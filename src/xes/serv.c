@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1991-2003 CNRS/LAAS
+ * Copyright (c) 1991-2004 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
