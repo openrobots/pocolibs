@@ -1,5 +1,6 @@
 #
 # Copyright (c) 2003-2004 CNRS/LAAS
+# Copyright (c) 2004 EPFL
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -17,55 +18,53 @@
 # $LAAS$
 #
 
-top_builddir=		@top_builddir@
+top_builddir=	@top_builddir@
+top_srcdir=	@top_srcdir@
+srcdir=		@srcdir@
+
 include ../../Init.make
-include @top_srcdir@/Init.make.$(OSAPI)
--include @srcdir@/os/$(OSAPI)/Makefile.inc
 
-INSTALL=		@INSTALL@
+INSTALL=	@INSTALL@
 
-CPPFLAGS += -I..
+CPPFLAGS+=	-I..
 
-VPATH=  @srcdir@/os/$(OSAPI):@srcdir@
+VPATH=		$(srcdir)
 
-SRCS += \
-	logLib.c 		\
-	osInit.c		\
-	semLib.c		\
-	symLib.c		\
-	sysLib.c		\
-	taskLib.c		\
-	tickLib.c		\
+SRCS+= \
+	osInit.c	\
+	logLib.c	\
+	semLib.c	\
+	shellLib.c	\
+	symLib.c	\
+	sysLib.c	\
+	taskLib.c	\
+	tickLib.c	\
 	wdLib.c
+OBJS=		$(SRCS:%.c=%.lo)
 
-OBJS = $(SRCS:%.c=%.o)
+SHLIB_MAJOR=	2
+SHLIB_MINOR=	1
 
-SHLIB_MAJOR=2
-SHLIB_MINOR=1
+BASENAME=	portLib
+LIB=		lib$(BASENAME).la
 
-BASENAME = libportLib
+all: all-os $(LIB)
 
-LIB = $(BASENAME)$(LIBEXT)
-
-all: $(LIB)
-
+# libtool library
 $(LIB): $(OBJS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJS:%.o=%.lo) \
-		$(LIBTOOL_LINKOPT)
+	$(LTLD) -o $@ $(OBJS) -rpath $(LIBDIR) -R$(LIBDIR)	\
+		-version-info $(SHLIB_MAJOR):$(SHLIB_MINOR)
 
-%.o: %.c
-	$(LIBTOOL) --mode=compile $(CC) -c $(CFLAGS) $(CPPFLAGS) $< \
-		$(LIBTOOL_COPT)
+%.lo: %.c
+	$(LTCC) -c $(CFLAGS) $(CPPFLAGS) -o $@ $<
 
-depend DEPENDANCES: $(SRCS)
-	$(MKDEP) -c$(CC) -oDEPENDANCES $(CPPFLAGS) $?
+depend DEPENDANCES:: $(SRCS)
+	$(MKDEP) -c$(CC) -oDEPENDANCES -t.lo $(CPPFLAGS) $?
 
 clean: 
-	rm -f $(OBJS) $(LIB)
-	rm -f $(OBJS:%.o=%.lo)
-	rm -rf .libs _libs
+	$(LIBTOOL) --mode=clean rm -f $(OBJS) $(LIB)
 
-distclean:
+distclean: clean
 	rm -f DEPENDANCES Makefile
 
 install: $(LIB)
@@ -75,3 +74,7 @@ install: $(LIB)
 ifneq (distclean,$(MAKECMDGOALS))
 include DEPENDANCES
 endif
+
+# os specific rules
+-include $(srcdir)/os/$(OSAPI)/Makefile.inc
+include $(top_srcdir)/Init.make.$(OSAPI)

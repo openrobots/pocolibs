@@ -1,5 +1,6 @@
 #
 # Copyright (c) 2004 CNRS/LAAS
+# Copyright (c) 2004 EPFL
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -17,9 +18,12 @@
 # $LAAS$
 #
 
-# --- rtai specific configuration --------------------------------------
+# --- RTAI-specific configuration ---------------------------------------
 
-# do it the local way for now
-CPPFLAGS+= -DPOSTERLIB_ONLY_LOCAL
+# because it's not yet possible to make a remote real-time version
+MOD_CPPFLAGS+= -DPOSTERLIB_ONLY_LOCAL
 
-SRCS+= module.c
+MODSRCS+= \
+	posterLib.c 		\
+	localPosterLib.c	\
+	$(MODVPATH)/module.c

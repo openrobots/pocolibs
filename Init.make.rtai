@@ -1,5 +1,6 @@
 #
 # Copyright (c) 2004 CNRS/LAAS
+# Copyright (c) 2004 EPFL
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -19,15 +20,42 @@
 
 # --- RTAI-specific configuration ---------------------------------------
 
-CPPFLAGS += -I$(RTAI_INCLUDES)
-
-# produce relocatable objects
+# how to produce pocolib'ed modules
 BINEXT=.o
-LIBEXT=.o
-LIBTOOL_COPT=-prefer-non-pic
-LIBTOOL_LINKOPT=-static
+LIBTOOL_LINKPOCOLIBS=
 
-LIBTOOL_LINKPORTLIB=
-LIBTOOL_LINKERRORLIB=
-LIBTOOL_LINKCOMLIB=
-LIBTOOL_LINKPOSTERLIB=
+# use posix sources for user-space library
+VPATH+=		:$(srcdir)/os/posix
+MODVPATH=	os/rtai
+
+MODDIR=		module
+MOD=		$(MODDIR)/lib$(BASENAME).o
+MOD_CPPFLAGS+=	-I$(RTAI_INCLUDES) -D__RTAI__ -D__KERNEL__ -DMODULE
+
+MODOBJS=$(MODSRCS:%.c=$(MODDIR)/%.lo)
+
+# how to build a module
+all-os:	$(MODDIR)/$(MODVPATH) $(MOD)
+
+# relocatable object
+$(MOD): $(MODOBJS)
+	$(LTLD) -o $@ $(MODOBJS)
+
+$(MODDIR)/%.lo: %.c
+	$(LTCC) -prefer-non-pic -c $(CFLAGS) $(CPPFLAGS) $(MOD_CPPFLAGS) \
+		-o $@ $<
+
+# object file directory
+$(MODDIR)/$(MODVPATH):
+	mkdir -p $@/$(MODVPATH)
+
+# module dependencies
+depend $(MODDIR)/DEPENDANCES:: $(MODDIR)/$(MODVPATH)
+depend $(MODDIR)/DEPENDANCES:: $(MODSRCS)
+	$(MKDEP) -c$(CC) -o$(MODDIR)/DEPENDANCES $(CPPFLAGS) $(MOD_CPPFLAGS) $?
+
+ifneq (,$(MODSRCS))
+ifneq (distclean,$(MAKECMDGOALS))
+include $(MODDIR)/DEPENDANCES
+endif
+endif

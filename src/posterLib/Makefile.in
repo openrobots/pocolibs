@@ -1,5 +1,6 @@
 #
 # Copyright (c) 1998, 2003-2004 CNRS/LAAS
+# Copyright (c) 2004 EPFL
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -16,36 +17,43 @@
 # $LAAS$
 #
 top_builddir=	@top_builddir@
+top_srcdir=	@top_srcdir@
 srcdir=		@srcdir@
-INSTALL=	@INSTALL@
 
 include ../../Init.make
-include @top_srcdir@/Init.make.$(OSAPI)
--include @srcdir@/os/$(OSAPI)/Makefile.inc
 
-VPATH= @srcdir@/os/$(OSAPI):@srcdir@
+INSTALL=	@INSTALL@
 
-CPPFLAGS += -I. -I.. -I@srcdir@
+VPATH+=		@srcdir@
 
-SRCS += \
-	posterLib.c \
-	localPosterLib.c
+CPPFLAGS+=	-I. -I.. -I@srcdir@
 
-OBJS = $(SRCS:%.c=%.o) $(SRCS_RPC:%.c=%.o)
+SRCS+= \
+	posterLib.c 		\
+	localPosterLib.c	\
+	remotePosterLib.c
 
-SHLIB_MAJOR = 2
-SHLIB_MINOR = 1
+SRCS_RPC= \
+	posters_clnt.c \
+	posters_xdr.c
 
-BASENAME = libposterLib
+HDR_RPC=	posters.h
 
-LIB = $(BASENAME)$(LIBEXT)
+OBJS=		$(SRCS:%.c=%.lo) $(SRCS_RPC:%.c=%.lo)
 
-all: $(LIB)
+SHLIB_MAJOR=	2
+SHLIB_MINOR=	1
+
+BASENAME= 	posterLib
+LIB=		lib$(BASENAME).la
+
+all: all-os $(LIB)
 
 $(LIB): $(OBJS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJS:%.o=%.lo)	\
-		$(LIBTOOL_LINKOPT) $(LIBTOOL_LINKPORTLIB)	\
-		$(LIBTOOL_LINKERRORLIB) $(LIBTOOL_LINKCOMLIB)
+	$(LTLD) -o $@ $(OBJS) -rpath $(LIBDIR) -R$(LIBDIR)	\
+		-L../comLib $(COMLIB) -L../errorLib $(ERRORLIB)	\
+		-L../portLib $(PORTLIB)				\
+		-version-info $(SHLIB_MAJOR):$(SHLIB_MINOR)
 
 #----------------------------------------------------------------------
 # RPC specific rules
@@ -69,25 +77,26 @@ posters.h: posters.x
 #----------------------------------------------------------------------
 # Regles generiques
 
-%.o: %.c
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $< \
-		$(LIBTOOL_COPT)
+%.lo: %.c
+	$(LTCC) -c $(CPPFLAGS) $(CFLAGS) -o $@ $<
 
 depend DEPENDANCES:: $(SRCS)  $(LIB_SRCS_RPC) $(HDR_RPC)
 	$(MKDEP) -c$(CC) -oDEPENDANCES $(CPPFLAGS) $?
 
 clean: 
-	rm -f $(OBJS) $(LIB) $(SRCS_RPC) posters.h posters.x
-	rm -f $(OBJS:%.o=%.lo)
-	rm -rf .libs _libs
+	$(LIBTOOL) --mode=clean rm -f $(OBJS) $(LIB)
 
-distclean:
+distclean: clean
 	rm -f DEPENDANCES Makefile
 
 install:
 	$(MKINSTALLDIRS) $(LIBDIR)
 	$(LIBTOOL) --mode=install $(INSTALL) $(LIB) $(LIBDIR)
 
+ifneq (distclean,$(MAKECMDGOALS))
 include DEPENDANCES
+endif
 
-.SUFFIXES = .x 
+# os specific rules
+-include $(srcdir)/os/$(OSAPI)/Makefile.inc
+include $(top_srcdir)/Init.make.$(OSAPI)

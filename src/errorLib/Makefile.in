@@ -1,5 +1,6 @@
 #
 # Copyright (c) 1998, 2003-2004 CNRS/LAAS
+# Copyright (c) 2004 EPFL
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -17,51 +18,54 @@
 #
 
 top_builddir=	@top_builddir@
+top_srcdir=	@top_srcdir@
+srcdir=		@srcdir@
+
 include ../../Init.make
-include @top_srcdir@/Init.make.$(OSAPI)
--include @srcdir@/os/$(OSAPI)/Makefile.inc
 
 INSTALL=	@INSTALL@
 
 CPPFLAGS += -I..
 
-VPATH=	@srcdir@/os/$(OSAPI):@srcdir@
+VPATH=		$(srcdir)
 
-SRCS += h2errorLib.c
-OBJS = $(SRCS:%.c=%.o)
+SRCS = h2errorLib.c
+OBJS = $(SRCS:%.c=%.lo)
 
 SHLIB_MAJOR = 2
 SHLIB_MINOR = 0
 
-BASENAME = liberrorLib
+BASENAME = errorLib
+LIB = lib$(BASENAME).la
 
-LIB = $(BASENAME)$(LIBEXT)
-
-all: $(LIB)
+all: all-os $(LIB)
 
 $(LIB): $(OBJS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJS:%.o=%.lo)  \
-		$(LIBTOOL_LINKOPT) $(LIBTOOL_LINKPORTLIB)
+	$(LTLD) -o $@ $(OBJS) -rpath $(LIBDIR) -R$(LIBDIR)	\
+		-L../portLib $(PORTLIB)				\
+		-version-info $(SHLIB_MAJOR):$(SHLIB_MINOR)
 
-%.o: %.c
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $< \
-		$(LIBTOOL_COPT)
+%.lo: %.c
+	$(LTCC) -c $(CPPFLAGS) $(CFLAGS) -o $@ $<
 
-depend DEPENDANCES: $(SRCS)
+depend DEPENDANCES:: $(SRCS)
 	$(MKDEP) -c$(CC) -o DEPENDANCES $(CPPFLAGS) $?
 
 clean: 
-	rm -f $(OBJS) $(LIB)
-	rm -f $(OBJS:%.o=%.lo)
-	rm -rf .libs _libs
+	$(LIBTOOL) --mode=clean rm -f $(OBJS) $(LIB)
 
-distclean:
-	rm -f DEPENDANCES Makefile h2addErrno
-
+distclean: clean
+	rm -f DEPENDANCES Makefile
 
 install: $(LIB)
 	$(MKINSTALLDIRS) $(BINDIR) $(LIBDIR)
 	$(INSTALL) h2addErrno $(BINDIR)
 	$(LIBTOOL) --mode=install $(INSTALL) $(LIB) $(LIBDIR)
 
+ifneq (distclean,$(MAKECMDGOALS))
 include DEPENDANCES
+endif
+
+# os specific rules
+-include $(srcdir)/os/$(OSAPI)/Makefile.inc
+include $(top_srcdir)/Init.make.$(OSAPI)

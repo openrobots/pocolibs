@@ -57,8 +57,8 @@ AC_DEFUN([AC_CHECK_RTAI_INCLUDES],
 
 # configure options
 AC_ARG_WITH(rtai,
-           AC_HELP_STRING([--with-rtai=no|kernel|user],
-               [configure to use RTAI in the specified address space]),
+           AC_HELP_STRING([--with-rtai=yes|no],
+               [configure to use RTAI]),
            [opt_rtai=$withval],[opt_rtai=no])
 AC_ARG_WITH(rtai-includes,
            AC_HELP_STRING([--with-rtai-includes=DIR],
@@ -66,23 +66,14 @@ AC_ARG_WITH(rtai-includes,
            [opt_rtai_includes=$withval])
 
 # make related stuff
-if test "x$opt_rtai" = "xkernel"; then
+if test "x$opt_rtai" = "xyes"; then
    OSAPI=rtai
-   AC_DEFINE(__RTAI__)
-   AC_DEFINE(__KERNEL__)
-   AC_DEFINE(MODULE)
-   AC_MSG_RESULT([Enabling RTAI kernel support])
-   AC_CHECK_RTAI_INCLUDES(RTAI_INCLUDES, $opt_rtai_includes)
-
-elif test "x$opt_rtai" = "xuser"; then
-   AC_MSG_ERROR([RTAI in userspace is not yet implemented], 2)
-   OSAPI=rtai-user
-   AC_DEFINE(__RTAI__)
-   AC_MSG_RESULT([Enabling RTAI userspace support])
+   AC_MSG_RESULT([Configuring to use RTAI])
    AC_CHECK_RTAI_INCLUDES(RTAI_INCLUDES, $opt_rtai_includes)
 
 elif test "x$opt_rtai" = "xno"; then :
    OSAPI=posix
+   AC_MSG_RESULT([Configuring to use POSIX])
 else
    AC_MSG_ERROR([invalid option --with-rtai=$opt_rtai], 2)
 fi
@@ -108,12 +99,13 @@ AC_RPCGEN_C
 dnl check for purify
 opt_purify=no
 AC_ARG_WITH(purify, [  --with-purify           configure to postprocess with purify], opt_purify=$withval)
-if test "$opt_purify" = yes; then
+if test "x$opt_purify" = xyes; then
   AC_MSG_RESULT([enabling purify])
   PURIFY="purify"
 else
   PURIFY=
 fi
+AC_SUBST(PURIFY)
 
 dnl processor tests 
 AC_C_BIGENDIAN
@@ -124,31 +116,20 @@ AC_TYPE_SIGNAL
 
 dnl --- check for X -----------------------------------------------------
 
-if test "x$opt_rtai" = "xkernel"; then
+AC_PATH_X
+if test "x$x_includes" = "xNONE"; then
    HAS_X=no
    XCPPFLAGS=
    XLDFLAGS=
-
-  if test "x$with_x" = xyes; then
-    AC_MSG_ERROR([X is not supported with RTAI in kernel mode enabled], 2)
-  fi
-
 else
-  AC_PATH_X
-  if test "x$x_includes" = "xNONE"; then
-    HAS_X=no
-    XCPPFLAGS=
-    XLDFLAGS=
-  else
-    HAS_X=yes
-    if test "x$x_includes" = "x"; then
+   HAS_X=yes
+   if test "x$x_includes" = "x"; then
       XCPPFLAGS=
       XLDFLAGS=
-    else
+   else
       XCPPFLAGS=-I$x_includes
       XLDFLAGS=-L$x_libraries
-    fi
-  fi
+   fi
 fi
 AC_SUBST(HAS_X XCPPFLAGS XLDFLAGS)
 
@@ -175,8 +156,6 @@ int main() {
 	AC_LANG_RESTORE
 )
 
-if test "x$opt_rtai" = "xkernel"; then :; else
-		
 AC_CACHE_CHECK(
 	[if compiler recognizes -pthread],
 	poco_cv_gcc_pthread,
@@ -222,8 +201,6 @@ else
 		])
 	fi
 fi
-
-fi # rtai-kernel mode
 
 dnl --- end of checks for pthread ---------------------------------------
 

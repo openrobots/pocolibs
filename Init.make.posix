@@ -19,15 +19,18 @@
 
 # --- posix specific configuration --------------------------------------
 
-# produce shared libraries
+# how to produce pocolib'ed executables
 BINEXT=
-LIBEXT=.la
-LIBTOOL_COPT=
-LIBTOOL_LINKOPT= \
-	-rpath $(LIBDIR) -version-info $(SHLIB_MAJOR):$(SHLIB_MINOR) \
-	-R$(LIBDIR)
+LIBTOOL_LINKPOCOLIBS=	-rpath $(LIBDIR) -R$(LIBDIR)
+LIBTOOL_LINKPOCOLIBS+=	-L../posterLib $(POSTERLIB)
+LIBTOOL_LINKPOCOLIBS+=	-L../comLib $(COMLIB)
+LIBTOOL_LINKPOCOLIBS+=	-L../errorLib $(ERRORLIB)
+LIBTOOL_LINKPOCOLIBS+=	-L../portLib $(PORTLIB)
+LIBTOOL_LINKPOCOLIBS+=	$(OS_LIBS)
 
-LIBTOOL_LINKPORTLIB=	-L../portLib -lportLib
-LIBTOOL_LINKERRORLIB=	-L../errorLib -lerrorLib
-LIBTOOL_LINKCOMLIB=	-L../comLib -lcomLib
-LIBTOOL_LINKPOSTERLIB=	-L../posterLib -lposterLib
+
+# fetch source files in posix subdir also
+VPATH+=		:$(srcdir)/os/posix
+
+# nothing specific here
+all-os:

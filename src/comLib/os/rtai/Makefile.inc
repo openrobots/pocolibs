@@ -1,5 +1,6 @@
 #
 # Copyright (c) 2004 CNRS/LAAS
+# Copyright (c) 2004 EPFL
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -19,4 +20,22 @@
 
 # --- RTAI-specific configuration ---------------------------------------
 
-SRCS+= module.c
+MODSRCS+= \
+        commonStructLib.c		\
+        csLib.c				\
+        gcomLib.c			\
+        h2devLib.c			\
+        $(MODVPATH)/h2devOsLib.c	\
+        h2endianness.c			\
+        h2evnLib.c			\
+        $(MODVPATH)/h2initGlob.c	\
+        h2mathLib.c			\
+        h2rngLib.c			\
+        $(MODVPATH)/h2semLib.c		\
+        h2timeLib.c			\
+        h2timerLib.c			\
+        mboxLib.c			\
+        smMemLib.c			\
+        $(MODVPATH)/smMemOsLib.c	\
+        smObjLib.c			\
+	$(MODVPATH)/module.c

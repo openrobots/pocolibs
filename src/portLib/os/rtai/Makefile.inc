@@ -1,5 +1,6 @@
 #
 # Copyright (c) 2004 CNRS/LAAS
+# Copyright (c) 2004 EPFL
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -19,6 +20,13 @@
 
 # --- RTAI-specific configuration ---------------------------------------
 
-SRCS += module.c
-
-# TODO:	shellLib.c
+MODSRCS+= \
+	osInit.c		\
+	$(MODVPATH)/logLib.c	\
+	$(MODVPATH)/semLib.c	\
+	$(MODVPATH)/symLib.c	\
+	$(MODVPATH)/sysLib.c	\
+	$(MODVPATH)/taskLib.c	\
+	$(MODVPATH)/tickLib.c	\
+	$(MODVPATH)/wdLib.c	\
+	$(MODVPATH)/module.c

@@ -15,19 +15,22 @@
 #
 # $LAAS$
 
-top_builddir=		@top_builddir@
+top_builddir=	@top_builddir@
+top_srcdir=	@top_srcdir@
+srcdir=		@srcdir@
+
 include $(top_builddir)/Init.make
-include @top_srcdir@/Init.make.$(OSAPI)
 
-VPATH= @srcdir@
+VPATH=		@srcdir@
 
-CPPFLAGS+= -I..
+CPPFLAGS+=	-I.. $(MOD_CPPFLAGS)
 
-DIRS= portLib comLib posterLib
+DIRS=		portLib comLib posterLib
 
 SRCS=\
 	portLib/semaphore.c	\
 	portLib/wd.c		\
+	portLib/taskDelete.c	\
 	portLib/taskDelay.c	\
 				\
 	comLib/commonStruct.c	\
@@ -37,28 +40,28 @@ SRCS=\
 				\
 	posterLib/poster.c
 
-OBJS=$(SRCS:%.c=%-obj.o)
+all: regress
+
+# os specific rules (must include here for BINEXT in the rules below)
+include $(top_srcdir)/Init.make.$(OSAPI)
+
 BINS=$(SRCS:%.c=%$(BINEXT))
 
-osregress=$(OSAPI)-obj.o
+osregress=$(OSAPI)-obj.lo
 
 regress: dirs $(BINS)
 
 dirs:
 	mkdir -p $(DIRS)
 
-%-obj.o: %.c
-	$(LIBTOOL) --mode=compile $(CC) -c $(CFLAGS) $(CPPFLAGS) \
-		$< -o $@ -prefer-non-pic
+%-obj.lo: %.c
+	$(LTCC) -c $(CFLAGS) $(CPPFLAGS) $< -o $@ -prefer-non-pic
 
-$(BINS): %$(BINEXT): %-obj.o $(osregress)
-	$(LIBTOOL) --mode=link $(CC) $(CFLAGS) $(CPPFLAGS)	\
-		$^ -o $@ $(LDFLAGS) $(LIBTOOL_LINKOPT)		\
-		$(LIBTOOL_LINKPOSTERLIB) $(LIBTOOL_LINKCOMLIB)	\
-		$(LIBTOOL_LINKERRORLIB) $(LIBTOOL_LINKPORTLIB)	\
-		$(OS_LIBS)
+$(BINS): %$(BINEXT): %-obj.lo $(osregress)
+	$(LTLD) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(LIBTOOL_LINKPOCOLIBS)
 
 clean:
 	$(LIBTOOL) --mode=clean rm -f $(BINS) $(OBJS) $(osregress)
 
 distclean: clean
+	rm -f DEPENDANCES Makefile

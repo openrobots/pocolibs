@@ -1,5 +1,6 @@
 #
 # Copyright (c) 2004 CNRS/LAAS
+# Copyright (c) 2004 EPFL
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -19,4 +20,6 @@
 
 # --- RTAI-specific configuration ---------------------------------------
 
-SRCS += module.c
+MODSRCS+= \
+	h2errorLib.c		\
+	$(MODVPATH)/module.c

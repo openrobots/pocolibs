@@ -1,5 +1,6 @@
 #
 # Copyright (c) 1998, 2003-2004 CNRS/LAAS
+# Copyright (c) 2004 EPFL
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -17,15 +18,17 @@
 #
 
 top_builddir=	@top_builddir@
+top_srcdir=	@top_srcdir@
+srcdir=		@srcdir@
+
 include ../../Init.make
-include @top_srcdir@/Init.make.$(OSAPI)
--include @srcdir@/os/$(OSAPI)/Makefile.inc
 
 INSTALL=	@INSTALL@
 
-CPPFLAGS += -I..
+CPPFLAGS +=	-I..
+CPPFLAGS +=	-DPOSTER_SERV_PATH=\"$(BINDIR)/posterServ\"
 
-VPATH= 	@srcdir@/os/$(OSAPI):@srcdir@
+VPATH=		$(srcdir)
 
 SRCS += \
 	commonStructLib.c	\
@@ -41,44 +44,51 @@ SRCS += \
 	h2semLib.c		\
 	h2timeLib.c		\
 	h2timerLib.c		\
+	h2timerTest.c           \
 	mboxLib.c		\
+	mboxEssay.c             \
 	smMemLib.c		\
 	smMemOsLib.c		\
-	smObjLib.c
+	smObjLib.c		\
+	vfscanf.c               \
+	xesClient.c             \
+	xesStdio.c
 
-OBJS = $(SRCS:%.c=%.o)
+OBJS = $(SRCS:%.c=%.lo)
 
 SHLIB_MAJOR = 2
 SHLIB_MINOR = 2
 
-BASENAME = libcomLib
+BASENAME= 	comLib
+LIB=		lib$(BASENAME).la
 
-LIB = $(BASENAME)$(LIBEXT)
-
-all: $(LIB)
+all: all-os $(LIB)
 
 $(LIB): $(OBJS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJS:%.o=%.lo) 	\
-		$(LIBTOOL_LINKOPT) $(LIBTOOL_LINKPORTLIB)	\
-		$(LIBTOOL_LINKERRORLIB)
+	$(LTLD) -o $@ $(OBJS) -rpath $(LIBDIR) -R$(LIBDIR)		  \
+		-L../errorLib $(ERRORLIB) -L../portLib $(PORTLIB) $(LIBM) \
+		-version-info $(SHLIB_MAJOR):$(SHLIB_MINOR)
 
-%.o: %.c
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $< \
-		$(LIBTOOL_COPT)
+%.lo: %.c
+	$(LTCC) -c $(CPPFLAGS) $(CFLAGS) $<
 
-depend DEPENDANCES: $(SRCS)
+depend DEPENDANCES:: $(SRCS)
 	$(MKDEP) -c$(CC) -oDEPENDANCES 	$(CPPFLAGS) $?
 
 clean: 
-	rm -f $(OBJS) $(LIB)
-	rm -f $(OBJS:%.o=%.lo)
-	rm -rf .libs _libs
+	$(LIBTOOL) --mode=clean rm -f $(OBJS) $(LIB)
 
-distclean:
+distclean: clean
 	rm -f DEPENDANCES Makefile
 
 install: $(LIB)
 	$(MKINSTALLDIRS) $(LIBDIR)
 	$(LIBTOOL) --mode=install $(INSTALL) $(LIB) $(LIBDIR)
 
+ifneq (distclean,$(MAKECMDGOALS))
 include DEPENDANCES
+endif
+
+# os specific rules
+-include $(srcdir)/os/$(OSAPI)/Makefile.inc
+include $(top_srcdir)/Init.make.$(OSAPI)

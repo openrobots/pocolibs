@@ -45,6 +45,8 @@ PURIFY=         @PURIFY@
 MKDEP=          @MKDEP@
 
 LIBTOOL=	@LIBTOOL@
+LTCC=           $(LIBTOOL) --mode=compile $(CC)
+LTLD=           $(LIBTOOL) --mode=link $(CC)
 
 CPPFLAGS=	-I@abs_srcdir@/include @CPPFLAGS@
 CFLAGS=		@CFLAGS@

@@ -1,5 +1,8 @@
 Version 2.0, xx April 2004
 
+ 20. Reworked makefiles and configure scripts in order to be able to
+     compile both kernel modules and userspace libraries with the same
+     configure; make; make install step under RTAI. 
  19. Added RTAI support.
  18. Added regression tests.
  17. Split h2devLib and smMemLib into os-independant and os-specific parts.
