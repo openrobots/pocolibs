@@ -5,8 +5,8 @@ REQUIREMENTS
 
 These libraries run on systems with POSIX.1 threads and basic
 real-time extensions. It has been tested successfully on Solaris (7
-and above), Linux (with glibc2), NetBSD (1.6 and later) and OpenBSD
-3.1 and later. The GNU make utility is needed to build the libraries. 
+and above), Linux (with glibc2), NetBSD (2.0 and later) and OpenBSD
+3.3 and later. The GNU make utility is needed to build the libraries. 
 
 BUILDING POCOLIB
 
