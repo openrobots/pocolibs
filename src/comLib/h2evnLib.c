@@ -32,6 +32,8 @@ __RCSID("$LAAS$");
 #include "errnoLib.h"
 
 #ifdef DEBUG
+#include <stdio.h>
+#include <stdarg.h>
 #include "xes.h"
 #endif
 
