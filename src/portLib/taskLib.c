@@ -123,7 +123,7 @@ taskLibInit(void)
     }
     snprintf(name, sizeof(name), "tUnix%d", getpid());
     tcb->name = strdup(name);
-#ifndef NO_SCHEDPARAM
+#ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
     pthread_getschedparam(pthread_self(), &policy, &param);
 #else
     policy = 0;
@@ -423,7 +423,7 @@ STATUS
 taskPrioritySet(long tid, int newPriority)
 {
     OS_TCB *tcb = (OS_TCB *)tid;
-#ifndef NO_SCHEDPARAM
+#ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
     struct sched_param my_param;
     int status;
 
@@ -447,7 +447,7 @@ STATUS
 taskPriorityGet(long tid, int *pPriority)
 {
     OS_TCB *tcb = (OS_TCB *)tid;
-#ifndef NO_SCHEDPARAM
+#ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
     struct sched_param my_param;
     int my_policy;
     int status;
