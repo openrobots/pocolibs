@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2004 EPFL
+ * Copyright (c) 2004 
+ *      Autonomous Systems Lab, Swiss Federal Institute of Technology.
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -21,6 +22,9 @@ __RCSID("$LAAS$");
 #include <linux/kernel.h>
 #include <linux/fs.h>
 #include <linux/errno.h>
+#ifdef CONFIG_DEVFS_FS
+# include <linux/devfs_fs_kernel.h>
+#endif
 
 #include <portLib.h>
 #include <taskLib.h>
@@ -39,6 +43,9 @@ MODULE_PARM(h2dev_major, "i");
 MODULE_PARM_DESC(h2dev_major, "h2dev major number");
 
 static struct file_operations fops;
+#ifdef CONFIG_DEVFS_FS
+static devfs_handle_t de;
+#endif
 
 #include "h2initGlob.h"
 
@@ -75,13 +82,22 @@ comLib_init(void)
    }
    logMsg("comLib: timers initialized\n");
 
-   /* register /dev/h2dev device. XXX we should support devfs. */
+   /* register /dev/h2dev device */
    memset(&fops, 0, sizeof(fops));
    SET_MODULE_OWNER(&fops);
    fops.open = h2devopen;
    fops.release = h2devrelease;
    fops.ioctl = h2devioctl;
 
+#ifdef CONFIG_DEVFS_FS
+   de = devfs_register(NULL, H2DEV_DEVICE_NAME,
+		       h2dev_major?0:DEVFS_FL_AUTO_DEVNUM, h2dev_major, 0,
+		       S_IFCHR|S_IRUGO|S_IWUGO, &fops, NULL);
+   if (!de) {
+      logMsg("comLib: cannot register device `" H2DEV_DEVICE_NAME "\n");
+      return -EIO;
+   }
+#else
    status = register_chrdev(h2dev_major, H2DEV_DEVICE_NAME, &fops);
    if (status < 0) {
       logMsg("comLib: cannot register device `" H2DEV_DEVICE_NAME
@@ -89,11 +105,11 @@ comLib_init(void)
       return status;
    }
    if (h2dev_major == 0) h2dev_major = status; /* dynamic allocation */
-
    logMsg("comLib: registered device `" H2DEV_DEVICE_NAME
 	  "' with major %d\n", h2dev_major);
+#endif /* CONFIG_DEVFS_FS */
 
-   logMsg("comLib: loaded\n");
+   logMsg("comLib: successfully loaded\n");
    return 0;
 }
 
@@ -111,11 +127,15 @@ comLib_exit(void)
       logMsg("Error: could not delete h2 devices\n");
    }
 
+#ifdef CONFIG_DEVFS_FS
+   if (de) devfs_unregister(de);
+#else
    /* unregister /dev/h2dev device */
    status = unregister_chrdev(h2dev_major, H2DEV_DEVICE_NAME);
    if (status < 0) {
       logMsg("comLib: cannot unregister device\n");
    }
+#endif /* CONFIG_DEVFS_FS */
 
    logMsg("comLib: unloaded\n");
 }
