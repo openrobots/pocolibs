@@ -14,9 +14,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-/*
-  due to implemetation there is 255 semaphores per program
-*/
 
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
@@ -417,7 +414,7 @@ long int semLibGetNewName(void)
 	    }
 	}
 
-      semNumPt = (unsigned char *)shmat(shmid, NULL, 0);
+      semNumPt = (unsigned long int *)shmat(shmid, NULL, 0);
       if (semNumPt == NULL) 
 	{
 	  LOGDBG(("semLibGetNewName: shmat\n"));
