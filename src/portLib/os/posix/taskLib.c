@@ -173,7 +173,7 @@ taskLibInit(void)
 	(unsigned long)tcb, (unsigned long)pthread_self());
 #endif
     if (pthread_setspecific(taskControlBlock, (void *)tcb) != 0) {
-	    fprintf(stderr, "pthread_setspecific failed\n");
+	errnoSet(errno);
 	return ERROR;
     }
 
@@ -255,13 +255,14 @@ taskSpawn(char *name, int priority, int options, int stackSize,
      */
     tcb = (OS_TCB *)malloc(sizeof(OS_TCB));
     if (tcb == NULL) {
+	errnoSet(S_portLib_NO_MEMORY);
 	return ERROR;
     }
     tcb->magic = TASK_MAGIC;
     if (name != NULL) {
 	tcb->name = strdup(name);
     } else {
-	sprintf(bufName, "t%d", ++numTask);
+	snprintf(bufName, sizeof(bufName), "t%d", ++numTask);
 	tcb->name = strdup(bufName);
     }
     tcb->options = options;
@@ -393,8 +394,8 @@ taskDelete(long tid)
     }
 
     if (tcb->magic != TASK_MAGIC) {
-	    fprintf(stderr, "taskDelete invalid taskId\n");
-	    return ERROR;
+	errnoSet(S_portLib_INVALID_TASKID);
+	return ERROR;
     }
 
     status = pthread_cancel(tcb->tid);
@@ -429,7 +430,8 @@ taskName(long tid)
 {
    OS_TCB *tcb = taskTcb(tid);
 
-   if (!tcb) return NULL;
+   if (tcb == NULL)
+       return NULL;
    return tcb->name;
 }
 
@@ -450,7 +452,7 @@ taskSuspend(long tid)
     }
     tcb = (OS_TCB *)tid;
     if (tcb->magic != TASK_MAGIC) {
-	fprintf(stderr, "taskSuspend: bad taskId\n");
+	errnoSet(S_portLib_INVALID_TASKID);
 	return ERROR;
     }
     printf("*** suspending task %lx\n", tid);
@@ -467,6 +469,7 @@ taskSuspend(long tid)
 STATUS 
 taskResume(long tid)
 {
+    errnoSet(S_portLib_NOT_IMPLEMENTED);
     return ERROR;
 }
 
@@ -478,7 +481,7 @@ taskResume(long tid)
 STATUS 
 taskPrioritySet(long tid, int newPriority)
 {
-	OS_TCB *tcb;
+    OS_TCB *tcb;
 #ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
     struct sched_param my_param;
     int status;
@@ -489,8 +492,8 @@ taskPrioritySet(long tid, int newPriority)
      
      tcb = (OS_TCB *)tid;
      if (tcb->magic != TASK_MAGIC) {
- 	    fprintf(stderr, "taskPrioritySet: bad taskId\n");
- 	    return ERROR;
+	 errnoSet(S_portLib_INVALID_TASKID);
+	 return ERROR;
      }
      
 #ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
@@ -518,7 +521,11 @@ taskPriorityGet(long tid, int *pPriority)
     struct sched_param my_param;
     int my_policy;
     int status;
-
+    
+    if (tcb->magic != TASK_MAGIC) {
+	errnoSet(S_portLib_INVALID_TASKID);
+	return ERROR;
+    }
     status = pthread_getschedparam(tcb->tid, &my_policy, &my_param);
     if (status != 0) {
 	errnoSet(status);
@@ -541,6 +548,7 @@ taskPriorityGet(long tid, int *pPriority)
 STATUS
 taskLock(void)
 {
+    errnoSet(S_portLib_NOT_IMPLEMENTED);
     return ERROR;
 }
 
@@ -552,6 +560,7 @@ taskLock(void)
 STATUS
 taskUnlock(void)
 {
+    errnoSet(S_portLib_NOT_IMPLEMENTED);
     return ERROR;
 }
 
@@ -559,6 +568,11 @@ taskUnlock(void)
 
 /*
  * Sleep for a number of ticks, or just yield cpu if ticks==0.
+ *
+ * This implementation diverges from the VxWorks implementation that 
+ * wakes up exactly on the next clock tick. 
+ * Using nanosleep() on system where it has high resolution, will 
+ * wake up the task between to clock ticks.
  */
 STATUS
 taskDelay(int ticks)
@@ -586,7 +600,7 @@ taskDelay(int ticks)
 /*----------------------------------------------------------------------*/
     
 /*
- * Return id of current task
+ * Return the id of current task
  */
 long
 taskIdSelf(void)
@@ -629,10 +643,10 @@ taskTcb(long tid)
 STATUS
 taskSetUserData(long tid, unsigned long data)
 {
-    OS_TCB *tcb = (OS_TCB *)(tid == 0 ? taskIdSelf() : tid);
+    OS_TCB *tcb = taskTcb(tid);
 
     if (tcb->magic != TASK_MAGIC) {
-	fprintf(stderr, "taskSetUserData: bad taskId\n");
+	errnoSet(S_portLib_INVALID_TASKID);
 	return ERROR;
     }
     tcb->userData = data;
@@ -647,9 +661,10 @@ taskSetUserData(long tid, unsigned long data)
 unsigned long
 taskGetUserData(long tid)
 {
-    OS_TCB *tcb = (OS_TCB *)(tid == 0 ? taskIdSelf() : tid);
+    OS_TCB *tcb = taskTcb(tid);
     if (tcb != NULL) {
 	if (tcb->magic != TASK_MAGIC) {
+	    errnoSet(S_portLib_INVALID_TASKID);
 	    fprintf(stderr, 
 		"taskGetUserData: bad/unregisterd taskId %ld %lx\n",
 		tid, (unsigned long)pthread_self());
@@ -657,7 +672,8 @@ taskGetUserData(long tid)
 	}
         return tcb->userData;
     } else {
-        fprintf(stderr, "taskGetUserData: tcb == NULL.\n");
+        fprintf(stderr, 
+		"taskLib: fatal error: taskGetUserData: tcb == NULL.\n");
 	abort();
     }
 }
@@ -670,18 +686,19 @@ taskGetUserData(long tid)
 STATUS
 taskOptionsSet(long tid, int mask, int newOptions)
 {
-   OS_TCB *tcb = (OS_TCB *)(tid == 0 ? taskIdSelf() : tid);
+    OS_TCB *tcb = taskTcb(tid);
 
-   if (!tcb) return ERROR;
-   if (tcb->magic != TASK_MAGIC) {
-      fprintf(stderr, 
-	      "taskOptionsSet: bad/unregisterd taskId %ld %lx\n",
-	      tid, (unsigned long)pthread_self());
-      return ERROR;
-   }
+    if (tcb == NULL) {
+	errnoSet(S_portLib_INVALID_TASKID);
+	return ERROR;
+    }
+    if (tcb->magic != TASK_MAGIC) {
+	errnoSet(S_portLib_INVALID_TASKID);
+	return ERROR;
+    }
 
-   tcb->options = (tcb->options & ~mask) | newOptions;
-   return OK;
+    tcb->options = (tcb->options & ~mask) | newOptions;
+    return OK;
 }
 
 /*----------------------------------------------------------------------*/
@@ -692,14 +709,13 @@ taskOptionsSet(long tid, int mask, int newOptions)
 STATUS
 taskOptionsGet(long tid, int *pOptions)
 {
-   OS_TCB *tcb = (OS_TCB *)(tid == 0 ? taskIdSelf() : tid);
-
-   if (!tcb) return ERROR;
+    OS_TCB *tcb = taskTcb(tid);
+    
+   if (tcb == NULL) 
+       return ERROR;
    if (tcb->magic != TASK_MAGIC) {
-      fprintf(stderr, 
-	      "taskOptionsGet: bad/unregisterd taskId %ld %lx\n",
-	      tid, (unsigned long)pthread_self());
-      return ERROR;
+       errnoSet(S_portLib_INVALID_TASKID);
+       return ERROR;
    }
 
    if (pOptions) *pOptions = tcb->options;
@@ -718,7 +734,7 @@ taskNameToId(char *name)
     
     for (t = taskList; t != NULL; t = t->next) {
 	if (t->magic != TASK_MAGIC) {
-	    fprintf(stderr, "taskNameToId: bad taskId\n");
+	    errnoSet(S_portLib_INVALID_TASKID);
 	    return ERROR;
 	}
 	if (strcmp(t->name, name) == 0) {
@@ -726,6 +742,7 @@ taskNameToId(char *name)
 	}
     } /* for */
     if (t == NULL) {
+	errnoSet(S_portLib_NO_SUCH_TASK);
 	return ERROR;
     } else {
 	return (long)t;
@@ -846,16 +863,16 @@ deleteHook(TASK_HOOK_LIST **list, FUNCPTR hook)
 	p = l;
     }
     if (l == NULL) {
-	/* pas trouve */
+	/* not found */
 	return ERROR;
     }
     if (p == NULL) {
-	/* element de tete */
+	/* head element */
 	*list = l->next;
 	free(l);
 	return OK;
     }
-    /* Element au milieu */
+    /* Element in the middle */
     p->next = l->next;
     free(l);
     return OK;
@@ -906,7 +923,7 @@ taskCreateHookDelete(FUNCPTR createHook)
 STATUS
 taskSwitchHookAdd(FUNCPTR switchHook)
 {
-    errnoSet(EOPNOTSUPP);
+    errnoSet(S_portLib_NOT_IMPLEMENTED);
     return ERROR;
 }
 
@@ -918,7 +935,7 @@ taskSwitchHookAdd(FUNCPTR switchHook)
 STATUS 
 taskSwitchHookDelete(FUNCPTR switchHook)
 {
-    errnoSet(EOPNOTSUPP);
+    errnoSet(S_portLib_NOT_IMPLEMENTED);
     return ERROR;
 }
 
@@ -948,7 +965,7 @@ taskDeleteHookDelete(FUNCPTR deleteHook)
 /*----------------------------------------------------------------------*/
 
 /***
- *** Émulation de errnoLib de VxWorks
+ *** Errno manipulation functions
  ***/
 
 /*----------------------------------------------------------------------*/
@@ -973,7 +990,7 @@ errnoSet(int errorValue)
 {
     OS_TCB *tcb = taskTcb(taskIdSelf());
 
-    if (tcb != NULL) {
+    if (tcb != NULL && tcb->magic == TASK_MAGIC) {
 	tcb->errorStatus = errorValue;
 	return OK;
     } else {
