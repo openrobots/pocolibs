@@ -15,13 +15,13 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _H2LIB_H
-#define _H2LIB_H
+#ifndef _PORTLIB_H
+#define _PORTLIB_H
 
 #include <pthread.h>
 
 /**
- ** Definitions generales compatibles VxWorks
+ ** General definitions found on other some systems
  **/
 
 #ifndef FALSE
@@ -50,7 +50,7 @@ typedef int STATUS;
 #define NO_WAIT 0
 #endif
 
-/* pointeurs sur fonctions */
+/* Various generic function pointer types */
 typedef int (*FUNCPTR) ();
 typedef int (*INTFUNCPTR)(); 
 typedef void (*VOIDFUNCPTR)();
@@ -58,12 +58,12 @@ typedef float (*FLTFUNCPTR)();
 typedef double (*DBLFUNCPTR)();
 typedef void *(*VOIDPTRFUNCPTR)();
 
-/* macro pour les boucles */
+/* Macro used to create endless loops */
 #ifndef FOREVER
 #define FOREVER while (TRUE)
 #endif
 
-/* macros utiles */
+/* Some other useful macros  */
 #ifndef MIN
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #endif
@@ -77,24 +77,19 @@ typedef void *(*VOIDPTRFUNCPTR)();
 #define max(a,b) ((a)>(b)?(a):(b))
 #endif
 
-
-/* Nombre de ticks par seconde */
+/* XXX Does this belong here ?? */
+/* Number of tick per second of the clock */
 #include <sysLib.h>
 #define NTICKS_PER_SEC sysClkRateGet()
-/* Duree d'un tick en micro-seconde */
+/* Duration of one tick in micro-seconds */
 #define TICK_US (1000000/NTICKS_PER_SEC)
 
-/* En attendant l'implementation d'une logTask */
+/* Some systems provide a logMsg() - emulate it using printf() for now */
 #define logMsg printf
-
-/* Sun n'a pas snprintf partout */
-#ifdef __sun
-#define snprintf mySnPrintf
-#endif
 
 /*
  * Prototypes
  */
-extern STATUS osInit(int clkRate);
+extern STATUS osInit(int);
 
-#endif
+#endif /* _PORTLIB_H */
