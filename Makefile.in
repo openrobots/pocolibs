@@ -51,11 +51,12 @@ install:
 	done
 
 clean:
+	rm -rf $(DISTNAME) $(DISTNAME).tar.gz
 	@for d in $(SUBDIRS) ; do \
 		$(MAKE) -C $$d clean ; \
 	done
 
-distclean:
+distclean: clean
 	@for d in $(SUBDIRS) ; do \
 		$(MAKE) -C $$d distclean ; \
 	done
@@ -70,9 +71,12 @@ DISTFILES = $(DIST_COMMON) $(DIST_SUBDIRS)
 dist:
 	-mkdir $(DISTNAME)
 	(cd @srcdir@ ; gnutar cf - --exclude=CVS --exclude=.#* \
-		$(DISTFILES)) | \
+		--exclude=*~ $(DISTFILES)) | \
 	( cd $(DISTNAME) ; tar xpf - )
 	tar cf - $(DISTNAME) | gzip -c -9 > $(DISTNAME).tar.gz
 
 sign:
 	gpg -a --detach-sign $(DISTNAME).tar.gz
+
+.PHONY:
+	all depend clean distclean install dist sign
