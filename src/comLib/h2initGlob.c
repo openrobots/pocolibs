@@ -25,13 +25,14 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
+#include <sys/types.h>
+#include <stdio.h>
+
 #include "portLib.h"
 #include "h2devLib.h"
 #include "h2timerLib.h"
 #include "smMemLib.h"
 #include "xes.h"
-
-#include <stdio.h>
 
 /**
  ** ComLib initialisation procedure for Unix processes 
