@@ -30,7 +30,12 @@ MODVPATH=	os/rtai
 
 MODDIR=		modules
 MOD=		$(MODDIR)/lib$(BASENAME).o
+
 MOD_CPPFLAGS+=	-I$(RTAI_INCLUDES) -D__KERNEL__ -DMODULE
+
+ifeq (powerpc,$(host_cpu))
+MOD_CFLAGS+=	-ffixed-r2 -mmultiple -mstring
+endif
 
 MODOBJS=$(MODSRCS:%.c=$(MODDIR)/%.lo)
 
@@ -42,8 +47,8 @@ $(MOD): $(MODOBJS)
 	$(LTLD) -o $@ $(MODOBJS)
 
 $(MODDIR)/%.lo: %.c
-	$(LTCC) -prefer-non-pic -c $(CFLAGS) $(CPPFLAGS) $(MOD_CPPFLAGS) \
-		-o $@ $<
+	$(LTCC) -prefer-non-pic -c $(CFLAGS) $(MOD_CFLAGS) \
+		$(CPPFLAGS) $(MOD_CPPFLAGS) -o $@ $<
 
 # object file directory
 $(MODDIR)/$(MODVPATH):

@@ -34,6 +34,8 @@ prefix=         @prefix@
 exec_prefix=    @exec_prefix@
 abs_srcdir=     @abs_srcdir@
 
+host_cpu=	@host_cpu@
+
 BINDIR=         @bindir@
 LIBDIR=         @libdir@
 DATADIR=        @datadir@
@@ -78,4 +80,3 @@ MKINSTALLDIRS=	$(abs_srcdir)/mkinstalldirs
 RPCGEN=		@RPCGEN@ @RPCGEN_C@
 
 LN=		ln -s
-
