@@ -47,7 +47,9 @@
 #include <sys/stream.h>
 #include <sys/stropts.h>
 #endif
+#ifdef USE_X
 #include <X11/Xlib.h>
+#endif
 
 #include "xes.h"
 #include "rngLib.h"
@@ -126,10 +128,12 @@ main(int argc, char *argv[])
 #ifdef USE_RLIMIT
     struct rlimit rl;
 #endif
+#ifdef USE_X
     Display *dpy;
     XEvent event;
+#endif
 
-#if 0
+#ifdef USE_X
     /* 
      * Connexion au serveur X
      */
@@ -249,10 +253,12 @@ main(int argc, char *argv[])
 	FD_SET(serv_socket_fd, &ibits);
 	FD_SET(serv_socket_fd, &ebits);
 
+#ifdef USE_X
 	/* traite les evenements X */
 	FD_SET(ConnectionNumber(dpy), &ebits);
 	FD_SET(ConnectionNumber(dpy), &ibits);
-	
+#endif
+
 	timeout.tv_sec = 0;
 	timeout.tv_usec = 100000;
 	
@@ -281,7 +287,7 @@ main(int argc, char *argv[])
 	    continue;
 	}
 	
-#if 0
+#ifdef USE_X
 	/*
 	 * Evenements X
 	 */
@@ -649,5 +655,3 @@ int to;
 } /* set_term_modes */
 
 /*----------------------------------------------------------------------*/
-
-
