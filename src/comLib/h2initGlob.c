@@ -32,6 +32,7 @@ __RCSID("$LAAS$");
 #include "h2devLib.h"
 #include "h2timerLib.h"
 #include "smMemLib.h"
+#include "h2initGlob.h"
 #include "xes.h"
 
 /**
