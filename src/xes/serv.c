@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1991-2004 CNRS/LAAS
+ * Copyright (c) 1991-2005 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -54,11 +54,6 @@
 #include "xes.h"
 #include "rngLib.h"
 #include "version.h"
-
-/* IRIX n'a pas vfork() */
-#ifdef __sgi__
-#define vfork fork
-#endif
 
 /*----------------------------------------------------------------------*/
 
@@ -508,7 +503,10 @@ create_window(int *win_fd, int *win_pid)
     int  master, slave, pid;
     struct termios termioStr;
     static char buf[100];
-    char *master_path, *slave_path;
+    char *slave_path;
+#ifndef USE_SYSV_PTY
+    char *master_path;
+#endif
 
 #ifndef USE_SYSV_PTY
     int i;
@@ -535,7 +533,7 @@ create_window(int *win_fd, int *win_pid)
 
 #else /* USE_SYSV_PTY */
     
-    master = open("/dev/ptmx", O_RDWR);
+    master = open("/dev/ptmx", O_RDWR|O_NOCTTY);
     if (master < 0) {
 	perror("xes: open /dev/ptmx");
     }
@@ -554,7 +552,7 @@ create_window(int *win_fd, int *win_pid)
     
     sprintf(buf, "-S%s%d", &slave_path[strlen(slave_path)-2], master);
 
-    if((pid = vfork()) == 0) {
+    if((pid = fork()) == 0) {
 
 #if !defined(SVR4) && !defined(__linux__)
 	setpgrp(0, getpid());
@@ -567,7 +565,7 @@ create_window(int *win_fd, int *win_pid)
 	exit(1);
     }
     if (pid == -1) {
-	perror("xes: vfork");
+	perror("xes: fork");
     }
 
     close(master);
@@ -579,7 +577,7 @@ create_window(int *win_fd, int *win_pid)
 	return -1;
     }
 
-#ifdef USE_SYSV_PTY
+#if defined(USE_SYSV_PTY) || defined(USE_STREAMS)
     if (ioctl(slave, I_PUSH, "ptem") < 0) {
 	perror("xes: push ptem");
 	return -1;
@@ -638,8 +636,13 @@ int to;
     termioStr.c_oflag = OPOST | ONLCR;
 #endif
     termioStr.c_cflag = B9600 | CS8 | CREAD;
-    termioStr.c_lflag = ISIG | ICANON | IEXTEN | ECHO | ECHOK | ECHOE 
-	| ECHOKE | ECHOCTL;
+    termioStr.c_lflag = ISIG | ICANON | IEXTEN | ECHO | ECHOK | ECHOE;
+#ifdef ECHOKE
+    termioStr.c_lflag |= ECHOKE;
+#endif
+#ifdef ECHOCTL
+    termioStr.c_lflag |= ECHOCTL;
+#endif
     memset(termioStr.c_cc, 0, sizeof(termioStr.c_cc));
     termioStr.c_cc[VINTR] = 0x03;
     termioStr.c_cc[VQUIT] =  0x1c; 
