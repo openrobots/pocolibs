@@ -76,7 +76,7 @@ extern int h2scanf ( const char *fmt, void *value );
 #define vprintf xesVPrintf
 
 #ifdef scanf
-#unsef scanf
+#undef scanf
 #endif
 #define scanf xesScanf
 

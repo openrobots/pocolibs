@@ -1,0 +1,86 @@
+#
+# Copyright (c) 1998, 2003 CNRS/LAAS
+#
+# Permission to use, copy, modify, and distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+#
+# $LAAS$
+#
+
+top_builddir=	@top_builddir@
+include ../../Init.make
+
+INSTALL=	@INSTALL@
+
+CPPFLAGS += -I.. -DROOTROBOTS=\"@prefix@\"
+
+VPATH= 	@top_srcdir@/src/comLib
+
+SRCS = \
+	commonStructLib.c	\
+	csLib.c			\
+	gcomLib.c		\
+	h2devLib.c		\
+	h2evnLib.c		\
+	h2initGlob.c		\
+	h2mathLib.c		\
+	h2rngLib.c		\
+	h2semLib.c		\
+	h2timeLib.c		\
+	h2timerLib.c		\
+	h2timerTest.c		\
+	mboxEssay.c		\
+	mboxLib.c		\
+	smMemLib.c		\
+	smObjLib.c		\
+	vfscanf.c		\
+	xesClient.c		\
+	xesStdio.c		\
+	h2endianness.c
+
+OBJS = $(SRCS:%.c=%.o)
+
+SHLIB_MAJOR = 2
+SHLIB_MINOR = 1
+
+BASENAME = libcomLib
+
+LIB = $(BASENAME).la
+
+all: $(LIB)
+
+$(LIB): $(OBJS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJS:%.o=%.lo) \
+	-rpath $(LIBDIR) -version-info $(SHLIB_MAJOR):$(SHLIB_MINOR) \
+	-L../portLib -L../errorLib -R$(LIBDIR) $(PORTLIB) $(ERRORLIB) $(LIBM)
+
+%.o: %.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $<
+
+
+depend DEPENDANCES: $(SRCS)
+	$(MKDEP) -c$(CC) -oDEPENDANCES 	$(CPPFLAGS) $?
+
+clean: 
+	rm -f $(OBJS) $(LIB)
+	rm -f $(OBJS:%.o=%.lo)
+	rm -rf .libs _libs
+
+distclean:
+	rm -f DEPENDANCES Makefile
+
+install: $(LIB)
+	$(MKINSTALLDIRS) $(LIBDIR)
+	$(LIBTOOL) --mode=install $(INSTALL) $(LIB) $(LIBDIR)
+	$(LIBTOOL) --mode=finish $(LIBDIR)
+
+include DEPENDANCES

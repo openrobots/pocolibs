@@ -40,48 +40,42 @@ DATADIR=        @datadir@
 INCLUDEDIR=     @includedir@/gdhe
 MODULESDIR=     @libdir@/gdhe
 
-CC=             @TCL_CC@
+CC=             @CC@
 PURIFY=         @PURIFY@
-RANLIB=         @RANLIB@
 MKDEP=          @MKDEP@
 
-CPPFLAGS=	
+LIBTOOL=	@LIBTOOL@
+
+CPPFLAGS=	-I@abs_srcdir@/include @ENDIAN_DEFINES@
 CFLAGS=
 
 # Base directory of the software
-ROOTROBOTS ?= /usr/local/robots
-H2UNIX  = $(ROOTROBOTS)/posix
+ROOTROBOTS ?= 	@prefix@
+
 # Target architecture
 TARGET=$(MACHTYPE)-$(OSTYPE)
 
-PORTLIB         = -lportLib
-COMLIB          = -lcomLib
-POSTERLIB       = -lposterLib
-ERRORLIB        = -lerrorLib
+PORTLIB=	-lportLib
+COMLIB=		-lcomLib
+POSTERLIB=	-lposterLib
+ERRORLIB=	-lerrorLib
 
 
-LIB_H2_UNIX = -L$(LIBDIR) $(LDRUNFLAGS) $(COMLIB) $(POSTERLIB) $(ERRORLIB)
+LIB_H2_UNIX=	-L$(LIBDIR) $(LDRUNFLAGS) $(COMLIB) $(POSTERLIB) $(ERRORLIB)
 
-LIBS = $(LIB_H2_UNIX) $(OS_LIBS) 
+LIBS=		$(LIB_H2_UNIX) $(OS_LIBS) 
 
-MKINSTALLDIRS   = $(TOP)/mkinstalldirs
+MKINSTALLDIRS=	$(abs_srcdir)/mkinstalldirs
 
-LIBDL           = -ldl
-LIBM            = -lm
-LIBNET          = -lsocket -lnsl
-LIBPOSIX        = -lposix4
-LIBPTHREADS     = -lpthread
-OS_LIBS         = $(PORTLIB) $(LIBNET) $(LIBPOSIX) $(LIBPTHREADS) \
+LIBDL=		-ldl
+LIBM=		-lm
+LIBNET=		-lsocket -lnsl
+LIBPOSIX=	-lposix4
+LIBPTHREADS=	-lpthread
+OS_LIBS=	$(PORTLIB) $(LIBNET) $(LIBPOSIX) $(LIBPTHREADS) \
                   $(LIBDL) $(LIBM)
-RANLIB          = true
-MKDEP           = $(BINDIR)/mkdep
-RPCGEN          = rpcgen
-INSTALL         = /usr/ucb/install -c
-LN              = ln -s
+RPCGEN=		rpcgen
+INSTALL=	@INSTALL@
+INSTALL_PROGRAM= @INSTALL_PROGRAM@
+LN=		ln -s
 
-# To build shared libs
-SHLIBSUF        = so
-SHLIBREV        = $(SHLIBSUF).$(SHLIB_MAJOR).$(SHLIB_MINOR)
-SHLIBCFLAGS     = -Kpic
-SHLIBLD         = /usr/ccs/bin/ld
-SHLIBLDFLAGS    = -G -z text -L$(LIBDIR) -R$(LIBDIR)

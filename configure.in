@@ -19,14 +19,37 @@ AC_SUBST(PACKAGE)
 AC_SUBST(VERSION)
 AC_REVISION($LAAS$)
 
-AC_PROG_RANLIB
-AC_PROG_INTALL
+AC_PROG_LIBTOOL
+AC_PROG_INSTALL
 
 dnl check for mkdep
 AC_PATH_PROG(MKDEP, mkdep, no, $prefix/bin:$exec_prefix/bin:$PATH)
 
-AC_CONFIG_HEADER(config.h)
+dnl check for purify
+opt_purify=no
+AC_ARG_WITH(purify, [  --with-purify           configure to postprocess with pur
+ify], opt_purify=$withval)
+if test "$opt_purify" = yes; then
+  AC_MSG_RESULT([enabling purify])
+  PURIFY="purify"
+else
+  PURIFY=
+fi
+
+dnl processor tests 
+AC_C_BIGENDIAN
+if test "$ac_cv_c_bigendian" = "yes"; then
+  ENDIAN_DEFINES=-DIS_BIG_ENDIAN
+else
+  ENDIAN_DEFINES=-DIS_LITTLE_ENDIAN
+fi
+AC_SUBST(ENDIAN_DEFINES)
+
+AC_CONFIG_HEADER(src/config.h)
 AC_OUTPUT(Init.make
 	Makefile
+	src/portLib/Makefile
+	src/errorLib/Makefile
+	src/comLib/Makefile
 )
 
