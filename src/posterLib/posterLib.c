@@ -104,6 +104,12 @@ posterCreate(char *name, int size, POSTER_ID *pPosterId)
 }
 
 /*----------------------------------------------------------------------*/
+char* posterName(POSTER_ID pPosterId)
+{
+    return ((POSTER_STR *)pPosterId) -> name;
+}
+
+/*----------------------------------------------------------------------*/
 
 STATUS
 posterMemCreate(char *name, int busSpace, void *pPool, 
