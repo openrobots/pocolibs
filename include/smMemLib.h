@@ -41,9 +41,9 @@ STATUS smMemInit(int smMemSize);
 STATUS smMemAttach(void);
 STATUS smMemEnd(void);
 unsigned long smMemBase(void);
-void *smMemMalloc(unsigned int nBytes);
-void *smMemCalloc(int elemNum, int elemSize);
-void *smMemRealloc(void *pBlock, unsigned newSize);
+void *smMemMalloc(size_t nBytes);
+void *smMemCalloc(size_t elemNum, size_t elemSize);
+void *smMemRealloc(void *pBlock, size_t newSize);
 STATUS smMemFree(void *ptr); 
 void smMemShow(int option);
 #endif

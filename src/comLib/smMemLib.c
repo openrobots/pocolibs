@@ -255,7 +255,7 @@ smMemBase(void)
  ** Allocation d'une zone dans le segment de memoire partagee
  **/
 void *
-smMemMalloc(unsigned int nBytes)
+smMemMalloc(size_t nBytes)
 {
     void *result;
     
@@ -277,7 +277,7 @@ smMemMalloc(unsigned int nBytes)
  ** Allocation et mise a zero
  **/
 void *
-smMemCalloc(int elemNum, int elemSize)
+smMemCalloc(size_t elemNum, size_t elemSize)
 {
     void *data;
     
@@ -295,7 +295,7 @@ smMemCalloc(int elemNum, int elemSize)
  ** Changement de taille d'une zone 
  **/
 void *
-smMemRealloc(void *pBlock, unsigned newSize)
+smMemRealloc(void *pBlock, size_t newSize)
 {
     void *newBlock;
 
