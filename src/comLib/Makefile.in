@@ -38,8 +38,9 @@ endif
 SRCS+=		$(COMLIB_COMPATSRC)
 OBJS=		$(SRCS:%.c=%.lo)
 
-SHLIB_MAJOR=	2
-SHLIB_MINOR=	3
+SHLIB_CURRENT=	3
+SHLIB_REVISION=	0
+SHLIB_AGE=0
 
 BASENAME= 	comLib
 LIB=		lib$(BASENAME).la
@@ -48,8 +49,8 @@ all: all-os $(LIB)
 
 $(LIB): $(OBJS)
 	$(LTLD) -o $@ $(OBJS) -rpath $(LIBDIR) -R$(LIBDIR)		\
-		-L../errorLib $(ERRORLIB) -L../portLib $(PORTLIB)	\
-		$(OS_LIBS) -version-info $(SHLIB_MAJOR):$(SHLIB_MINOR)
+		-L../errorLib $(ERRORLIB) -L../portLib $(PORTLIB) $(OS_LIBS) \
+		-version-info $(SHLIB_CURRENT):$(SHLIB_REVISION):$(SHLIB_AGE)
 
 %.lo: %.c
 	$(LTCC) -c $(CPPFLAGS) $(CFLAGS) $<

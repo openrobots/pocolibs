@@ -1,4 +1,6 @@
 Version 2.0, xx July 2004
+ 34. Start over with libtool style shared libraries version numbers. 
+     Bump all major revisions to make sure nothing bad happens.
  33. Add a configure test for usablility of POSIX timers for a 
      100Hz sysClk.
  32. Add a 'tick' regress test to check the accuracy of sysClk. 

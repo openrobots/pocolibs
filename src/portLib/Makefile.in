@@ -42,8 +42,9 @@ SRCS+= \
 	wdLib.c
 OBJS=		$(SRCS:%.c=%.lo)
 
-SHLIB_MAJOR=	2
-SHLIB_MINOR=	3
+SHLIB_CURRENT=	3
+SHLIB_REVISION=	0
+SHLIB_AGE=	0
 
 BASENAME=	portLib
 LIB=		lib$(BASENAME).la
@@ -53,7 +54,7 @@ all: all-os $(LIB)
 # libtool library
 $(LIB): $(OBJS)
 	$(LTLD) -o $@ $(OBJS) -rpath $(LIBDIR) -R$(LIBDIR)	\
-		-version-info $(SHLIB_MAJOR):$(SHLIB_MINOR)
+	-version-info $(SHLIB_CURRENT):$(SHLIB_REVISION):$(SHLIB_AGE)
 
 %.lo: %.c
 	$(LTCC) -c $(CFLAGS) $(CPPFLAGS) -o $@ $<
