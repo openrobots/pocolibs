@@ -237,7 +237,7 @@ typedef H2RNG_HDR *H2RNG_ID;
 
 #define H2RNG_WR1(pTo, buf, nbytes)                     \
   (                                                     \
-   bcopy (buf, pTo, nbytes),                            \
+     memcpy (pTo, buf, nbytes),				\
    pTo = pTo + nbytes                                   \
    )                                                   
 
@@ -263,15 +263,15 @@ typedef H2RNG_HDR *H2RNG_ID;
    (                                                    \
     (ntop <= nbytes) ?                                  \
     (                                                   \
-     bcopy (buf, pTo, ntop),                            \
+     memcpy (pTo, buf, ntop),				\
      n = nbytes - ntop,                                 \
-     bcopy (buf + ntop, pDeb, n),                       \
+     memcpy (buf + ntop, pDeb, n),                      \
      ntop = -1,                                         \
      pTo = pDeb + n                                     \
      )                                                  \
     :                                                   \
     (                                                   \
-     bcopy (buf, pTo, nbytes),                          \
+     memcpy (pTo, buf, nbytes),                         \
      ntop = ntop - nbytes,                              \
      pTo = pTo + nbytes                                 \
      )                                                  \
@@ -336,7 +336,7 @@ typedef H2RNG_HDR *H2RNG_ID;
 
 #define H2RNG_RD1(pFrom, buf, nbytes)                   \
   (                                                     \
-   bcopy (pFrom, buf, nbytes),                          \
+   memcpy (buf, pFrom, nbytes),				\
    pFrom = pFrom + nbytes                               \
    )                                                                     
 
@@ -363,15 +363,15 @@ typedef H2RNG_HDR *H2RNG_ID;
    (                                                    \
     (ntop <= nbytes) ?                                  \
     (                                                   \
-     bcopy (pFrom, buf, ntop),                          \
+     memcpy (buf, pFrom, ntop),				\
      n = nbytes - ntop,                                 \
-     bcopy (pDeb, buf + ntop, n),                       \
+     memcpy (buf + ntop, pDeb, n),                      \
      ntop = -1,                                         \
      pFrom = pDeb + n                                   \
      )                                                  \
     :                                                   \
     (                                                   \
-     bcopy (pFrom, buf, nbytes),                        \
+     memcpy (buf, pFrom, nbytes),                       \
      ntop = ntop - nbytes,                              \
      pFrom = pFrom + nbytes                             \
      )                                                  \

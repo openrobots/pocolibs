@@ -1,5 +1,6 @@
 Version 2.0, xx April 2004
 
+ 16. Use memcpy instead of bcopy everywhere.
  15. Removed system-specific includes from headers, and modified some
      structures definitions to use standard C types instead of posix
      types (in particular changed uid_t into long, key_t into long and

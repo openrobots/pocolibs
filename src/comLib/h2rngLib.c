@@ -179,7 +179,7 @@ h2rngBufGet(H2RNG_ID rngId,		/* Identificateur du ring buffer */
 	/* Verifier si plus grand que nombre de bytes a lire */
 	if (n1 > nbytes) {
 	    /* Faire une seule copie */
-	    bcopy ((char *) (rngId+1) + pRd, buf, nbytes);
+ 	    memcpy (buf, (char *) (rngId+1) + pRd, nbytes);
 	    
 	    /* Actualiser pointeur de lecture et retourner */
 	    rngId->pRd = pRd + nbytes;
@@ -187,13 +187,13 @@ h2rngBufGet(H2RNG_ID rngId,		/* Identificateur du ring buffer */
 	}
 	
 	/* Copier tout le premier morceau */
-	bcopy ((char *) (rngId+1) + pRd, buf, n1);
+	memcpy (buf, (char *) (rngId+1) + pRd, n1);
 	
 	/* Taille du deuxieme morceau */
 	n2 = nbytes - n1;
 	
 	/* Copier le deuxieme morceau et retourner */
-	bcopy ((char *) (rngId+1), buf+n1, n2);
+	memcpy (buf+n1, (char *) (rngId+1), n2);
 	
 	/* Actualiser le pointeur de lecture et retourner */
 	rngId->pRd = n2;
@@ -201,7 +201,7 @@ h2rngBufGet(H2RNG_ID rngId,		/* Identificateur du ring buffer */
     }
     
     /* Copier tout, d'une seule fois */
-    bcopy ((char *) (rngId+1) + pRd, buf, n1 = min (maxbytes, n1));
+    memcpy (buf, (char *) (rngId+1) + pRd, n1 = min (maxbytes, n1));
     
     /* Actualiser le pointeur de lecture et retourner */
     rngId->pRd = pRd + n1;
@@ -258,7 +258,7 @@ h2rngBufPut(H2RNG_ID rngId, /* Ring buffer ou mettre les bytes */
 	/* Verifier si plus grand que le nombre de bytes a ecrire */
 	if (n1 > nbytes) {
 	    /* Faire une seule copie */
-	    bcopy (buf, (char *) (rngId+1) + pWr, nbytes);
+	    memcpy ((char *) (rngId+1) + pWr, buf, nbytes);
 	    
 	    /* Actualiser pointeur d'ecriture et retourner */
 	    rngId->pWr = pWr + nbytes;
@@ -266,13 +266,13 @@ h2rngBufPut(H2RNG_ID rngId, /* Ring buffer ou mettre les bytes */
 	}
 	
 	/* Copier tout le premier morceau */
-	bcopy (buf, (char *) (rngId+1) + pWr, n1);
+	memcpy ((char *) (rngId+1) + pWr, buf, n1);
 	
 	/* Taille du deuxieme morceau */
 	n2 = nbytes - n1;
 	
 	/* Copier le deuxieme morceau et retourner */
-	bcopy (buf+n1, (char *) (rngId+1), n2);
+	memcpy ((char *) (rngId+1), buf+n1, n2);
 	
 	/* Actualiser le pointeur d'ecriture et retourner */
 	rngId->pWr = n2;
@@ -280,7 +280,7 @@ h2rngBufPut(H2RNG_ID rngId, /* Ring buffer ou mettre les bytes */
     } 
 
     /* Copier tout, d'une seule fois */
-    bcopy (buf, (char *) (rngId+1) + pWr, nbytes = min (nbytes, n1 - 1));
+    memcpy ((char *) (rngId+1) + pWr, buf, nbytes = min (nbytes, n1 - 1));
     
     /* Actualiser le pointeur d'ecriture et retourner */
     rngId->pWr = pWr + nbytes;
