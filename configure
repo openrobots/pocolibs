@@ -7425,6 +7425,10 @@ _ACEOF
 
 
 
+# AC_CHECK_PTHREADS(action if ok, action if not ok, action if cross-compiling)
+
+
+
 echo "$as_me:$LINENO: checking if compiler recognizes -pthread" >&5
 echo $ECHO_N "checking if compiler recognizes -pthread... $ECHO_C" >&6
 if test "${poco_cv_gcc_pthread+set}" = set; then
@@ -7440,25 +7444,30 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-	cat >conftest.$ac_ext <<_ACEOF
+	if test "$cross_compiling" = yes; then
+  :
+else
+  cat >conftest.$ac_ext <<_ACEOF
 #line $LINENO "configure"
 #include "confdefs.h"
+
 #include <pthread.h>
-int
-main ()
-{
-void *p = pthread_create;
-  ;
-  return 0;
+void *pipo(void *a) {   exit(0); }
+
+int main() {
+    pthread_t t;
+    pthread_create(&t, NULL, pipo, NULL);
+    pthread_join(t, NULL);
+    exit(2);
 }
+
 _ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
+rm -f conftest$ac_exeext
 if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   (eval $ac_link) 2>&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-         { ac_try='test -s conftest$ac_exeext'
+  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
   { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
@@ -7466,17 +7475,21 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   (exit $ac_status); }; }; then
   poco_cv_gcc_pthread=yes
 else
-  echo "$as_me: failed program was:" >&5
+  echo "$as_me: program exited with status $ac_status" >&5
+echo "$as_me: failed program was:" >&5
 cat conftest.$ac_ext >&5
+( exit $ac_status )
 poco_cv_gcc_pthread=no
 
 fi
-rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
+rm -f core core.* *.core gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+fi
 	ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
 
 	CFLAGS=$ac_save_CFLAGS
 
@@ -7496,31 +7509,36 @@ else
 		CFLAGS="$CFLAGS -mt"
 
 
-		ac_ext=c
+	ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-		cat >conftest.$ac_ext <<_ACEOF
+	if test "$cross_compiling" = yes; then
+  :
+else
+  cat >conftest.$ac_ext <<_ACEOF
 #line $LINENO "configure"
 #include "confdefs.h"
+
 #include <pthread.h>
-int
-main ()
-{
-void *p = pthread_create;
-  ;
-  return 0;
+void *pipo(void *a) {   exit(0); }
+
+int main() {
+    pthread_t t;
+    pthread_create(&t, NULL, pipo, NULL);
+    pthread_join(t, NULL);
+    exit(2);
 }
+
 _ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
+rm -f conftest$ac_exeext
 if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   (eval $ac_link) 2>&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-         { ac_try='test -s conftest$ac_exeext'
+  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
   { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
@@ -7528,17 +7546,21 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   (exit $ac_status); }; }; then
   poco_cv_cc_mt=yes
 else
-  echo "$as_me: failed program was:" >&5
+  echo "$as_me: program exited with status $ac_status" >&5
+echo "$as_me: failed program was:" >&5
 cat conftest.$ac_ext >&5
+( exit $ac_status )
 poco_cv_cc_mt=no
 
 fi
-rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
-		ac_ext=c
+rm -f core core.* *.core gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+fi
+	ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
 
 		CFLAGS=$ac_save_CFLAGS
 
@@ -7547,8 +7569,9 @@ echo "$as_me:$LINENO: result: $poco_cv_cc_mt" >&5
 echo "${ECHO_T}$poco_cv_cc_mt" >&6
 	if test $poco_cv_cc_mt = yes; then
 		CFLAGS="$CFLAGS -mt";
-	fi
-	echo "$as_me:$LINENO: checking for pthread_create in -lpthread" >&5
+		LDFLAGS="$LDFLAGS -mt";
+	else
+		echo "$as_me:$LINENO: checking for pthread_create in -lpthread" >&5
 echo $ECHO_N "checking for pthread_create in -lpthread... $ECHO_C" >&6
 if test "${ac_cv_lib_pthread_pthread_create+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -7655,11 +7678,74 @@ fi
 
 fi
 
+		ac_save_LIBS="$LIBS"
+		if test -n "$poco_threads" ; then
+			LIBS="$poco_threads $LIBS"
+		fi
+
+
+	ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+	if test "$cross_compiling" = yes; then
+  :
+else
+  cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+
+#include <pthread.h>
+void *pipo(void *a) {   exit(0); }
+
+int main() {
+    pthread_t t;
+    pthread_create(&t, NULL, pipo, NULL);
+    pthread_join(t, NULL);
+    exit(2);
+}
+
+_ACEOF
+rm -f conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+
+			:
+
+else
+  echo "$as_me: program exited with status $ac_status" >&5
+echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+( exit $ac_status )
+
+			{ { echo "$as_me:$LINENO: error: No working thread support found (fatal)" >&5
+echo "$as_me: error: No working thread support found (fatal)" >&2;}
+   { (exit 1); exit 1; }; }
+			exit 2
+
+fi
+rm -f core core.* *.core gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+fi
+	ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+
+	fi
 fi
 
-if test -n $poco_threads ; then
-	LIBS="-lpthread $LIBS"
-fi
 
 echo "$as_me:$LINENO: checking for library containing fabs" >&5
 echo $ECHO_N "checking for library containing fabs... $ECHO_C" >&6
@@ -8135,7 +8221,7 @@ rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
 
           ac_config_headers="$ac_config_headers src/config.h"
 
-                                                                                                    ac_config_files="$ac_config_files Init.make Makefile src/portLib/Makefile src/errorLib/Makefile src/errorLib/h2addErrno src/comLib/Makefile src/posterLib/Makefile src/posterLib/posterServ/Makefile src/h2/Makefile src/shell/Makefile"
+                                                                                                                        ac_config_files="$ac_config_files Init.make Makefile include/Makefile src/portLib/Makefile src/errorLib/Makefile src/errorLib/h2addErrno src/comLib/Makefile src/posterLib/Makefile src/posterLib/posterServ/Makefile src/h2/Makefile src/shell/Makefile src/xes/Makefile"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -8642,6 +8728,7 @@ do
   # Handling of arguments.
   "Init.make" ) CONFIG_FILES="$CONFIG_FILES Init.make" ;;
   "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
+  "include/Makefile" ) CONFIG_FILES="$CONFIG_FILES include/Makefile" ;;
   "src/portLib/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/portLib/Makefile" ;;
   "src/errorLib/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/errorLib/Makefile" ;;
   "src/errorLib/h2addErrno" ) CONFIG_FILES="$CONFIG_FILES src/errorLib/h2addErrno" ;;
@@ -8650,6 +8737,7 @@ do
   "src/posterLib/posterServ/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/posterLib/posterServ/Makefile" ;;
   "src/h2/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/h2/Makefile" ;;
   "src/shell/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/shell/Makefile" ;;
+  "src/xes/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/xes/Makefile" ;;
   "src/config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS src/config.h" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
