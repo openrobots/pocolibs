@@ -25,25 +25,27 @@ CPPFLAGS += -I..
 
 VPATH=	@top_srcdir@/src/h2
 
-SRC_PROG = h2.c
-OBJ_PROG = $(SRC_PROG:%.c=%.o)
+SRCS = h2.c
+OBJS = $(SRC_PROG:%.c=%.o)
 PROG = h2
 
 all: $(PROG)
 
-$(PROG): $(OBJ_PROG) $(LIBH2) $(LIBOS)
-	$(LIBTOOL) --mode=link $(CC) -o $(PROG) $(CFLAGS) $(LDFLAGS) \
-	$(OBJ_PROG) \
+$(PROG): $(OBJS)
+	$(LIBTOOL) --mode=link $(CC) -o $(PROG) $(CFLAGS) $(LDFLAGS) $(OBJS) \
 	-L../portLib -L../errorLib -L../comLib -L../posterLib $(LIBS)
 
 %.o: %.c
 	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $<
 
-depend DEPENDANCES:: $(SRC_PROG)
+depend DEPENDANCES: $(SRCS)
 	$(MKDEP) -c$(CC) -oDEPENDANCES 	$(CPPFLAGS) $?
 
 clean: 
-	rm -f $(OBJ_PROG) $(PROG)
+	rm -f $(OBJS) $(PROG)
+
+distclean: clean
+	rm -f Makefile DEPENDANCES
 
 install:
 	$(MKINSTALLDIRS) $(BINDIR)
