@@ -47,7 +47,7 @@ MKDEP=          @MKDEP@
 LIBTOOL=	@LIBTOOL@
 
 CPPFLAGS=	-I@abs_srcdir@/include
-CFLAGS=
+CFLAGS=		@CFLAGS@
 
 # Base directory of the software
 ROOTROBOTS ?= 	@prefix@
@@ -57,20 +57,13 @@ COMLIB=		-lcomLib
 POSTERLIB=	-lposterLib
 ERRORLIB=	-lerrorLib
 
+LIB_H2_UNIX=	$(COMLIB) $(POSTERLIB) $(ERRORLIB)
 
-LIB_H2_UNIX=	-L$(LIBDIR) $(LDRUNFLAGS) $(COMLIB) $(POSTERLIB) $(ERRORLIB)
-
+OS_LIBS=	@LIBS@
 LIBS=		$(LIB_H2_UNIX) $(OS_LIBS) 
 
 MKINSTALLDIRS=	$(abs_srcdir)/mkinstalldirs
 
-LIBDL=		-ldl
-LIBM=		-lm
-LIBNET=		-lsocket -lnsl
-LIBPOSIX=	-lposix4
-LIBPTHREADS=	-lpthread
-OS_LIBS=	$(PORTLIB) $(LIBNET) $(LIBPOSIX) $(LIBPTHREADS) \
-                  $(LIBDL) $(LIBM)
 RPCGEN=		rpcgen
 
 LN=		ln -s

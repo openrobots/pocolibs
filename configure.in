@@ -19,7 +19,9 @@ AC_SUBST(PACKAGE)
 AC_SUBST(VERSION)
 AC_REVISION($LAAS$)
 
+AC_LIBTOOL_DLOPEN
 AC_PROG_LIBTOOL
+
 AC_PROG_INSTALL
 
 dnl check for mkdep
@@ -39,7 +41,78 @@ fi
 dnl processor tests 
 AC_C_BIGENDIAN
 
+dnl
 AC_TYPE_SIGNAL
+
+dnl
+
+AC_CACHE_CHECK(
+	[if compiler recognizes -pthread],
+	poco_cv_gcc_pthread,
+	ac_save_CFLAGS=$CFLAGS
+	CFLAGS="$CFLAGS -pthread"
+	AC_LANG_SAVE
+	AC_LANG_C
+	AC_TRY_LINK([#include <pthread.h>],
+		[void *p = pthread_create;],
+		poco_cv_gcc_pthread=yes,
+		poco_cv_gcc_pthread=no
+	)
+	AC_LANG_RESTORE
+	CFLAGS=$ac_save_CFLAGS
+)
+if test $poco_cv_gcc_pthread = yes; then
+	poco_threads=""
+	CFLAGS="$CFLAGS -pthread"
+else
+	AC_CHECK_LIB(pthread,pthread_create,poco_threads=-lpthread,
+             [AC_CHECK_LIB(c_r,pthread_create,poco_threads=-lc_r)])
+fi
+
+if test -n $poco_threads ; then
+	LIBS=-lpthread
+fi
+
+AC_SEARCH_LIBS([fabs], [m])
+
+dnl AC_CHECK_LIB([pthread], pthread_create, 
+dnl 	have_libpthread=yes, 
+dnl 	AC_CHECK_LIB([c_r], pthread_create,
+dnl 		have_libc_r=yes))
+dnl if test "$have_libpthread" != "yes" -a "$have_libc_r" != "yes"; then
+dnl 	AC_MSG_ERROR([POSIX threads library not found])
+dnl fi
+
+dnl AC_SEARCH_LIBS([pthread_create], [pthread c_r])
+
+AC_SEARCH_LIBS([timer_create], [rt])
+
+dnl AC_CHECK_LIB([rt], timer_create, have_librt=yes, have_librt=no)
+
+dnl if test "$have_librt" = yes; then
+dnl   LIBS=-lrt
+dnl fi
+
+AC_MSG_CHECKING([for posix timers])
+AC_TRY_LINK([#include <time.h>], 
+	[timer_create(CLOCK_REALTIME, NULL, NULL);],
+	[AC_MSG_RESULT([yes])]
+	[AC_DEFINE(HAVE_POSIX_TIMERS)],
+	[AC_MSG_RESULT([no])]
+)
+
+AC_CHECK_FUNCS(gethostbyname, [], [
+	  AC_CHECK_LIB(nsl, gethostbyname)
+	])
+AC_CHECK_LIB(socket, socket)
+
+AC_MSG_CHECKING([for vfscanf])
+AC_TRY_LINK([#include <stdio.h>],
+	[vfscanf(NULL, NULL, NULL);],
+	[AC_MSG_RESULT([yes])]
+	[AC_DEFINE(HAVE_VFSCANF)],
+	[AC_MSG_RESULT([no])]
+)
 
 AC_CONFIG_HEADER(src/config.h)
 AC_OUTPUT(Init.make
