@@ -200,7 +200,7 @@ mboxSend(MBOX_ID toId, MBOX_ID fromId, char *buf, int nbytes)
 	return (ERROR);
     } 
     /* Signaler au device destinataire qu'il a un message pret a lire */
-    if (h2semGive (h2semGive(H2DEV_MBOX_SEM_ID(toId))) == ERROR) {
+    if (h2semGive(H2DEV_MBOX_SEM_ID(toId)) == ERROR) {
 	printf("erreur give semSigRd\n");
     }
     /* Signaler l'evenement a la tache creatrice du mailbox */
