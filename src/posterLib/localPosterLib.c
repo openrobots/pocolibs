@@ -42,6 +42,10 @@ __RCSID("$LAAS$");
 
 #include "posterLibPriv.h"
 
+#ifdef VALGRIND_SUPPORT
+#include <valgrind/memcheck.h>
+#endif
+
 #if defined(__RTAI__) && defined(__KERNEL__)
 # define getpid		taskIdSelf
 # define getuid()	0
@@ -117,6 +121,7 @@ localPosterCreate(char *name, int size, POSTER_ID *pPosterId)
     }    
     /* Memorise l'adresse globale */
     H2DEV_POSTER_POOL(dev) = smObjLocalToGlobal(pool);
+   
     /* Memorise la taille */
     H2DEV_POSTER_SIZE(dev) = size;
     /* Memorise le pid du createur */
@@ -126,6 +131,7 @@ localPosterCreate(char *name, int size, POSTER_ID *pPosterId)
     /* Init endianness of the data of the poster to local value
        (will be changed in remote create procedure if necessary) */
     H2DEV_POSTER_ENDIANNESS(dev) = H2_LOCAL_ENDIANNESS;
+
 
     if (pPosterId != NULL) {
 	*pPosterId = (POSTER_ID)dev;
@@ -197,7 +203,13 @@ localPosterFind(char *name, POSTER_ID *pPosterId)
     /* Memorise le resultat */
     *pPosterId = (POSTER_ID)p;
     
-    return(OK);
+#ifdef VALGRIND_SUPPORT
+    // valgrind can't know if somebody has ever
+    // written on this poster, so ...
+    VALGRIND_MAKE_READABLE( localPosterAddr(*pPosterId), H2DEV_POSTER_SIZE(p));
+#endif
+
+     return(OK);
 
 } /* posterFind */
 
@@ -379,6 +391,10 @@ localPosterIoctl(POSTER_ID posterId, int code, void *parg)
     /* Executer la fonction demandee */
     retval = OK;
     switch (code) {
+      case FIO_FRESH:
+        *(int *) parg = H2DEV_POSTER_FLG_FRESH(dev);
+        break;
+
       case FIO_GETDATE:
 	/* Verifier si on a deja ecrit sur le poster */
 	if (H2DEV_POSTER_FLG_FRESH(dev) != TRUE) {
