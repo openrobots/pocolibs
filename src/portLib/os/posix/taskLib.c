@@ -34,8 +34,6 @@ __RCSID("$LAAS$");
 #include "taskLib.h"
 #include "taskHookLib.h"
 
-extern int main(int, char **);
-
 static pthread_key_t taskControlBlock;
 static OS_TCB *taskList = NULL;
 static int numTask = 0;
@@ -159,7 +157,7 @@ taskLibInit(void)
     tcb->policy = policy;
     tcb->priority = priorityPosixToVx(param.sched_priority);
     tcb->options = 0;
-    tcb->entry = main;
+    tcb->entry = NULL;			/* implicit main() */
     tcb->errorStatus = errno;
     /* Process and thread ids */
     tcb->pid = getpid();
@@ -602,6 +600,8 @@ taskIdSelf(void)
 	}
     }
     tcb = (OS_TCB *)pthread_getspecific(taskControlBlock);
+    if (tcb == NULL)
+	    return 0;			/* XXX correct ? */
     if (tcb->magic != TASK_MAGIC) {
 	fprintf(stderr, "taskIdSelf: bad task specific data: %lx %lx\n",
 		(unsigned long)tcb, (unsigned long)pthread_self());
