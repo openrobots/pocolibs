@@ -53,6 +53,17 @@ AC_C_BIGENDIAN
 dnl
 AC_TYPE_SIGNAL
 
+dnl check for X
+AC_PATH_X
+if test "x$x_includes" = "x"; then
+  XCPPFLAGS=
+  XLDFLAGS=
+else
+  XCPPFLAGS=-I$x_includes
+  XLDFLAGS=-L$x_libraries
+fi
+AC_SUBST(XCPPFLAGS XLDFLAGS)
+
 dnl
 
 # AC_CHECK_PTHREADS(action if ok, action if not ok, action if cross-compiling)

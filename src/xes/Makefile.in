@@ -35,11 +35,11 @@ PROG = xes_server
 all: $(PROG)
 
 $(PROG): $(OBJS)
-	$(LIBTOOL) --mode=link $(CC) -o $(PROG) $(CFLAGS) $(LDFLAGS) $(OBJS) \
-	$(OS_LIBS)
+	$(LIBTOOL) --mode=link $(CC) -o $(PROG) $(CFLAGS) $(XLDFLAGS) \
+	$(LDFLAGS) $(OBJS) $(OS_LIBS)
 
 %.o: %.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $<
+	$(CC) -c $(CPPFLAGS) $(XCPPFLAGS) $(CFLAGS) $<
 
 depend DEPENDANCES: $(SRCS)
 	$(MKDEP) -c$(CC) -oDEPENDANCES $(CPPFLAGS) $?

@@ -50,6 +50,9 @@ CPPFLAGS=	-I@abs_srcdir@/include
 CFLAGS=		@CFLAGS@
 LDFLAGS=	@LDFLAGS@
 
+XCPPFLAGS=	@XCPPFLAGS@
+XLDFLAGS=	@XLDFLAGS@
+
 # Base directory of the software
 ROOTROBOTS ?= 	@prefix@
 
