@@ -22,6 +22,7 @@ __RCSID("$LAAS$");
 #if defined(__RTAI__) && defined(__KERNEL__)
 # include <linux/slab.h>
 #else
+# include <sys/types.h>
 # include <stdio.h>
 # include <string.h>
 # include <stdlib.h>
