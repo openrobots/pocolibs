@@ -61,7 +61,7 @@ distclean:
 	done
 
 DIST_COMMON = BUGS CHANGELOG Init.make.in Init.make.posix Init.make.rtai \
-	Makefile.in README aclocal.m4 libtool.m4 pocolibs.m4 config.guess \
+	Makefile.in README libtool.m4 pocolibs.m4 config.guess \
 	config.sub configure configure.in ltmain.sh install-sh mkinstalldirs
 DIST_SUBDIRS = doc include man src compat
 
