@@ -253,7 +253,7 @@ SVC(poster_ioctl_1)(POSTER_IOCTL_PAR *param, struct svc_req *clnt)
 
 #ifndef VXWORKS
 
-static void
+static RETSIGTYPE
 sighandler(int sig)
 {
     switch (sig) {
