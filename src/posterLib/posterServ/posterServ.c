@@ -267,6 +267,7 @@ int
 main(int argc, char *argv[])
 {
     int c, bg = 0, err = 0;
+    CLIENT *clnt;
 
     while ((c = getopt(argc, argv, "bv")) != EOF) {
 	switch (c) {
@@ -285,6 +286,13 @@ main(int argc, char *argv[])
 	fprintf(stderr, "usage: %s [-b]\n", argv[0]);
 	exit(2);
     } 
+    /* Test if service is already registered on localhost */
+    if ((clnt = clnt_create("localhost",
+		POSTER_SERV, POSTER_VERSION, "tcp")) != NULL) {
+	    fprintf(stderr, "posterServ already running\n");
+	    clnt_destroy(clnt);
+	    exit(1);
+    }
     /*
      * Lancement en background
      */
