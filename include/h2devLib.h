@@ -24,12 +24,11 @@
 #include "h2endianness.h"
 
 /**
- ** Structures de device H2 pour Unix
- ** Le tableau des devices h2 est stocké dans un tableau en memoire 
- ** partagee 
+ ** H2 device structures
+ ** The array of h2 devices is stored in shared memory. 
  **/
 
-/* Mode par defaut des structures IPC */
+/* Default access mode for IPC data */
 #define PORTLIB_MODE 0666
 
 /* Semaphore */
@@ -39,44 +38,44 @@ typedef struct H2_SEM_STR {
 } H2_SEM_STR;
 
 /*
- * XXX Attention, dans les 3 types de devices suivants sont memorises 
- * XXX sous le nom taskId, des identificateurs differents
+ * XXX Warning, in the 3 following device types, 3 different identifiers
+ * XXX are stored under the 'taskId' name. Don't mix them!
  */
 
 /* Mailbox */
 typedef struct H2_MBOX_STR {
-    int taskId;				/* identificateur h2dev */
-    int size;				/* taille du mbox */
-    H2SEM_ID semExcl;			/* Semaphore excution mutuelle */
-    H2SEM_ID semSigRd;			/* Semaphore signalisation lecture */
-    H2RNG_ID rngId;			/* Id global du ring buffer */
+    int taskId;				/* h2dev id */
+    int size;				/* mbox size */
+    H2SEM_ID semExcl;			/* mutex for this mailbox */
+    H2SEM_ID semSigRd;			/* signalling semaphore  */
+    H2RNG_ID rngId;			/* global Id of the ring buffer */
 } H2_MBOX_STR;
 
 /* Poster */
 typedef struct H2_POSTER_STR {
-    int taskId;				/* pid Unix */
-    unsigned char *pPool;		/* addresse globale poster */
-    H2SEM_ID semId;			/* semaphore de synchro */
-    int flgFresh;			/* Flag donnees disponibles */
-    H2TIME date;			/* date derniere modif */
-    int size;				/* taille du poster */
-    int op;				/* operation en cours */
+    int taskId;				/* Unix pid */
+    unsigned char *pPool;		/* global address of the data */
+    H2SEM_ID semId;			/* synchronization semaphore */
+    int flgFresh;			/* available data flag */
+    H2TIME date;			/* last modification date */
+    int size;				/* poster size */
+    int op;				/* current operation */
     H2_ENDIANNESS endianness;
 } H2_POSTER_STR;
 
-/* Tache */
+/* Task */
 typedef struct H2_TASK_STR {
-    int taskId;				/* identificateur taskLib */
+    int taskId;				/* taskLib id */
     int semId;
 } H2_TASK_STR;
 
-/* Memoire partagee */
+/* Shared memory */
 typedef struct H2_MEM_STR {
-    int shmId;				/* id segment memoire partagee */
-    int size;				/* taille */
+    int shmId;				/* IPC SHM identifier */
+    int size;				/* size */
 } H2_MEM_STR;
 
-/* Types de devices */
+/* Device types */
 typedef enum {
     H2_DEV_TYPE_NONE,
     H2_DEV_TYPE_H2DEV,
@@ -87,10 +86,10 @@ typedef enum {
     H2_DEV_TYPE_MEM
 } H2_DEV_TYPE;
 
-/* Nombre de types definis */
+/* Number of defined device types */
 #define H2DEV_MAX_TYPES 7
 
-/* longueur max d'un nom */
+/* Maximum length of a device name */
 #define H2_DEV_MAX_NAME 32
 
 /* devices */
@@ -116,10 +115,10 @@ typedef struct H2_DEV_STR {
 /* External name for h2 devices */
 #define H2_DEV_NAME ".h2dev"
 
-/* Code du module */
+/* Code for this module */
 #define M_h2devLib   505
 
-/* Codes d'erreur */
+/* Error codes */
 #define S_h2devLib_BAD_DEVICE_TYPE 		((M_h2devLib << 16) | 0)
 #define S_h2devLib_DUPLICATE_DEVICE_NAME	((M_h2devLib << 16) | 1)
 #define S_h2devLib_TOO_MANY_DEVICES             ((M_h2devLib << 16) | 2)
