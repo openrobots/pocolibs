@@ -58,9 +58,6 @@ static pthread_mutex_t h2devMutex = PTHREAD_MUTEX_INITIALIZER;
 static int posterServPid = -1;		/* pid du serveur de posters */
 static char const posterServPath[] = POSTER_SERV_PATH;
 
-/* Prototypes fonctions locales */
-static int h2devFindAux(const char *name, H2_DEV_TYPE type);
-
 /*----------------------------------------------------------------------*/
 
 /**
