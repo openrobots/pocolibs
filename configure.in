@@ -1,0 +1,32 @@
+dnl autoconf script for portLib/comLib (aka pocolibs)
+dnl
+dnl Copyright (c) 2003 CNRS/LAAS
+dnl
+dnl GPL, since some parts were copied from other configure.in
+dnl 
+dnl $LAAS$
+dnl
+AC_INIT(src/comLib/csLib.c)
+AC_PREREQ(2.13)
+
+AC_CANONICAL_HOST
+
+AC_PROG_CC
+
+PACKAGE=pocolibs
+VERSION=2.0
+AC_SUBST(PACKAGE)
+AC_SUBST(VERSION)
+AC_REVISION($LAAS$)
+
+AC_PROG_RANLIB
+AC_PROG_INTALL
+
+dnl check for mkdep
+AC_PATH_PROG(MKDEP, mkdep, no, $prefix/bin:$exec_prefix/bin:$PATH)
+
+AC_CONFIG_HEADER(config.h)
+AC_OUTPUT(Init.make
+	Makefile
+)
+
