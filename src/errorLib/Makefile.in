@@ -39,8 +39,8 @@ all: $(LIB)
 
 $(LIB): $(OBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJS:%.o=%.lo)  \
-	-rpath $(prefix)/lib -version-info $(SHLIB_MAJOR):$(SHLIB_MINOR) \
-	-L../portLib -R$(LIBDIR) $(PORTLIB)
+	-rpath $(LIBDIR) -version-info $(SHLIB_MAJOR):$(SHLIB_MINOR) \
+	 -R$(LIBDIR) -L../portLib -lportLib
 
 %.o: %.c
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $<
@@ -54,13 +54,12 @@ clean:
 	rm -rf .libs _libs
 
 distclean:
-	rm -f DEPENDANCES Makefile
+	rm -f DEPENDANCES Makefile h2addErrno
 
 
 install: $(LIB)
-	$(MKINSTALLDIRS) $(ROOTROBOTS)/bin $(LIBDIR)
-	$(INSTALL) h2addErrno $(ROOTROBOTS)/bin
+	$(MKINSTALLDIRS) $(BINDIR) $(LIBDIR)
+	$(INSTALL) h2addErrno $(BINDIR)
 	$(LIBTOOL) --mode=install $(INSTALL) $(LIB) $(LIBDIR)
-	$(LIBTOOL) --mode=finish $(LIBDIR)
 
 include DEPENDANCES

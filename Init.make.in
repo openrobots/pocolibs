@@ -52,9 +52,6 @@ CFLAGS=
 # Base directory of the software
 ROOTROBOTS ?= 	@prefix@
 
-# Target architecture
-TARGET=$(MACHTYPE)-$(OSTYPE)
-
 PORTLIB=	-lportLib
 COMLIB=		-lcomLib
 POSTERLIB=	-lposterLib
@@ -75,7 +72,6 @@ LIBPTHREADS=	-lpthread
 OS_LIBS=	$(PORTLIB) $(LIBNET) $(LIBPOSIX) $(LIBPTHREADS) \
                   $(LIBDL) $(LIBM)
 RPCGEN=		rpcgen
-INSTALL=	@INSTALL@
-INSTALL_PROGRAM= @INSTALL_PROGRAM@
+
 LN=		ln -s
 

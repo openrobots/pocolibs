@@ -51,7 +51,7 @@ all: $(LIB)
 
 $(LIB): $(OBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJS:%.o=%.lo) \
-	-rpath $(prefix)/lib -version-info $(SHLIB_MAJOR):$(SHLIB_MINOR)
+	-rpath $(LIBDIR) -version-info $(SHLIB_MAJOR):$(SHLIB_MINOR)
 
 %.o: %.c
 	$(LIBTOOL) --mode=compile $(CC) -c $(CFLAGS) $(CPPFLAGS) $<
@@ -70,6 +70,5 @@ distclean:
 install: $(LIB)
 	$(MKINSTALLDIRS) $(LIBDIR)
 	$(LIBTOOL) --mode=install $(INSTALL) $(LIB) $(LIBDIR)
-	$(LIBTOOL) --mode=finish $(LIBDIR)
 
 include DEPENDANCES

@@ -20,7 +20,10 @@ include Init.make
 SUBDIRS=\
 	src/portLib  \
 	src/errorLib \
-	src/comLib
+	src/comLib \
+	src/posterLib \
+	src/h2 \
+	src/shell
 
 all:
 	@for d in $(SUBDIRS) ; do \
@@ -35,5 +38,15 @@ depend:
 install:
 	@for d in $(SUBDIRS) ; do \
 		$(MAKE) -C $$d install ;\
+	done
+
+clean:
+	@for d in $(SUBDIRS) ; do \
+		$(MAKE) -C $$d clean ; \
+	done
+
+distclean:
+	@for d in $(SUBDIRS) ; do \
+		$(MAKE) -C $$d distclean ; \
 	done
 

@@ -15,40 +15,36 @@
 #
 # $LAAS$
 #
-include ../Init.make
+
+top_builddir=	@top_builddir@
+include ../../Init.make
 
 CPPFLAGS += -I..
 
-# CPPFLAGS += -DRSHD_DEBUG
+VPATH=	@top_srcdir@/src/h2
 
-PROG = $(TARGET)/shell
-SRCS = \
-	config.c	\
-	main.c
-
-OBJS = $(SRCS:%.c=$(TARGET)/%.o)
+SRC_PROG = h2.c
+OBJ_PROG = $(SRC_PROG:%.c=%.o)
+PROG = h2
 
 all: $(PROG)
-pure: $(PROG).pure
 
-$(PROG): $(OBJS) $(LIBH2) $(LIBOS)
-	$(CC) -o $(PROG) $(CFLAGS) $(LDFLAGS) $(OBJS) $(LIBS) 
+$(PROG): $(OBJ_PROG) $(LIBH2) $(LIBOS)
+	$(LIBTOOL) --mode=link $(CC) -o $(PROG) $(CFLAGS) $(LDFLAGS) \
+	$(OBJ_PROG) \
+	-L../portLib -L../errorLib -L../comLib -L../posterLib $(LIBS)
 
-$(PROG).pure: $(OBJS) $(LIBH2) $(LIBOS)
-	purify $(CC) -o $(PROG).pure $(CFLAGS) $(LDFLAGS) $(OBJS) $(LIBS)
+%.o: %.c
+	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $<
 
-$(TARGET)/%.o: %.c
-	$(CC) -c -o$@ $(CPPFLAGS) $(CFLAGS) $<
+depend DEPENDANCES:: $(SRC_PROG)
+	$(MKDEP) -c$(CC) -oDEPENDANCES 	$(CPPFLAGS) $?
 
-depend $(TARGET)/DEPENDANCES: $(SRCS)
-	-mkdir -p $(TARGET)
-	$(MKDEP) -c$(CC) -o$(TARGET)/DEPENDANCES -d$(TARGET) \
-	-sH2UNIX=$(H2UNIX) $(CPPFLAGS) $?
-
-clean:
-	rm -f $(OBJS) $(PROG)
+clean: 
+	rm -f $(OBJ_PROG) $(PROG)
 
 install:
-	$(INSTALL) $(PROG) $(BINDIR)
+	$(MKINSTALLDIRS) $(BINDIR)
+	$(LIBTOOL) --mode=install $(INSTALL) $(PROG) $(BINDIR)
 
-include $(TARGET)/DEPENDANCES
+include DEPENDANCES

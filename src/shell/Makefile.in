@@ -15,38 +15,48 @@
 #
 # $LAAS$
 #
-TOP = ..
-include $(TOP)/Init.make
+top_builddir=	@top_builddir@
+INSTALL=	@INSTALL@
+
+include ../../Init.make
+
+VPATH=	@srcdir@
 
 CPPFLAGS += -I..
 
-SRC_PROG = h2.c
-OBJ_PROG = $(SRC_PROG:%.c=$(TARGET)/%.o)
-PROG = $(TARGET)/h2
+# CPPFLAGS += -DRSHD_DEBUG
+
+PROG = shell
+SRCS = \
+	config.c	\
+	main.c
+
+OBJS = $(SRCS:%.c=%.o)
 
 all: $(PROG)
+pure: $(PROG).pure
 
-$(PROG): $(OBJ_PROG) $(LIBH2) $(LIBOS)
-	$(CC) -o $(PROG) $(CFLAGS) $(LDFLAGS) $(OBJ_PROG) $(LIBS)
+$(PROG): $(OBJS) $(LIBH2) $(LIBOS)
+	$(LIBTOOL) --mode=link $(CC) -o $(PROG) $(CFLAGS) $(LDFLAGS) \
+	$(OBJS) -L../portLib -L../errorLib -L../comLib -L../posterLib $(LIBS) 
 
-$(TARGET)/%.o: %.c
-	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $<
+$(PROG).pure: $(OBJS) $(LIBH2) $(LIBOS)
+	$(PURIFY) $(CC) -o $(PROG).pure $(CFLAGS) $(LDFLAGS) $(OBJS) $(LIBS)
 
-depend $(TARGET)/DEPENDANCES:: $(TARGET)
+%.o: %.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $<
 
-depend $(TARGET)/DEPENDANCES:: $(SRC_PROG)
-	$(MKDEP) -c$(CC) -o$(TARGET)/DEPENDANCES -d'$$(TARGET)' \
-	-sH2UNIX=$(H2UNIX) \
-	$(CPPFLAGS) $?
+DEPENDANCES: $(SRCS)
+	$(MKDEP) -c$(CC) -oDEPENDANCES $(CPPFLAGS) $?
 
-$(TARGET):
-	-mkdir -p $@
+clean:
+	rm -f $(OBJS) $(PROG)
+	rm -rf .libs _libs
 
-clean: 
-	rm -f $(OBJ_PROG) $(PROG)
+distclean: clean
+	rm -f Makefile DEPENDANCES
 
 install:
-	$(MKINSTALLDIRS) $(BINDIR)
-	$(INSTALL) $(PROG) $(BINDIR)
+	$(LIBTOOL) --mode=install $(INSTALL) $(PROG) $(BINDIR)
 
-include $(TARGET)/DEPENDANCES
+include DEPENDANCES

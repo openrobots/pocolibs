@@ -90,7 +90,6 @@ distclean:
 install:
 	$(MKINSTALLDIRS) $(LIBDIR)
 	$(LIBTOOL) --mode=install $(INSTALL) $(LIB) $(LIBDIR)
-	$(LIBTOOL) --mode=finish $(LIBDIR)
 
 include DEPENDANCES
 
