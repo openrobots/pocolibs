@@ -299,7 +299,7 @@ main(int argc, char *argv[])
     if (bg) {
 	if (fork()) {
 	    printf("posterServ\n"
-		   "Copyright (C) LAAS/CNRS 1992-1999\n");
+		   "Copyright (C) LAAS/CNRS 1992-2004\n");
 	    exit(0);
 	}
     }
