@@ -69,7 +69,7 @@ LIBS=		$(LIB_H2_UNIX) $(OS_LIBS)
 
 MKINSTALLDIRS=	$(abs_srcdir)/mkinstalldirs
 
-RPCGEN=		@RPCGEN@
+RPCGEN=		@RPCGEN@ @RPCGEN_C@
 
 LN=		ln -s
 

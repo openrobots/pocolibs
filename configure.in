@@ -34,10 +34,12 @@ fi
 AC_PROG_INSTALL
 
 dnl check for mkdep
-AC_ARG_VAR(RPCGEN, [Remote Procedure Call (RPC) protocol compiler])
-
 AC_PATH_PROG(MKDEP, mkdep, no, $prefix/bin:$exec_prefix/bin:$PATH)
+
+dnl check for rpcgen
+AC_ARG_VAR(RPCGEN, [Remote Procedure Call (RPC) protocol compiler])
 AC_PATH_PROG(RPCGEN, rpcgen, no, [$PATH])
+AC_RPCGEN_C
 
 dnl check for purify
 opt_purify=no
@@ -82,7 +84,7 @@ AC_DEFUN([AC_CHECK_PTHREADS],
 	AC_LANG_C
 	AC_TRY_RUN([
 #include <pthread.h>
-void *pipo(void *a) {   exit(0); }
+void *pipo(void *a) { exit(0); }
  
 int main() {
     pthread_t t;

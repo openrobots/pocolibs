@@ -77,3 +77,5 @@
 /* Endianness */
 #undef WORDS_BIGENDIAN
 
+/* rpcgen -C generates _svc() prototypes */
+#undef HAVE_RPCGEN_C
