@@ -21,6 +21,11 @@ INSTALL=	@INSTALL@
 
 include ../../Init.make
 
+ifeq (yes,$(HAS_X))
+CPPFLAGS += -DUSE_X
+XLIB = -lX11
+endif
+
 VPATH=	@top_srcdir@/src/xes
 
 SRCS = \
@@ -36,7 +41,7 @@ all: $(PROG)
 
 $(PROG): $(OBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $(PROG) $(CFLAGS) $(XLDFLAGS) \
-	$(LDFLAGS) $(OBJS) $(OS_LIBS)
+	$(LDFLAGS) $(OBJS)  $(XLIB) $(OS_LIBS)
 
 %.o: %.c
 	$(CC) -c $(CPPFLAGS) $(XCPPFLAGS) $(CFLAGS) $<

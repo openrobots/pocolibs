@@ -29,11 +29,8 @@ SUBDIRS=\
 	src/posterLib			\
 	src/posterLib/posterServ	\
 	src/h2				\
-	src/shell
-
-ifeq (yes,$(HAS_X))
-SUBDIRS+= src/xes
-endif
+	src/shell			\
+	src/xes
 
 all:
 	@for d in $(SUBDIRS) ; do \
