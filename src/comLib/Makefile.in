@@ -22,13 +22,13 @@ top_builddir=	@top_builddir@
 top_srcdir=	@top_srcdir@
 srcdir=		@srcdir@
 
-include ../../Init.make
+include $(top_builddir)/Init.make
 -include $(srcdir)/os/$(OSAPI)/Makefile.inc
 
 INSTALL=	@INSTALL@
 
 CPPFLAGS+=	-I..
-CPPFLAGS+=	-DPOSTER_SERV_PATH=\"$(BINDIR)/posterServ\"
+CPPFLAGS+=	-DPOSTER_SERV_PATH=\"$(BINDIR)/posterServ\" 
 
 COMLIB_COMPATSRC=@COMLIB_COMPATSRC@
 ifneq (,$(COMLIB_COMPATSRC))
@@ -38,9 +38,9 @@ endif
 SRCS+=		$(COMLIB_COMPATSRC)
 OBJS=		$(SRCS:%.c=%.lo)
 
-SHLIB_CURRENT=	3
-SHLIB_REVISION=	0
-SHLIB_AGE=0
+SHLIB_CURRENT=	4
+SHLIB_REVISION=	1
+SHLIB_AGE=	1
 
 BASENAME= 	comLib
 LIB=		lib$(BASENAME).la
@@ -48,15 +48,12 @@ LIB=		lib$(BASENAME).la
 all: all-os $(LIB)
 
 $(LIB): $(OBJS)
-	$(LTLD) -o $@ $(OBJS) -rpath $(LIBDIR) -R$(LIBDIR)		\
-		-L../errorLib $(ERRORLIB) -L../portLib $(PORTLIB) $(OS_LIBS) \
+	$(LTLD) -o $@ $(OBJS) -rpath $(LIBDIR) -R$(LIBDIR) \
+		 $(ERRORLIB) $(PORTLIB) -lm $(OS_LIBS) \
 		-version-info $(SHLIB_CURRENT):$(SHLIB_REVISION):$(SHLIB_AGE)
 
 %.lo: %.c
 	$(LTCC) -c $(CPPFLAGS) $(CFLAGS) $<
-
-depend DEPENDANCES:: $(SRCS)
-	$(MKDEP) -c$(CC) -oDEPENDANCES -t.lo $(CPPFLAGS) $?
 
 clean:: 
 	$(LIBTOOL) --mode=clean rm -f $(OBJS) $(LIB)
@@ -68,9 +65,13 @@ install:: $(LIB)
 	$(MKINSTALLDIRS) $(LIBDIR)
 	$(LIBTOOL) --mode=install $(INSTALL) $(LIB) $(LIBDIR)
 
-ifneq (distclean,$(MAKECMDGOALS))
+ifeq ($(findstring clean,$(MAKECMDGOALS)),)
+depend DEPENDANCES:: $(SRCS)
+	$(MKDEP) -c$(CC) -oDEPENDANCES -t.lo $(CPPFLAGS) $?
+
 include DEPENDANCES
 endif
 
 # os specific rules
 include $(top_srcdir)/Init.make.$(OSAPI)
+
