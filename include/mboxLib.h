@@ -18,8 +18,11 @@
 #ifndef _MBOXLIB_H
 #define _MBOXLIB_H
 
-typedef int MBOX_ID;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+typedef int MBOX_ID;
 
 /* Codes des fonctions ioctl */
 #define   FIO_NBYTES                    1
@@ -57,5 +60,9 @@ extern STATUS mboxSend ( MBOX_ID toId, MBOX_ID fromId, char *buf, int nbytes );
 extern void mboxShow ( void );
 extern STATUS mboxSkip ( MBOX_ID mboxId );
 extern int mboxSpy ( MBOX_ID mboxId, MBOX_ID *pFromId, int *pNbytes, char *buf, int maxbytes );
+
+#ifdef __cplusplus
+};
+#endif
 
 #endif
