@@ -167,6 +167,7 @@ h2semAlloc(int type)
     h2semTake(0, WAIT_FOREVER);
 
     /* Recherche d'un semaphore libre dans un tableau */
+    j = -1;				/* stupid gcc warning killer */
     for (i = 0; i < H2_DEV_MAX; i++) {
 	if (H2DEV_TYPE(i) == H2_DEV_TYPE_SEM) {
 	    /* Allocation d'un semaphore dans le tableau */

@@ -233,7 +233,7 @@ remotePosterWrite (POSTER_ID posterId,	/* Identificateur du poster */
 static STATUS 
 posterFindPath(char *posterName, REMOTE_POSTER_ID *pPosterId)
 {
-	POSTER_FIND_RESULT *res;
+	POSTER_FIND_RESULT *res = NULL;
 	char *host;
 	CLIENT *client;
 	char *pp, *tmp;

@@ -185,7 +185,7 @@ h2info(void)
 int
 main(int argc, char *argv[])
 {
-    int status;
+    int status = ERROR;
 
     progname = argv[0];
 

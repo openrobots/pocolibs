@@ -34,7 +34,8 @@ extern void h2timerTest(int);
 extern void posterShow(void);
 #endif
 
-static VOIDFUNCPTR tabFunc[] = {
+/* unused varniable, to pull symmbols from libraries */
+VOIDFUNCPTR shellTabFunc[] = {
 #ifdef INCLUDE_MBOX
     mboxEssay,
 #endif
