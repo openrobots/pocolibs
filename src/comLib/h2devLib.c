@@ -35,7 +35,6 @@ __RCSID("$LAAS$");
 #include "errnoLib.h"
 #include "h2semLib.h"
 #include "mboxLib.h"
-#include "posterLib.h"
 #include "h2errorLib.h"
 #include "h2devLib.h"
 #include "smMemLib.h"
@@ -128,7 +127,7 @@ STATUS
 h2devClean(const char *name)
 {
    int i, match = 0;
-   POSTER_ID p;
+   unsigned char *pool;
 
    if (h2devAttach() == ERROR) {
       return ERROR;
@@ -144,11 +143,10 @@ h2devClean(const char *name)
 		 mboxDelete(i);
 		 break;
 	      case H2_DEV_TYPE_POSTER:
-#if 0
-		if (posterFind(H2DEV_NAME(i), &p) == OK) { 
-		    posterDelete(p);
-		}
-#endif
+		pool = smObjGlobalToLocal(H2DEV_POSTER_POOL(i));
+		if (pool != NULL) 
+		    smMemFree(pool);
+		h2semDelete(H2DEV_POSTER_SEM_ID(i));
 		h2devFree(i);
 		break;
 	      case H2_DEV_TYPE_TASK:
