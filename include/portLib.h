@@ -68,12 +68,6 @@ typedef void *(*VOIDPTRFUNCPTR)();
 #ifndef MAX
 #define MAX(a,b) ((a)>(b)?(a):(b))
 #endif
-#ifndef min
-#define min(a,b) ((a)<(b)?(a):(b))
-#endif
-#ifndef max
-#define max(a,b) ((a)>(b)?(a):(b))
-#endif
 
 /* XXX Does this belong here ?? */
 /* Number of tick per second of the clock */
