@@ -51,7 +51,10 @@ depend DEPENDANCES: testRead.c testWrite.c
 	$(MKDEP) -c$(CC) -oDEPENDANCES $(CPPFLAGS) $?
 
 clean:
-	$(LIBTOOL) --mode=clean rm -f  $(TESTW) $(TESTR) 
+	$(LIBTOOL) --mode=clean rm -f $(TESTW) $(TESTR) $(TESTW).lo $(TESTR).lo
+
+distclean:
+	rm -f DEPENDANCES Makefile
 
 install:
 	@echo "Nothing to do"
