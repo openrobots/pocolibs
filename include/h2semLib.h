@@ -20,6 +20,10 @@
 
 #include "semLib.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Nombre max de semaphores par Id(SEMMSL) */
 #define MAX_SEM 20
 
@@ -42,6 +46,11 @@
 typedef int H2SEM_ID;
 
 
+/** Creates a new H2 semaphore of the given type
+ * @return ERROR on error, the semaphore id on success
+ * In case of an error, errnoGet() returns the according 
+ * error code
+ */
 extern H2SEM_ID h2semAlloc (int type );
 extern STATUS h2semCreate0 ( int semId, int value );
 extern STATUS h2semDelete ( H2SEM_ID sem );
@@ -51,6 +60,11 @@ extern STATUS h2semGive ( H2SEM_ID sem );
 extern STATUS h2semInit ( int num, int *pSemId );
 extern STATUS h2semShow ( H2SEM_ID sem );
 extern BOOL h2semTake ( H2SEM_ID sem, int timeout );
+extern STATUS h2semSet ( H2SEM_ID sem, int value );
 
+
+#ifdef __cplusplus
+};
+#endif
 
 #endif
