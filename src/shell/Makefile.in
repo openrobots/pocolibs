@@ -16,17 +16,15 @@
 # $LAAS$
 #
 top_builddir=	@top_builddir@
+top_srcdir=	@top_srcdir@
 srcdir=		@srcdir@
 INSTALL=	@INSTALL@
 
-include ../../Init.make
+include $(top_builddir)/Init.make
 -include $(srcdir)/os/$(OSAPI)/Makefile.inc
 
-VPATH=		@srcdir@
-
-CPPFLAGS+=	-I..
-
 # CPPFLAGS += -DRSHD_DEBUG
+VPATH = $(srcdir)
 
 PROG = shell
 SRCS = \
@@ -40,7 +38,7 @@ pure: $(PROG).pure
 
 $(PROG): $(OBJS) $(LIBH2) $(LIBOS)
 	$(LTLD) -o $(PROG) $(CFLAGS) $(LDFLAGS) \
-	$(OBJS) -L../portLib -L../errorLib -L../comLib -L../posterLib $(LIBS) 
+			$(OBJS) $(LIBS) 
 
 $(PROG).pure: $(OBJS) $(LIBH2) $(LIBOS)
 	$(PURIFY) $(LTLD) -o $(PROG).pure $(CFLAGS) $(LDFLAGS) $(OBJS) $(LIBS)
@@ -48,12 +46,8 @@ $(PROG).pure: $(OBJS) $(LIBH2) $(LIBOS)
 %.lo: %.c
 	$(LTCC) -c $(CPPFLAGS) $(CFLAGS) $< -prefer-non-pic
 
-depend DEPENDANCES: $(SRCS)
-	$(MKDEP) -c$(CC) -oDEPENDANCES -t.lo $(CPPFLAGS) $?
-
 clean:
-	rm -f $(OBJS) $(PROG)
-	rm -rf .libs _libs
+	$(LIBTOOL) --mode=clean rm -f $(OBJS) $(PROG)
 
 distclean: clean
 	rm -f Makefile DEPENDANCES
@@ -61,4 +55,11 @@ distclean: clean
 install:
 	$(LIBTOOL) --mode=install $(INSTALL) $(PROG) $(BINDIR)
 
+ifeq ($(findstring clean,$(MAKECMDGOALS)),)
+depend DEPENDANCES: $(SRCS)
+	$(MKDEP) -c$(CC) -oDEPENDANCES -t.lo $(CPPFLAGS) $?
+
 include DEPENDANCES
+endif
+
+.PHONY: all pure clean distclean install depend

@@ -15,12 +15,13 @@
 #
 # $LAAS$
 top_builddir=	@top_builddir@
+top_srcdir=	@top_srcdir@
 srcdir=		@srcdir@
 includedir=	@includedir@
 INSTALL=	@INSTALL@
 INSTALL_DATA=	$(INSTALL) -m 644
 
-include ../Init.make
+include $(top_builddir)Init.make
 
 # -----------------------------------------------------------------------
 
@@ -59,13 +60,10 @@ flist=\
 	wdLib.h			\
 	xes.h		
 
-
 # -----------------------------------------------------------------------
 
-.PHONY: all
-all:;
+all clean depend:
 
-.PHONY: install
 install:
 	$(MKINSTALLDIRS) $(INCLUDEDIR)
 	@for f in $(flist); do						\
@@ -73,5 +71,7 @@ install:
 		echo $$c; $$c;						\
 	done
 
-.PHONY: clean distclean depend
-clean distclean depend:;
+distclean:
+	rm -f Makefile
+
+.PHONY: all install clean distclean depend

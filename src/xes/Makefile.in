@@ -17,9 +17,10 @@
 #
 
 top_builddir=	@top_builddir@
+top_srcdir=	@top_srcdir@
 INSTALL=	@INSTALL@
 
-include ../../Init.make
+include $(top_builddir)/Init.make
 
 ifeq (yes,$(HAS_X))
 CPPFLAGS += -DUSE_X
@@ -46,9 +47,6 @@ $(PROG): $(OBJS)
 %.lo: %.c
 	$(LTCC) -c $(CPPFLAGS) $(XCPPFLAGS) $(CFLAGS) $<
 
-depend DEPENDANCES: $(SRCS)
-	$(MKDEP) -c$(CC) -t.lo -oDEPENDANCES $(CPPFLAGS) $(XCPPFLAGS) $?
-
 clean:
 	$(LIBTOOL) --mode=clean rm -f $(OBJS) $(PROG)
 
@@ -59,4 +57,11 @@ install:
 	$(MKINSTALLDIRS) $(BINDIR)
 	$(LIBTOOL) --mode=install $(INSTALL) $(PROG) $(BINDIR)
 
+ifeq ($(findstring clean,$(MAKECMDGOALS)),)
+depend DEPENDANCES: $(SRCS)
+	$(MKDEP) -c$(CC) -t.lo -oDEPENDANCES $(CPPFLAGS) $(XCPPFLAGS) $?
+
 include DEPENDANCES
+endif
+
+.PHONY: all clean distclean install depend

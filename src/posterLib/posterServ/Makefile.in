@@ -25,7 +25,7 @@ include ../../../Init.make
 
 INSTALL=	@INSTALL@
 
-CPPFLAGS+=	-I. -I../..
+CPPFLAGS+=	-I.
 
 VPATH=		@srcdir@
 
@@ -42,8 +42,7 @@ SERV = posterServ
 all: $(SERV)
 
 $(SERV): $(OBJS)
-	$(LTLD) -o $(SERV) $(LDFLAGS) $(OBJS) \
-	-L../../portLib -L../../errorLib -L../../comLib -L..  $(LIBS)
+	$(LTLD) -o $(SERV) $(LDFLAGS) $(OBJS) $(LIBS)
 
 posters.x: $(srcdir)/../os/posix/posters.x
 	rm -f posters.x
@@ -66,16 +65,18 @@ posters.h: posters.x
 	$(LTCC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $< -prefer-non-pic
 
 clean:
-	rm -f $(OBJS)  $(SERV) $(SRCS_RPC) posters.h posters.x
+	$(LIBTOOL) --mode=clean rm -f $(OBJS) $(SERV) $(SRCS_RPC) posters.h posters.x
 
 distclean: clean
 	rm -r Makefile DEPENDANCES
 
+ifeq ($(findstring clean, $(MAKECMDGOALS)),)
 depend DEPENDANCES:: posters.h $(SRCS) $(SRCS_RPC) 
 	$(MKDEP) -c$(CC) -oDEPENDANCES -t.lo $(CPPFLAGS)  $?
 
 include DEPENDANCES
+endif
 
 SUFFIXES = .x 
 
-
+.PHONY: all clean distclean install depend

@@ -19,11 +19,11 @@ top_builddir=	@top_builddir@
 top_srcdir=	@top_srcdir@
 srcdir=		@srcdir@
 
-include $(top_builddir)/Init.make
+include $(top_builddir)Init.make
 
 VPATH=		@srcdir@
 
-CPPFLAGS+=	-I.. $(MOD_CPPFLAGS)
+CPPFLAGS+=	$(MOD_CPPFLAGS)
 
 DIRS=		portLib comLib posterLib
 
@@ -47,6 +47,7 @@ all: regress
 include $(top_srcdir)/Init.make.$(OSAPI)
 
 BINS=$(SRCS:%.c=%$(BINEXT))
+OBJS=$(SRCS:%.c=%-obj.lo)
 
 osregress=$(OSAPI)-obj.lo
 
@@ -65,4 +66,6 @@ clean:
 	$(LIBTOOL) --mode=clean rm -f $(BINS) $(OBJS) $(osregress)
 
 distclean: clean
-	rm -f DEPENDANCES Makefile
+	rm -f Makefile
+
+.PHONY: all clean distclean

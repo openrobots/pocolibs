@@ -27,7 +27,6 @@ include $(top_builddir)/Init.make
 
 INSTALL=	@INSTALL@
 
-CPPFLAGS+=	-I..
 CPPFLAGS+=	-DPOSTER_SERV_PATH=\"$(BINDIR)/posterServ\" 
 
 COMLIB_COMPATSRC=@COMLIB_COMPATSRC@
@@ -42,14 +41,13 @@ SHLIB_CURRENT=	4
 SHLIB_REVISION=	1
 SHLIB_AGE=	1
 
-BASENAME= 	comLib
-LIB=		lib$(BASENAME).la
+LIB=		libcomLib.la
 
 all: all-os $(LIB)
 
 $(LIB): $(OBJS)
 	$(LTLD) -o $@ $(OBJS) -rpath $(LIBDIR) -R$(LIBDIR) \
-		 $(ERRORLIB) $(PORTLIB) -lm $(OS_LIBS) \
+		 $(ERRORLIB) $(PORTLIB) $(OS_LIBS) \
 		-version-info $(SHLIB_CURRENT):$(SHLIB_REVISION):$(SHLIB_AGE)
 
 %.lo: %.c
@@ -75,3 +73,4 @@ endif
 # os specific rules
 include $(top_srcdir)/Init.make.$(OSAPI)
 
+.PHONY: all all-os clean distclean install depend

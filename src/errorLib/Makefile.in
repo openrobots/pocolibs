@@ -21,13 +21,12 @@
 top_builddir=	@top_builddir@
 top_srcdir=	@top_srcdir@
 srcdir=		@srcdir@
-
-include ../../Init.make
--include $(srcdir)/os/$(OSAPI)/Makefile.inc
+builddir=	@builddir@
 
 INSTALL=	@INSTALL@
 
-CPPFLAGS+=	-I..
+include $(top_builddir)/Init.make
+-include $(srcdir)/os/$(OSAPI)/Makefile.inc
 
 SRCS+=		h2errorLib.c
 OBJS=		$(SRCS:%.c=%.lo)
@@ -36,34 +35,33 @@ SHLIB_CURRENT=	3
 SHLIB_REVISION=	0
 SHLIB_AGE=	0
 
-BASENAME = errorLib
-LIB = lib$(BASENAME).la
+LIB=		liberrorLib.la
 
 all: all-os $(LIB)
 
 $(LIB): $(OBJS)
-	$(LTLD) -o $@ $(OBJS) -rpath $(LIBDIR) -R$(LIBDIR)	\
-	-L../portLib $(PORTLIB)					\
-	-version-info $(SHLIB_CURRENT):$(SHLIB_REVISION):$(SHLIB_AGE)
+	$(LTLD) -o $@ $(OBJS) -rpath $(LIBDIR) -R$(LIBDIR) $(PORTLIB) \
+		-version-info $(SHLIB_CURRENT):$(SHLIB_REVISION):$(SHLIB_AGE)
 
 %.lo: %.c
 	$(LTCC) -c $(CPPFLAGS) $(CFLAGS) -o $@ $<
-
-depend DEPENDANCES:: $(SRCS)
-	$(MKDEP) -c$(CC) -o DEPENDANCES -t.lo $(CPPFLAGS) $?
 
 clean:: 
 	$(LIBTOOL) --mode=clean rm -f $(OBJS) $(LIB)
 
 distclean:: clean
 	rm -f DEPENDANCES Makefile
+	rm -f h2addErrno
 
 install:: $(LIB)
 	$(MKINSTALLDIRS) $(BINDIR) $(LIBDIR)
 	$(INSTALL) h2addErrno $(BINDIR)
 	$(LIBTOOL) --mode=install $(INSTALL) $(LIB) $(LIBDIR)
 
-ifneq (distclean,$(MAKECMDGOALS))
+ifeq ($(findstring clean,$(MAKECMDGOALS)),)
+depend DEPENDANCES:: $(SRCS)
+	$(MKDEP) -c$(CC) -o DEPENDANCES -t.lo $(CPPFLAGS) $?
+
 include DEPENDANCES
 endif
 

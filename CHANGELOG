@@ -1,4 +1,12 @@
-Version 2.0, xx September 2004
+Version 2.0, xx January 2005
+
+ 43. Add a h2semSet() function to force the value of a semaphore (Sylvain
+     Joyeux).
+ 42. Add a posterName() function and a FIO_FRESH ioctl to posterLib (Sylvain 
+     Joyeux).
+ 41. Valgrind support (Sylvain Joyeux).
+ 40. Remove some unused files. 
+ 39. Make headers C++ compatible (Sylvain Joyeux). 
  38. Add --{disable,enable}-posix-timer option to configure, to be able
      to force the timer type that is used by tickLib, as the auto-detection
      of useable POSIX timer is not always reliable enough.

@@ -1,38 +1,37 @@
 # -*- Makefile -*-
 # @configure_input@
 #
-# Copyright (C) 1999-2003 LAAS/CNRS 
+# Copyright (C) 1999-2003 LAAS/CNRS
 # All rights reserved.
-# 
-# Redistribution and use in source and binary forms, with or without
+#
+# Redistribution and use in source and binary forms, with or withou
 # modification, are permitted provided that the following conditions
 # are met:
-# 
-#    - Redistributions of source code must retain the above copyright
+#
+#    - Redistributions of source code must retain the above copyrigh
 #      notice, this list of conditions and the following disclaimer.
 #    - Redistributions in binary form must reproduce the above
 #      copyright notice, this list of conditions and the following
 #      disclaimer in the documentation and/or other materials provided
 #      with the distribution.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NO
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
 # FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
 # COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
 # INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
 # BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 # LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRIC
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# 
+#
 # $LAAS$
 
 prefix=         @prefix@
 exec_prefix=    @exec_prefix@
-abs_srcdir=     @abs_srcdir@
 
 host_cpu=	@host_cpu@
 
@@ -50,8 +49,8 @@ LIBTOOL=	@LIBTOOL@
 LTCC=           $(LIBTOOL) --mode=compile $(CC)
 LTLD=           $(LIBTOOL) --mode=link $(CC)
 
-CPPFLAGS=	-I@abs_srcdir@/include
-CPPFLAGS+=	-I@abs_srcdir@/include/os/$(OSAPI) @CPPFLAGS@
+CPPFLAGS=	-I$(top_srcdir)/include -I$(top_builddir)/src
+CPPFLAGS+=	-I$(top_srcdir)/include/os/$(OSAPI) @CPPFLAGS@
 CFLAGS=		@CFLAGS@
 LDFLAGS=	@LDFLAGS@
 
@@ -66,17 +65,20 @@ LNXKERN_INCLUDES=@LNXKERN_INCLUDES@
 # Base directory of the software
 ROOTROBOTS ?= 	@prefix@
 
-PORTLIB=	-lportLib
-COMLIB=		-lcomLib
-POSTERLIB=	-lposterLib
-ERRORLIB=	-lerrorLib
+PORTLIB=	-L$(top_builddir)/src/portLib   -lportLib
+COMLIB=		-L$(top_builddir)/src/comLib    -lcomLib
+POSTERLIB=	-L$(top_builddir)/src/posterLib -lposterLib
+ERRORLIB=	-L$(top_builddir)/src/errorLib  -lerrorLib
+
+VALGRIND_CFLAGS= @VALGRIND_CFLAGS@
+VALGRIND_LIBS=   @VALGRIND_LIBS@
 
 LIB_H2_UNIX=	$(COMLIB) $(POSTERLIB) $(ERRORLIB)
 
 OS_LIBS=	@LIBS@
-LIBS=		$(LIB_H2_UNIX) $(OS_LIBS) 
+LIBS=		$(LIB_H2_UNIX) $(OS_LIBS)
 
-MKINSTALLDIRS=	$(abs_srcdir)/mkinstalldirs
+MKINSTALLDIRS=	$(top_srcdir)/mkinstalldirs
 
 RPCGEN=		@RPCGEN@ @RPCGEN_C@
 

@@ -22,12 +22,10 @@ top_builddir=	@top_builddir@
 top_srcdir=	@top_srcdir@
 srcdir=		@srcdir@
 
-include ../../Init.make
--include $(srcdir)/os/$(OSAPI)/Makefile.inc
-
 INSTALL=	@INSTALL@
 
-CPPFLAGS+=	-I..
+include $(top_builddir)/Init.make
+-include $(srcdir)/os/$(OSAPI)/Makefile.inc
 
 VPATH=		@srcdir@
 
@@ -40,13 +38,10 @@ all: $(PROG)
 
 $(PROG): $(OBJS)
 	$(LTLD) -o $(PROG) $(CFLAGS) $(LDFLAGS) $(OBJS) \
-	  -L../portLib -L../errorLib -L../comLib -L../posterLib $(LIBS)
+	  $(LIBS)
 
 %.lo: %.c
 	$(LTCC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $< -prefer-non-pic
-
-depend DEPENDANCES: $(SRCS)
-	$(MKDEP) -c$(CC) -oDEPENDANCES -t.lo $(CPPFLAGS) $?
 
 clean: 
 	$(LIBTOOL) --mode=clean rm -f $(OBJS) $(PROG)
@@ -58,4 +53,12 @@ install:
 	$(MKINSTALLDIRS) $(BINDIR)
 	$(LIBTOOL) --mode=install $(INSTALL) $(PROG) $(BINDIR)
 
+ifeq ($(findstring clean,$(MAKECMDGOALS)),)
+depend DEPENDANCES: $(SRCS)
+	$(MKDEP) -c$(CC) -oDEPENDANCES -t.lo $(CPPFLAGS) $?
+
 include DEPENDANCES
+endif
+
+.PHONY: all clean distclean install depend
+

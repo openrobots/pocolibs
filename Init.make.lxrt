@@ -1,3 +1,4 @@
+# -*- Makefile -*-
 #
 # Copyright (c) 2004 CNRS/LAAS
 #
@@ -31,10 +32,10 @@ LIBTOOL_LINKOPT= \
 	-rpath $(LIBDIR) -version-info $(SHLIB_MAJOR):$(SHLIB_MINOR) \
 	-R$(LIBDIR)
 
-LIBTOOL_LINKPORTLIB=	-L$(top_builddir)/src/portLib -lportLib
-LIBTOOL_LINKERRORLIB=	-L$(top_builddir)/src/errorLib -lerrorLib
-LIBTOOL_LINKCOMLIB=	-L$(top_builddir)/src/comLib -lcomLib
-LIBTOOL_LINKPOSTERLIB=	-L$(top_builddir)/src/posterLib -lposterLib
+LIBTOOL_LINKPORTLIB=	  $(PORTLIB)
+LIBTOOL_LINKERRORLIB=	  $(ERRORLIB)
+LIBTOOL_LINKCOMLIB=	    $(COMLIB)
+LIBTOOL_LINKPOSTERLIB=	$(POSTERLIB)
 
 # fetch source files in posix subdir
 VPATH=	$(srcdir)/os/posix:$(srcdir):$(top_srcdir)/compat
