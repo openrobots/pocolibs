@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2004 CNRS/LAAS
+ * Copyright (c) 2004 
+ *      Autonomous Systems Lab, Swiss Federal Institute of Technology.
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,6 +20,7 @@ __RCSID("$LAAS$");
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/kernel.h>
+#include <linux/proc_fs.h>
 #include <linux/errno.h>
 
 #include "portLib.h"
@@ -35,6 +37,10 @@ MODULE_PARM_DESC(ticks_per_sec,
 int
 portLib_init(void)
 {
+   struct proc_dir_entry *portLibproc;
+
+   portLibproc = proc_mkdir("portLib", NULL);
+
    if (ticks_per_sec < 0 || ticks_per_sec > 1000000) {
       printk("portLib: %d is an invalid tick frequency\n", ticks_per_sec);
       return -EINVAL;

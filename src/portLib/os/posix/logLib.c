@@ -19,11 +19,24 @@ __RCSID("$LAAS$");
 #include <stdio.h>
 
 #define LOGLIB_C
+#include "portLib.h"
 #include "logLib.h"
 
 /*
  * Message logging facilities
  */
+
+STATUS
+logInit(int fd, int maxMsgs)
+{
+   return OK;
+}
+
+void
+logEnd()
+{
+   ;
+}
 
 int
 logMsg(const char *fmt,

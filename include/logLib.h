@@ -1,6 +1,7 @@
 /* $LAAS$ */
 /*
- * Copyright (c) 2004 CNRS/LAAS
+ * Copyright (c) 2004 
+ *      Autonomous Systems Lab, Swiss Federal Institute of Technology.
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -17,6 +18,9 @@
 
 #ifndef _LOGLIB_H
 #define _LOGLIB_H
+
+extern STATUS	logInit(int fd, int maxMsgs);
+extern void	logEnd(void);
 
 #ifdef LOGLIB_C
 extern int logMsg ( const char *fmt, int arg1, int arg2, int arg3, int arg4,

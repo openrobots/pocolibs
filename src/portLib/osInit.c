@@ -32,6 +32,10 @@ __RCSID("$LAAS$");
 STATUS
 osInit(int clkRate)
 {
+    /* Initialize log library */
+    if (logInit(0/* ignored */, 256) == ERROR) {
+        return ERROR;
+    }
     
     /* Initialize task library */
     if (taskLibInit() == ERROR) {
@@ -66,4 +70,5 @@ void
 osExit()
 {
    sysClkDisable();
+   logEnd();
 }

@@ -1,5 +1,9 @@
-Version 2.0, xx May 2004
+Version 2.0, xx July 2004
 
+ 29. Implemented a real-time logging library for RTAI. Added logInit and
+     logEnd. Bumped portLib minor.
+ 28. Updated RTAI/user-space to handle multi-threaded linux processes.
+     It now uses one real-time task per thread.
  27. Added devfs support for RTAI.
  26. install-sh does not overwrite files if they were not modified.
  25. Preliminary RTAI/user-space support. posterLib requires a more

@@ -43,7 +43,7 @@ SRCS+= \
 OBJS=		$(SRCS:%.c=%.lo)
 
 SHLIB_MAJOR=	2
-SHLIB_MINOR=	2
+SHLIB_MINOR=	3
 
 BASENAME=	portLib
 LIB=		lib$(BASENAME).la
