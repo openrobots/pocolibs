@@ -67,7 +67,7 @@ h2initGlob(int ticksPerSec)
 	    return ERROR;
 	}
     }
-    printf("Hilare2 execution environment version 1.1\n"
+    printf("Hilare2 execution environment version 2.0\n"
 	   "Copyright (c) 1999-2003 LAAS/CNRS\n");
 
     return OK;
