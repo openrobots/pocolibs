@@ -90,7 +90,7 @@ AC_SUBST(OSAPI)
 dnl --- end of OS flavour checks ----------------------------------------
 
 dnl add -ldl if needed 
-if test -n $lt_cv_dlopen_libs ; then
+if test -n "$lt_cv_dlopen_libs" ; then
 	LIBS=$lt_cv_dlopen_libs
 fi
 
@@ -216,23 +216,8 @@ dnl --- end of checks for pthread ---------------------------------------
 AC_SEARCH_LIBS([fabs], [m])
 AC_SEARCH_LIBS([atan], [m])
 
-dnl AC_CHECK_LIB([pthread], pthread_create, 
-dnl 	have_libpthread=yes, 
-dnl 	AC_CHECK_LIB([c_r], pthread_create,
-dnl 		have_libc_r=yes))
-dnl if test "$have_libpthread" != "yes" -a "$have_libc_r" != "yes"; then
-dnl 	AC_MSG_ERROR([POSIX threads library not found])
-dnl fi
-
-dnl AC_SEARCH_LIBS([pthread_create], [pthread c_r])
-
 AC_SEARCH_LIBS([timer_create], [rt])
 
-dnl AC_CHECK_LIB([rt], timer_create, have_librt=yes, have_librt=no)
-
-dnl if test "$have_librt" = yes; then
-dnl   LIBS=-lrt
-dnl fi
 
 AC_MSG_CHECKING([for posix timers])
 AC_TRY_LINK([#include <time.h>], 
@@ -267,7 +252,6 @@ AC_CHECK_FUNCS([fnmatch],[], [
 	COMLIB_COMPATSRC="${COMLIB_COMPATSRC} fnmatch.c"
 ])
 AC_SUBST(COMLIB_COMPATSRC)
-
 
 dnl --- Debugging options -----------------------------------------------
 
@@ -317,4 +301,3 @@ AC_OUTPUT(Init.make
 	src/xes/Makefile
 	src/regress/Makefile
 )
-
