@@ -1,0 +1,22 @@
+2.5
+	Diverses petites modifications pour les OS modernes
+	Meilleure config Linux, ignore le SIGPIPE,...
+
+2.4
+	Connxion au serveur X pour fin automatique lors du reset du 
+	serveur X.
+	Ajout handler signaux pour nettoyage xes_pid
+	
+2.3
+	Detache le serveur de son terminal pour eviter bloquages Solaris 2.x
+2.2
+	Corrige' lecture "junk" xterm
+2.1
+	Ajout gestion ring buffers pour E/S non bloquantes
+	Ajout commande kill_xes
+1.7
+	Portages a Solaris 2 & NetBSD, traitement du ^D.
+1.4, 1.5
+	Corrections dans le Makefile
+1.3
+	ajoute' gestion de version

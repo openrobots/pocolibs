@@ -1,0 +1,70 @@
+# Makefile for xes on Unix
+#
+# Copyright (C) 1994 LAAS/CNRS
+#
+# $Id$
+#
+
+include ../../Init.make
+include ../../Init.make.unix
+include ../../Init.make.$(TARGET)
+include Init.make.$(TARGET)
+
+SERV_SRCS = \
+	rngLib.c \
+	serv.c \
+	socket_lib.c \
+	version.c
+
+SERV_OBJS = $(SERV_SRCS:%.c=$(TARGET)/%.o)
+SERVER = $(TARGET)/xes_server
+
+CLIENT_SRCS = client.c
+CLIENT_LIB  = $(TARGET)/libxes.a
+CLIENT_OBJS = $(CLIENT_SRCS:%.c=$(CLIENT_LIB)(%.o))
+
+XES_EXEC_SRC = xes_exec.c
+XES_EXEC_OBJ = $(XES_EXEC_SRC:%.c=$(TARGET)/%.o)
+XES_EXEC = $(TARGET)/xes_exec
+
+all: $(CLIENT_LIB) $(SERVER) $(XES_EXEC)
+
+$(CLIENT_LIB): $(CLIENT_OBJS)
+	$(RANLIB) $(CLIENT_LIB)
+
+$(XES_EXEC): $(XES_EXEC_OBJ) $(CLIENT_LIB) 
+	$(CC) -o $(XES_EXEC) $(CPPFLAGS) $(CFLAGS) $(XES_EXEC_OBJ) \
+	$(CLIENT_LIB) $(OS_LIBS)
+
+$(SERVER): $(SERV_OBJS)
+	$(CC) -o $(SERVER) $(CFLAGS) $(X_LDFLAGS) $(SERV_OBJS) \
+	$(OS_LIBS) $(X_LIBS)
+
+pure $(SERVER)_pure: $(SERV_OBJS)
+	purify -follow-child-processes=yes \
+	$(CC) -o $(SERVER)_pure $(CFLAGS) $(X_LDFLAGS) $(SERV_OBJS) \
+	$(OS_LIBS) $(X_LIBS)
+
+(%.o):	%.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $<
+	ar r $@ $%
+	rm -f $%
+
+%.o: %.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $<
+
+$(TARGET)/%.o: %.c
+	$(CC) -c -o $@ $(CPPFLAGS) $(X_INCLUDES) $(CFLAGS) $<
+clean:
+	rm -f $(CLIENT_LIB) $(CLIENT_TEST) $(SERVER)
+	rm -f *~
+
+depend $(TARGET)/DEPENDANCES:: $(CLIENT_SRCS)
+	$(MKDEP) -c$(CC) -o$(TARGET)/DEPENDANCES  $(CPPFLAGS) \
+	-l $(CLIENT_LIB) $?
+
+depend $(TARGET)/DEPENDANCES:: $(SERV_SRCS) $(XES_EXEC_SRC)
+	$(MKDEP) -c$(CC) -o$(TARGET)/DEPENDANCES  $(CPPFLAGS) $(X_INCLUDES)\
+	 -d $(TARGET) $?
+
+include $(TARGET)/DEPENDANCES
