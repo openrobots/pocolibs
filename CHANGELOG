@@ -1,5 +1,6 @@
 Version 2.0, xx January 2005
 
+ 44. Makefiles cleanups (Sylvain Joyeux, Matthieu Herrb).
  43. Add a h2semSet() function to force the value of a semaphore (Sylvain
      Joyeux).
  42. Add a posterName() function and a FIO_FRESH ioctl to posterLib (Sylvain 
