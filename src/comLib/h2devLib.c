@@ -42,11 +42,8 @@ __RCSID("$LAAS$");
 #include "smObjLib.h"
 
 /* Paths pour le lancement de posterServ */
-#ifndef ROOTROBOTS
-#define ROOTROBOTS "/usr/local/robots"
-#endif
-#ifndef TARGET
-#define TARGET ""
+#ifndef EXEC_PREFIX
+#define EXEC_PREFIX "/usr/local/robots"
 #endif
 
 /**
@@ -214,8 +211,8 @@ h2devInit(int smMemSize)
     }
     /* Demarrage du serveur de posters */
     if (getenv("POSTER_HOST") == NULL) {
-	snprintf(posterServPath, PATH_MAX, "%s/bin/%s/posterServ", 
-		 ROOTROBOTS, TARGET);
+	snprintf(posterServPath, PATH_MAX, "%s/bin/posterServ", 
+		 EXEC_PREFIX);
 	posterServPid = fork();
 	if (posterServPid == 0) {
 	    /* Processus fils */
