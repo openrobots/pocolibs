@@ -19,6 +19,12 @@
 #define _POSTERLIB_H
 
 #include "h2endianness.h"
+#include <portLib.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 
 /* type of operation in posterTake() */
 typedef enum {
@@ -31,6 +37,7 @@ typedef enum {
 #define   FIO_GETDATE                            1
 #define   FIO_NMSEC                              2
 #define   FIO_GETSIZE				 3
+#define   FIO_FRESH                  4
 
 /* bus address space for poster storage */
 #define POSTER_LOCAL_MEM   0		/* local memory of one process
@@ -94,8 +101,13 @@ extern STATUS posterGive ( POSTER_ID posterId );
 extern void * posterAddr ( POSTER_ID posterId );
 extern STATUS posterIoctl(POSTER_ID posterId, int code, void *parg);
 extern STATUS posterEndianness(POSTER_ID posterId, H2_ENDIANNESS *endianness);
+extern char* posterName(POSTER_ID posterId);
 
 /* for posterServ only ! */
 extern STATUS posterSetEndianness(POSTER_ID posterId, H2_ENDIANNESS endianness);
+
+#ifdef __cplusplus
+};
+#endif
 
 #endif
