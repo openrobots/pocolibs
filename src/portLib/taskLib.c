@@ -272,7 +272,7 @@ taskSpawn(char *name, int priority, int options, int stackSize,
     }
 #endif    
 #endif
-#ifdef HAVE_SETSCHEDPOLICY
+#ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
     if (rr_min_priority > 0 && rr_min_priority > 0) {
 	    /* Set priority of new thread */
 	    thread_param.sched_priority = priorityVxToPosix(priority);
@@ -306,7 +306,7 @@ taskSpawn(char *name, int priority, int options, int stackSize,
 	    } /* switch */
 #endif /* __linux__ */
     }
-#endif /* HAVE_SETSCHEDPOLICY */
+#endif /* HAVE_PTHREAD_ATTR_SETSCHEDPOLICY */
 
     tcb->params.arg1 = arg1;
     tcb->params.arg2 = arg2;
@@ -324,13 +324,13 @@ taskSpawn(char *name, int priority, int options, int stackSize,
 	errnoSet(status);
 	return ERROR;
     }
-#ifndef NO_SCHEDPARAM
+#ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
     /* Read back the scheduler parameters of the created thread */
     pthread_getschedparam(thread_id, &policy, &thread_param);
     tcb->policy = policy;
 #else
     tcb->policy = 0;
-#endif /* !NO_SCHEDPARAM */
+#endif /* HAVE_PTHREAD_ATTR_SETSCHEDPOLICY */
     tcb->priority = priorityPosixToVx(thread_param.sched_priority);
 
     /* Register thread id in TCB */
