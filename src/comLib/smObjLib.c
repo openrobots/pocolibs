@@ -26,9 +26,12 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
-#include <portLib.h>
-#include <smObjLib.h>
-#include <smMemLib.h>
+#include "portLib.h"
+
+#include <stdio.h>
+
+#include "smObjLib.h"
+#include "smMemLib.h"
 
 /*----------------------------------------------------------------------*/
 

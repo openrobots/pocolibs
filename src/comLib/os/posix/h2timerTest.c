@@ -30,7 +30,7 @@ h2timerTest(int period)
 {
     H2TIMER_ID timer;
     H2TIME  oldTime;
-    u_long msec, tmax = 0;
+    unsigned long msec, tmax = 0;
     int i = 0;
 
     if (period == 0) 

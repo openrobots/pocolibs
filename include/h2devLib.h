@@ -1,6 +1,6 @@
 /* $LAAS$ */
 /*
- * Copyright (c) 1998, 2003 CNRS/LAAS
+ * Copyright (c) 1998, 2003-2004 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -21,8 +21,6 @@
 #include "h2timeLib.h"
 #include "h2semLib.h"
 #include "h2rngLib.h"
-#include <sys/ipc.h>
-
 #include "h2endianness.h"
 
 /**
@@ -99,7 +97,7 @@ typedef enum {
 typedef struct H2_DEV_STR {
     H2_DEV_TYPE type;
     char name[H2_DEV_MAX_NAME];
-    uid_t uid;
+    long uid;
     union {
 	H2_SEM_STR sem;
 	H2_MBOX_STR mbox;
@@ -172,7 +170,7 @@ extern STATUS h2devAttach ( void );
 extern STATUS h2devEnd ( void );
 extern int h2devFind ( char *name, H2_DEV_TYPE type );
 extern STATUS h2devFree ( int dev );
-extern key_t h2devGetKey ( int type, int dev, BOOL create, int *pFd );
+extern long h2devGetKey ( int type, int dev, BOOL create, int *pFd );
 extern int h2devGetSemId ( void );
 extern STATUS h2devInit ( int smMemSize );
 extern STATUS h2devShow ( void );

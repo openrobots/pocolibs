@@ -1,6 +1,6 @@
 /* $LAAS$ */
 /*
- * Copyright (c) 1991, 2003 CNRS/LAAS
+ * Copyright (c) 1991, 2003-2004 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -29,10 +29,6 @@
 /* DESCRIPTION :
    Fichier d'en-tete du module de gestion des communications
 */
-
-#ifndef u_long
-#include <sys/types.h>
-#endif
 
 #include "mboxLib.h"
 
@@ -100,12 +96,12 @@ typedef struct {
 
 /* Structure de donnees d'un identif. de send */
 typedef struct {
-  int status;                      /* Status du send */
-  u_long time;                     /* Temps du send */
-  int finalReplyTout;              /* Timeout replique finale */
-  int intermedReplyTout;           /* Timeout replique intermediaire */
-  LETTER_ID finalReplyLetter;      /* Adresse lettre de replique finale */
-  LETTER_ID intermedReplyLetter;   /* Adresse lettre de replique intermed. */
+  int status;                      /* Send status */
+  unsigned long time;              /* Send time */
+  int finalReplyTout;              /* Timeout final reply */
+  int intermedReplyTout;           /* Timeout intermediate reply */
+  LETTER_ID finalReplyLetter;      /* Final reply address */
+  LETTER_ID intermedReplyLetter;   /* Intermediate reply address */
 } SEND;
 
 

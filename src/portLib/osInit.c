@@ -23,6 +23,7 @@ __RCSID("$LAAS$");
 #include "tickLib.h"
 #include "sysLib.h"
 #include "symLib.h"
+#include "wdLib.h"
 
 /**
  ** Global initialisation of all OS-level services (VxWorks Emulation)

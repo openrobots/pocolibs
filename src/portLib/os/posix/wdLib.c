@@ -16,10 +16,11 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
+#include "portLib.h"
+
 #include <signal.h>
 #include <stdlib.h>
-
-#include "portLib.h"
+#include <pthread.h>
 
 #include "errnoLib.h"
 #include "memLib.h"

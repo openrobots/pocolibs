@@ -1,5 +1,9 @@
 Version 2.0, xx April 2004
 
+ 15. Removed system-specific includes from headers, and modified some
+     structures definitions to use standard C types instead of posix
+     types (in particular changed uid_t into long, key_t into long and
+     u_long into unsigned long). This shouldn't break anything.
  14. Implemented and added semMCreate() and converted commonStruct.c and
      h2timerLib.c functions to use it instead of pthread_*
      routines. Added h2timerEnd() that undo h2timerInit() actions. Made

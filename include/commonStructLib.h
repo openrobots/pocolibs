@@ -23,7 +23,6 @@
 */
 
 #include "semLib.h"
-#include <pthread.h>
 
 /* Flag d'indication d'initialisation de la structure */
 #define  COMMON_STRUCT_INIT_FLAG                  0x11223344

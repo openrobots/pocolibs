@@ -34,8 +34,6 @@
    comme complement aux routines disponibles sur VXWORKS.
 */
 
-#include <math.h>
-
 extern const double sinTab[];
 extern const double cosTab[];
 

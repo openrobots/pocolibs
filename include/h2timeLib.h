@@ -1,6 +1,6 @@
 /* $LAAS$ */
 /*
- * Copyright (c) 1993, 2003 CNRS/LAAS
+ * Copyright (c) 1993, 2003-2004 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,20 +18,17 @@
 #ifndef _H2TIMELIB_H
 #define _H2TIMELIB_H
 
-#include <sys/types.h>
-
-
 /* Def. type structure de temps */
 typedef struct {
-  u_long ntick;               /* nombre de ticks */
-  u_short msec;               /* milli-secondes */
-  u_short sec;                /* secondes */
-  u_short minute;             /* minutes */
-  u_short hour;               /* heures */
-  u_short day;                /* jour de la semaine */
-  u_short date;               /* jour du mois */
-  u_short month;              /* mois */
-  u_short year;               /* annee */
+  unsigned long ntick;               /* ticks number */
+  unsigned short msec;               /* milli-seconds */
+  unsigned short sec;                /* seconds */
+  unsigned short minute;             /* minutes */
+  unsigned short hour;               /* hours */
+  unsigned short day;                /* week day number*/
+  unsigned short date;               /* month day number */
+  unsigned short month;              /* month */
+  unsigned short year;               /* year */
 } H2TIME;
 
 /* Prototypes */
@@ -39,7 +36,7 @@ typedef struct {
 extern STATUS h2timeAdj ( H2TIME *pTimeStr );
 extern STATUS h2timeGet ( H2TIME *pTimeStr );
 extern void h2timeInit ( void );
-extern STATUS h2timeInterval ( H2TIME *pOldTime, u_long *pNmsec );
+extern STATUS h2timeInterval ( H2TIME *pOldTime, unsigned long *pNmsec );
 extern STATUS h2timeSet ( H2TIME *pTimeStr );
 extern void h2timeShow ( void );
 

@@ -18,8 +18,6 @@
 #ifndef _PORTLIB_H
 #define _PORTLIB_H
 
-#include <pthread.h>
-
 /**
  ** General definitions found on other some systems
  **/

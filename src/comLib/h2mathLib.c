@@ -41,6 +41,7 @@ __RCSID("$LAAS$");
 #include "h2mathTab.c"
 #include "h2mathLib.h"
 #include <stdio.h>
+#include <math.h>
 
 /*----------------------- VARIABLES LOCALES --------------------------------*/
 

@@ -18,9 +18,6 @@
 #ifndef _TASKLIB_H
 #define _TASKLIB_H
 
-#include <stdarg.h>
-#include <sys/types.h>
-
 #include "semLib.h"
 
 /*

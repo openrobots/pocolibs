@@ -18,6 +18,8 @@ __RCSID("$LAAS$");
 
 #include "portLib.h"
 
+#include <stdio.h>
+
 #include "wdLib.h"
 #include "tickLib.h"
 
