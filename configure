@@ -8205,6 +8205,50 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 	fi
 fi
 
+# Linux requires -D_XOPEN_SOURCE=500 to build with libpthread and -Wall
+echo "$as_me:$LINENO: checking whether you need -D_XOPEN_SOURCE to use libpthread" >&5
+echo $ECHO_N "checking whether you need -D_XOPEN_SOURCE to use libpthread... $ECHO_C" >&6
+xopen=no
+cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+
+		#include <sys/types.h>
+		#include <pthread.h>
+
+int
+main ()
+{
+
+		pthread_rwlock_t lock;
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  xopen=no
+else
+  echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE=500"; xopen=yes
+fi
+rm -f conftest.$ac_objext conftest.$ac_ext
+echo "$as_me:$LINENO: result: $xopen" >&5
+echo "${ECHO_T}$xopen" >&6
+
+
 
 
 echo "$as_me:$LINENO: checking for library containing fabs" >&5
