@@ -503,7 +503,7 @@ create_window(int *win_fd, int *win_pid)
     int  master, slave, pid;
     struct termios termioStr;
     static char buf[100];
-    char *slave_path;
+    char *slave_path, *c;
 #ifndef USE_SYSV_PTY
     char *master_path;
 #endif
@@ -550,7 +550,12 @@ create_window(int *win_fd, int *win_pid)
 
 #endif /* USE_SYSV_PTY */
     
-    sprintf(buf, "-S%s%d", &slave_path[strlen(slave_path)-2], master);
+    if ((c = strrchr(slave_path, '/'))) {
+	    /* unix98 style name */
+	    sprintf(buf, "-S%s/%d", c+1, master);
+    } else {
+	    sprintf(buf, "-S%s%d", &slave_path[strlen(slave_path)-2], master);
+    }
 
     if((pid = fork()) == 0) {
 
