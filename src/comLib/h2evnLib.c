@@ -26,6 +26,10 @@ __RCSID("$LAAS$");
 #include "h2evnLib.h"
 #include "errnoLib.h"
 
+#ifdef DEBUG
+#include "xes.h"
+#endif
+
 /******************************************************************************
 *
 *  h2evnSusp  -  Suspendre en attente d'un evenement
@@ -44,7 +48,7 @@ __RCSID("$LAAS$");
 BOOL
 h2evnSusp(int timeout)
 {
-    int dev = taskGetUserData(0);
+    unsigned long dev = taskGetUserData(0);
 
     /* Si le semaphore de synchro n'existe pas, 
        appelle mboxInit() pour le creer */
@@ -56,9 +60,16 @@ h2evnSusp(int timeout)
 	dev = taskGetUserData(0);
 	if (dev == 0) {
 	    /* Encore rate' ?? */
+#ifdef DEBUG
+	    fprintf(stderr, "h2evnSusp: dev == 0\n");
+#endif
 	    return ERROR;
 	}
     }
+#ifdef DEBUG
+    fprintf(stderr, "h2evnSusp %lu %lux\n", (unsigned long)pthread_self(), 
+	dev);
+#endif
     return h2semTake(H2DEV_TASK_SEM_ID(dev), timeout);
 }
 
@@ -76,12 +87,16 @@ h2evnSusp(int timeout)
 STATUS
 h2evnSignal(int taskId)
 {
-    int dev = taskGetUserData(taskId);
+    unsigned dev = taskGetUserData(taskId);
 
     /* if the task didn't call h2evnSusp before, report an error */
-    if (dev <= 0) {
-       errnoSet(S_h2evnLib_BAD_TASK_ID);
-       return ERROR;
+    if (dev == 0) {
+#ifdef DEBUG
+	printf( "h2evnSignal: bad dev %d, task %d\n", dev, 
+	    taskTcb(taskId)->tid);
+#endif
+	errnoSet(S_h2evnLib_BAD_TASK_ID);
+	return ERROR;
     }
 
     return(h2semGive(H2DEV_TASK_SEM_ID(dev)));
@@ -95,7 +110,7 @@ h2evnSignal(int taskId)
 void
 h2evnClear(void)
 {
-    int dev = taskGetUserData(0);
+    unsigned long dev = taskGetUserData(0);
 
     h2semFlush(H2DEV_TASK_SEM_ID(dev));
 }
