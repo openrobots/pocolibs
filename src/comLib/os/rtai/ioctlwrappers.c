@@ -27,8 +27,9 @@ __RCSID("$LAAS$");
 #include <sys/stat.h>
 #include <linux/kdev_t.h>
 
+#include <pthread.h>
+
 #include <rtai_nam2num.h>
-#define KEEP_STATIC_INLINE /* ... */
 #include <rtai_shm.h>
 
 #include <smObjLib.h>
@@ -51,8 +52,9 @@ __RCSID("$LAAS$");
  */
 H2_DEV_STR *h2Devs = NULL;
 
-/* h2dev file descriptor */
-int h2devfd = -1;
+/* h2dev file descriptor - one per thread */
+static int h2devfdkeydone = 0;
+static pthread_key_t h2devfdkey;
 
 /* local functions */
 static inline STATUS	doioctl(unsigned int r, struct h2devop *op);
@@ -95,10 +97,11 @@ h2devGetKey(int type, int dev, BOOL dummy, int *dummy2)
 STATUS
 h2devInit(int smMemSize)
 {
+   int fd;
    STATUS s;
    struct h2devop op;   
 
-   if (h2devfd >= 0) {
+   if (h2devfd() >= 0) {
       errnoSet(EEXIST);
       return ERROR;
    }
@@ -106,11 +109,18 @@ h2devInit(int smMemSize)
    /* XXX we should probably use H2DEV_DIR env var (as in posix version,
     * but with a different purpose) to supersede the hardcoded /dev path */
 
-   h2devfd = open("/dev/" H2DEV_DEVICE_NAME, O_RDWR);
-   if (h2devfd < 0) {
+   fd = open("/dev/" H2DEV_DEVICE_NAME, O_RDWR);
+   if (fd < 0) {
       errnoSet(S_h2devLib_NOT_INITIALIZED);
       return ERROR;
    }
+
+   /* Create a thread specific key for file descriptor */
+   if (!h2devfdkeydone) {
+      pthread_key_create(&h2devfdkey, NULL);
+      h2devfdkeydone = 1;
+   }
+   pthread_setspecific(h2devfdkey, (void *)fd);
 
    LOGDBG(("comLib:h2devInit: opened /dev/" H2DEV_DEVICE_NAME "\n"));
 
@@ -133,35 +143,47 @@ h2devInit(int smMemSize)
 STATUS
 h2devAttach(void)
 {
+   void *k = pthread_getspecific(h2devfdkey);
    struct h2devop op;   
    long key;
    int i;
+   int fd;
 
-   if (h2devfd >= 0) return OK;
+   if (h2devfd() >= 0) return OK;
 
    key = h2devGetKey(H2_DEV_TYPE_H2DEV, 0, FALSE/*don't create*/, NULL);
    if (key == ERROR) return ERROR;
 
-   h2devfd = open("/dev/" H2DEV_DEVICE_NAME, O_RDWR);
-   if (h2devfd < 0) {
+   fd = open("/dev/" H2DEV_DEVICE_NAME, O_RDWR);
+   if (fd < 0) {
       errnoSet(S_h2devLib_NOT_INITIALIZED);
       return ERROR;
    }
 
+   /* Create a thread specific key for file descriptor */
+   if (!h2devfdkeydone) {
+      pthread_key_create(&h2devfdkey, NULL);
+      h2devfdkeydone = 1;
+   }
+   pthread_setspecific(h2devfdkey, (void *)fd);
+
    LOGDBG(("comLib:h2devAttach: opened /dev/" H2DEV_DEVICE_NAME "\n"));
 
    if (doioctl(H2DEV_IOC_DEVATTACH, &op) != OK) {
-      close(h2devfd);
-      h2devfd = -1;
+      close(fd);
+      pthread_setspecific(h2devfdkey, NULL);
       return ERROR;
    }
 
    LOGDBG(("comLib:h2devAttach: attached to h2 devices\n"));
 
+   /* mmap h2devices - this is done only once per process */
+   if (h2Devs) return OK;
+
    h2Devs = rtai_malloc(key, sizeof(H2_DEV_STR)*H2_DEV_MAX);
    if (!h2Devs) {
-      close(h2devfd);
-      h2devfd = -1;
+      close(fd);
+      pthread_setspecific(h2devfdkey, NULL);
 
       errnoSet(S_smObjLib_SHMGET_ERROR);
       return ERROR;
@@ -288,15 +310,36 @@ H2DEV_IOC(
 static inline STATUS
 doioctl(unsigned int r, struct h2devop *op)
 {
-   if (h2devfd < 0) {
+   int fd = h2devfd();
+
+   if (fd < 0) {
       if (h2devAttach() == ERROR)
 	 return ERROR;
+
+      fd = h2devfd();
    }
 
-   if (ioctl(h2devfd, r, op) < 0) {
+   if (ioctl(fd, r, op) < 0) {
       errnoSet(op->err);
       return ERROR;
    }
 
    return OK;
+}
+
+
+/*
+ * --- h2devfd ----------------------------------------------------------
+ *
+ * Get thread-specific file descriptor 
+ */
+
+static inline int
+h2devfd()
+{
+   void *k = pthread_getspecific(h2devfdkey);
+
+   if (!k || !h2devfdkeydone) return -1;
+
+   return (int)k;
 }
