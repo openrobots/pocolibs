@@ -55,19 +55,34 @@ AC_TYPE_SIGNAL
 
 dnl
 
+# AC_CHECK_PTHREADS(action if ok, action if not ok, action if cross-compiling)
+AC_DEFUN([AC_CHECK_PTHREADS],
+	AC_LANG_SAVE
+	AC_LANG_C
+	AC_TRY_RUN([
+#include <pthread.h>
+void *pipo(void *a) {   exit(0); }
+ 
+int main() {
+    pthread_t t;
+    pthread_create(&t, NULL, pipo, NULL);
+    pthread_join(t, NULL);
+    exit(2);
+}
+	],[$1],[$2],:)
+	AC_LANG_RESTORE
+)
+
+		
 AC_CACHE_CHECK(
 	[if compiler recognizes -pthread],
 	poco_cv_gcc_pthread,
 	ac_save_CFLAGS=$CFLAGS
 	CFLAGS="$CFLAGS -pthread"
-	AC_LANG_SAVE
-	AC_LANG_C
-	AC_TRY_LINK([#include <pthread.h>],
-		[void *p = pthread_create;],
-		poco_cv_gcc_pthread=yes,
+	AC_CHECK_PTHREADS(
+		poco_cv_gcc_pthread=yes, 
 		poco_cv_gcc_pthread=no
 	)
-	AC_LANG_RESTORE
 	CFLAGS=$ac_save_CFLAGS
 )
 if test $poco_cv_gcc_pthread = yes; then
@@ -79,26 +94,31 @@ else
 		poco_cv_cc_mt,
 		ac_save_CFLAGS=$CFLAGS
 		CFLAGS="$CFLAGS -mt"
-		AC_LANG_SAVE
-		AC_LANG_C
-		AC_TRY_LINK([#include <pthread.h>],
-			[void *p = pthread_create;],
+		AC_CHECK_PTHREADS(
 			poco_cv_cc_mt=yes,
 			poco_cv_cc_mt=no
 		)
-		AC_LANG_RESTORE
 		CFLAGS=$ac_save_CFLAGS
 	)
 	if test $poco_cv_cc_mt = yes; then
 		CFLAGS="$CFLAGS -mt";
+		LDFLAGS="$LDFLAGS -mt";
+	else
+		AC_CHECK_LIB(pthread,pthread_create,poco_threads=-lpthread,
+        	     [AC_CHECK_LIB(c_r,pthread_create,poco_threads=-lc_r)])
+		ac_save_LIBS="$LIBS"
+		if test -n "$poco_threads" ; then
+			LIBS="$poco_threads $LIBS"
+		fi
+		AC_CHECK_PTHREADS([
+			:
+		],[
+			AC_MSG_ERROR([No working thread support found (fatal)])
+			exit 2
+		])
 	fi
-	AC_CHECK_LIB(pthread,pthread_create,poco_threads=-lpthread,
-             [AC_CHECK_LIB(c_r,pthread_create,poco_threads=-lc_r)])
 fi
 
-if test -n $poco_threads ; then
-	LIBS="-lpthread $LIBS"
-fi
 
 AC_SEARCH_LIBS([fabs], [m])
 
