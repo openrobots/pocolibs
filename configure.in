@@ -88,6 +88,7 @@ AC_CACHE_CHECK(
 if test $poco_cv_gcc_pthread = yes; then
 	poco_threads=""
 	CFLAGS="$CFLAGS -pthread"
+	LDFLAGS="$LDFLAGS -pthread";
 else
 	AC_CACHE_CHECK(
 		[if compiler recognizes -mt],
@@ -121,6 +122,7 @@ fi
 
 
 AC_SEARCH_LIBS([fabs], [m])
+AC_SEARCH_LIBS([atan], [m])
 
 dnl AC_CHECK_LIB([pthread], pthread_create, 
 dnl 	have_libpthread=yes, 
@@ -145,6 +147,14 @@ AC_TRY_LINK([#include <time.h>],
 	[timer_create(CLOCK_REALTIME, NULL, NULL);],
 	[AC_MSG_RESULT([yes])]
 	[AC_DEFINE(HAVE_POSIX_TIMERS)],
+	[AC_MSG_RESULT([no])]
+)
+
+AC_MSG_CHECKING([for pthread_attr_setschedpolicy])
+AC_TRY_LINK([#include <pthread.h>], 
+	[pthread_attr_setschedpolicy(NULL, SCHED_RR);],
+	[AC_MSG_RESULT([yes])]
+	[AC_DEFINE(HAVE_SETSCHEDPOLICY)],
 	[AC_MSG_RESULT([no])]
 )
 

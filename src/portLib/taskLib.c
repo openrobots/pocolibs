@@ -272,7 +272,7 @@ taskSpawn(char *name, int priority, int options, int stackSize,
     }
 #endif    
 #endif
-#ifndef NO_SCHEDPARAM
+#ifdef HAVE_SETSCHEDPOLICY
     if (rr_min_priority > 0 && rr_min_priority > 0) {
 	    /* Set priority of new thread */
 	    thread_param.sched_priority = priorityVxToPosix(priority);
@@ -306,7 +306,7 @@ taskSpawn(char *name, int priority, int options, int stackSize,
 	    } /* switch */
 #endif /* __linux__ */
     }
-#endif /* !NO_SCHEDPARAM */
+#endif /* HAVE_SETSCHEDPOLICY */
 
     tcb->params.arg1 = arg1;
     tcb->params.arg2 = arg2;
