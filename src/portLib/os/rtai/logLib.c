@@ -98,7 +98,7 @@ logInit(int fd, int maxMsgs)
 void
 logEnd()
 {
-   remove_proc_entry("portLib/log", NULL);
+   remove_proc_entry("portLib/logLib", NULL);
    vfree(logQ);
 }
 
@@ -153,7 +153,7 @@ logRead(struct file *file, char *buf, size_t count, loff_t *ppos)
    unsigned long flags;
    const char *name;
    struct LogQ c;
-   int n, len, status, err;
+   int n, len, err;
    char *page, *log;
 
    flags = rt_spin_lock_irqsave(&logQSync);
@@ -219,7 +219,7 @@ logRead(struct file *file, char *buf, size_t count, loff_t *ppos)
       if (name)
 	 len = snprintf(log, count, "%s: ", name);
       else
-	 len = snprintf(log, count, "%d: ", c.tid);
+	 len = snprintf(log, count, "%ld: ", c.tid);
       n += len;
       log += len;
       count -= len;
