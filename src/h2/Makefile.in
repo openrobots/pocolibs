@@ -17,6 +17,8 @@
 #
 
 top_builddir=	@top_builddir@
+INSTALL=	@INSTALL@
+
 include ../../Init.make
 
 CPPFLAGS += -I..
