@@ -16,6 +16,11 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
+#include <sys/types.h>
+#include <unistd.h>
+
+#include <string.h>
+
 #include <rtai_lxrt.h>
 
 #include "portLib.h"
@@ -67,6 +72,8 @@ sysClkConnect(FUNCPTR routine, int arg)
 void
 sysClkEnable(void)
 {
+  char name[12];
+
   rt_set_oneshot_mode();
    sysClkTickCount = start_rt_timer(sysClkTickCount);
 
@@ -78,8 +85,10 @@ sysClkEnable(void)
        return;
      }
 
+   snprintf(name, sizeof(name), "k%d", getpid());
+
    sysClkThreadId = 
-      taskSpawn("sysClkThread", 10, VX_FP_TASK, 1024, sysClkThread);
+      taskSpawn(name, 10, VX_FP_TASK, 1024, sysClkThread);
    if (sysClkThreadId == ERROR) {
       logMsg("portLib:sysClkEnable: cannot start clock thread\n");
       return;
