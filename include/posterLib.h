@@ -23,7 +23,7 @@
 /* type of operation in posterTake() */
 typedef enum {
 	POSTER_READ,
-	POSTER_WRITE
+	POSTER_WRITE,
 	POSTER_IOCTL
 } POSTER_OP;
 
