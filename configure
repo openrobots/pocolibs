@@ -8460,27 +8460,91 @@ fi
 
 
 
-echo "$as_me:$LINENO: checking for posix timers" >&5
-echo $ECHO_N "checking for posix timers... $ECHO_C" >&6
-cat >conftest.$ac_ext <<_ACEOF
+echo "$as_me:$LINENO: checking for usable posix timers" >&5
+echo $ECHO_N "checking for usable posix timers... $ECHO_C" >&6
+if test "$cross_compiling" = yes; then
+  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
+echo "$as_me: error: cannot run test program while cross compiling" >&2;}
+   { (exit 1); exit 1; }; }
+else
+  cat >conftest.$ac_ext <<_ACEOF
 #line $LINENO "configure"
 #include "confdefs.h"
+
+#include <sys/time.h>
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
-int
-main ()
+
+static volatile int done = 0;
+static void timerInt(int sig) { done++; }
+
+static long
+time_difference(struct timeval *t1, struct timeval *t2)
 {
-timer_create(CLOCK_REALTIME, NULL, NULL);
-  ;
-  return 0;
+	long usec_diff = t1->tv_usec - t2->tv_usec, retenue = 0;
+
+	if (usec_diff < 0) {
+		usec_diff = 1000000 + usec_diff;
+		retenue = 1;
+	}
+	return (t1->tv_sec - t2->tv_sec - retenue)*1000000 + usec_diff;
 }
+
+int
+main(int argc, char *argv[])
+{
+	timer_t t;
+	struct itimerspec tv;
+	sigset_t sigset;
+	struct sigaction act;
+	struct timeval tp1, tp2;
+
+	sigemptyset(&sigset);
+	sigaddset(&sigset, SIGALRM);
+	if (sigprocmask(SIG_UNBLOCK, &sigset, NULL) == -1) {
+		perror("sigprocmask");
+		exit(2);
+	}
+	act.sa_handler = timerInt;
+	sigemptyset(&act.sa_mask);
+	act.sa_flags = 0;
+	if (sigaction(SIGALRM, &act, NULL) == -1) {
+		perror("sigaction");
+		exit(2);
+	}
+	if (timer_create(CLOCK_REALTIME, NULL, &t) == -1) {
+		perror("timer_create");
+		exit(2);
+	}
+	tv.it_interval.tv_nsec = 10000000;
+	tv.it_interval.tv_sec = 0;
+	tv.it_value.tv_nsec = 10000000;
+	tv.it_value.tv_sec = 0;
+	if (timer_settime(t, 0, &tv, NULL) == -1) {
+		perror("timer_settime");
+		exit(2);
+	}
+	gettimeofday(&tp1, NULL);
+	while (done < 100)
+		;
+	gettimeofday(&tp2, NULL);
+	if (time_difference(&tp2, &tp1) < 1200000)
+		exit(0);
+	else {
+		fprintf(stderr, "no able to generate 100 ticks/s\n");
+		exit(2);
+	}
+}
+
 _ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
+rm -f conftest$ac_exeext
 if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   (eval $ac_link) 2>&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-         { ac_try='test -s conftest$ac_exeext'
+  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
   { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
@@ -8488,18 +8552,23 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   (exit $ac_status); }; }; then
   echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
-	cat >>confdefs.h <<\_ACEOF
+ 	cat >>confdefs.h <<\_ACEOF
 #define HAVE_POSIX_TIMERS 1
 _ACEOF
 
 else
-  echo "$as_me: failed program was:" >&5
+  echo "$as_me: program exited with status $ac_status" >&5
+echo "$as_me: failed program was:" >&5
 cat conftest.$ac_ext >&5
+( exit $ac_status )
 echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
 
 fi
-rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
+rm -f core core.* *.core gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+fi
+
+
 
 echo "$as_me:$LINENO: checking for pthread_attr_setschedpolicy" >&5
 echo $ECHO_N "checking for pthread_attr_setschedpolicy... $ECHO_C" >&6
