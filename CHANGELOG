@@ -1,4 +1,7 @@
 Version 2.0, xx September 2004
+ 38. Add --{disable,enable}-posix-timer option to configure, to be able
+     to force the timer type that is used by tickLib, as the auto-detection
+     of useable POSIX timer is not always reliable enough.
  37. Added --with-linux-kernel-includes option to specify the path to
      linux kernel headers when compiling for RTAI.
  36. Revert the change that made the posterId in posterServ an uint64_t.
