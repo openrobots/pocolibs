@@ -390,6 +390,17 @@ h2semFlush(H2SEM_ID sem)
 }
 
 /*----------------------------------------------------------------------*/
+/**
+ ** Stub 
+ **/
+STATUS
+h2semSet(H2SEM_ID sem, int value)
+{
+	errnoSet(S_h2semLib_NOT_IMPLEMENTED);
+	return ERROR;
+}
+
+/*----------------------------------------------------------------------*/
 
 STATUS
 h2semShow(H2SEM_ID sem)
