@@ -1,6 +1,6 @@
 /* $LAAS$ */
 /*
- * Copyright (c) 2000, 2003 CNRS/LAAS
+ * Copyright (c) 2000, 2004 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,15 +19,15 @@
 
 #include "posters.h"
 
-/* Redefinition du type POSTER_ID */
+/* Structure of remote posters */
 typedef  struct {
-    void *vxPosterId;		/* Id VxWorks du Poster */
-    CLIENT *client;		/* Struct RPC client du poster */
-    unsigned int dataSize;	/* Taille du poster */
-    void *dataCache;		/* Cache local des donne'es 
+    void *vxPosterId;		/* Id of the remote poster (hist. vxWorks) */
+    CLIENT *client;		/* RPC client to talk to posterServ */
+    unsigned int dataSize;	/* Size of the poster (for local cache) */
+    void *dataCache;		/* local data cache
 				   (for posterTake/Give and Addr) */
-    int pid;			/* PID du createur */
-    POSTER_OP op;		/* derniere operation posterTake */
+    int pid;			/* process Id of the poster owner */
+    POSTER_OP op;		/* type of access declared to posterTake */
     H2_ENDIANNESS endianness;
 } *REMOTE_POSTER_ID, REMOTE_POSTER_STR;
 

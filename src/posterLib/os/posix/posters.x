@@ -1,6 +1,6 @@
 /* $LAAS$ */
 /*
- * Copyright (c) 1991, 2003 CNRS/LAAS
+ * Copyright (c) 1991, 2004 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -15,10 +15,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 /***
- *** Serveur de posters pour Unix
- *** base' sur RPC
+ *** Poster server for posix systems 
+ *** based on Sun RPC
  ***
- *** De'finition du protocole RPC
+ *** Definition of the RPC protocol
  ***/
 
 %#include <sys/types.h>
