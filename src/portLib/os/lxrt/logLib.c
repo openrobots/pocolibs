@@ -25,9 +25,21 @@ __RCSID("$LAAS$");
  * Message logging facilities
  */
 
+STATUS
+logInit(int fd, int maxMsgs)
+{
+   return OK;
+}
+
+void
+logEnd()
+{
+   ;
+}
+
 int
 logMsg(const char *fmt,
        int arg1, int arg2, int arg3, int arg4, int arg5, int arg6)
 {
-   return rtai_print_to_screen(fmt, arg1, arg2, arg3, arg4, arg5, arg6);
+   return rt_printk(fmt, arg1, arg2, arg3, arg4, arg5, arg6);
 }
