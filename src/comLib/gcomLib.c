@@ -422,7 +422,7 @@ gcomLetterAlloc(int sizeLetter, LETTER_ID *pLetterId)
     } /* for */
 
     /* Allouer de la memoire pour la lettre */
-    if ((letter->pHdr = (LETTER_HDR_ID) calloc (1, (u_int) sizeLetter + 
+    if ((letter->pHdr = (LETTER_HDR_ID) calloc (1, (size_t) sizeLetter + 
 					      sizeof (LETTER_HDR))) == NULL)
 	return (ERROR);
     
