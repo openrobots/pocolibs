@@ -343,7 +343,7 @@ h2rngBufGet(H2RNG_ID rngId,		/* Identificateur du ring buffer */
     /* Verifier si on doit faire la copie en deux morceaux */
     if ((n1 = pWr - pRd) < 0) {
 	/* Nombre de bytes a copier = min (maxBytes, nombre pos. occupees) */
-	nbytes = min (maxbytes, n1 + rngId->size);
+	nbytes = MIN(maxbytes, n1 + rngId->size);
 	
 	/* Taille du premier morceau occupe */
 	n1 = rngId->size - pRd;
@@ -373,7 +373,7 @@ h2rngBufGet(H2RNG_ID rngId,		/* Identificateur du ring buffer */
     }
     
     /* Copier tout, d'une seule fois */
-    memcpy (buf, (char *) (rngId+1) + pRd, n1 = min (maxbytes, n1));
+    memcpy (buf, (char *) (rngId+1) + pRd, n1 = MIN(maxbytes, n1));
     
     /* Actualiser le pointeur de lecture et retourner */
     rngId->pRd = pRd + n1;
@@ -422,7 +422,7 @@ h2rngBufPut(H2RNG_ID rngId, /* Ring buffer ou mettre les bytes */
     /* Verifier l'etat des pointeurs */
     if ((n1 = pRd - pWr) <= 0) {
 	/* Nombre de bytes a ecrire = min (pos.libres, nbytes) */
-	nbytes = min (n1 + rngId->size - 1, nbytes);
+	nbytes = MIN(n1 + rngId->size - 1, nbytes);
 	
 	/* Taille du premier morceau libre */
 	n1 = rngId->size - pWr;
@@ -452,7 +452,7 @@ h2rngBufPut(H2RNG_ID rngId, /* Ring buffer ou mettre les bytes */
     } 
 
     /* Copier tout, d'une seule fois */
-    memcpy ((char *) (rngId+1) + pWr, buf, nbytes = min (nbytes, n1 - 1));
+    memcpy ((char *) (rngId+1) + pWr, buf, nbytes = MIN(nbytes, n1 - 1));
     
     /* Actualiser le pointeur d'ecriture et retourner */
     rngId->pWr = pWr + nbytes;
@@ -798,7 +798,7 @@ h2rngBlockSpy(H2RNG_ID rngId, /* Identificateur du ring buffer */
 	*pnbytes = nbytes;
 	
 	/* Definir le nombre de bytes a` lire */
-	nbytes = min (nbytes, maxbytes);
+	nbytes = MIN(nbytes, maxbytes);
 	
 	/* Lire le message */
 	H2RNG_RD2(pFrom, buf, nbytes, ntop, n, pDeb);
@@ -837,7 +837,7 @@ h2rngBlockSpy(H2RNG_ID rngId, /* Identificateur du ring buffer */
     *pnbytes = nbytes;
     
     /* Definir le nombre de bytes a` lire */
-    nbytes = min (nbytes, maxbytes);
+    nbytes = MIN(nbytes, maxbytes);
     
     /* Lire le message lui-meme */
     H2RNG_RD1(pFrom, buf, nbytes);
@@ -959,7 +959,7 @@ h2rngFreeBytes(H2RNG_ID rngId)
 	n = dp - 11;
       else
 	n = dp + rngId->size - 9;
-      return (max (n, 0));
+      return (MAX(n, 0));
       
     default:                       /* Type inconnu */
 
