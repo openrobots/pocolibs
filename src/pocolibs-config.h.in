@@ -83,6 +83,9 @@
 /* debug portLib:taskLib  */
 #undef PORTLIB_DEBUG_TASKLIB
 
+/* debug portLib:sysLib  */
+#undef PORTLIB_DEBUG_SYSLIB
+
 /* debug comLib:h2devLib  */
 #undef COMLIB_DEBUG_H2DEVLIB
 

@@ -272,18 +272,22 @@ AC_SUBST(COMLIB_COMPATSRC)
 dnl --- Debugging options -----------------------------------------------
 
 AC_ARG_WITH(debug,
-           AC_HELP_STRING([--with-debug=all task h2dev smmem h2evn mbox gcom],
-               [print debugging information at run-time]),
+           AC_HELP_STRING([--with-debug=all task sys h2dev smmem h2evn mbox gcom],
+           [print debugging information at run-time (comma separated list)]),
            [opt_debug=$withval],[opt_debug=])
 
 if test "x$opt_debug" = "xall"; then
-   opt_debug="task h2dev smmem h2evn mbox gcom"
+   opt_debug="task,sys,h2dev,smmem,h2evn,mbox,gcom"
 fi
-for dopt in "$opt_debug"; do 
+
+ac_save_ifs=$IFS; IFS=","
+for dopt in $opt_debug; do 
 	test -z "$dopt" && break
 
+	AC_MSG_RESULT([debugging $dopt])
 	case "$dopt" in
 	   task)	AC_DEFINE(PORTLIB_DEBUG_TASKLIB) ;;
+	   sys)		AC_DEFINE(PORTLIB_DEBUG_SYSLIB) ;;
 
 	   h2dev)	AC_DEFINE(COMLIB_DEBUG_H2DEVLIB) ;;
 	   smmem)	AC_DEFINE(COMLIB_DEBUG_SMMEMLIB) ;;
@@ -293,6 +297,7 @@ for dopt in "$opt_debug"; do
 
 	esac
 done
+IFS=$ac_save_ifs
 
 
 dnl --- Make makefiles --------------------------------------------------
