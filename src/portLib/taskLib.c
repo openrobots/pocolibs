@@ -142,9 +142,16 @@ taskLibInit(void)
     tcb->tid = pthread_self();
     /* The tcb list is initially empty */
     tcb->next = NULL;
+    /* Mark the TCB */
+    tcb->magic = TASK_MAGIC;
 
     /* Register the TCB pointer in the thread-specific key */
+#ifdef DEBUG
+    fprintf(stderr, "registering task specific value %lu %lu\n",
+	(unsigned long)tcb, (unsigned long)pthread_self());
+#endif
     if (pthread_setspecific(taskControlBlock, (void *)tcb) != 0) {
+	    fprintf(stderr, "pthread_setspecific failed\n");
 	return ERROR;
     }
 
@@ -228,6 +235,7 @@ taskSpawn(char *name, int priority, int options, int stackSize,
     if (tcb == NULL) {
 	return ERROR;
     }
+    tcb->magic = TASK_MAGIC;
     if (name != NULL) {
 	tcb->name = strdup(name);
     } else {
@@ -362,6 +370,11 @@ taskDelete(long tid)
 	pthread_exit(&status);
     }
 
+    if (tcb->magic != TASK_MAGIC) {
+	    fprintf(stderr, "taskDelete invalid taskId\n");
+	    return ERROR;
+    }
+
     status = pthread_cancel(tcb->tid);
     if ( status != 0) {
 	errnoSet(status);
@@ -394,8 +407,15 @@ taskDelete(long tid)
 STATUS 
 taskSuspend(long tid)
 {
+    OS_TCB *tcb;
+
     if (tid == 0) {
 	tid = taskIdSelf();
+    }
+    tcb = (OS_TCB *)tid;
+    if (tcb->magic != TASK_MAGIC) {
+	fprintf(stderr, "taskSuspend: bad taskId\n");
+	return ERROR;
     }
     printf("*** suspending task %lx\n", tid);
     abort();
@@ -422,11 +442,22 @@ taskResume(long tid)
 STATUS 
 taskPrioritySet(long tid, int newPriority)
 {
-    OS_TCB *tcb = (OS_TCB *)tid;
+	OS_TCB *tcb;
 #ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
     struct sched_param my_param;
     int status;
+#endif
 
+    if (tid == 0) 
+ 	    tid = taskIdSelf();
+     
+     tcb = (OS_TCB *)tid;
+     if (tcb->magic != TASK_MAGIC) {
+ 	    fprintf(stderr, "taskPrioritySet: bad taskId\n");
+ 	    return ERROR;
+     }
+     
+#ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
     my_param.sched_priority = newPriority;
     status = pthread_setschedparam(tcb->tid, SCHED_RR, &my_param);
     if (status != 0) {
@@ -524,13 +555,21 @@ taskDelay(int ticks)
 long
 taskIdSelf(void)
 {
+    OS_TCB *tcb;
+
     if (taskList == NULL) {
 	/* TaskLib was not initialized - do it now */
 	if (taskLibInit() == ERROR) {
 	    return 0;
 	}
     }
-    return (long)pthread_getspecific(taskControlBlock);
+    tcb = (OS_TCB *)pthread_getspecific(taskControlBlock);
+    if (tcb->magic != TASK_MAGIC) {
+	fprintf(stderr, "taskIdSelf: bad task specific data: %ld %ld\n",
+		(long)tcb, pthread_self());
+	abort();
+    }
+    return (long)tcb;
 }
 
 /*----------------------------------------------------------------------*/
@@ -554,6 +593,10 @@ taskSetUserData(long tid, unsigned long data)
 {
     OS_TCB *tcb = (OS_TCB *)(tid == 0 ? taskIdSelf() : tid);
 
+    if (tcb->magic != TASK_MAGIC) {
+	fprintf(stderr, "taskSetUserData: bad taskId\n");
+	return ERROR;
+    }
     tcb->userData = data;
     return OK;
 }
@@ -568,6 +611,12 @@ taskGetUserData(long tid)
 {
     OS_TCB *tcb = (OS_TCB *)(tid == 0 ? taskIdSelf() : tid);
     if (tcb != NULL) {
+	if (tcb->magic != TASK_MAGIC) {
+	    fprintf(stderr, 
+		"taskGetUserData: bad/unregisterd taskId %ld %ld\n",
+		tid, pthread_self());
+	    return 0;
+	}
         return tcb->userData;
     } else {
         fprintf(stderr, "taskGetUserData: tcb == NULL.\n");
@@ -586,6 +635,10 @@ taskNameToId(char *name)
     OS_TCB *t;
     
     for (t = taskList; t != NULL; t = t->next) {
+	if (t->magic != TASK_MAGIC) {
+	    fprintf(stderr, "taskNameToId: bad taskId\n");
+	    return ERROR;
+	}
 	if (strcmp(t->name, name) == 0) {
 	    break;
 	}

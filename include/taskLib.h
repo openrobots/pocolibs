@@ -46,7 +46,10 @@ typedef struct OS_TCB {
     unsigned long userData;		/* user data */
     TASK_PARAMS params;			/* parameters */
     struct OS_TCB *next;		/* next tcb in list */
+    unsigned int magic;			/* magic */
 } OS_TCB, WIND_TCB;
+
+#define TASK_MAGIC  0x5441534b
 
 /*
  * Flags for tasks
