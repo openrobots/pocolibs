@@ -15,11 +15,10 @@
  */
 
 /***
- *** Fonction d'initialisation globale pour un process qui veut utiliser
- *** comLib
+ *** Global initialisation procedure for comLib
  ***
- *** ticksPerSec -> frequence de l'horloge systeme
- ***                0 -> pas d'horloge systeme
+ *** ticksPerSec -> main clock frequency
+ ***                0 -> no clock
  ***
  ***/
 
@@ -35,33 +34,34 @@ __RCSID("$LAAS$");
 #include <stdio.h>
 
 /**
- ** Initialisation de comLib dans un processus Unix 
+ ** ComLib initialisation procedure for Unix processes 
+ ** should be called once, before any other comLib/posterLib function
  **/
 
 STATUS
 h2initGlob(int ticksPerSec)
 {
-    /* Initialise l'os */
+    /* OS level initialization */
     if (osInit(ticksPerSec) == ERROR) {
 	return ERROR;
     }
-    /* Initialise les E/S */
+    /* I/O redirections  */
     if (xesStdioInit() == ERROR) {
         return ERROR;
     }
-    /* Attache aux devices h2 */
+    /* attach to h2 devices */
     if (h2devAttach() == ERROR) {
 	printf("Error: could not find h2 devices\n"
 		"Did you execute `h2 init' ?\n");
 	return ERROR;
     }
-    /* Attache la memoire partagee */
+    /* attach to shared memory */
     if (smMemAttach() == ERROR) {
 	printf("Error: could not attach shared memory\n");
 	return ERROR;
     }
 		
-    /* Initialise les timers h2 */
+    /* Start h2 timers if a clock is available */
     if (ticksPerSec != 0) {
 	if (h2timerInit() == ERROR) {
 	    return ERROR;
