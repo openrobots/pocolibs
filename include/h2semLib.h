@@ -41,7 +41,7 @@ extern "C" {
 #define S_h2semLib_TIMEOUT (M_h2semLib | 4)
 #define S_h2semLib_BAD_SEM_TYPE (M_h2semLib | 5)
 #define S_h2semLib_PERMISSION_DENIED (M_h2semLib | 6)
-
+#define S_h2semLib_NOT_IMPLEMENTED (M_h2semLib | 7)
 
 typedef int H2SEM_ID;
 
