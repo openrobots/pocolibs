@@ -1,5 +1,9 @@
 Version 2.0, xx April 2004
 
+ 13. Made OS_TCB an opaque data type and put the definition in
+     taskLib.c. Moved the errnoGet,Set() functions into taskLib.c since
+     they need access to the TCB. Replaced tcb->name by taskName() calls
+     in mboxLib.c.
  12. Added taskName() and osExit() functions to portLib. Turned the
      logMsg #define into a real function definition and created logLib.h
      header.

@@ -24,37 +24,14 @@
 #include "semLib.h"
 
 /*
- * Struture to pass parameters to a VxWorks-like task main routine
- */
-typedef struct taskParams {
-    int arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10;
-} TASK_PARAMS;
-
-
-/*
- * A VxWorks compatible task descriptor
- */
-typedef struct OS_TCB {
-    char *name;				/* pointer to task name */
-    int options;			/* task options bits */
-    int policy;				/* scheduling policy */
-    int priority;			/*  */
-    FUNCPTR entry;			/* entry point */
-    int errorStatus;			/* error code */
-    pthread_t tid;			/* thread id */
-    pid_t pid;				/* process id */
-    unsigned long userData;		/* user data */
-    TASK_PARAMS params;			/* parameters */
-    struct OS_TCB *next;		/* next tcb in list */
-    unsigned int magic;			/* magic */
-} OS_TCB, WIND_TCB;
-
-#define TASK_MAGIC  0x5441534b
-
-/*
  * Flags for tasks
  */
 #define VX_FP_TASK	0x0008
+
+/*
+ * Opaque task descriptor
+ */
+typedef struct OS_TCB OS_TCB, WIND_TCB;
 
 /*
  * Function prototypes

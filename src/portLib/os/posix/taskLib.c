@@ -47,6 +47,33 @@ static int rr_max_priority;
 #endif
 
 /*
+ * Struture to pass parameters to a VxWorks-like task main routine
+ */
+typedef struct taskParams {
+    int arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10;
+} TASK_PARAMS;
+
+/*
+ * A VxWorks compatible task descriptor
+ */
+struct OS_TCB {
+    char *name;				/* pointer to task name */
+    int options;			/* task options bits */
+    int policy;				/* scheduling policy */
+    int priority;			/*  */
+    FUNCPTR entry;			/* entry point */
+    int errorStatus;			/* error code */
+    pthread_t tid;			/* thread id */
+    pid_t pid;				/* process id */
+    unsigned long userData;		/* user data */
+    TASK_PARAMS params;			/* parameters */
+    struct OS_TCB *next;		/* next tcb in list */
+    unsigned int magic;			/* magic */
+};
+
+#define TASK_MAGIC  0x5441534b
+
+/*
  * Task hooks globals 
  */
 typedef struct TASK_HOOK_LIST {
@@ -873,3 +900,39 @@ taskDeleteHookDelete(FUNCPTR deleteHook)
 
 /*----------------------------------------------------------------------*/
 
+/***
+ *** Émulation de errnoLib de VxWorks
+ ***/
+
+/*----------------------------------------------------------------------*/
+
+
+int
+errnoGet(void)
+{
+    OS_TCB *tcb = taskTcb(taskIdSelf());
+    
+    if (tcb != NULL) {
+	return tcb->errorStatus;
+    }
+    return 0;
+}
+
+
+/*----------------------------------------------------------------------*/
+
+STATUS
+errnoSet(int errorValue)
+{
+    OS_TCB *tcb = taskTcb(taskIdSelf());
+
+    if (tcb != NULL) {
+	tcb->errorStatus = errorValue;
+	return OK;
+    } else {
+	fprintf(stderr, "errnoSet: no TCB %ld\n", taskIdSelf());
+	return ERROR;
+    }
+}
+
+/*----------------------------------------------------------------------*/

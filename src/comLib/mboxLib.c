@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003 CNRS/LAAS
+ * Copyright (c) 1990, 2003-2004 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -47,18 +47,18 @@ STATUS
 mboxInit(char *procName)		/* unused parameter procName */
 {
     int tid = taskIdSelf();
-    OS_TCB *tcb = taskTcb(tid);
+    const char *tName;
     int dev;
 
-    if (tcb == NULL) {
-	return ERROR;
-    }
+    if (tid == 0) return ERROR;
+    tName = taskName(tid);
+
     /* Look for the h2 device associated with current task */
-    dev = h2devFind(tcb->name, H2_DEV_TYPE_TASK);
+    dev = h2devFind((char *)tName, H2_DEV_TYPE_TASK);
 
     /* If not found, create one */
     if (dev == ERROR) {
-	dev = h2devAlloc(tcb->name, H2_DEV_TYPE_TASK);
+	dev = h2devAlloc((char *)tName, H2_DEV_TYPE_TASK);
 	if (dev == ERROR) {
 	    return(ERROR);
 	}
