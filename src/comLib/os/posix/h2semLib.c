@@ -34,6 +34,10 @@ __RCSID("$LAAS$");
 #include "errnoLib.h"
 #include "h2semLib.h"
 
+#ifdef VALGRIND_SUPPORT
+#include <valgrind/memcheck.h>
+#endif
+
 /***
  *** Semaphores a` la mode VxWorks pour Unix
  ***
@@ -156,7 +160,10 @@ h2semAlloc(int type)
     int i, j, dev;
     union semun semun;    
     unsigned short tabval[MAX_SEM];
-    BOOL trouve = FALSE;
+#ifdef VALGRIND_SUPPORT
+    VALGRIND_MAKE_READABLE(tabval, MAX_SEM * sizeof(unsigned short));
+#endif
+     BOOL trouve = FALSE;
 
     /* Verification du type */
     if (type != H2SEM_SYNC && type != H2SEM_EXCL) {
@@ -177,6 +184,8 @@ h2semAlloc(int type)
 		h2semGive(0);
 		return ERROR;
 	    }
+
+           
 	    for (j = 0; j < MAX_SEM; j++) {
 		if (tabval[j] == SEM_UNALLOCATED) {
 		    trouve = TRUE;
@@ -357,17 +366,7 @@ h2semGive(H2SEM_ID sem)
 BOOL
 h2semFlush(H2SEM_ID sem)
 {
-    union semun semun;
-    int dev;
-
-    dev = sem / MAX_SEM;
-    sem = sem % MAX_SEM;
-    
-    semun.val = 0;
-    if (semctl(H2DEV_SEM_SEM_ID(dev), sem, SETVAL, semun) == -1) {
-	return FALSE;
-    }
-    return TRUE;
+    return h2semSet(sem, 0) == OK ? TRUE : FALSE;
 }
 
 /*----------------------------------------------------------------------*/
@@ -398,3 +397,21 @@ h2semShow(H2SEM_ID sem)
     } /* switch */
     return OK;
 }
+
+/*----------------------------------------------------------------------*/
+STATUS
+h2semSet(H2SEM_ID sem, int value)
+{
+    union semun semun;
+    int dev;
+
+    dev = sem / MAX_SEM;
+    sem = sem % MAX_SEM;
+    
+    semun.val = value;
+    if (semctl(H2DEV_SEM_SEM_ID(dev), sem, SETVAL, semun) == -1) {
+	return ERROR;
+    }
+    return OK;
+}
+
