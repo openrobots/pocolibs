@@ -20,36 +20,35 @@
 
 #include "h2endianness.h"
 
-
-/* type d'operation pour un posterTake */
+/* type of operation in posterTake()x */
 typedef enum {
     POSTER_READ,			/* Lecture */
     POSTER_WRITE,			/* Ecriture */
     POSTER_IOCTL			/* controle */
 } POSTER_OP;
 
-/* Codes des fonctions ioctl */
+/*  ioctl operation codes */
 #define   FIO_GETDATE                            1
 #define   FIO_NMSEC                              2
 #define   FIO_GETSIZE				 3
 
-/* type de bus pour les adresses de poster (busSpace) */
-#define POSTER_LOCAL_MEM   0		/* memoire locale d'une carte 
-					 * pas exportable !! */
-#define POSTER_SM_MEM      1		/* memoire partagee de VxMP */
-#define POSTER_VME_A32     2		/* adresse VME A32 */
-#define POSTER_VME_A24     3		/* adresse VME A24 */
-#define POSTER_REMOTE	   4            /* poster servi par posterServ */
+/* bus address space for poster storage */
+#define POSTER_LOCAL_MEM   0		/* local memory of one process
+					 * - not exportable */
+#define POSTER_SM_MEM      1		/* VxMP like shared memory */
+#define POSTER_VME_A32     2		/* VME A32 space */
+#define POSTER_VME_A24     3		/* VME A24 space */
+#define POSTER_REMOTE	   4            /* poster accessed using posterServ */
 
 typedef long POSTER_ID;
 
 #define POSTER_MAGIC 0x89012345
 
-/* Code du module */
+/* Module codes */
 #define M_posterLib  				510
 #define M_remotePosterLib			516
 
-/* Codes d'erreur */
+/* Error codes */
 #define S_posterLib_POSTER_CLOSED (M_posterLib << 16 | 0)
 #define S_posterLib_NOT_OWNER     (M_posterLib << 16 | 1)
 #define S_posterLib_EMPTY_POSTER   (M_posterLib << 16 | 3)
@@ -66,7 +65,7 @@ typedef long POSTER_ID;
 #define S_posterLib_SEMGET_ERROR  (M_posterLib << 16 | 15)
 #define S_posterLib_SEMOP_ERROR   (M_posterLib << 16 | 16)
 
-/* Codes d'erreur  */
+/* Remote posters error codes  */
 #define S_remotePosterLib_POSTER_CLOSED        (M_remotePosterLib << 16 | 0)
 #define S_remotePosterLib_NOT_OWNER            (M_remotePosterLib << 16 | 1)
 #define S_remotePosterLib_ERR_TIME_READ        (M_remotePosterLib << 16 | 2)
@@ -98,6 +97,5 @@ extern STATUS posterEndianness(POSTER_ID posterId, H2_ENDIANNESS *endianness);
 
 /* for posterServ only ! */
 extern STATUS posterSetEndianness(POSTER_ID posterId, H2_ENDIANNESS endianness);
-
 
 #endif
