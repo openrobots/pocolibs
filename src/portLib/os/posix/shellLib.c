@@ -290,7 +290,7 @@ findSymbol(char *name, char **value)
 } /* findSymbol */
 
 /**
- ** Affichage d'une valeur a` la mode du shell VxWorks
+ ** Display a value like the VxWorks shell does
  **/
 static void
 printValue(long value)
@@ -305,7 +305,7 @@ printValue(long value)
 }
 
 /**
- ** Affichage d'un symbole et de sa valeur a` la mode du shell VxWorks
+ ** Display a symbol and its value like the VxWorks shell does
  **/
 static void
 printSymbol(char *name, char *value)
