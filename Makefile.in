@@ -22,12 +22,13 @@ SUBDIRS=\
 	src/errorLib \
 	src/comLib \
 	src/posterLib \
+	src/posterLib/posterServ \
 	src/h2 \
 	src/shell
 
 all:
 	@for d in $(SUBDIRS) ; do \
-		$(MAKE) -C $$d all ; \
+		$(MAKE) -C $$d all || exit 2; \
 	done
 
 depend:
