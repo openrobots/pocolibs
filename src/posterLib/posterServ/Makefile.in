@@ -36,6 +36,7 @@ OBJS = $(SRCS:%.c=%.o) $(SRCS_RPC:%.c=%.o)
 
 SERV = posterServ
 
+all: $(SERV)
 
 $(SERV): $(OBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $(SERV) $(LDFLAGS) $(OBJS) \
