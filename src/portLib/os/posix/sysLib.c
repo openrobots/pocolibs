@@ -30,11 +30,12 @@ __RCSID("$LAAS$");
 #include "portLib.h"
 #include "errnoLib.h"
 
-#define CLK_SIGNAL SIGALRM
+#define CLK_SIGNAL SIGALRM		/* signal used by the h2 tick */
 
 #ifndef TEST 
 # define ERRNO_SET(x) errnoSet(x)
 #else
+/* hack to avoid that the small test program depends on errorLib */
 # define ERRNO_SET(x) /**/
 #endif
 
@@ -106,8 +107,8 @@ sysClkEnable(void)
 	    printf("Erreur sigaction %d\n", errno);
 	}
 
+	/* Create a global timer */
 #ifdef HAVE_POSIX_TIMERS
-	/* Cree le timer global */
 	if (timer_create(CLOCK_REALTIME, NULL, &sysClkTimer) == -1) {
 	    printf("Erreur creation timer %d\n", errno);
 	    ERRNO_SET(errno);
@@ -125,13 +126,13 @@ sysClkEnable(void)
     
 #ifdef HAVE_POSIX_TIMERS
 	if (timer_settime(sysClkTimer, 0, &tv, NULL) == -1) {
-	    printf("Erreur set timer %d\n", errno);
-	    ERRNO_SET(errno);
+		fprintf(stderr, "Error setting timer %s\n", strerror(errno));
+		ERRNO_SET(errno);
 	}
 #else
 	if (setitimer(ITIMER_REAL, &tv, NULL) == -1) {
-	    printf("Erreur set timer %d\n", errno);
-	    ERRNO_SET(errno);
+		fprintf(stderr, "Error setting timer %s\n", strerror(errno));
+		ERRNO_SET(errno);
 	}
 #endif
 
