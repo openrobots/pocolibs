@@ -1,0 +1,37 @@
+.\" $Id$
+.TH h2devInit 3 "January 1999"
+.SH NAME
+h2devInit \- initializes a 
+.SM comLib 
+session
+.SH SYNOPSIS
+.nf
+.B "#include <h2Lib.h>"
+.B "#include <h2devLib.h>"
+.B "STATUS h2devInit(void)"
+.fi
+.SH DESCRIPTION
+.IR h2devInit
+initializes a 
+.SM comLib
+session.
+It creates the IPC structures used by the library and initializes them 
+to a know state.
+.PP
+.IR h2devInit 
+should be called once, by any process, before using any other
+.SM comLib
+function.
+.SH "RETURN VALUE"
+If everything is good 
+.IR h2devInit
+returns
+.IR OK ,
+otherwise it returns 
+.IR ERROR 
+and calls
+.IR errnoSet(3)
+with the corresponding Unix or comLib error code.
+.SH "SEE ALSO"
+.IR h2devEnd(3)
+

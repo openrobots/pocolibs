@@ -1,0 +1,437 @@
+/*
+ * Copyright (c) 1996, 2003 CNRS/LAAS
+ *
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
+/***
+ *** Poster lower layer for a local Unix machine , 
+ *** using SYSV shared memory segments
+ ***/
+#include "config.h"
+__RCSID("$LAAS$");
+
+#include <sys/types.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <string.h>
+#include <unistd.h>
+
+#include "portLib.h"
+#include "smMemLib.h"
+#include "smObjLib.h"
+#include "errnoLib.h"
+#include "h2semLib.h"
+#include "h2devLib.h"
+#include "posterLib.h"
+
+#include "posterLibPriv.h"
+
+static STATUS localPosterCreate ( char *name, int size, POSTER_ID *pPosterId );
+static STATUS localPosterMemCreate ( char *name, int busSpace, void *pPool,
+				     int size, POSTER_ID *pPosterId );
+static STATUS localPosterDelete ( POSTER_ID posterId );
+static STATUS localPosterFind ( char *name, POSTER_ID *pPosterId );
+static int localPosterWrite ( POSTER_ID posterId, int offset, void *buf, 
+			      int nbytes );
+static int localPosterRead ( POSTER_ID posterId, int offset, void *buf, 
+			     int nbytes );
+static STATUS localPosterTake ( POSTER_ID posterId, POSTER_OP op );
+static STATUS localPosterGive ( POSTER_ID posterId );
+static void * localPosterAddr ( POSTER_ID posterId );
+static STATUS localPosterIoctl ( POSTER_ID posterId, int code, void *parg );
+static STATUS localPosterShow ( void );
+static STATUS localPosterSetEndianness(POSTER_ID posterId, 
+				       H2_ENDIANNESS endianness);
+static STATUS localPosterGetEndianness(POSTER_ID posterId, 
+				       H2_ENDIANNESS *endianness);
+
+const POSTER_FUNCS posterLocalFuncs = {
+    NULL,
+    localPosterCreate,
+    localPosterMemCreate,
+    localPosterDelete,
+    localPosterFind,
+    localPosterWrite,
+    localPosterRead,
+    localPosterTake,
+    localPosterGive,
+    localPosterAddr,
+    localPosterIoctl,
+    localPosterShow,
+    localPosterSetEndianness,
+    localPosterGetEndianness
+};
+
+/*----------------------------------------------------------------------*/
+
+
+static STATUS
+localPosterCreate(char *name, int size, POSTER_ID *pPosterId)
+{
+    int dev;
+    unsigned char *pool;
+    
+    if (pPosterId != NULL) {
+	*pPosterId = NULL;
+    }
+
+    /* Allocation d'un h2dev */
+    dev = h2devAlloc(name, H2_DEV_TYPE_POSTER);
+    if (dev < 0) {
+	return(ERROR);
+    }
+    /* Allocation memoire partagee */
+    pool = smMemMalloc(size);
+    if (pool == NULL) {
+	errnoSet(S_posterLib_MALLOC_ERROR);
+	h2devFree(dev);
+	return ERROR;
+    }
+    /* Creation SEM */
+    H2DEV_POSTER_SEM_ID(dev) = h2semAlloc(H2SEM_EXCL);
+    if (H2DEV_POSTER_SEM_ID(dev) == ERROR) {
+	smMemFree(pool);
+	h2devFree(dev);
+	return(ERROR);
+    }    
+    /* Memorise l'adresse globale */
+    H2DEV_POSTER_POOL(dev) = smObjLocalToGlobal(pool);
+    /* Memorise la taille */
+    H2DEV_POSTER_SIZE(dev) = size;
+    /* Memorise le pid du createur */
+    H2DEV_POSTER_TASK_ID(dev) = getpid();
+    /* Indiquer que les donnees ne sont pas fraiches */
+    H2DEV_POSTER_FLG_FRESH(dev) = FALSE;
+    /* Init endianness of the data of the poster to local value
+       (will be changed in remote create procedure if necessary) */
+    H2DEV_POSTER_ENDIANNESS(dev) = H2_LOCAL_ENDIANNESS;
+
+    if (pPosterId != NULL) {
+	*pPosterId = (POSTER_ID)dev;
+    }
+    return(OK);
+
+} /* posterCreate */
+
+/*----------------------------------------------------------------------*/
+
+static STATUS 
+localPosterMemCreate(
+     char *name,                /* Nom du device a creer */
+     int busSpace,		/* espace d'adressage de l'addresse pPool */
+     void *pPool,		/* adresse Pool de memoire pour le poster */
+     int size,                  /* Taille poster - en bytes */
+     POSTER_ID *pPosterId)      /* Ou` mettre l'id du poster */
+{
+    fprintf(stderr, "posterMemCreate: pas encore supportee sur Unix\n");
+    return(ERROR);
+}
+
+/*----------------------------------------------------------------------*/
+
+static STATUS
+localPosterDelete(POSTER_ID posterId)
+{
+    int dev = (int)posterId;
+    unsigned char *pool;
+    uid_t uid = getuid();
+
+    if (dev < 0 || dev > H2_DEV_MAX || 
+	H2DEV_TYPE(dev) != H2_DEV_TYPE_POSTER) {
+	errnoSet(S_posterLib_POSTER_CLOSED);
+	return(ERROR);
+    }
+
+    if (uid != H2DEV_UID(dev) && uid != H2DEV_UID(0)) {
+	errnoSet(S_posterLib_NOT_OWNER);
+	return ERROR;
+    }
+    /* Passer en local l'adresse du poster */
+    pool = smObjGlobalToLocal(H2DEV_POSTER_POOL(dev));
+
+    /* Liberer l'espace */
+    smMemFree(pool);
+    
+    /* Destruction du semaphore */
+    h2semDelete(H2DEV_POSTER_SEM_ID(dev));
+    /* Liberation du device */
+    h2devFree(dev);
+
+    return(OK);
+
+} /* posterDelete */
+
+/*----------------------------------------------------------------------*/
+
+static STATUS
+localPosterFind(char *name, POSTER_ID *pPosterId)
+{
+    int p;
+
+    /* Recherche du device h2 correspondant */
+    p = h2devFind(name, H2_DEV_TYPE_POSTER);
+    if (p == ERROR) {
+	return(ERROR);
+    }
+    /* Memorise le resultat */
+    *pPosterId = (POSTER_ID)p;
+    
+    return(OK);
+
+} /* posterFind */
+
+/*----------------------------------------------------------------------*/
+
+static int
+localPosterWrite(POSTER_ID posterId, int offset, void *buf, int nbytes)
+{
+    /* Prise du semaphore d'exclusion mutuelle */
+    if (localPosterTake(posterId, POSTER_WRITE) == ERROR) {
+	return(ERROR);
+    }
+
+    /* Ecrire les donnees dans le poster */
+    memcpy((char *)localPosterAddr(posterId) + offset, buf, nbytes);
+
+    /* liberer le semaphore d'exclusion mutuelle */
+    localPosterGive(posterId);
+    
+    return(nbytes);
+
+} /* posterWrite */
+
+/*----------------------------------------------------------------------*/
+
+static int 
+localPosterRead(POSTER_ID posterId, int offset, void *buf, int nbytes)
+{
+    int dev = (int)posterId;
+    int nRd;
+
+    /* Calculer le nombre d'octets a lire */
+    nRd = MIN(nbytes, H2DEV_POSTER_SIZE(dev) - offset);
+    if (nRd <= 0) {
+	return 0;
+    }
+    /* Prendre le semaphore d'exclusion mutuelle */
+    if (localPosterTake(posterId, POSTER_READ) == ERROR) {
+	return(ERROR);
+    }
+    /* Copier les donnees */
+    memcpy(buf, (char *)localPosterAddr(posterId) + offset, nbytes);
+
+    /* Liberer le semaphore */
+    localPosterGive(posterId);
+    
+    return(nbytes);
+
+} /* posterRead */
+
+/*----------------------------------------------------------------------*/
+
+static STATUS
+localPosterTake(POSTER_ID posterId, POSTER_OP op)
+{
+    int dev = (int)posterId;
+
+    if (dev < 0 || dev >= H2_DEV_MAX 
+	|| H2DEV_TYPE(dev) != H2_DEV_TYPE_POSTER) {
+	errnoSet(S_posterLib_POSTER_CLOSED);
+	return(ERROR);
+    }
+    if (op == POSTER_WRITE && H2DEV_POSTER_TASK_ID(dev) != getpid()) {
+	errnoSet(S_posterLib_NOT_OWNER);
+	return ERROR;
+    }
+    if (h2semTake(H2DEV_POSTER_SEM_ID(dev), WAIT_FOREVER) == FALSE) {
+	return ERROR;
+    }
+    H2DEV_POSTER_OP(dev) = op;
+    return OK;
+
+} /* localPosterTake */
+
+/*----------------------------------------------------------------------*/
+
+static STATUS
+localPosterGive(POSTER_ID posterId)
+{
+    int dev = (int)posterId;
+    H2TIME date;
+
+    if (dev < 0 || dev >= H2_DEV_MAX 
+	|| H2DEV_TYPE(dev) != H2_DEV_TYPE_POSTER) {
+	errnoSet(S_posterLib_POSTER_CLOSED);
+	return(ERROR);
+    }
+    
+    if (H2DEV_POSTER_OP(dev) == POSTER_WRITE) {
+
+	/* Marquer les donnes comme fraiches */
+	H2DEV_POSTER_FLG_FRESH(dev) = TRUE;
+
+	/* Lire la date */
+	if (h2timeGet(&date) == ERROR) {
+	    h2semGive(H2DEV_POSTER_SEM_ID(dev));
+	    return ERROR;
+	}
+	/* La copier dans le device */
+	memcpy(H2DEV_POSTER_DATE(dev), &date, sizeof(H2TIME));
+    }
+
+    return(h2semGive(H2DEV_POSTER_SEM_ID(dev)));
+
+} /* localPosterGive */
+
+/*----------------------------------------------------------------------*/
+
+static void *
+localPosterAddr(POSTER_ID posterId)
+{
+    int dev = (int)posterId;
+
+    if (dev < 0 || dev >= H2_DEV_MAX 
+	|| H2DEV_TYPE(dev) != H2_DEV_TYPE_POSTER) {
+	errnoSet(S_posterLib_POSTER_CLOSED);
+	return(NULL);
+    }
+    
+    return smObjGlobalToLocal(H2DEV_POSTER_POOL(dev));
+    
+} /* posterAddr */
+
+
+/*----------------------------------------------------------------------*/
+
+static STATUS
+localPosterSetEndianness(POSTER_ID posterId, H2_ENDIANNESS endianness)
+{
+    int dev = (int)posterId;
+
+    if (dev < 0 || dev >= H2_DEV_MAX 
+	|| H2DEV_TYPE(dev) != H2_DEV_TYPE_POSTER) {
+	errnoSet(S_posterLib_POSTER_CLOSED);
+	return ERROR;
+    }
+
+    H2DEV_POSTER_ENDIANNESS(dev) = endianness;
+    return OK;
+    
+} /* posterSetEndianness */
+
+/*----------------------------------------------------------------------*/
+
+static STATUS
+localPosterGetEndianness(POSTER_ID posterId, H2_ENDIANNESS *endianness)
+{
+    int dev = (int)posterId;
+
+    if (dev < 0 || dev >= H2_DEV_MAX 
+	|| H2DEV_TYPE(dev) != H2_DEV_TYPE_POSTER) {
+	errnoSet(S_posterLib_POSTER_CLOSED);
+	return ERROR;
+    }
+
+    *endianness = H2DEV_POSTER_ENDIANNESS(dev);
+    return OK;
+    
+} /* posterGetEndianness */
+
+
+/*----------------------------------------------------------------------*/
+
+static STATUS
+localPosterIoctl(POSTER_ID posterId, int code, void *parg)
+{
+    int dev = (int)posterId;
+    STATUS retval;
+
+    if (dev < 0 || dev >= H2_DEV_MAX 
+	|| H2DEV_TYPE(dev) != H2_DEV_TYPE_POSTER) {
+	errnoSet(S_posterLib_POSTER_CLOSED);
+	return ERROR;
+    }
+    /* Prendre l'acces au poster */
+    if (localPosterTake(posterId, POSTER_IOCTL) == ERROR) {
+	return ERROR;
+    }
+    /* Executer la fonction demandee */
+    retval = OK;
+    switch (code) {
+      case FIO_GETDATE:
+	/* Verifier si on a deja ecrit sur le poster */
+	if (H2DEV_POSTER_FLG_FRESH(dev) != TRUE) {
+	    errnoSet(S_posterLib_EMPTY_POSTER);
+	    retval = ERROR;
+	}
+	/* Copier la date du poster */
+	memcpy(parg, (char *)H2DEV_POSTER_DATE(dev), sizeof(H2TIME));
+	break;
+	
+      case FIO_NMSEC:
+	/* Verifier si on a deja ecrit sur le poster */
+	if (H2DEV_POSTER_FLG_FRESH(dev) != TRUE) {
+	    errnoSet(S_posterLib_EMPTY_POSTER);
+	    retval = ERROR;
+	}
+	/* Nombre de millisecondes depuis la derniere ecriture */
+	if (h2timeInterval(H2DEV_POSTER_DATE(dev), (u_long *)parg) == ERROR) {
+	    retval = ERROR;
+	}
+	break;
+
+      case FIO_GETSIZE:
+	/* Size of the poster */
+	*(u_long *)parg = H2DEV_POSTER_SIZE(dev);
+	break;
+
+      default:
+	errnoSet(S_posterLib_BAD_IOCTL_CODE);
+	retval = ERROR;
+    } /* switch */
+    localPosterGive(posterId);
+    return retval;
+}
+
+/*----------------------------------------------------------------------*/
+
+static STATUS
+localPosterShow(void)
+{
+    int i;
+    H2TIME *date;
+
+    if (h2devAttach() == ERROR) {
+	return ERROR;
+    }
+    putchar('\n');
+    printf("NAME                             Id      Size T(last write)\n"
+	   "------------------------------- --- --------- -------------\n");
+    for (i = 0; i < H2_DEV_MAX; i++) {
+	if (H2DEV_TYPE(i) == H2_DEV_TYPE_POSTER) {
+	    printf("%-32s %3d %8d", H2DEV_NAME(i), i,
+		   H2DEV_POSTER_SIZE(i));
+	    if (H2DEV_POSTER_FLG_FRESH(i)) {
+		date = H2DEV_POSTER_DATE(i);
+		printf(" %02dh:%02dmin%02ds\n", date->hour, date->minute,
+		       date->sec);
+	    } else {
+		printf(" EMPTY_POSTER!\n");
+	    }
+	}
+    } /* for */
+    putchar('\n');
+    return OK;
+}

@@ -1,0 +1,22 @@
+.\" $Id$
+.TH errnoGet 3 "January 1999"
+.SH NAME
+errnoGet \- get the
+.SM comLib
+error code
+.SH SYNOPSIS
+.nf
+.B "#include <h2Lib.h>"
+.B "#include <errnoLib.h>"
+.B "int errnoGet(void)"
+.fi
+.SH DESCRIPTION
+.IR errnoGet
+returns the 
+.SM comLib
+error code associated with the current thread.
+.SH "COMPATIBILITY"
+.IR errnoGet 
+is designed to emulate the VxWorks function of the same name.
+.SH "SEE ALSO"
+.IR errnoSet(3)

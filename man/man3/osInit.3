@@ -1,0 +1,30 @@
+.\" $Id$
+.TH osInit 3 "May 1999"
+.SH NAME
+osInit \- initialize the real-time OS library
+.SH SYNOPSIS
+.nf
+.B "#include <h2Lib.h>"
+.B "STATUS osInit(int clkRate)"
+.fi
+.SH DESCRIPTION
+.IR osInit
+initializes the real-time OS library. It should be called one before
+any call to other functions of the library. The 
+.I clkRate
+parameter specifies the clock rate used in this process. A value of 
+.IR 0
+disable the clock. The maximum value on most systems is the 
+.IR HZ
+constant, which is generally equal to 100. 
+.SH "RETURN VALUE"
+.IR osInit
+returns 
+.IR OK
+or 
+.IR ERROR
+in case of an error. Then it sets the 
+.I errno
+value of the task.
+.SH "SEE ALSO"
+.IR h2devInit(3)

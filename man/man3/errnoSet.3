@@ -1,0 +1,30 @@
+.\" $Id$
+.TH errnoSet 3 "January 1999"
+.SH NAME
+errnoSet \- set the 
+.SM comLib
+error code
+.SH SYNOPSIS
+.nf
+.B "#include <h2Lib.h>"
+.B "#include <errnoLib.h>"
+.B "STATUS errnoSet(int errorCode)"
+.fi
+.SH DESCRIPTION
+.IR errnoSet
+sets the 
+.SM comLib
+error code associated with the current thread to the value passed in 
+.IR errorCode .
+.SH "RETURN VALUE"
+If everything is good 
+.IR h2devInit
+returns
+.IR OK ,
+otherwise it returns 
+.IR ERROR 
+and calls
+.IR errnoSet(3)
+with the corresponding Unix or comLib error code.
+.SH "SEE ALSO"
+.IR errnoGet(3)

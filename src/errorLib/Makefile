@@ -1,0 +1,60 @@
+#
+# Copyright (c) 1998, 2003 CNRS/LAAS
+#
+# Permission to use, copy, modify, and distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+#
+# $LAAS$
+#
+TOP = ..
+include $(TOP)/Init.make
+
+CPPFLAGS += -I..
+
+SRCS = h2errorLib.c
+OBJS = $(SRCS:%.c=$(TARGET)/%.o)
+
+SHLIB_MAJOR = 2
+SHLIB_MINOR = 0
+
+BASENAME = liberrorLib
+
+LIB = $(TARGET)/$(BASENAME).$(SHLIBREV)
+
+all: $(LIB)
+
+$(LIB): $(OBJS)
+	$(SHLIBLD) -o $@ $(SHLIBLDFLAGS) $(OBJS)  $(PORTLIB)
+
+$(TARGET)/%.o: %.c
+	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(SHLIBCFLAGS) $<
+
+depend $(TARGET)/DEPENDANCES:: $(TARGET)
+
+depend $(TARGET)/DEPENDANCES:: $(SRCS)
+	$(MKDEP) -c$(CC) -o $(TARGET)/DEPENDANCES -d'$$(TARGET)' \
+	$(CPPFLAGS) $?
+
+$(TARGET):
+	-mkdir -p $@
+
+clean: 
+	rm -f $(LIB)
+
+install: $(LIB)
+	$(MKINSTALLDIRS) $(ROOTROBOTS)/bin $(LIBDIR)
+	$(INSTALL) h2addErrno $(ROOTROBOTS)/bin
+	$(INSTALL) $(LIB) $(LIBDIR)
+	(cd $(LIBDIR); rm -f $(BASENAME).$(SHLIBSUF) ; \
+	 $(LN) $(BASENAME).$(SHLIBREV) $(BASENAME).$(SHLIBSUF))
+
+include $(TARGET)/DEPENDANCES

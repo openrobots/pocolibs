@@ -1,0 +1,53 @@
+$LAAS$
+
+		INTEGRATION DE L'ENDIANNESS DANS POSTERLIB
+
+Pour des raisons techniques, mais aussi pour rester compatible avec la
+version actuelle, le posterWrite ne va pas changer l'endianness. 
+L'endianness des données stockées sera donc toujours celui du module 
+createur du poster.
+
+C'est lors du posterRead qu'on procédera éventuellement à la conversion,
+à condition bien sur d'utiliser les fonctions GenoM (soumettre cette 
+condition à posterWrite eu été trop incertain).
+
+C'est donc lors du posterCreate que l'info d'endianness sera enregistrée.
+
+La mémoire partagée est dans h2dev :
+c'est là qu'il faut stocker endianness. 
+
+Pour des raisons d'efficacité on va aussi le stocker dans POSTER_STR
+(évite de lire endianness dans h2dev remote).
+
+Ainsi, posterCreate aura pour effet de stocker l'endianness dans h2dev ET
+dans POSTER_STR.
+
+Pour les processus autres que le créateur du poster, cette info sera
+récupérée à l'occasion du posterFind (passage obligé avant tout autre
+appel à des fonctions de posterLib). posterFind ira lui-même récupérer
+cette info dans h2dev (remote ou local) puis la stockera dans une liste
+locale allPosters de POSTER_STR.
+
+La fonction posterEndianness permettra alors de récupérer cette info
+depuis les fonctions GenoM ou autre code C.
+
+
+Remarque: actuellement la structure POSTER_STR créée par posterCreate est
+ignorée de la liste allPosters locale à posterLib et maintenue par
+posteFind.  Ainsi, en cas d'appel à posterFind après un posterCreate par
+un même process (étrange mais pas interdit), une nouvelle structure
+POSTER_STR (et éventuelleemnt REMOTE_POSTER_STR avec la place pour les
+données!) est créée. Elle pointe bien sur sur le même h2dev, mais la
+structure originale POSTER_STR est ignorée et les champs éventuellement
+initialisés dans celle-ci (eg, endianness) seront perdus. Sans parler de
+la duplication de l'occupation mémoire et des fuites (un seul POSTER_STR
+sera libéré). Il serait donc plus propre d'ajouter les structures
+POSTER_STR allouées par posterCreate à la liste allPosters.
+
+----------------------------------------------------------------------
+		FONCTIONNEMENT DE POSTERLIB
+
+
+
+
+

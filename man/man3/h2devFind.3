@@ -1,0 +1,32 @@
+.\" $Id$
+.TH h2devFind 3 "January 1999"
+.SH NAME
+h2devFind \- find an existing 
+.SM comLib
+device
+.SH SYNOPSIS
+.nf
+.B "#include <h2Lib.h>"
+.B "#include <h2devLib.h>"
+.B "int h2devFind(char *name, H2_DEV_TYPE type)"
+.fi
+.SH DESCRIPTION
+.IR h2devFind
+searches for a 
+.SM comLib
+device with name 
+.I name  
+and type
+.I type ,
+allocated by another process, in order to access it.
+.SH "RETURN VALUE"
+.IR h2devFind
+returns the index of the found device upon success, or
+.IR ERROR
+in case of an error. In this case it calls
+.IR errnoSet(3)
+with the corresponding Unix or comLib error code.
+.SH "SEE ALSO"
+.IR h2devAlloc(3),
+.IR h2devFree(3)
+

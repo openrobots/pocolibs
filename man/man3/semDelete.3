@@ -1,0 +1,28 @@
+.\" $Id$
+.TH semDelete 3 "May 1999"
+.SH NAME
+semDelete \- delete a semaphore
+.SH SYNOPSIS
+.nf
+.B "#include <h2Lib.h>"
+.B "#include <semLib.h>"
+.B "STATUS semDelete(SEM_ID semaphore)"
+.fi
+.SH DESCRIPTION
+.IR semDelete
+deletes a semaphore from the process and releases any resources used
+by the semaphore. 
+.I semaphore
+is the identifier of the semaphore to delete. 
+.SH "RETURN VALUE"
+.IR OK
+or
+.IR ERROR .
+In this case the errno value for the calling task is set.
+.SH NOTE
+The behaviour of processes blocked on a semaphore when it is deleted is
+not defined.
+.SH "SEE ALSO"
+.IR semBCreate(3) ,
+.IR semCCreate(3)
+

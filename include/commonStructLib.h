@@ -1,0 +1,55 @@
+/* $LAAS$ */
+/*
+ * Copyright (c) 1991, 2003 CNRS/LAAS
+ *
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+#ifndef  COMMON_STRUCT_H
+#define  COMMON_STRUCT_H
+
+/* DESCRIPTION :
+   Bibliotheque de manipulation de structures de donnees communes, utiles
+   pour le partage de donnees entre des taches d'une meme CPU.
+*/
+
+#include <pthread.h>
+
+/* Flag d'indication d'initialisation de la structure */
+#define  COMMON_STRUCT_INIT_FLAG                  0x11223344
+
+/* Flag d'indication de la direction de copie */
+#define  TO                                       0
+#define  FROM                                     1
+
+#define   M_commonStructLib             (506 << 16)
+
+/* Codes d'erreur */
+#define  S_commonStructLib_ISNT_COMMON_STRUCT     (M_commonStructLib | 0)
+
+
+/* Definition de type de l'en-tete des structures communes de donnees */
+typedef struct {
+  int initFlag;				/* Flag  d'initialisation */
+  int nBytes;				/* Nombre de bytes de la structure */
+  pthread_mutex_t *semId;		/* Semaphore d'exclusion mutuelle 
+					   de la structure */
+  int unused;				/* pour alignement de la structure */
+} COMMON_STRUCT_HDR, *COMMON_STRUCT_ID;
+
+
+/* prototypes */
+#include "commonStructLibProto.h"
+
+
+/*------------- fin de chargement du fichier --------------------------------*/
+#endif

@@ -1,0 +1,37 @@
+.\" $Id$
+.TH semBCreate 3 "May 1999"
+.SH NAME
+semBCreate \- create a binary semaphore
+.SH SYNOPSIS
+.nf
+.B "#include <h2Lib.h>"
+.B "#include <semLib.h>"
+.B "SEM_ID semBCreate(int options, SEM_B_STATE initalState)"
+.fi
+.SH DESCRIPTION
+.IR semBCreate 
+creates a binary semaphore, that is local to the process creating it.
+.I options
+can be
+.IR SEM_Q_FIFO
+to specify that tasks waiting on the semaphore are dequeued in a FIFO
+order, or 
+.IR SEM_Q_PRIORITY
+to specify that tasks waiting on the semaphore are dequeued by
+decreasing priority.
+.PP
+.I initialState
+indicates the initial state of the semaphore, either 
+.IR SEM_EMPTY 
+or
+.IR SEM_FULL
+.SH "RETURN VALUE"
+.IR semBCreate
+returns the semaphore identifier for the newly created semaphore or
+NULL in case of an error. In that case an error code is left in the
+task's errno value. 
+.SH "SEE ALSO"
+.IR semCCreate(3) ,
+.IR semTake(3) ,
+.IR semGive(3) ,
+.IR semDelete(3)

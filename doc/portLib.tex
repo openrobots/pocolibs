@@ -1,0 +1,750 @@
+%%%
+%%% Copyright (C) 1999 Matthieu Herrb
+%%%
+%%% Wed Jun  2 1999
+%%%
+
+\documentclass[a4paper,11pt]{report}
+\usepackage[dvips]{graphicx}
+\usepackage{french}
+\usepackage{c-superflu}
+
+\title{Spécifications et implémentation de \textsf{portLib} et \textsf{comLib}}
+\author{Matthieu Herrb - LAAS/CNRS}
+\date{Août 1999}
+\makeindex
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+\chapter{Introduction}
+PortLib (POsix Real-Time LIBrary) est une bibliothèque pour faciliter
+le portage d'applications écrites pour le système VxWorks vers un
+système compatible Unix disposant des extensions temps-réel définies
+par POSIX.1b. 
+
+\chapter{portLib pour le portage d'applications VxWorks}
+
+\section{Composantes de portLib}
+
+\subsection{Initialisation}
+
+Toute tâche Unix qui souhaite utiliser les fonctions de PortLib doit
+appeler la fonction \f{osInit}. Notez que cette fonction est appelée
+par la fonction d'initialisation de ComLib, \f{h2initGlob}, par
+conséquent une tâche qui utilise h2initGlob pour initialiser ComLib et
+PortLib n'a pas besoin d'appeler osInit.
+
+\paragraph{\f{osInit}}
+\begin{verbatim}
+STATUS
+osInit(int clkRate)
+\end{verbatim}
+
+\subsection{Tâches}
+
+PortLib utilise les threads POSIX pour implémenter les tâches de
+VxWorks. Toutes les fonctionnalités des tâches VxWorks ne sont
+cependant pas implémentées. En particulier, PortLib utilise le
+scheduler par défaut offert par l'implémentation des threads
+POSIX, qui n'a pas les mêmes propriétés que le scheduler de VxWorks. 
+
+\subsubsection{Création/Destruction}
+
+\paragraph{\f{taskSpawn}}
+\begin{verbatim}
+int
+taskSpawn(char *name, int priority, int options, int stackSize,
+          FUNCPTR entryPt, int arg1, int arg2, int arg3, int arg4, int arg5,
+          int arg6, int arg7, int arg8, int arg9, int arg10)
+\end{verbatim}
+
+\paragraph{\f{taskDelete}}
+\begin{verbatim}
+STATUS
+taskDelete(int tid)
+\end{verbatim}
+
+\subsubsection{Suspension/reprise}
+
+\paragraph{\f{taskSuspend}}
+\begin{verbatim}
+STATUS 
+taskSuspend(int tid)
+\end{verbatim}
+
+\paragraph{\f{taskResume}}
+\begin{verbatim}
+STATUS 
+taskResume(int tid)
+\end{verbatim}
+
+\subsubsection{Gestion des priorités}
+
+\paragraph{\f{taskPrioritySet}}
+\begin{verbatim}
+STATUS 
+taskPrioritySet(int tid, int newPriority)
+\end{verbatim}
+
+\paragraph{\f{taskPriorityGet}}
+\begin{verbatim}
+STATUS
+taskPriorityGet(int tid, int *pPriority)
+\end{verbatim}
+
+\subsubsection{Scheduler}
+
+\paragraph{\f{taskLock}}
+\begin{verbatim}
+STATUS
+taskLock(void)
+\end{verbatim}
+
+\paragraph{\f{taskUnlock}}
+\begin{verbatim}
+STATUS
+taskUnlock(void)
+\end{verbatim}
+
+\paragraph{\f{taskDelay}}
+\begin{verbatim}
+STATUS
+taskDelay(int ticks)
+\end{verbatim}
+
+\subsubsection{Identificateurs de tâches}
+
+\paragraph{\f{taskIdSelf}}
+\begin{verbatim}
+int
+taskIdSelf(void)
+\end{verbatim}
+
+\paragraph{\f{taskTcb}}
+\begin{verbatim}
+OS_TCB *
+taskTcb(int tid)
+\end{verbatim}
+
+\paragraph{\f{taskNameToId}}
+\begin{verbatim}
+int 
+taskNameToId(char *name)
+\end{verbatim}
+
+\subsubsection{Données privées à une tâche}
+
+\paragraph{\f{taskSetUserData}}
+\begin{verbatim}
+STATUS
+taskSetUserData(int tid, unsigned long data)
+\end{verbatim}
+
+\paragraph{\f{taskGetUserData}}
+\begin{verbatim}
+unsigned long
+taskGetUserData(int tid)
+\end{verbatim}
+
+
+\subsection{Horloge système}
+
+\paragraph{\f{tickGet}}
+\begin{verbatim}
+unsigned long
+tickGet(void)
+\end{verbatim}
+
+\paragraph{\f{sysClkRateSet}}
+\begin{verbatim}
+STATUS
+sysClkRateSet(int ticksPerSecond)
+\end{verbatim}
+
+\paragraph{\f{sysClkRateGet}}
+\begin{verbatim}
+int
+sysClkRateGet(void)
+\end{verbatim}
+
+\subsection{Watchdogs}
+
+\paragraph{\f{wdCreate}} 
+\begin{verbatim}
+WDOG_ID
+wdCreate(void)
+\end{verbatim}
+
+\paragraph{\f{wdDelete}}
+\begin{verbatim}
+STATUS
+wdDelete(WDOG_ID wdId)
+\end{verbatim}
+
+\paragraph{\f{wdStart}}
+\begin{verbatim}
+STATUS
+wdStart(WDOG_ID wdId, int delay, FUNCPTR pRoutine, int parameter)
+\end{verbatim}
+
+\paragraph{\f{wdCancel}}
+\begin{verbatim}
+STATUS
+wdCancel(WDOG_ID wdId)
+\end{verbatim}
+
+
+\subsection{Sémaphores}
+
+\paragraph{\f{semBCreate}}
+\begin{verbatim}
+SEM_ID
+semBCreate(int options, SEM_B_STATE initialState)
+\end{verbatim}
+
+\paragraph{\f{semCCreate}}
+\begin{verbatim}
+SEM_ID
+semCCreate(int options, int initialCount)
+\end{verbatim}
+
+\paragraph{\f{semDelete}}
+\begin{verbatim}
+STATUS
+semDelete(SEM_ID semId)
+\end{verbatim}
+
+\paragraph{\f{semGive}}
+\begin{verbatim}
+STATUS
+semGive(SEM_ID semId)
+\end{verbatim}
+
+\paragraph{\f{semTake}}
+\begin{verbatim}
+STATUS
+semTake(SEM_ID semId, int timeout)
+\end{verbatim}
+
+\paragraph{\f{semFlush}}
+\begin{verbatim}
+STATUS
+semFlush(SEM_ID semId)
+\end{verbatim}
+
+
+\subsection{Gestion des erreurs}
+
+\paragraph{\f{errnoGet}}
+\begin{verbatim}
+int
+errnoGet(void)
+\end{verbatim}
+
+\paragraph{\f{errnoSet}}
+\begin{verbatim}
+STATUS
+errnoSet(int errorValue)
+\end{verbatim}
+
+
+\subsection{Table des symboles}
+
+\paragraph{\f{symFindByName}}
+\begin{verbatim}
+STATUS
+symFindByName(SYMTAB_ID symTblId, char *name, char **pValue,
+              SYM_TYPE *pType)
+\end{verbatim}
+
+\paragraph{\f{symFindByValue}}
+\begin{verbatim}
+STATUS
+symFindByValue(SYMTAB_ID symTldId, char *value, char *name, 
+               int *pValue, SYM_TYPE *pType)
+\end{verbatim}
+
+\section{Limitations}
+
+%----------------------------------------------------------------------
+
+\chapter{La bibliothèque comLib}
+
+Cette bibliothèque, développée initialement sous VxWorks pour le robot 
+mobile autonome Hilare 2, est l'un des composants de base de
+l'architecture informatique pour les systèmes autonomes proposée par
+le LAAS. Elle fournit les outils de communication utilisés 
+par la couche fonctionnelle générée par GenoM. 
+
+La version de comLib pour Unix décrite ici est le deuxième portage à
+Unix de cette bibliothèque. Ce portage utilise la bibliothèque PortLib 
+pour se rapprocher au maximum de la version initiale, développée sous
+VxWorks. 
+
+La version VxWorks de comLib permet à un ensemble de tâches, réparties 
+sur plusieurs cartes CPU connectées par un bus VME d'échanger des
+données, soit par messages, soit par mémoire partagée (posters) en
+établissant des relations client/serveur. 
+
+Cette implémentation sous Unix est limitée à une seule machine Unix
+(qui peut être multi-processeurs, mais c'est transparent pour
+portLib/comLib). Chaque tâche Unix peut contenir plusieurs tâches au
+sens VxWorks (émulées par les threads POSIX). Plusieurs tâches Unix
+peuvent dialoguer grâce à des mécansimes (utilisant la mémoire partagée 
+d'Unix) proches de VxMP qui permet sous VxWorks d'établir une
+communication entre plusieurs CPU disposant de mémoire partagée grâce
+au bus VME.  On peut donc faire le parallèle entre un processus Unix
+et un processeur dans un rack VME sous VxWorks. Les threads à
+l'intérieur du processus Unix correspondent aux tâches sur un
+processeur VxWorks. 
+
+\section{Devices H2}
+
+La notion de device hilare2 est à la base de comLib. C'est cet élément 
+qui contient les objets de communication de base et qui permet de les
+localiser dans un système multi-processus. 
+
+\paragraph{\f{h2devInit}}
+\begin{verbatim}
+STATUS
+h2devInit(int smMemSize)
+\end{verbatim}
+
+\paragraph{\f{h2devEnd}}
+\begin{verbatim}
+STATUS
+h2devEnd(void)
+\end{verbatim}
+
+\paragraph{\f{h2devAttach}} 
+\begin{verbatim}
+STATUS 
+h2devAttach(void)
+\end{verbatim}
+
+\paragraph{\f{h2devAlloc}}
+\begin{verbatim}
+int
+h2devAlloc(char *name, H2_DEV_TYPE type)
+\end{verbatim}
+
+\paragraph{\f{h2devFree}}
+\begin{verbatim}
+void
+h2devFree(int dev)
+\end{verbatim}
+
+\paragraph{\f{h2devFind}}
+\begin{verbatim}
+int
+h2devFind(char *name, H2_DEV_TYPE type)
+\end{verbatim}
+
+\paragraph{\f{h2devShow}}
+\begin{verbatim}
+void
+h2devShow(void)
+\end{verbatim}
+
+\section{Émulation de VxMP}
+
+\subsection{Mémoire partagée}
+
+ComLib utilise une zone de mémoire partagée Unix unique dans laquelle
+est alloué le tableau des devices h2. Le reste de cette zone est gérée 
+comme un pool de mémoire partagée, que les différentes tâches peuvent
+utiliser pour allouer des blocs de mémoire partagée pour implémenter
+les boîtes à lettres et les posters. L'interface d'utilisation de
+cette zone se fait selon le formalisme défini par VxMP. 
+
+\paragraph{\f{smMemMalloc}}
+\begin{verbatim}
+void *
+smMemMalloc(unsigned int nBytes)
+\end{verbatim}
+
+\paragraph{\f{smMemCalloc}}
+\begin{verbatim}
+void *
+smMemCalloc(int elemNum, int elemSize)
+\end{verbatim}
+
+\paragraph{\f{smMemRealloc}}
+\begin{verbatim}
+void *
+smMemRealloc(void *pBlock, unsigned newSize)
+\end{verbatim}
+
+\paragraph{\f{smMemFree}}
+\begin{verbatim}
+STATUS 
+smMemFree(void *ptr)
+\end{verbatim}
+
+\paragraph{\f{smMemShow}}
+\begin{verbatim}
+void
+smMemShow(BOOL option)
+\end{verbatim}
+
+\subsection{Adresses locales/globales}
+
+\paragraph{\f{smObjGlobalToLocal}}
+\begin{verbatim}
+void *
+smObjGlobalToLocal(void *globalAdrs)
+\end{verbatim}
+
+\paragraph{\f{smObjLocalToGlobal}}
+\begin{verbatim}
+void *
+smObjLocalToGlobal(void *localAdrs)
+\end{verbatim}
+
+\section{Initialisation}
+
+\paragraph{\f{h2initGlob}}
+\begin{verbatim}
+STATUS
+h2initGlob(int ticksPerSec)
+\end{verbatim}
+
+\section{Sémaphores partagés}
+
+\paragraph{\f{h2semAlloc}}
+\begin{verbatim}
+H2SEM_ID
+h2semAlloc(int type)
+\end{verbatim}
+
+\paragraph{\f{h2semDelete}}
+\begin{verbatim}
+STATUS
+h2semDelete(H2SEM_ID sem)
+\end{verbatim}
+
+\paragraph{\f{h2semTake}}
+\begin{verbatim}
+BOOL
+h2semTake(H2SEM_ID sem, int timeout)
+\end{verbatim}
+
+\paragraph{\f{h2semGive}}
+\begin{verbatim}
+STATUS
+h2semGive(H2SEM_ID sem)
+\end{verbatim}
+
+\paragraph{\f{h2semFlush}}
+\begin{verbatim}
+BOOL
+h2semFlush(H2SEM_ID sem)
+\end{verbatim}
+
+\paragraph{\f{h2semShow}}
+\begin{verbatim}
+STATUS
+h2semShow(H2SEM_ID sem)
+\end{verbatim}
+
+\section{Structures partagées}
+
+Bibliothèque de manipulation de structures de données communes, utiles
+pour le partage de données entre des tâches d'une même CPU.
+
+\paragraph{\f{commonStructCreate}}
+\begin{verbatim}
+STATUS 
+commonStructCreate(int len,
+                   void **pStructAdrs)
+\end{verbatim}
+Cette fonction permet à la tâche appelante de créer une structure
+commune de données.
+
+\paragraph{\f{commonStructDelete}}
+\begin{verbatim}
+STATUS 
+commonStructDelete(void *pCommonStruct)
+\end{verbatim}
+Cette fonction permet de libérer une structure de donnees commune.
+
+\paragraph{\f{commonStructTake}}
+\begin{verbatim}
+STATUS 
+commonStructTake(void *pCommonStruct)
+\end{verbatim}
+
+Cette routine permet de prendre le contrôle sur une structure de données
+commune, allouée auparavant au moyen de commonStructCreate. Après avoir
+pris le contrôle, la tache appelante peut exécuter des cycles indivisibles
+de lecture/écriture sur cette zone mémoire (l'accès des autres tâches étant
+exclu).
+
+\paragraph{\f{commonStructGive}}
+\begin{verbatim}
+STATUS 
+commonStructGive(void *pCommonStruct)
+\end{verbatim}
+Cette routine permet de libérer l'accès à une structure de données
+commune.
+
+\paragraph{\f{commonStructCopy}}
+\begin{verbatim}
+STATUS 
+commonStructCopy(void *pCommonStruct,
+                 int toFromFlag,     
+                 void *pBuf)         
+\end{verbatim}
+Cette fonction permet de copier le contenu d'une structure de données
+commune dans un tampon fourni par l'utilisateur.
+
+
+\section{Horloge}
+
+\paragraph{\f{h2timeGet}}
+\begin{verbatim}
+STATUS
+h2timeGet(H2TIME *pTimeStr)
+\end{verbatim}
+
+\paragraph{\f{h2timeSet}}
+\begin{verbatim}
+STATUS
+h2timeSet(H2TIME *pTimeStr)
+\end{verbatim}
+Non implémenté dans cette version.
+
+\paragraph{\f{h2timeAdj}}
+\begin{verbatim}
+STATUS
+h2timeAdj(H2TIME *pTimeStr)
+\end{verbatim}
+
+\paragraph{\f{h2timeShow}}
+\begin{verbatim}
+void
+h2timeShow(void)
+\end{verbatim}
+
+\paragraph{\f{h2timeInterval}}
+\begin{verbatim}
+STATUS
+h2timeInterval (H2TIME *pOldTime, u_long *pNmsec)
+\end{verbatim}
+
+\section{Timers}
+
+\paragraph{\f{h2timerAlloc}}
+\begin{verbatim}
+H2TIMER_ID 
+h2timerAlloc(void)
+\end{verbatim}
+
+\paragraph{\f{h2timerFree}}
+\begin{verbatim}
+STATUS 
+h2timerFree(H2TIMER_ID timerId)
+\end{verbatim}
+
+\paragraph{\f{h2timerStart}}
+\begin{verbatim}
+STATUS 
+h2timerStart(H2TIMER_ID timerId,
+             int periode,
+             int delay)
+\end{verbatim}
+
+\paragraph{\f{h2timerPause}}
+\begin{verbatim}
+STATUS
+h2timerPause(H2TIMER_ID timerId)
+\end{verbatim}
+
+\paragraph{\f{h2timerPauseReset}}
+\begin{verbatim}
+STATUS 
+h2timerPauseReset(H2TIMER_ID timerId)
+\end{verbatim}
+
+\paragraph{\f{h2timerStop}}
+\begin{verbatim}
+STATUS
+h2timerStop(H2TIMER_ID timerId)
+\end{verbatim}
+
+\paragraph{\f{h2timerChangePeriod}}
+\begin{verbatim}
+STATUS
+h2timerChangePeriod(H2TIMER_ID timerId, int periode)
+\end{verbatim}
+
+
+\section{Tampons Circulaires}
+
+Bibliothèque des routines de manipulation de ring buffers. Alloués en
+mémoire partagée.
+
+\paragraph{\f{h2rngCreate}}
+\begin{verbatim}
+H2RNG_ID 
+h2rngCreate(int type,
+            int nbytes)
+\end{verbatim}
+Crée et initialise un ring buffer de taille fournie par l'utilisateur.
+
+\paragraph{\f{h2rngDelete}}
+\begin{verbatim}
+void 
+h2rngDelete(H2RNG_ID rngId)
+\end{verbatim}
+Libère le pool de mémoire du ring buffer.
+
+\paragraph{\f{h2rngFlush}}
+\begin{verbatim}
+STATUS 
+h2rngFlush(H2RNG_ID rngId)
+\end{verbatim}
+
+\paragraph{\f{h2rngBufGet}}
+\begin{verbatim}
+int 
+h2rngBufGet(H2RNG_ID rngId,
+            char *buf,     
+            int maxbytes)  
+\end{verbatim}
+Copie les caractères du ring buffer sur le buffer de l'utilisateur.
+Copie autant de bytes qu'il y a sur le ring buffer, jusqu'au nombre
+ max. défini par l'utilisateur. Les bytes lus sont enlevés du ring buffer.
+
+
+\paragraph{\f{h2rngBufPut}}
+\begin{verbatim}
+int 
+h2rngBufPut(H2RNG_ID rngId,
+            char *buf,     
+            int nbytes)    
+\end{verbatim}
+Copie le contenu du buffer de l'utilisateur sur le ring buffer.
+Le nombe spécifié de bytes va être mis dans le ring buffer, s'il y a
+de la place.
+
+\paragraph{\f{h2rngBlockPut}}
+\begin{verbatim}
+int 
+h2rngBlockPut(H2RNG_ID rngId,
+              int idBlk,     
+              char *buf,     
+              int nbytes)    
+\end{verbatim}
+Copie le contenu du buffer de l'utilisateur sur le ring buffer, sous
+le format de « bloc ». L'overhead associé est de 9 ou 10 bytes, dépendant
+de la taille du message. L'en-tête du message consiste du nombre de
+bytes du message, suivi d'un identificateur de bloc (fourni par 
+l'utilisateur).
+
+\paragraph{\f{h2rngBlockGet}}
+\begin{verbatim}
+int 
+h2rngBlockGet(H2RNG_ID rngId,
+              int *pidBlk,   
+              char *buf,     
+              int maxbytes)  
+\end{verbatim}
+Lit un bloc de caractères dans le ring buffer et le met dans le buffer
+de l'utilisateur. Récupère aussi l'id du bloc.
+
+\paragraph{\f{h2rngBlockSpy}}
+\begin{verbatim}
+int 
+h2rngBlockSpy(H2RNG_ID rngId,
+              int *pidBlk,   
+              int *pnbytes,  
+              char *buf,     
+              int maxbytes)  
+\end{verbatim}
+Espionne le contenu du 1er bloc dans le ring buffer.
+Obtient le nombre de bytes du message, l'id du bloc et
+un échantillon des données du bloc.
+
+\paragraph{\f{h2rngIsEmpty}}
+\begin{verbatim}
+BOOL 
+h2rngIsEmpty(H2RNG_ID rngId)
+\end{verbatim}
+Vérifie si le ring buffer est vide. 
+
+\paragraph{\f{h2rngIsFull}}
+\begin{verbatim}
+BOOL 
+h2rngIsFull(H2RNG_ID rngId)
+\end{verbatim}
+Vérifie si le ring buffer est plein.
+
+\paragraph{\f{h2rngFreeBytes}}
+\begin{verbatim}
+int 
+h2rngFreeBytes(H2RNG_ID rngId)
+\end{verbatim}
+Détermine le nombre de bytes libres dans un ring.
+
+\paragraph{\f{h2rngNBytes}}
+\begin{verbatim}
+int 
+h2rngNBytes(H2RNG_ID rngId)
+\end{verbatim}
+Détermine le nombre de positions occupées dans un ring buffer type
+"byte".
+
+\paragraph{\f{h2rngNBlocks}}
+\begin{verbatim}
+int 
+h2rngNBlocks(H2RNG_ID rngId)
+\end{verbatim}
+Cette procédure donne comme réponse le nombre de blocks dans un ring
+type block.
+
+\paragraph{\f{h2rngBlockSkip}}
+\begin{verbatim}
+STATUS 
+h2rngBlockSkip(H2RNG_ID rngId)
+\end{verbatim}
+Cette fonction permet de sauter le prochain message sur le ring.
+Son contenu est alors perdu.
+
+
+
+\section{Communication par messages}
+
+\section{La couche lettre}
+
+\section{Client/Serveur}
+
+\section{Évenements}
+
+\section{Fonctions mathématiques}
+
+\section{Entrées/Sorties}
+
+%----------------------------------------------------------------------
+
+\chapter{PosterLib}
+
+%----------------------------------------------------------------------
+
+\chapter{Gestion des erreurs}
+
+%----------------------------------------------------------------------
+
+\chapter{Utilisation sous Unix}
+
+\section{La commande h2}
+
+\section{Le shell}
+
+\section{Compilation et édition de liens}
+
+\printindex
+
+\end{document}

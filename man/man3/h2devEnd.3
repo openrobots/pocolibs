@@ -1,0 +1,38 @@
+.\" $Id$
+.TH h2devEnd 3 "January 1999"
+.SH NAME
+h2devEnd \- terminates a
+.SM comLib
+session
+.SH SYNOPSIS
+.nf
+.B "#include <h2Lib.h>"
+.B "#include <h2devLib.h>"
+.B "STATUS h2devEnd(void)"
+.fi
+.SH DESCRIPTION
+.IR h2devEnd
+terminates a 
+.SM comLib 
+session.
+It destroys any existing 
+.SM comLib
+device and frees all used IPC structures (semaphores, mailboxes or shared 
+memory) 
+.PP
+All processes using 
+.SM comLib
+should be terminated before calling
+.IR h2devEnd .
+.SH "RETURN VALUE"
+If everything is good
+.IR h2devEnd 
+returns
+.IR OK ,
+otherwise it returns 
+.IR ERROR
+and calls
+.IR errnoSet(3)
+with the corresponding Unix or comLib error code.
+.SH "SEE ALSO"
+.IR h2devInit(3)
