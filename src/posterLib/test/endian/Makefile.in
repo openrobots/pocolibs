@@ -1,0 +1,73 @@
+# -*- Makefile -*-
+#
+# Copyright (c) 2003-2004 CNRS/LAAS
+#
+# Permission to use, copy, modify, and distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+#
+# $LAAS$
+#
+top_builddir=	@top_builddir@
+srcdir=		@srcdir@
+INSTALL=	@INSTALL@
+
+include ../../../../Init.make
+-include $(srcdir)/os/$(OSAPI)/Makefile.inc
+
+VPATH=		@srcdir@
+
+#----------------------------------------------------------------------
+# Test programs
+
+TEST_W = testPosterWrite
+TEST_R = testPosterRead
+TEST_LIB = testPosterLib.lo
+
+DIRGENOM = $(ROOTROBOTS)/genom
+LIBGENOM = $(LIBDIR)/genomLib.so
+
+CPPFLAGS += -I$(DIRGENOM)/include -I../../..
+
+all: $(TEST_W) $(TEST_R)
+
+$(TEST_W): testPosterWrite.lo $(TEST_LIB)
+	$(LTLD) -o $@ $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) \
+	testPosterWrite.lo $(TEST_LIB) \
+	-L../../../portLib -L../../../errorLib -L../../../comLib \
+	-L../.. $(LIBS) -lm  $(LIBGENOM)
+
+$(TEST_R): testPosterRead.lo $(TEST_LIB)
+	$(LTLD) -o $@ $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) \
+	testPosterRead.lo $(TEST_LIB) \
+	-L../../../portLib -L../../../errorLib -L../../../comLib \
+	-L../.. $(LIBS) -lm  $(LIBGENOM)
+
+# Regles standard 
+%.lo: %.c
+	$(LTCC) -c $(CPPFLAGS) $(CFLAGS) $<
+
+# Nettoyage
+clean:
+	$(LIBTOOL) --mode=clean rm -f testPosterWrite.lo testPosterRead.lo \
+	$(TEST_LIB) $(TEST_W) $(TEST_R)
+
+distclean: clean
+	rm -f DEPENDANCES Makefile
+
+# Dependances 
+MKDEPFLAGS = -k
+
+depend DEPENDANCES: testPosterLib.c testPosterWrite.c testPosterRead.c
+	$(MKDEP) $(MKDEPFLAGS) -c$(CC) -t.lo -oDEPENDANCES $(CPPFLAGS) $?
+
+include DEPENDANCES
+
