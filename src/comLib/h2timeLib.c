@@ -48,45 +48,98 @@ h2timeGet(H2TIME *pTimeStr)
     struct timeval tv;
 
 #if defined(__RTAI__) && defined(__KERNEL__)
-    long tmp;
     do_gettimeofday(&tv);
 #else
-    struct tm *tmp;
     gettimeofday(&tv, NULL);
 #endif
 
-    pTimeStr->ntick = tv.tv_sec * NTICKS_PER_SEC + tv.tv_usec / TICK_US;
-    pTimeStr->msec = tv.tv_usec / 1000;
-
-#if defined(__RTAI__) && defined(__KERNEL__)
-    tmp = tv.tv_sec;
-    pTimeStr->sec = tmp % 60;
-    tmp /= 60;
-    pTimeStr->minute = tmp % 60;
-    tmp /= 60;
-    pTimeStr->hour = tmp % 24;
-
-    /* XXX I'll work on that later */
-    pTimeStr->day = 1;
-    pTimeStr->date = 1;
-    pTimeStr->month = 1;
-    pTimeStr->year = 2004;
-#else
-    tmp = localtime((time_t *)&tv.tv_sec);
-
-    pTimeStr->sec = tmp->tm_sec;
-    pTimeStr->minute = tmp->tm_min;
-    pTimeStr->hour = tmp->tm_hour;
-    pTimeStr->day = tmp->tm_wday == 0 ? 7 : tmp->tm_wday;
-    pTimeStr->date = tmp->tm_mday;
-    pTimeStr->month = tmp->tm_mon + 1;
-    pTimeStr->year = tmp->tm_year;
-#endif
-
+    h2timeFromTimeval(pTimeStr, &tv);
     /* free(tmp); */
     
     return(OK);
 } /* h2timeGet */
+
+static int days_in_year[] = 
+    { 0,                // Janvier
+      31,               // Fevrier
+      31+28,            // Mars
+      2*31+28,          // Avril
+      2*31+30+28,       // Mai
+      3*31+30+28,       // Juin
+      3*31+2*30+28,     // Juillet
+      4*31+2*30+28,     // Aout
+      5*31+2*30+28,     // Septembre
+      5*31+3*30+28,     // Octobre
+      6*31+3*30+28,     // Novembre
+      6*31+4*30+28,     // Decembre
+      7*31+4*30+28
+    };
+#define is_bisextile_exception(y) ( ((y) % 100 == 0) && ((y) % 400 != 0) )
+#define is_bisextile(y)     ( ( !((y) % 4) && !is_bisextile_exception(y) ) ? 1 : 0 )
+#define days_since_zero(y)  ( (y) * days_in_year[12] + ((y) / 4) + ((y) / 400) - ((y) / 100) )
+#define days_since_epoch(y) ( days_since_zero(y) - days_since_zero(1970) )
+
+void
+h2timeFromTimeval(H2TIME* pTimeStr, const struct timeval* tv)
+{
+    long sec, day, month, year;
+    static int day_per_month[] = 
+        { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+
+    pTimeStr->ntick = tv -> tv_sec * NTICKS_PER_SEC + tv -> tv_usec / TICK_US;
+    pTimeStr->msec = tv -> tv_usec / 1000;
+
+    sec = tv -> tv_sec;
+    day  = sec / (3600 * 24); // day since 1970
+    year = (day / 365 + 1970);        // We'll have one year difference each 4*365 years (roughly)
+    day  -= days_since_epoch(year);  // day in the year
+
+    day_per_month[1] = is_bisextile(year) ? 29 : 28;
+    for (month = 0; month < 12; ++month)
+    {
+        if (day < day_per_month[month])
+            break;
+        day -= day_per_month[month];
+    }
+    // now, day is the day in the month and month the month index
+
+    pTimeStr->sec    = sec % 60;
+    pTimeStr->minute = (sec / 60) % 60;
+    pTimeStr->hour   = (sec / 3600) % 24;
+    pTimeStr->day   = 0;
+    pTimeStr->date  = day + 1;
+    pTimeStr->month = month + 1;
+    pTimeStr->year  = year - 1900;
+//#else
+//    tmp = localtime((time_t *)&tv -> tv_sec);
+//
+//    pTimeStr->sec    = tmp->tm_sec;
+//    pTimeStr->minute = tmp->tm_min;
+//    pTimeStr->hour   = tmp->tm_hour;
+//    pTimeStr->day    = tmp->tm_wday == 0 ? 7 : tmp->tm_wday;
+//    pTimeStr->date   = tmp->tm_mday;
+//    pTimeStr->month  = tmp->tm_mon + 1;
+//    pTimeStr->year   = tmp->tm_year;
+//#endif
+}
+
+void
+timevalFromH2time(struct timeval* tv, const H2TIME* pTimeStr)
+{
+    tv -> tv_usec = pTimeStr->msec*1000;
+
+    int year = pTimeStr->year + 1900;
+    int days = pTimeStr->date - 1
+             + days_in_year[pTimeStr->month - 1]
+             + ((pTimeStr->month > 2) ? is_bisextile(year) : 0)
+             + days_since_epoch(year);
+
+    tv -> tv_sec 
+        = pTimeStr->sec 
+            + pTimeStr->minute*60
+            + pTimeStr->hour  *3600
+            + days            *24*3600;
+}
 
 /*----------------------------------------------------------------------*/
 
