@@ -23,7 +23,7 @@
  *** l'adresse de base du shared memory segment 
  ***/
 
-#include "config.h"
+#include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
 #include <portLib.h>

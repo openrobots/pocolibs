@@ -9474,7 +9474,7 @@ fi
 rm -f conftest.err conftest.$ac_objext \
       conftest$ac_exeext conftest.$ac_ext
 
-          ac_config_headers="$ac_config_headers src/config.h"
+          ac_config_headers="$ac_config_headers src/pocolibs-config.h"
 
                                                                                                                         ac_config_files="$ac_config_files Init.make Makefile include/Makefile src/portLib/Makefile src/errorLib/Makefile src/errorLib/h2addErrno src/comLib/Makefile src/posterLib/Makefile src/posterLib/posterServ/Makefile src/h2/Makefile src/shell/Makefile src/xes/Makefile"
 cat >confcache <<\_ACEOF
@@ -10014,7 +10014,7 @@ do
   "src/h2/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/h2/Makefile" ;;
   "src/shell/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/shell/Makefile" ;;
   "src/xes/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/xes/Makefile" ;;
-  "src/config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS src/config.h" ;;
+  "src/pocolibs-config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS src/pocolibs-config.h" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
    { (exit 1); exit 1; }; };;

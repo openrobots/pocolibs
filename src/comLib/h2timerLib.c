@@ -21,7 +21,7 @@
    par l'utilisateur.
 */
 
-#include "config.h"
+#include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
 /* #define DEBUG_H2TIMER */

@@ -31,7 +31,7 @@
 
 /*-------------------------- INCLUSIONS ------------------------------------*/
  
-#include "config.h"
+#include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
 #ifdef VXWORKS

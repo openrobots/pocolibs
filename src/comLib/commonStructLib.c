@@ -26,7 +26,7 @@
    Bibliotheque de manipulation de structures de donnees communes, utiles
    pour le partage de donnees entre des taches d'une meme CPU.
 */
-#include "config.h"
+#include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
 

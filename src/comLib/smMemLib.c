@@ -18,7 +18,7 @@
  *** Gestion de memoire partagee compatible VxMP
  ***
  ***/
-#include "config.h"
+#include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
 #include <assert.h>

@@ -18,7 +18,7 @@
  *** Poster lower layer for a local Unix machine , 
  *** using SYSV shared memory segments
  ***/
-#include "config.h"
+#include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
 #include <sys/types.h>

@@ -200,7 +200,7 @@ AC_TRY_LINK([#include <stdio.h>],
 	[AC_MSG_RESULT([no])]
 )
 
-AC_CONFIG_HEADER(src/config.h)
+AC_CONFIG_HEADER(src/pocolibs-config.h)
 AC_OUTPUT(Init.make
 	Makefile
 	include/Makefile

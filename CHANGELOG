@@ -1,5 +1,7 @@
 Version 2.0, xx April 2004
 
+ 11. Moved config.h to pocolibs-config.h in order to prevent name clashes
+     with <linux/config.h> when compiling linux modules.
  10. Created os/posix subdirectories and moved some posix specific files
      in there in order to prepare the upcoming rtai support.
   9. Get rid of the remaining ifdef __DARWIN__ checks. They are not

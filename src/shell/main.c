@@ -19,7 +19,7 @@
  *** pour comLib/Posix
  ***/
 
-#include "config.h"
+#include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
 #include <stdio.h>

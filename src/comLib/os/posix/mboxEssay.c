@@ -27,7 +27,7 @@
    En particulier, il est utile pour la verification de l'etat des mailboxes du
    systeme et, eventuelement, pour leur deletion, tests, etc.
 */
-#include "config.h"
+#include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
 #ifdef VXWORKS

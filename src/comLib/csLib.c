@@ -27,7 +27,7 @@
    logicielle du type "client/serveur".
 */
 
-#include "config.h"
+#include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
 #include <string.h>

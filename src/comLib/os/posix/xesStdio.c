@@ -18,7 +18,7 @@
  *** Fonctions d'entrees/sorties a la mode stdio pour XES
  ***/
 
-#include "config.h"
+#include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
 #include <stdio.h>
