@@ -17,7 +17,7 @@
 #include "config.h"
 __RCSID("$LAAS$");
 
-#if !defined(__OpenBSD__) && !defined(__NetBSD__) && !defined(__DARWIN__)
+#ifndef HAVE_VFSCANF
 #include <stdio.h>
 #include <stdarg.h>
 #include <limits.h>
