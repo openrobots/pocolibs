@@ -550,12 +550,16 @@ create_window(int *win_fd, int *win_pid)
 
 #endif /* USE_SYSV_PTY */
     
+#ifdef XTERM_S_OPT_SLASH
     if ((c = strrchr(slave_path, '/'))) {
 	    /* unix98 style name */
 	    sprintf(buf, "-S%s/%d", c+1, master);
     } else {
 	    sprintf(buf, "-S%s%d", &slave_path[strlen(slave_path)-2], master);
     }
+#else
+    sprintf(buf, "-S%s%d", &slave_path[strlen(slave_path)-2], master);
+#endif
 
     if((pid = fork()) == 0) {
 
