@@ -107,13 +107,13 @@ typedef struct H2_DEV_STR {
     } data;
 } H2_DEV_STR;
 
-/* Nombre max de h2dev */
-#define H2_DEV_MAX 100
+/* Maximum number of h2 devices */
+#define H2_DEV_MAX 120
 
-/* Timeout sur h2devFind */
+/* Timeout on h2devFind */
 #define H2DEV_TIMEOUT 100
 
-/* Nom externe */
+/* External name for h2 devices */
 #define H2_DEV_NAME ".h2dev"
 
 /* Code du module */
