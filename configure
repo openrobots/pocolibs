@@ -469,7 +469,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT PACKAGE VERSION LN_S ECHO RANLIB ac_ct_RANLIB STRIP ac_ct_STRIP CPP EGREP LIBTOOL OSAPI INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA MKDEP RPCGEN RPCGEN_C HAS_X XCPPFLAGS XLDFLAGS LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT PACKAGE VERSION LN_S ECHO RANLIB ac_ct_RANLIB STRIP ac_ct_STRIP CPP EGREP LIBTOOL RTAI_INCLUDES OSAPI INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA MKDEP RPCGEN RPCGEN_C HAS_X XCPPFLAGS XLDFLAGS LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -1022,8 +1022,11 @@ Optional Packages:
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-gnu-ld           assume the C compiler uses GNU ld default=no
   --with-pic              try to use only PIC/non-PIC objects default=use both
-  --with-purify           configure to postprocess with pur
-ify
+  --with-rtai=no|kernel|user
+                          configure to use RTAI in the specified address space
+  --with-rtai-includes=DIR
+                          RTAI headers are in DIR
+  --with-purify           configure to postprocess with purify
   --with-x                use the X Window System
 
 Some influential environment variables:
@@ -4170,7 +4173,7 @@ test "x$enable_libtool_lock" != xno && enable_libtool_lock=yes
 case $host in
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 4173 "configure"' > conftest.$ac_ext
+  echo '#line 4176 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -4742,7 +4745,7 @@ chmod -w .
 save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -o out/conftest2.$ac_objext"
 compiler_c_o=no
-if { (eval echo configure:4745: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
+if { (eval echo configure:4748: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
   # The compiler can only warn and ignore the option if not recognized
   # So say no if there are warnings
   if test -s out/conftest.err; then
@@ -6706,7 +6709,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 6709 "configure"
+#line 6712 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -6804,7 +6807,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 6807 "configure"
+#line 6810 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -7541,7 +7544,125 @@ LIBTOOL='$(SHELL) $(top_builddir)/libtool'
 
 
 
-OSAPI=posix
+
+# AC_CHECK_RTAI_INCLUDES(var, path)
+
+
+# configure options
+
+# Check whether --with-rtai or --without-rtai was given.
+if test "${with_rtai+set}" = set; then
+  withval="$with_rtai"
+  opt_rtai=$withval
+else
+  opt_rtai=no
+fi;
+
+# Check whether --with-rtai-includes or --without-rtai-includes was given.
+if test "${with_rtai_includes+set}" = set; then
+  withval="$with_rtai_includes"
+  opt_rtai_includes=$withval
+fi;
+
+# make related stuff
+if test "x$opt_rtai" = "xkernel"; then
+   OSAPI=rtai
+   cat >>confdefs.h <<\_ACEOF
+#define __RTAI__ 1
+_ACEOF
+
+   cat >>confdefs.h <<\_ACEOF
+#define __KERNEL__ 1
+_ACEOF
+
+   cat >>confdefs.h <<\_ACEOF
+#define MODULE 1
+_ACEOF
+
+   echo "$as_me:$LINENO: result: Enabling RTAI kernel support" >&5
+echo "${ECHO_T}Enabling RTAI kernel support" >&6
+
+   echo "$as_me:$LINENO: checking for RTAI includes" >&5
+echo $ECHO_N "checking for RTAI includes... $ECHO_C" >&6
+   if test "${ac_cv_path_rtai+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+       IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS=":"
+        ac_tmppath="$opt_rtai_includes:/usr/realtime/include:/usr/src/rtai/include"
+        for ac_dir in $ac_tmppath; do
+            test -z "$ac_dir" && ac_dir=.
+            if eval test -f $ac_dir/rtai.h; then
+               eval ac_cv_path_rtai="$ac_dir"
+               break
+            fi
+       done
+       IFS="$ac_save_ifs"
+
+fi
+
+   RTAI_INCLUDES="$ac_cv_path_rtai"
+   if test -n "$RTAI_INCLUDES"; then
+      echo "$as_me:$LINENO: result: $RTAI_INCLUDES" >&5
+echo "${ECHO_T}$RTAI_INCLUDES" >&6
+   else
+      { { echo "$as_me:$LINENO: error: cannot find RTAI includes" >&5
+echo "$as_me: error: cannot find RTAI includes" >&2;}
+   { (exit 2); exit 2; }; }
+   fi
+
+
+
+elif test "x$opt_rtai" = "xuser"; then
+   { { echo "$as_me:$LINENO: error: RTAI in userspace is not yet implemented" >&5
+echo "$as_me: error: RTAI in userspace is not yet implemented" >&2;}
+   { (exit 2); exit 2; }; }
+   OSAPI=rtai-user
+   cat >>confdefs.h <<\_ACEOF
+#define __RTAI__ 1
+_ACEOF
+
+   echo "$as_me:$LINENO: result: Enabling RTAI userspace support" >&5
+echo "${ECHO_T}Enabling RTAI userspace support" >&6
+
+   echo "$as_me:$LINENO: checking for RTAI includes" >&5
+echo $ECHO_N "checking for RTAI includes... $ECHO_C" >&6
+   if test "${ac_cv_path_rtai+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+       IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS=":"
+        ac_tmppath="$opt_rtai_includes:/usr/realtime/include:/usr/src/rtai/include"
+        for ac_dir in $ac_tmppath; do
+            test -z "$ac_dir" && ac_dir=.
+            if eval test -f $ac_dir/rtai.h; then
+               eval ac_cv_path_rtai="$ac_dir"
+               break
+            fi
+       done
+       IFS="$ac_save_ifs"
+
+fi
+
+   RTAI_INCLUDES="$ac_cv_path_rtai"
+   if test -n "$RTAI_INCLUDES"; then
+      echo "$as_me:$LINENO: result: $RTAI_INCLUDES" >&5
+echo "${ECHO_T}$RTAI_INCLUDES" >&6
+   else
+      { { echo "$as_me:$LINENO: error: cannot find RTAI includes" >&5
+echo "$as_me: error: cannot find RTAI includes" >&2;}
+   { (exit 2); exit 2; }; }
+   fi
+
+
+
+elif test "x$opt_rtai" = "xno"; then :
+   OSAPI=posix
+else
+   { { echo "$as_me:$LINENO: error: invalid option --with-rtai=$opt_rtai" >&5
+echo "$as_me: error: invalid option --with-rtai=$opt_rtai" >&2;}
+   { (exit 2); exit 2; }; }
+fi
 
 
 
@@ -8052,7 +8173,21 @@ _ACEOF
 
 
 
-echo "$as_me:$LINENO: checking for X" >&5
+
+
+if test "x$opt_rtai" = "xkernel"; then
+   HAS_X=no
+   XCPPFLAGS=
+   XLDFLAGS=
+
+  if test "x$with_x" = xyes; then
+    { { echo "$as_me:$LINENO: error: X is not supported with RTAI in kernel mode enabled" >&5
+echo "$as_me: error: X is not supported with RTAI in kernel mode enabled" >&2;}
+   { (exit 2); exit 2; }; }
+  fi
+
+else
+  echo "$as_me:$LINENO: checking for X" >&5
 echo $ECHO_N "checking for X... $ECHO_C" >&6
 
 
@@ -8286,26 +8421,30 @@ else
 echo "${ECHO_T}libraries $x_libraries, headers $x_includes" >&6
 fi
 
-if test "x$x_includes" = "xNONE"; then
-  HAS_X=no
-  XCPPFLAGS=
-  XLDFLAGS=
-else
-  HAS_X=yes
- if test "x$x_includes" = "x"; then
-   XCPPFLAGS=
-   XLDFLAGS=
- else
-   XCPPFLAGS=-I$x_includes
-   XLDFLAGS=-L$x_libraries
- fi
+  if test "x$x_includes" = "xNONE"; then
+    HAS_X=no
+    XCPPFLAGS=
+    XLDFLAGS=
+  else
+    HAS_X=yes
+    if test "x$x_includes" = "x"; then
+      XCPPFLAGS=
+      XLDFLAGS=
+    else
+      XCPPFLAGS=-I$x_includes
+      XLDFLAGS=-L$x_libraries
+    fi
+  fi
 fi
+
+
 
 
 
 # AC_CHECK_PTHREADS(action if ok, action if not ok, action if cross-compiling)
 
 
+if test "x$opt_rtai" = "xkernel"; then :; else
 
 echo "$as_me:$LINENO: checking if compiler recognizes -pthread" >&5
 echo $ECHO_N "checking if compiler recognizes -pthread... $ECHO_C" >&6
@@ -8666,6 +8805,9 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 	fi
 fi
+
+fi # rtai-kernel mode
+
 
 
 echo "$as_me:$LINENO: checking for library containing fabs" >&5
@@ -9476,7 +9618,7 @@ rm -f conftest.err conftest.$ac_objext \
 
           ac_config_headers="$ac_config_headers src/pocolibs-config.h"
 
-                                                                                                                        ac_config_files="$ac_config_files Init.make Makefile include/Makefile src/portLib/Makefile src/errorLib/Makefile src/errorLib/h2addErrno src/comLib/Makefile src/posterLib/Makefile src/posterLib/posterServ/Makefile src/h2/Makefile src/shell/Makefile src/xes/Makefile"
+                                                                                                                                  ac_config_files="$ac_config_files Init.make Makefile include/Makefile src/portLib/Makefile src/errorLib/Makefile src/errorLib/h2addErrno src/comLib/Makefile src/posterLib/Makefile src/posterLib/posterServ/Makefile src/h2/Makefile src/shell/Makefile src/xes/Makefile src/regress/Makefile"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -10014,6 +10156,7 @@ do
   "src/h2/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/h2/Makefile" ;;
   "src/shell/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/shell/Makefile" ;;
   "src/xes/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/xes/Makefile" ;;
+  "src/regress/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/regress/Makefile" ;;
   "src/pocolibs-config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS src/pocolibs-config.h" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
@@ -10125,6 +10268,7 @@ s,@ac_ct_STRIP@,$ac_ct_STRIP,;t t
 s,@CPP@,$CPP,;t t
 s,@EGREP@,$EGREP,;t t
 s,@LIBTOOL@,$LIBTOOL,;t t
+s,@RTAI_INCLUDES@,$RTAI_INCLUDES,;t t
 s,@OSAPI@,$OSAPI,;t t
 s,@INSTALL_PROGRAM@,$INSTALL_PROGRAM,;t t
 s,@INSTALL_SCRIPT@,$INSTALL_SCRIPT,;t t

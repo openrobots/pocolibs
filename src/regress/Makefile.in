@@ -1,0 +1,64 @@
+#
+# Copyright (c) 2004 CNRS/LAAS
+#
+# Permission to use, copy, modify, and distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+#
+# $LAAS$
+
+top_builddir=		@top_builddir@
+include $(top_builddir)/Init.make
+include @top_srcdir@/Init.make.$(OSAPI)
+
+VPATH= @srcdir@
+
+CPPFLAGS+= -I..
+
+DIRS= portLib comLib posterLib
+
+SRCS=\
+	portLib/semaphore.c	\
+	portLib/wd.c		\
+	portLib/taskDelay.c	\
+				\
+	comLib/commonStruct.c	\
+	comLib/h2dev.c		\
+	comLib/mbox.c		\
+	comLib/h2timer.c	\
+				\
+	posterLib/poster.c
+
+OBJS=$(SRCS:%.c=%-obj.o)
+BINS=$(SRCS:%.c=%$(BINEXT))
+
+osregress=$(OSAPI)-obj.o
+
+regress: dirs $(BINS)
+
+dirs:
+	mkdir -p $(DIRS)
+
+%-obj.o: %.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CFLAGS) $(CPPFLAGS) \
+		$< -o $@ -prefer-non-pic
+
+$(BINS): %$(BINEXT): %-obj.o $(osregress)
+	$(LIBTOOL) --mode=link $(CC) $(CFLAGS) $(CPPFLAGS)	\
+		$^ -o $@ $(LDFLAGS) $(LIBTOOL_LINKOPT)		\
+		$(LIBTOOL_LINKPOSTERLIB) $(LIBTOOL_LINKCOMLIB)	\
+		$(LIBTOOL_LINKERRORLIB) $(LIBTOOL_LINKPORTLIB)	\
+		$(OS_LIBS)
+
+clean:
+	$(LIBTOOL) --mode=clean rm -f $(BINS) $(OBJS) $(osregress)
+
+distclean: clean

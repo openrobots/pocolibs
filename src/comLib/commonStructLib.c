@@ -29,16 +29,22 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
-
-#include <string.h>
-#include <stdlib.h>
-#include <string.h>
-#include <pthread.h>
-
 #include "portLib.h"
+
+#if defined(__RTAI__) && defined(__KERNEL__)
+# include <linux/slab.h>
+#else
+# include <stdlib.h>
+# include <string.h>
+#endif
+
 #include "errnoLib.h"
 #include "commonStructLib.h"
 
+#if defined(__RTAI__) && defined(__KERNEL__)
+# define malloc(x)	kmalloc(x, GFP_KERNEL)
+# define free(x)	kfree(x)
+#endif
 
 /* ROUTINES DISPONIBLES A L'UTILISATEUR : */
  
@@ -151,7 +157,6 @@ commonStructCreate(int len,		/* Taille de la structure commune
     char *pStrPool;	/* memory pool address */
     int poolSize;	/* memory pool size */
     SEM_ID semId;	/* mutex semaphore */
-    int status;
 
     /* Obtenir la taille du pool de memoire */
     poolSize = sizeof (COMMON_STRUCT_HDR) + len;

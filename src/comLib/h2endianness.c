@@ -23,7 +23,11 @@ __RCSID("$LAAS$");
 #include "vxWorks.h"
 #endif
 
-#include <stdio.h>
+#if defined(__RTAI__) && defined(__KERNEL__)
+# include <linux/kernel.h>
+#else
+# include <stdio.h>
+#endif
 
 #include "h2endianness.h"
 
@@ -36,20 +40,20 @@ H2_ENDIANNESS h2localEndianness (void)
   } u;
 
   u.i  = 256; /* 0x10 */
-  printf ("u.i = %d\n", u.i);
-  printf ("u.c[1] = %d\n", u.c[1]);
+  logMsg ("u.i = %d\n", u.i);
+  logMsg ("u.c[1] = %d\n", u.c[1]);
 
   /* Little endian */
   if (u.c[1] == 1) {
 #if defined(WORDS_BIGENDIAN)
-    printf ("** ERROR h2localEndianness: this library was compiled with wrong endianness\n");
+    logMsg ("** ERROR h2localEndianness: this library was compiled with wrong endianness\n");
 #endif
     return H2_LITTLE_ENDIAN;
   }
   
   /* Big endian */
 #if !defined(WORDS_BIGENDIAN)
-  printf ("** ERROR h2localEndianness: this library was compiled with wrong endianness\n");
+  logMsg ("** ERROR h2localEndianness: this library was compiled with wrong endianness\n");
 #endif
   return H2_BIG_ENDIAN;
 }

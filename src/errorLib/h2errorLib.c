@@ -40,8 +40,12 @@ __RCSID("$LAAS$");
 #include "portLib.h"
 #endif
 
-#include <stdio.h>
-#include <string.h>
+#if defined(__RTAI__) && defined(__KERNEL__)
+# include <linux/sched.h>
+#else
+# include <stdio.h>
+# include <string.h>
+#endif
 
 #include "errnoLib.h"
 #include "h2errorLib.h"
@@ -73,18 +77,17 @@ static char h2msgErrno[1024];
 void 
 h2printErrno(int numErr)
 {
-  printf(h2getMsgErrno(numErr));
-  printf("\n");
-
+  logMsg(h2getMsgErrno(numErr));
+  logMsg("\n");
 }
 
 void 
 h2perror(char *string)
 {
   if (string && string[0])
-    printf("%s: %s\n", string, h2getMsgErrno(errnoGet()));
+    logMsg("%s: %s\n", string, h2getMsgErrno(errnoGet()));
   else
-    printf("%s\n", h2getMsgErrno(errnoGet()));
+    logMsg("%s\n", h2getMsgErrno(errnoGet()));
 }
 
 /*****************************************************************************
@@ -105,7 +108,7 @@ h2listModules(void)
   int sourceNum;
   int prev;
 
-  printf ("\t -- Number attribution --\n"
+  logMsg ("\t -- Number attribution --\n"
           "\t 0              system\n"
 	  "\t 5??            comLib\n"
 	  "\t 6??            hardLib\n"
@@ -118,7 +121,7 @@ h2listModules(void)
     if( sourceNum > 699 && 
 	((sourceNum/10.) - (double)(int)(sourceNum/10) < 0.1000001) &&
 	(int)(sourceNum-prev) != 1) {
-      printf("%d  %s\n",   
+      logMsg("%d  %s\n",   
 	     H2_SOURCE_TAB_FAIL[i].sourceNum, 
 	     H2_SOURCE_TAB_FAIL[i].sourceName);
       prev = sourceNum;
@@ -159,11 +162,16 @@ h2getMsgErrno(int numErr)
    */
   /* Erreurs standards (source == 0) */
   if (H2_SYS_ERR_FLAG(numErr)) {
+#if defined(__RTAI__) && defined(__KERNEL__)
+    sprintf(h2msgErrno, "system error %d", numErr);
+    return(h2msgErrno);
+#else
     return(strerror(numErr));
+#endif
   }
 
   /* Erreurs vxworks (source < 100) */
-#ifndef UNIX
+#ifdef VXWORKS
   /* Rem: si on est sur UNIX les erreurs vxworks sont recupere'es 
      par le tableau d'erreur h2 */
   if (H2_VX_ERR_FLAG(numErr)) 

@@ -27,7 +27,7 @@ CPPFLAGS += -I..
 
 VPATH=	@srcdir@/os/$(OSAPI):@srcdir@
 
-SRCS = h2errorLib.c
+SRCS += h2errorLib.c
 OBJS = $(SRCS:%.c=%.o)
 
 SHLIB_MAJOR = 2

@@ -17,13 +17,17 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <errno.h>
-
 #include "portLib.h"
+
+#if defined(__RTAI__) && defined(__KERNEL__)
+# include <linux/kernel.h>
+# include <linux/sched.h>
+#else
+# include <stdio.h>
+# include <string.h>
+# include <unistd.h>
+#endif
+
 #include "taskLib.h"
 #include "errnoLib.h"
 #include "h2devLib.h"
@@ -32,7 +36,19 @@ __RCSID("$LAAS$");
 #include "h2rngLib.h"
 #include "mboxLib.h"
 #include "smObjLib.h"
-#include "xes.h"
+
+#define COMLIB_DEBUG_MBOXLIB
+
+#ifdef COMLIB_DEBUG_MBOXLIB
+# define LOGDBG(x)     logMsg x
+#else
+# define LOGDBG(x)
+#endif
+
+#if defined(__RTAI__) && defined(__KERNEL__)
+# define getuid()      0
+#endif
+
 
 /*----------------------------------------------------------------------*/
 
@@ -129,6 +145,7 @@ mboxCreate(char *name, int size, MBOX_ID *pMboxId)
 
     /* That's it */
     *pMboxId = dev;
+    LOGDBG(("comLib:mboxCreate: new mbox %d of size %d\n", dev, size));
     return OK;
 }
 
@@ -188,6 +205,7 @@ mboxSend(MBOX_ID toId, MBOX_ID fromId, char *buf, int nbytes)
     /* Write a block corresponding to the message */
     if ((result = h2rngBlockPut (rngId, (int) fromId, buf, nbytes))
 	!= nbytes) {
+        LOGDBG(("comLib:mboxSend: wrote %d bytes in mbox %d\n", result, toId));
 	if (result == 0) {
 	    errnoSet (S_mboxLib_MBOX_FULL);
 	}
@@ -196,12 +214,12 @@ mboxSend(MBOX_ID toId, MBOX_ID fromId, char *buf, int nbytes)
     }
     /* Signal the mailbox that there's a message to read */
     if (h2semGive(H2DEV_MBOX_SEM_ID(toId)) == ERROR) {
-	printf("erreur give semSigRd\n");
+	logMsg("erreur give semSigRd\n");
     }
     /* Signal the event to the task owning the mailbox */
     semTask = H2DEV_TASK_SEM_ID(H2DEV_MBOX_TASK_ID(toId));
     if (h2semGive(semTask) == ERROR) {
-	printf("erreur give semTask\n");
+	logMsg("erreur give semTask\n");
     }
     /* Free the mutex */
     h2semGive(H2DEV_MBOX_SEM_EXCL_ID(toId));
@@ -461,19 +479,19 @@ mboxShow(void)
     if (h2devAttach() == ERROR) {
 	return;
     }
-    putchar('\n');
-    printf("Name                              Id     Size NMes    Bytes\n"
-	   "-------------------------------- --- -------- ---- --------\n");
+    logMsg("\n");
+    logMsg("Name                              Id     Size NMes    Bytes\n");
+    logMsg("-------------------------------- --- -------- ---- --------\n");
     for (i = 0; i < H2_DEV_MAX; i++) {
 	if (H2DEV_TYPE(i) == H2_DEV_TYPE_MBOX) {
 	    mboxIoctl(i, FIO_SIZE, &size);
 	    mboxIoctl(i, FIO_NMSGS, &nMess);
 	    mboxIoctl(i, FIO_NBYTES, &bytes);
-	    printf("%-32s %3d %8d %4d %8d\n", H2DEV_NAME(i), i,
+	    logMsg("%-32s %3d %8d %4d %8d\n", H2DEV_NAME(i), i,
 		   size, nMess, bytes);
 	}
     } /* for */
-    putchar('\n');
+    logMsg("\n");
 }
 
 /*----------------------------------------------------------------------*/

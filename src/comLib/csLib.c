@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003 CNRS/LAAS
+ * Copyright (c) 1990, 2003-2004 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -30,14 +30,23 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
-#include <string.h>
-#include <errnoLib.h>
-#include <stdlib.h>
-
 #include "portLib.h"
+
+#if defined(__RTAI__) && defined(__KERNEL__)
+# include <linux/slab.h>
+#else
+# include <string.h>
+# include <stdlib.h>
+#endif
+
+#include "errnoLib.h"
 #include "gcomLib.h"
 #include "csLib.h"
 
+#if defined(__RTAI__) && defined(__KERNEL__)
+# define malloc(x)     kmalloc(x, GFP_KERNEL)
+# define free(x)       kfree(x)
+#endif
 
 /*---------- ROUTINES DISPONIBLES A L'UTILISATEUR ---------------------------*/
 

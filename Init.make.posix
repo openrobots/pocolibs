@@ -20,6 +20,7 @@
 # --- posix specific configuration --------------------------------------
 
 # produce shared libraries
+BINEXT=
 LIBEXT=.la
 LIBTOOL_COPT=
 LIBTOOL_LINKOPT= \
@@ -29,3 +30,4 @@ LIBTOOL_LINKOPT= \
 LIBTOOL_LINKPORTLIB=	-L../portLib -lportLib
 LIBTOOL_LINKERRORLIB=	-L../errorLib -lerrorLib
 LIBTOOL_LINKCOMLIB=	-L../comLib -lcomLib
+LIBTOOL_LINKPOSTERLIB=	-L../posterLib -lposterLib

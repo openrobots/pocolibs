@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003 CNRS/LAAS
+ * Copyright (c) 1990, 2003-2004 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,9 +16,14 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
-#include <unistd.h>
-
 #include "portLib.h"
+
+#if defined(__RTAI__) && defined(__KERNEL__)
+# include <linux/kernel.h>
+#else
+# include <unistd.h>
+#endif
+
 #include "taskLib.h"
 #include "h2semLib.h"
 #include "h2devLib.h"

@@ -26,6 +26,7 @@
 #define S_semLib_ALLOC_ERROR (M_semLib | 2)
 #define S_semLib_NOT_A_SEM (M_semLib | 3)
 #define S_semLib_TIMEOUT (M_semLib | 4)
+#define S_semLib_RESOURCE_BUSY (M_semLib | 5)
  
 
 /* Valeur initiale des semaphores binaires */

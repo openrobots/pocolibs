@@ -26,10 +26,14 @@ SUBDIRS=\
 	src/portLib  \
 	src/errorLib \
 	src/comLib \
-	src/posterLib \
+	src/posterLib
+
+ifneq (rtai,$(OSAPI))
+SUBDIRS+=\
 	src/posterLib/posterServ \
 	src/h2 \
 	src/shell
+endif
 
 ifeq (yes,$(HAS_X))
 SUBDIRS+= src/xes
@@ -44,6 +48,9 @@ depend:
 	@for d in $(SUBDIRS) ; do \
 		$(MAKE) -C $$d depend ; \
 	done
+
+regress:
+	$(MAKE) -C src/regress regress
 
 install:
 	@for d in $(SUBDIRS) ; do \

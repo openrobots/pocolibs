@@ -23,16 +23,17 @@ include @top_srcdir@/Init.make.$(OSAPI)
 
 INSTALL=	@INSTALL@
 
-CPPFLAGS += -I.. -DPOSTER_SERV_PATH=\"@bindir@/posterServ\"
+CPPFLAGS += -I..
 
 VPATH= 	@srcdir@/os/$(OSAPI):@srcdir@
 
-SRCS = \
+SRCS += \
 	commonStructLib.c	\
 	csLib.c			\
 	gcomLib.c		\
 	h2devLib.c		\
 	h2devOsLib.c		\
+	h2endianness.c		\
 	h2evnLib.c		\
 	h2initGlob.c		\
 	h2mathLib.c		\
@@ -40,16 +41,10 @@ SRCS = \
 	h2semLib.c		\
 	h2timeLib.c		\
 	h2timerLib.c		\
-	h2timerTest.c		\
-	mboxEssay.c		\
 	mboxLib.c		\
 	smMemLib.c		\
 	smMemOsLib.c		\
-	smObjLib.c		\
-	vfscanf.c		\
-	xesClient.c		\
-	xesStdio.c		\
-	h2endianness.c
+	smObjLib.c
 
 OBJS = $(SRCS:%.c=%.o)
 

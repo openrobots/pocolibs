@@ -41,6 +41,15 @@
 #endif /* __GNUC__ */
 #endif
 
+/* Define this to identify RTAI */
+#undef __RTAI__
+
+/* Define this to identify RTAI kernel support */
+#undef __KERNEL__
+
+/* Define this also to identify RTAI kernel support */
+#undef MODULE
+
 /* Define as the return type of signal handlers (int or void).  */
 #undef RETSIGTYPE
 

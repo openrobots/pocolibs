@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2003 CNRS/LAAS
+ * Copyright (c) 1999, 2003-2004 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -21,21 +21,42 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
-#include <assert.h>
-
-#include <string.h>
-#include <stdio.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/shm.h>
-
 #include <portLib.h>
-#include <errnoLib.h>
 
+#if defined(__RTAI__) && defined(__KERNEL__)
+# include <linux/kernel.h>
+# include <linux/sched.h>
+#else
+# include <stdio.h>
+# include <string.h>
+# include <assert.h>
+#endif
+
+#include <errnoLib.h>
 #include <smMemLib.h>
 #include <smObjLib.h>
 #include <h2devLib.h>
+
+#define COMLIB_DEBUG_SMMEMLIB
+
+/* handle MALLOC_TRACE */
+#ifdef MALLOC_TRACE
+# define LOGDBG(x)    malloc_trace x
+#endif
+
+#if defined(COMLIB_DEBUG_SMMEMLIB) && !defined(LOGDBG)
+# define LOGDBG(x)     logMsg x
+#else
+# define LOGDBG(x)
+#endif
+
+#if defined(__RTAI__) && defined(__KERNEL__)
+# ifdef NDEBUG
+#  define assert(x)
+# else
+#  define assert(x) if (!(x)) logMsg("assert failed " #x)
+# endif
+#endif
 
 /**
  ** Global variables
@@ -247,9 +268,8 @@ smMemMalloc(unsigned int nBytes)
     }
     result = internal_malloc(nBytes);
 
-#ifdef MALLOC_TRACE
-    malloc_trace("alloc %u -> 0x%lx\n", size, (unsigned long)result);
-#endif
+    LOGDBG(("comLib:smMemLib: alloc %u -> 0x%lx\n", 
+	    nBytes, (unsigned long)result));
     return result;
 }
 
@@ -302,25 +322,19 @@ smMemFree(void *ptr)
 {
     SM_MALLOC_CHUNK *oc, *c;
 
-#ifdef MALLOC_TRACE
-    malloc_trace("free 0x%x\n", (unsigned)ptr);
-#endif
+    LOGDBG(("comLib:smMemLib: free 0x%x\n", (unsigned)ptr));
 
     if (ptr == NULL) {
-#ifdef MDEBUG
-	fprintf(stderr, "free(NULL)\n");
-#endif
-	return ERROR;
+       LOGDBG(("comLib:smMemLib: free(NULL)\n"));
+       return ERROR;
     }
     /* get a pointer to the header */
     oc = (SM_MALLOC_CHUNK *)ptr - 1;
     /* test for allocated bloc */
     if (oc->next != MALLOC_MAGIC) {
 	/* what to do ? */
-#ifdef MDEBUG
-	fprintf(stderr, "free(something not returned by malloc)\n");
-#endif
-	return ERROR;
+       LOGDBG(("comLib:smMemLib: free(something not returned by malloc)\n"));
+       return ERROR;
     }
     /* insert free chunk in the free list */
     insert_after(&smMemFreeList, oc);
@@ -355,9 +369,9 @@ smMemShow(BOOL option)
     SM_MALLOC_CHUNK *c;
 
     if (option) {
-	printf("\nFREE LIST:\n");
-	printf(" num   addr        size\n");
-	printf(" --- ---------- ----------\n");
+	logMsg("\nFREE LIST:\n");
+	logMsg(" num   addr        size\n");
+	logMsg(" --- ---------- ----------\n");
     }
     /* Parcours de la liste des blocs libres */
     for (c = smMemFreeList; c != NULL; c = smObjGlobalToLocal(c->next)) {
@@ -368,20 +382,20 @@ smMemShow(BOOL option)
 	    maxb = c->length;
 	}
 	if (option) {
-	    printf("%4ld 0x%08lx %10lu\n", blocks, (unsigned long)c, 
+	    logMsg("%4ld 0x%08lx %10lu\n", blocks, (unsigned long)c, 
 		   (unsigned long)c->length);
 	}
     }
     if (option) {
-	printf("\nSUMMARY:\n");
+	logMsg("\nSUMMARY:\n");
     }
-    printf(" status    bytes    blocks   ave block  max block\n");
-    printf(" ------ ---------- -------- ---------- ----------\n");
-    printf("current\n");
-    printf("   free %10lu %9lu %10lu %10lu\n", bytes, blocks, 
+    logMsg(" status    bytes    blocks   ave block  max block\n");
+    logMsg(" ------ ---------- -------- ---------- ----------\n");
+    logMsg("current\n");
+    logMsg("   free %10lu %9lu %10lu %10lu\n", bytes, blocks, 
 	   bytes/blocks, maxb);
 #ifdef notyet
-    printf("  alloc %10d %9d %10d %10s\n", allocBytes, allocBlocks, 
+    logMsg("  alloc %10d %9d %10d %10s\n", allocBytes, allocBlocks, 
 	   allocBytes/allocBlocks, "-");
 #endif
 }

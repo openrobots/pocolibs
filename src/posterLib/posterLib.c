@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 2003 CNRS/LAAS
+ * Copyright (c) 1996, 2003-2004 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -17,16 +17,26 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include <portLib.h>
+
+#if defined(__RTAI__) && defined(__KERNEL__)
+# include <linux/slab.h>
+#else
+# include <stdio.h>
+# include <stdlib.h>
+# include <string.h>
+#endif
+
 #include <h2devLib.h>
 #include <posterLib.h>
 #include <errnoLib.h>
 
 #include "posterLibPriv.h"
+
+#if defined(__RTAI__) && defined(__KERNEL__)
+# define malloc(x)     kmalloc(x, GFP_KERNEL)
+# define free(x)       kfree(x)
+#endif
 
 static STATUS posterInit(void);
 #define POSTER_INIT if (posterInit() == ERROR) return ERROR
@@ -53,6 +63,11 @@ posterCreate(char *name, int size, POSTER_ID *pPosterId)
 	return ERROR;
     }
     
+#ifdef POSTERLIB_ONLY_LOCAL
+    p->type = POSTER_ACCESS_LOCAL;
+    p->funcs = &posterLocalFuncs;
+
+#else
     /* Si POSTER_HOST est defini, creation remote, sinon creation locale */
     if (getenv("POSTER_HOST") != NULL) {
 	p->type = POSTER_ACCESS_REMOTE;
@@ -61,6 +76,7 @@ posterCreate(char *name, int size, POSTER_ID *pPosterId)
 	p->type = POSTER_ACCESS_LOCAL;
 	p->funcs = &posterLocalFuncs;
     }
+#endif /* POSTERLIB_ONLY_LOCAL */
     
     /* Init endianness value to local value 
        (will be changed in remote create procedure if necessary) */
@@ -91,7 +107,7 @@ STATUS
 posterMemCreate(char *name, int busSpace, void *pPool, 
 		int size, POSTER_ID *pPosterId)
 {
-    fprintf(stderr, "posterMemCreate: Not supported under Unix\n");
+    logMsg("posterMemCreate: Not supported under Unix\n");
     return(ERROR);
 }
 
@@ -163,6 +179,8 @@ posterFind(char *name, POSTER_ID *pPosterId)
 	*pPosterId = p;
 	return OK;
     } 
+
+#ifndef POSTERLIB_ONLY_LOCAL
     /* Reset errno */
     errnoSet(0);
     
@@ -182,6 +200,8 @@ posterFind(char *name, POSTER_ID *pPosterId)
 	*pPosterId = p;
 	return OK;
     }
+#endif /* POSTERLIB_ONLY_LOCAL */
+
     /* Pas trouve' - errno a deja ete positionne' */
     free(p);
     return ERROR;
@@ -342,10 +362,12 @@ posterInit(void)
 	if (posterInitDone) {
 		return OK;
 	}
+#ifndef POSTERLIB_ONLY_LOCAL
 	/* Remote posters specific init */
 	if (posterRemoteFuncs.init() != OK) {
 		return ERROR;
 	}
+#endif
 	posterInitDone = TRUE;
 	return OK;
 }

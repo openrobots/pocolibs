@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003 CNRS/LAAS
+ * Copyright (c) 1990, 2003-2004 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -17,12 +17,17 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
-#include <sys/time.h>
-#include <sys/types.h>
-#include <stdio.h>
-#include <time.h>
-
 #include "portLib.h"
+
+#if defined(__RTAI__) && defined(__KERNEL__)
+# include <linux/time.h>
+#else
+# include <stdio.h>
+# include <time.h>
+# include <sys/time.h>
+# include <sys/types.h>
+#endif
+
 #include "h2timeLib.h"
 
 /*----------------------------------------------------------------------*/
@@ -41,13 +46,32 @@ STATUS
 h2timeGet(H2TIME *pTimeStr)
 {
     struct timeval tv;
-    struct tm *tmp;
 
+#if defined(__RTAI__) && defined(__KERNEL__)
+    long tmp;
+    do_gettimeofday(&tv);
+#else
+    struct tm *tmp;
     gettimeofday(&tv, NULL);
+#endif
 
     pTimeStr->ntick = tv.tv_sec * NTICKS_PER_SEC + tv.tv_usec / TICK_US;
     pTimeStr->msec = tv.tv_usec / 1000;
 
+#if defined(__RTAI__) && defined(__KERNEL__)
+    tmp = tv.tv_sec;
+    pTimeStr->sec = tmp % 60;
+    tmp /= 60;
+    pTimeStr->minute = tmp % 60;
+    tmp /= 60;
+    pTimeStr->hour = tmp % 24;
+
+    /* XXX I'll work on that later */
+    pTimeStr->day = 1;
+    pTimeStr->date = 1;
+    pTimeStr->month = 1;
+    pTimeStr->year = 2004;
+#else
     tmp = localtime((time_t *)&tv.tv_sec);
 
     pTimeStr->sec = tmp->tm_sec;
@@ -57,6 +81,7 @@ h2timeGet(H2TIME *pTimeStr)
     pTimeStr->date = tmp->tm_mday;
     pTimeStr->month = tmp->tm_mon + 1;
     pTimeStr->year = tmp->tm_year;
+#endif
 
     /* free(tmp); */
     
@@ -101,12 +126,12 @@ h2timeShow(void)
 
     /* Demander la lecture de la date */
     if (h2timeGet (&strTime) != OK) {
-	printf ("Probleme de lecture de la date!\n");
+	logMsg ("Probleme de lecture de la date!\n");
 	return;
     }
     
     /* Envoyer la date vers la console */
-    printf ("\nDate: %02d-%02d-%02d, %s, %02dh:%02dmin:%02ds\n\n", 
+    logMsg ("\nDate: %02d-%02d-%02d, %s, %02dh:%02dmin:%02ds\n\n", 
 	    strTime.date, strTime.month, strTime.year, 
 	    dayStr[strTime.day - 1], strTime.hour, strTime.minute, 
 	    strTime.sec);

@@ -27,16 +27,9 @@ VPATH= @srcdir@/os/$(OSAPI):@srcdir@
 
 CPPFLAGS += -I. -I.. -I@srcdir@
 
-SRCS = \
+SRCS += \
 	posterLib.c \
-	localPosterLib.c \
-	remotePosterLib.c
-
-SRCS_RPC = \
-	posters_clnt.c \
-	posters_xdr.c
-
-HDR_RPC = posters.h
+	localPosterLib.c
 
 OBJS = $(SRCS:%.c=%.o) $(SRCS_RPC:%.c=%.o)
 

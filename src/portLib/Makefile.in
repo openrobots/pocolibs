@@ -28,11 +28,10 @@ CPPFLAGS += -I..
 
 VPATH=  @srcdir@/os/$(OSAPI):@srcdir@
 
-SRCS = \
+SRCS += \
 	logLib.c 		\
 	osInit.c		\
 	semLib.c		\
-	shellLib.c		\
 	symLib.c		\
 	sysLib.c		\
 	taskLib.c		\

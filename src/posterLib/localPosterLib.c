@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 2003 CNRS/LAAS
+ * Copyright (c) 1996, 2003-2004 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -21,14 +21,17 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
-#include <sys/types.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <string.h>
-#include <unistd.h>
-
 #include "portLib.h"
+
+#if defined(__RTAI__) && defined(__KERNEL__)
+# include <linux/sched.h>
+#else
+# include <stdio.h>
+# include <string.h>
+# include <unistd.h>
+#endif
+
+#include "taskLib.h"
 #include "smMemLib.h"
 #include "smObjLib.h"
 #include "errnoLib.h"
@@ -37,6 +40,11 @@ __RCSID("$LAAS$");
 #include "posterLib.h"
 
 #include "posterLibPriv.h"
+
+#if defined(__RTAI__) && defined(__KERNEL__)
+# define getpid		taskIdSelf
+# define getuid()	0
+#endif
 
 static STATUS localPosterCreate ( char *name, int size, POSTER_ID *pPosterId );
 static STATUS localPosterMemCreate ( char *name, int busSpace, void *pPool,
@@ -135,7 +143,7 @@ localPosterMemCreate(
      int size,                  /* Taille poster - en bytes */
      POSTER_ID *pPosterId)      /* Ou` mettre l'id du poster */
 {
-    fprintf(stderr, "posterMemCreate: pas encore supportee sur Unix\n");
+    logMsg("posterMemCreate: pas encore supportee sur Unix\n");
     return(ERROR);
 }
 
@@ -416,22 +424,22 @@ localPosterShow(void)
     if (h2devAttach() == ERROR) {
 	return ERROR;
     }
-    putchar('\n');
-    printf("NAME                             Id      Size T(last write)\n"
-	   "------------------------------- --- --------- -------------\n");
+    logMsg("\n");
+    logMsg("NAME                             Id      Size T(last write)\n");
+    logMsg("------------------------------- --- --------- -------------\n");
     for (i = 0; i < H2_DEV_MAX; i++) {
 	if (H2DEV_TYPE(i) == H2_DEV_TYPE_POSTER) {
-	    printf("%-32s %3d %8d", H2DEV_NAME(i), i,
+	    logMsg("%-32s %3d %8d", H2DEV_NAME(i), i,
 		   H2DEV_POSTER_SIZE(i));
 	    if (H2DEV_POSTER_FLG_FRESH(i)) {
 		date = H2DEV_POSTER_DATE(i);
-		printf(" %02dh:%02dmin%02ds\n", date->hour, date->minute,
+		logMsg(" %02dh:%02dmin%02ds\n", date->hour, date->minute,
 		       date->sec);
 	    } else {
-		printf(" EMPTY_POSTER!\n");
+		logMsg(" EMPTY_POSTER!\n");
 	    }
 	}
     } /* for */
-    putchar('\n');
+    logMsg("\n");
     return OK;
 }

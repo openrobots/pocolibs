@@ -24,18 +24,30 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
-/* #define DEBUG_H2TIMER */
-
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
-
 #include "portLib.h"
+
+#if defined(__RTAI__) && defined(__KERNEL__)
+# include <linux/kernel.h>
+# include <linux/sched.h>
+#else
+# include <stdio.h>
+# include <string.h>
+#endif
+
 #include "errnoLib.h"
+#include "semLib.h"
 #include "wdLib.h"
 #include "h2timerLib.h"
 
-static  int delayCount;                /* Compteur global de synchronisation */
+/* #define COMLIB_DEBUG_H2TIMERLIB */
+
+#ifdef COMLIB_DEBUG_H2TIMERLIB
+# define LOGDBG(x)     logMsg x
+#else
+# define LOGDBG(x)
+#endif
+
+static int delayCount;                /* Compteur global de synchronisation */
 static SEM_ID timerMutex;
 static WDOG_ID timerWd;			/* watchdog du compteur */
 static H2TIMER timerTab[NMAX_TIMERS]; /* Tableau de timers */
@@ -75,8 +87,7 @@ h2timerInit(void)
 	/* Initialiser le semaphore */
 	timerTab[nTimer].semSync = semBCreate(SEM_Q_PRIORITY, SEM_EMPTY);
 	if (timerTab[nTimer].semSync == NULL) {
-	    fprintf(stderr, "h2timerInit: erreur semBCreate\n");
-	    errnoSet(errno);
+	    logMsg("h2timerInit: erreur semBCreate\n");
 	    return ERROR;
 	}
     }
@@ -208,7 +219,8 @@ h2timerStart(H2TIMER_ID timerId,
     if ((periode <= 0) || 
 	((periode > MAX_DELAY) && ((periode%MAX_DELAY) != 0)) ||
 	((periode < MAX_DELAY) && ((MAX_DELAY%periode) != 0))) {
-        printf ("h2timerStart: period (%d) must be a multiple or a divisor of %d\n", 
+        logMsg ("h2timerStart: "
+		"period (%d) must be a multiple or a divisor of %d\n", 
 		periode, MAX_DELAY);
 	errnoSet (S_h2timerLib_BAD_PERIOD);
 	return (ERROR);
@@ -226,9 +238,7 @@ h2timerStart(H2TIMER_ID timerId,
     timerId->count = 0;
     timerId->status = WAIT_DELAY;
 
-#ifdef DEBUG_H2TIMER
-    printf("h2timerStart %d %d\n", periode, delay);
-#endif
+    LOGDBG(("h2timerStart %d %d\n", periode, delay));
     return (OK);
 }
 
@@ -252,9 +262,7 @@ h2timerPause(H2TIMER_ID timerId)
     }
 
     /* Attente liberation du semaphore de sync du timer */
-#ifdef DEBUG_H2TIMER
-    printf("h2timerPause: got lock\n");
-#endif
+    LOGDBG(("h2timerPause: got lock\n"));
     semTake(timerId->semSync, WAIT_FOREVER);
 
     /*
@@ -388,10 +396,8 @@ timerInt(int arg)
     int nTimer;               /* Numero d'un timer */
     H2TIMER_ID timerId;       /* Ptr vers tableau de timers */
     
+    LOGDBG(("timerInt: delayCount %d\n", delayCount));
 
-#ifdef DEBUG_H2TIMER
-    printf("timerInt: delayCount %d\n", delayCount);
-#endif
     /* Incremente le compteur de delay */
     if (++delayCount >= MAX_DELAY)
 	delayCount = 0;
@@ -408,16 +414,14 @@ timerInt(int arg)
 	if (timerId->flagInit == H2TIMER_FLG_INIT) {
 	    /* Verifier si le timer est en comptage */
 	    if (timerId->status == RUNNING_TIMER) {
-#ifdef DEBUG_H2TIMER
-		printf(" -- count(%d) = %d\n", nTimer, timerId->count);
-#endif
+	        LOGDBG((" -- count(%d) = %d\n", nTimer, timerId->count));
+
 		/* Incrementer le compteur */
 		if (++timerId->count == timerId->periode) {
 		    /* Reseter le compteur */
 		    timerId->count = 0;
-#ifdef DEBUG_H2TIMER		    
-		    printf(" -- timer % declenche'\n", nTimer);
-#endif
+		    LOGDBG((" -- timer % declenche'\n", nTimer));
+
 		    /* Liberer le semaphore */
 		    semGive (timerId->semSync);
 		    
@@ -432,9 +436,7 @@ timerInt(int arg)
 		    timerId->count = 0;
 		    
 		    /* Demarrer le timer */
-#ifdef DEBUG_H2TIMER
-		    printf(" -- timer %d starting\n", nTimer);
-#endif
+		    LOGDBG((" -- timer %d starting\n", nTimer));
 		    timerId->status = RUNNING_TIMER;
 		    semGive (timerId->semSync);
 		}

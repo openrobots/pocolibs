@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2003 CNRS/LAAS
+ * Copyright (c) 1999, 2003-2004 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -28,7 +28,11 @@ __RCSID("$LAAS$");
 
 #include "portLib.h"
 
-#include <stdio.h>
+#if defined(__RTAI__) && defined(__KERNEL__)
+# include <linux/kernel.h>
+#else
+# include <stdio.h>
+#endif
 
 #include "smObjLib.h"
 #include "smMemLib.h"

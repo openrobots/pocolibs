@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003 CNRS/LAAS
+ * Copyright (c) 1990, 2003-2004 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -36,12 +36,17 @@ __RCSID("$LAAS$");
 #else
 #include "portLib.h"
 #endif
-#include <sys/types.h>
+
+#if defined(__RTAI__) && defined(__KERNEL__)
+# include <linux/kernel.h>
+#else
+# include <stdio.h>
+#endif
+
+#include <math.h>
 
 #include "h2mathTab.c"
 #include "h2mathLib.h"
-#include <stdio.h>
-#include <math.h>
 
 /*----------------------- VARIABLES LOCALES --------------------------------*/
 
@@ -103,7 +108,7 @@ double angleLimit (angle)
 {
   /* Test angle */
   if (fabs(angle) > 10000) {
-    printf ("angleLimit: bad angle %f\n", angle);
+    logMsg ("angleLimit: bad angle %f\n", angle);
     return 0;
   }
   
@@ -296,7 +301,7 @@ double integCosFresnel (double theta)
   /* Trouver position dans tableau */
   i = (int) (50.*theta);
   if (i>= sizeof(tabCosFresnel)/sizeof(double)) {
-    printf ("integCosFresnel: theta=%g out of bounds\n", theta);
+    logMsg ("integCosFresnel: theta=%g out of bounds\n", theta);
     return 0;
   }
 
@@ -333,7 +338,7 @@ double integSinFresnel (double theta)
   /* Trouver position dans tableau */
   i = (int) (50.*theta);
   if (i>= sizeof(tabSinFresnel)/sizeof(double)) {
-    printf ("tabSinFresnel: theta=%g out of bounds\n", theta);
+    logMsg ("tabSinFresnel: theta=%g out of bounds\n", theta);
     return 0;
   }
   

@@ -18,10 +18,15 @@ __RCSID("$LAAS$");
 
 #include "portLib.h"
 
-#include <sys/types.h>
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
+#if defined(__RTAI__) && defined(__KERNEL__)
+# include <linux/kernel.h>
+# include <linux/sched.h>
+#else
+# include <sys/types.h>
+# include <stdio.h>
+# include <string.h>
+# include <unistd.h>
+#endif
 
 #include "errnoLib.h"
 #include "h2semLib.h"
@@ -31,6 +36,10 @@ __RCSID("$LAAS$");
 #include "h2devLib.h"
 #include "smMemLib.h"
 #include "smObjLib.h"
+
+#if defined(__RTAI__) && defined(__KERNEL__)
+# define getuid()      0
+#endif
 
 /* Local fucntions prototypes */
 static int h2devFindAux(const char *name, H2_DEV_TYPE type);

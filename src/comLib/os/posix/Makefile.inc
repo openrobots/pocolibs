@@ -21,5 +21,12 @@
 
 CPPFLAGS +=  -DPOSTER_SERV_PATH=\"$(BINDIR)/posterServ\"
 
+SRCS+= \
+	h2timerTest.c           \
+	mboxEssay.c             \
+	vfscanf.c               \
+	xesClient.c             \
+	xesStdio.c
+
 # need libm for h2mathLib
 LIBTOOL_LINKOPT+= $(LIBM)

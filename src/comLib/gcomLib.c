@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003 CNRS/LAAS
+ * Copyright (c) 1990, 2003-2004 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -17,19 +17,37 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <sys/time.h>
-#include <assert.h>
-#include <pthread.h>
-
 #include "portLib.h"
+
+#if defined(__RTAI__) && defined(__KERNEL__)
+# include <linux/slab.h>
+#else
+# include <stdio.h>
+# include <string.h>
+# include <stdlib.h>
+#endif
+
 #include "taskLib.h"
+#include "tickLib.h"
 #include "h2semLib.h"
 #include "errnoLib.h"
 #include "h2devLib.h"
 #include "gcomLib.h"
+
+/* Memory allocation routine - allocates 0'ed buffers */
+#if defined(__RTAI__) && defined(__KERNEL__)
+
+static inline void *calloc(int x, size_t y) 
+{
+   register size_t s = x*y;
+   void *m;
+
+   if ((m = kmalloc(s, GFP_KERNEL))) memset(m, 0, s);
+   return m;
+}
+# define free(x)		kfree(x)
+
+#endif
 
 /**
  ** Variables statiques
@@ -391,12 +409,11 @@ gcomLetterAlloc(int sizeLetter, LETTER_ID *pLetterId)
     } /* for */
 
     /* Allouer de la memoire pour la lettre */
-    if ((letter->pHdr = (LETTER_HDR_ID) malloc ((u_int) sizeLetter + 
+    if ((letter->pHdr = (LETTER_HDR_ID) calloc (1, (u_int) sizeLetter + 
 					      sizeof (LETTER_HDR))) == NULL)
 	return (ERROR);
     
     /* Remplir les champs de la lettre */
-    memset((char *) letter->pHdr, 0, sizeof (LETTER_HDR));
     letter->size = sizeLetter + sizeof (LETTER_HDR);
     letter->flagInit = GCOM_FLAG_INIT;
     
@@ -704,7 +721,7 @@ gcomLetterSend(MBOX_ID mboxId, LETTER_ID sendLetter,
     }
     
     /* Lire le temps */
-    pTabSend->time = (u_long) time ((time_t *) 0);
+    pTabSend->time = tickGet();
     
     /* Charger le champ de timeout de la replique finale */
     pTabSend->finalReplyTout = finalReplyTout;
@@ -1122,7 +1139,7 @@ gcomDispatch (MBOX_ID replyMbox)
 	}
       
 	/* Jeter la lettre et continuer */
-	printf("Probleme dans la reception d'une replique intermediaire ou finale\n");
+	logMsg("Problem while receiving a reply\n");
 	(void) mboxSkip (replyMbox);
     } /* while */
 }
@@ -1185,8 +1202,7 @@ gcomVerifTout (int sendId, int *pTimeout)
 	*pTimeout = 0;
     
     /* Sinon, verifier si timeout */
-    else if ((*pTimeout = totalTimeout - (int) ((u_long) time ((time_t *) 0)
-						- pSend->time)) <= 0)
+    else if ((*pTimeout = totalTimeout - (int) (tickGet() - pSend->time)) <= 0)
 	return (pSend->status = toutStatus);
     
     /* Retourner l'etat */
@@ -1245,8 +1261,7 @@ gcomVerifStatus(int sendId)
     
   /* verifier si timeout */
     if (totalTimeout != 0) {
-	if ((totalTimeout - (int) ((u_long) time ((time_t *) 0) 
-				   - pSend->time)) <= 0)
+       if ((totalTimeout - (int) (tickGet() - pSend->time)) <= 0)
 	    return (pSend->status = toutStatus);
     }
     
