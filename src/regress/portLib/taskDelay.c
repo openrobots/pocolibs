@@ -23,8 +23,8 @@ __RCSID("$LAAS$");
 #if defined(__RTAI__) && defined(__KERNEL__)
 # include <rtai_sched.h>
 #else
+# include <sys/time.h>
 # include <stdio.h>
-# include <time.h>
 #endif
 
 /**
