@@ -18,7 +18,7 @@ __RCSID("$LAAS$");
 
 #include <stdio.h>
 #include <string.h>
-#ifdef USE_POSIX_TIMER
+#ifdef HAVE_POSIX_TIMERS
 #include <time.h>
 #else
 #include <sys/time.h>
@@ -50,7 +50,7 @@ static int sysClkArg = 0;
 static int sysClkTicksPerSecond = 100;
 static int sysClkConnected = FALSE;
 static int sysClkRunning = FALSE;
-#ifdef USE_POSIX_TIMER
+#ifdef HAVE_POSIX_TIMERS
 static timer_t sysClkTimer;
 #endif
 
@@ -81,7 +81,7 @@ void
 sysClkEnable(void)
 {
     struct sigaction act;
-#ifdef USE_POSIX_TIMER
+#ifdef HAVE_POSIX_TIMERS
     struct itimerspec tv;
 #else
     struct itimerval tv;
@@ -106,7 +106,7 @@ sysClkEnable(void)
 	    printf("Erreur sigaction %d\n", errno);
 	}
 
-#ifdef USE_POSIX_TIMER
+#ifdef HAVE_POSIX_TIMERS
 	/* Cree le timer global */
 	if (timer_create(CLOCK_REALTIME, NULL, &sysClkTimer) == -1) {
 	    printf("Erreur creation timer %d\n", errno);
@@ -123,7 +123,7 @@ sysClkEnable(void)
 	tv.it_value.tv_sec = 0;
 #endif
     
-#ifdef USE_POSIX_TIMER
+#ifdef HAVE_POSIX_TIMERS
 	if (timer_settime(sysClkTimer, 0, &tv, NULL) == -1) {
 	    printf("Erreur set timer %d\n", errno);
 	    ERRNO_SET(errno);
@@ -151,14 +151,14 @@ void
 sysClkDisable(void)
 {
     static struct sigaction act;
-#ifndef USE_POSIX_TIMER
+#ifndef HAVE_POSIX_TIMERS
     struct itimerval tv;
 #endif
 
     if (sysClkRunning) {
 
 
-#ifdef USE_POSIX_TIMER
+#ifdef HAVE_POSIX_TIMERS
 	timer_delete(sysClkTimer);
 #else
 	tv.it_value.tv_usec = 0;
