@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003 CNRS/LAAS
+ * Copyright (c) 2003-2005 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -41,9 +41,9 @@
 
 #endif /* SunOS 4.1.x */
 
-#ifdef linux
+#ifdef __linux__
 
-#undef USE_SYSV_PTY
+#define USE_SYSV_PTY
 #undef USE_STREAMS
 #define USE_RLIMIT
 
