@@ -31,7 +31,6 @@ SRCS = \
 	osInit.c		\
 	semLib.c		\
 	shellLib.c		\
-	snprintf.c		\
 	symLib.c		\
 	sysLib.c		\
 	taskLib.c		\
