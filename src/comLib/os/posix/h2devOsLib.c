@@ -396,7 +396,7 @@ h2devShow(void)
     for (i = 0; i < H2_DEV_MAX; i++) {
 	pthread_mutex_lock(&h2devMutex);
 	if (H2DEV_TYPE(i) != H2_DEV_TYPE_NONE) {
-	    printf("%2d %6s %5d %s\n", i,
+	    printf("%2d %6s %5ld %s\n", i,
 		   h2devTypeName[H2DEV_TYPE(i)],  H2DEV_UID(i), 
 		   H2DEV_NAME(i));
 	}
