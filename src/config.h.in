@@ -44,8 +44,11 @@
 /* Define as the return type of signal handlers (int or void).  */
 #undef RETSIGTYPE
 
+/* vfscanf */
+#undef HAVE_VFSCANF
+
 /* Use timer_* functions ? */
-#undef USE_POSIX_TIMER
+#undef HAVE_POSIX_TIMERS
 
 /* Use a separate thread for sysClk? */
 #undef USE_CLK_THREAD
