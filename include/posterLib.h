@@ -20,11 +20,11 @@
 
 #include "h2endianness.h"
 
-/* type of operation in posterTake()x */
+/* type of operation in posterTake() */
 typedef enum {
-    POSTER_READ,			/* Lecture */
-    POSTER_WRITE,			/* Ecriture */
-    POSTER_IOCTL			/* controle */
+	POSTER_READ,
+	POSTER_WRITE
+	POSTER_IOCTL
 } POSTER_OP;
 
 /*  ioctl operation codes */
@@ -59,7 +59,7 @@ typedef long POSTER_ID;
 
 #define S_posterLib_DUPLICATE_POSTER (M_posterLib << 16 | 10)
 #define S_posterLib_INVALID_PATH   (M_posterLib << 16 | 11)
-#define S_posterLib_MALLOC_ERROR  (M_posterLib << 16 | 12) 
+#define S_posterLib_MALLOC_ERROR  (M_posterLib << 16 | 12)
 #define S_posterLib_SHMGET_ERROR   (M_posterLib << 16 | 13)
 #define S_posterLib_SHMAT_ERROR   (M_posterLib << 16 | 14)
 #define S_posterLib_SEMGET_ERROR  (M_posterLib << 16 | 15)
@@ -72,7 +72,7 @@ typedef long POSTER_ID;
 #define S_remotePosterLib_EMPTY_POSTER         (M_remotePosterLib << 16 | 3)
 #define S_remotePosterLib_BAD_IOCTL_CODE       (M_remotePosterLib << 16 | 4)
 #define S_remotePosterLib_BAD_OP               (M_remotePosterLib << 16 | 5)
- 
+
 #define S_remotePosterLib_BAD_RPC              (M_remotePosterLib << 16 | 10)
 #define S_remotePosterLib_BAD_ALLOC            (M_remotePosterLib << 16 | 11)
 #define S_remotePosterLib_CORRUPT_DATA         (M_remotePosterLib << 16 | 12)
