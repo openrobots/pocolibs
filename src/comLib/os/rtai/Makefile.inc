@@ -35,6 +35,7 @@ SRCS+= \
         h2endianness.c			\
         h2evnLib.c			\
         h2initGlob.c			\
+        h2mathLib.c			\
         h2rngLib.c			\
 	h2timeLib.c			\
         h2timerLib.c			\
