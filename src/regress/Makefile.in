@@ -32,6 +32,7 @@ SRCS=\
 	portLib/wd.c		\
 	portLib/taskDelete.c	\
 	portLib/taskDelay.c	\
+	portLib/tick.c		\
 				\
 	comLib/commonStruct.c	\
 	comLib/h2dev.c		\
