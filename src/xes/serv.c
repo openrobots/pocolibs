@@ -1,17 +1,18 @@
-/***
- *** Entree/Sorties interactives VxWorks a travers X
- ***
- *** Matthieu Herrb - Juin 1991
- *** Portage a Solaris 2 - Avril 1994
- ***
- *** Module serveur X
- ***/
-
-/***
- *** Copyright (C) 1991,1997 LAAS/CNRS 
- ***/
-
-#ident "$Id$"
+/*
+ * Copyright (c) 1991-2003 CNRS/LAAS
+ *
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
 
 /*
  * Base' sur: 
@@ -128,7 +129,7 @@ main(int argc, char *argv[])
     Display *dpy;
     XEvent event;
 
-
+#if 0
     /* 
      * Connexion au serveur X
      */
@@ -137,6 +138,7 @@ main(int argc, char *argv[])
 	fprintf(stderr, "xes: cannot open display\n");
 	exit(1);
     }
+#endif
     /*
      * Verifie si /tmp/xes-pid existe
      */
@@ -279,6 +281,7 @@ main(int argc, char *argv[])
 	    continue;
 	}
 	
+#if 0
 	/*
 	 * Evenements X
 	 */
@@ -299,7 +302,7 @@ main(int argc, char *argv[])
 	    unlink(PID_FILE);
 	    exit (0);
 	}
-	    
+#endif    
 	/*
 	 * Demande de connexion
 	 */

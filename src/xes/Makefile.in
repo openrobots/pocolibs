@@ -36,7 +36,7 @@ all: $(PROG)
 
 $(PROG): $(OBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $(PROG) $(CFLAGS) $(LDFLAGS) $(OBJS) \
-	$(LIBS)
+	$(OS_LIBS)
 
 %.o: %.c
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $<
