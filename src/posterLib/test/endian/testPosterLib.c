@@ -14,10 +14,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "config.h"
+#include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
-#ifdef UNIX
+#ifndef VXWORKS
 #include "portLib.h"
 #else
 #include <vxWorks.h>

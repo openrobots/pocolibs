@@ -15,7 +15,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifdef UNIX
+#ifndef VXWORKS
 #include "portLib.h"
 #else
 #include <vxWorks.h>
