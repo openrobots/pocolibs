@@ -8979,7 +8979,7 @@ IFS=$ac_save_ifs
 
           ac_config_headers="$ac_config_headers src/pocolibs-config.h"
 
-                                                                                                                                  ac_config_files="$ac_config_files Init.make Makefile include/Makefile src/portLib/Makefile src/errorLib/Makefile src/errorLib/h2addErrno src/comLib/Makefile src/posterLib/Makefile src/posterLib/posterServ/Makefile src/h2/Makefile src/shell/Makefile src/xes/Makefile src/regress/Makefile"
+                                                                                                                                            ac_config_files="$ac_config_files Init.make Makefile include/Makefile src/portLib/Makefile src/errorLib/Makefile src/errorLib/h2addErrno src/comLib/Makefile src/posterLib/Makefile src/posterLib/posterServ/Makefile src/posterLib/test/basic/Makefile src/h2/Makefile src/shell/Makefile src/xes/Makefile src/regress/Makefile"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -9493,6 +9493,7 @@ do
   "src/comLib/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/comLib/Makefile" ;;
   "src/posterLib/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/posterLib/Makefile" ;;
   "src/posterLib/posterServ/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/posterLib/posterServ/Makefile" ;;
+  "src/posterLib/test/basic/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/posterLib/test/basic/Makefile" ;;
   "src/h2/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/h2/Makefile" ;;
   "src/shell/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/shell/Makefile" ;;
   "src/xes/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/xes/Makefile" ;;
