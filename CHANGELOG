@@ -1,5 +1,11 @@
 Version 2.0, xx July 2004
-
+ 33. Add a configure test for usablility of POSIX timers for a 
+     100Hz sysClk.
+ 32. Add a 'tick' regress test to check the accuracy of sysClk. 
+     (Linux 2.4 POSIX timers are known to be unable to set a clock
+     at 100Hz).
+ 31. Some cleanups in header files: avoid nested includes. 
+ 30. Fix posterLib LP64 issues.
  29. Implemented a real-time logging library for RTAI. Added logInit and
      logEnd. Bumped portLib minor.
  28. Updated RTAI/user-space to handle multi-threaded linux processes.
