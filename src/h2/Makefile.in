@@ -26,7 +26,7 @@ CPPFLAGS += -I..
 VPATH=	@top_srcdir@/src/h2
 
 SRCS = h2.c
-OBJS = $(SRC_PROG:%.c=%.o)
+OBJS = $(SRCS:%.c=%.o)
 PROG = h2
 
 all: $(PROG)
