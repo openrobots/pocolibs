@@ -32,7 +32,7 @@ __RCSID("$LAAS$");
 
 #ifdef COMLIB_DEBUG_H2DEVLIB
 # define LOGDBG(x)	logMsg x
-# define LOGKDBG(x)
+# define LOGKDBG(x)	logMsg x
 
 static const char *	h2ioctlname(int n);
 #else
