@@ -48,6 +48,7 @@ LIBTOOL=	@LIBTOOL@
 
 CPPFLAGS=	-I@abs_srcdir@/include
 CFLAGS=		@CFLAGS@
+LDFLAGS=	@LDFLAGS@
 
 # Base directory of the software
 ROOTROBOTS ?= 	@prefix@
