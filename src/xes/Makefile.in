@@ -34,7 +34,7 @@ SRCS = \
 	socket_lib.c \
 	version.c
 
-OBJS = $(SRCS:%.c=%.o)
+OBJS = $(SRCS:%.c=%.lo)
 PROG = xes_server
 
 all: $(PROG)
@@ -43,14 +43,14 @@ $(PROG): $(OBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $(PROG) $(CFLAGS) $(XLDFLAGS) \
 	$(LDFLAGS) $(OBJS)  $(XLIB) $(OS_LIBS)
 
-%.o: %.c
-	$(CC) -c $(CPPFLAGS) $(XCPPFLAGS) $(CFLAGS) $<
+%.lo: %.c
+	$(LTCC) -c $(CPPFLAGS) $(XCPPFLAGS) $(CFLAGS) $<
 
 depend DEPENDANCES: $(SRCS)
-	$(MKDEP) -c$(CC) -oDEPENDANCES $(CPPFLAGS) $(XCPPFLAGS) $?
+	$(MKDEP) -c$(CC) -t.lo -oDEPENDANCES $(CPPFLAGS) $(XCPPFLAGS) $?
 
 clean:
-	rm -f $(OBJS) $(SERVER)
+	$(LIBTOOL) --mode=clean rm -f $(OBJS) $(PROG)
 
 distclean: clean
 	rm -f Makefile DEPENDANCES
