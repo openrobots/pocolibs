@@ -396,7 +396,7 @@ gcomLetterAlloc(int sizeLetter, LETTER_ID *pLetterId)
 	return (ERROR);
     
     /* Remplir les champs de la lettre */
-    memset((char *) letter->pHdr, sizeof (LETTER_HDR), '\0');
+    memset((char *) letter->pHdr, 0, sizeof (LETTER_HDR));
     letter->size = sizeLetter + sizeof (LETTER_HDR);
     letter->flagInit = GCOM_FLAG_INIT;
     
