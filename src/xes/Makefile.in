@@ -42,7 +42,7 @@ $(PROG): $(OBJS)
 	$(CC) -c $(CPPFLAGS) $(XCPPFLAGS) $(CFLAGS) $<
 
 depend DEPENDANCES: $(SRCS)
-	$(MKDEP) -c$(CC) -oDEPENDANCES $(CPPFLAGS) $?
+	$(MKDEP) -c$(CC) -oDEPENDANCES $(CPPFLAGS) $(XCPPFLAGS) $?
 
 clean:
 	rm -f $(OBJS) $(SERVER)
