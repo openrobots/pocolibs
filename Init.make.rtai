@@ -34,7 +34,7 @@ MOD=		$(MODDIR)/lib$(BASENAME).o
 MOD_CPPFLAGS+=	-I$(RTAI_INCLUDES) -D__KERNEL__ -DMODULE
 
 ifeq (powerpc,$(host_cpu))
-MOD_CFLAGS+=	-ffixed-r2 -mmultiple -mstring
+MOD_CFLAGS+=	-fsigned-char -ffixed-r2 -mmultiple -mstring
 endif
 
 MODOBJS=$(MODSRCS:%.c=$(MODDIR)/%.lo)
