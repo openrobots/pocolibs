@@ -20,6 +20,9 @@
 
 # --- RTAI-specific configuration ---------------------------------------
 
+# use the posix version for userspace lib
+VPATH=	$(srcdir)/os/posix:$(srcdir)
+
 MODSRCS+= \
 	osInit.c		\
 	$(MODVPATH)/logLib.c	\

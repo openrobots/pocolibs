@@ -38,8 +38,6 @@ __RCSID("$LAAS$");
 #include "mboxLib.h"
 #include "smObjLib.h"
 
-#define COMLIB_DEBUG_MBOXLIB
-
 #ifdef COMLIB_DEBUG_MBOXLIB
 # define LOGDBG(x)     logMsg x
 #else
@@ -88,6 +86,7 @@ mboxInit(char *procName)		/* unused parameter procName */
 	}
 	/* Store the device index in the user data of this task */
 	taskSetUserData(0, dev);
+	LOGDBG(("comLib:mboxInitSelf: initialized for task %lx\n", tid));
 
     } else {
 	/* Existing device found, check consistency */
@@ -95,7 +94,36 @@ mboxInit(char *procName)		/* unused parameter procName */
 	    errnoSet(S_mboxLib_NAME_IN_USE);
 	    return(ERROR);
 	}
+	LOGDBG(("comLib:mboxInitSelf: task %lx already initialized\n", tid));
     }
+    return(OK);
+}
+
+
+/*----------------------------------------------------------------------*/
+
+STATUS
+mboxEnd(int taskId)
+{
+    int i, dev;
+
+    if (taskId == 0) {
+	taskId = taskIdSelf();
+    }
+    /* Device for the given task */
+    dev = taskGetUserData(taskId);
+
+    /* Free all mailboxes attached to this task */
+    for (i = 0; i < H2_DEV_MAX; i++) {
+	if (H2DEV_TYPE(i) == H2_DEV_TYPE_MBOX
+	    && H2DEV_MBOX_TASK_ID(i) == dev) {
+	    mboxDelete(i);
+	}
+    }
+    /* Free the global synchronisation semaphore of the task */
+    h2semDelete(H2DEV_TASK_SEM_ID(dev));
+    /* Free the device for this task */
+    h2devFree(dev);
     return(OK);
 }
 
@@ -131,6 +159,7 @@ mboxCreate(char *name, int size, MBOX_ID *pMboxId)
     if ((mbox->semSigRd = h2semAlloc(H2SEM_SYNC)) == ERROR) {
 	return ERROR;
     }
+    LOGDBG(("comLib:mboxCreate: semaphores created\n"));
 
     /* Allocate a ring buffer */
     rngId = h2rngCreate(H2RNG_TYPE_BLOCK, size);
@@ -147,6 +176,32 @@ mboxCreate(char *name, int size, MBOX_ID *pMboxId)
     /* That's it */
     *pMboxId = dev;
     LOGDBG(("comLib:mboxCreate: new mbox %d of size %d\n", dev, size));
+    return OK;
+}
+
+/*----------------------------------------------------------------------*/
+
+STATUS
+mboxDelete(MBOX_ID mboxId)
+{
+    uid_t uid = getuid();
+
+    if (uid != H2DEV_UID(mboxId) && uid != H2DEV_UID(0)) {
+	errnoSet(S_mboxLib_NOT_OWNER);
+	return ERROR;
+    }
+    /* free the ring buffer */
+    h2rngDelete (smObjGlobalToLocal(H2DEV_MBOX_RNG_ID(mboxId)));
+
+    /* Free the synchronization semaphore */
+    h2semDelete (H2DEV_MBOX_SEM_ID(mboxId));
+
+    /* Free the mutex semaphore */
+    h2semDelete (H2DEV_MBOX_SEM_EXCL_ID(mboxId));
+
+    /* Free the h2 device */
+    h2devFree(mboxId);
+
     return OK;
 }
 
@@ -176,95 +231,28 @@ mboxFind(char *name, MBOX_ID *pMboxId)
 
 /*----------------------------------------------------------------------*/
 
-/**
- **  mboxSend  -  Send a message to a mailbox
- **
- **  Description:
- **  Sends a message to a mailbox device. Takes the mutex semaphore
- **  for the device, check that it exists, computes the local address
- **  of the ring buffer for this device, writes the messages in the
- **  ring buffer and frees the synchronization semaphore to signal
- **  the mailbox owner that a message was written.
- **
- **  Returns: OK or ERROR
- **/
-
-STATUS
-mboxSend(MBOX_ID toId, MBOX_ID fromId, char *buf, int nbytes)
+void
+mboxShow(void)
 {
-    H2RNG_ID rngId;			/* ring buffer of the device */
-    H2SEM_ID semTask;
-    int result;
+    int i;
+    int nMess, bytes, size;
 
-    /* take the mutex semaphore of the device */
-    if (h2semTake (H2DEV_MBOX_SEM_EXCL_ID(toId), WAIT_FOREVER) != TRUE) {
-	return (ERROR);
+    if (h2devAttach() == ERROR) {
+	return;
     }
-    /* Get the local address of the ring buffer */
-    rngId = (H2RNG_ID)smObjGlobalToLocal(H2DEV_MBOX_RNG_ID(toId));
-
-    /* Write a block corresponding to the message */
-    if ((result = h2rngBlockPut (rngId, (int) fromId, buf, nbytes))
-	!= nbytes) {
-        LOGDBG(("comLib:mboxSend: wrote %d bytes in mbox %d\n", result, toId));
-	if (result == 0) {
-	    errnoSet (S_mboxLib_MBOX_FULL);
+    logMsg("\n");
+    logMsg("Name                              Id     Size NMes    Bytes\n");
+    logMsg("-------------------------------- --- -------- ---- --------\n");
+    for (i = 0; i < H2_DEV_MAX; i++) {
+	if (H2DEV_TYPE(i) == H2_DEV_TYPE_MBOX) {
+	    mboxIoctl(i, FIO_SIZE, &size);
+	    mboxIoctl(i, FIO_NMSGS, &nMess);
+	    mboxIoctl(i, FIO_NBYTES, &bytes);
+	    logMsg("%-32s %3d %8d %4d %8d\n", H2DEV_NAME(i), i,
+		   size, nMess, bytes);
 	}
-	h2semGive (H2DEV_MBOX_SEM_EXCL_ID(toId));
-	return (ERROR);
-    }
-    /* Signal the mailbox that there's a message to read */
-    if (h2semGive(H2DEV_MBOX_SEM_ID(toId)) == ERROR) {
-	logMsg("erreur give semSigRd\n");
-    }
-    /* Signal the event to the task owning the mailbox */
-    semTask = H2DEV_TASK_SEM_ID(H2DEV_MBOX_TASK_ID(toId));
-    if (h2semGive(semTask) == ERROR) {
-	logMsg("erreur give semTask\n");
-    }
-    /* Free the mutex */
-    h2semGive(H2DEV_MBOX_SEM_EXCL_ID(toId));
-
-    /* OK, done */
-    return (OK);
-
-}
-
-/*----------------------------------------------------------------------*/
-
-int
-mboxRcv(MBOX_ID mboxId, MBOX_ID *pFromId, char *buf, int maxbytes,
-	int timeout)
-{
-    int nr;                       /* number of read bytes */
-    int takeStat;                 /* status of semTake() */
-    H2RNG_ID rid;
-
-    /* Compute local address of ring buffer */
-    rid = (H2RNG_ID)smObjGlobalToLocal(H2DEV_MBOX_RNG_ID(mboxId));
-
-    /* Flush the synchronisation semaphore */
-    h2semFlush(H2DEV_MBOX_SEM_ID(mboxId));
-
-    /* Wait for a message */
-    while (1) {
-
-	/* Check if a message is available */
-	if ((nr = h2rngNBytes (rid)) > 0) {
-	    /* Read it */
-	    nr = h2rngBlockGet (rid, (int *) pFromId, buf, maxbytes);
-	    return (nr);
-	}
-
-	/* return if ERROR */
-	if (nr < 0)
-	    return (ERROR);
-
-	/* otherwise, wait */
-	if ((takeStat = h2semTake (H2DEV_MBOX_SEM_ID(mboxId), timeout))
-	    != TRUE)
-	    return (takeStat);
-    }
+    } /* for */
+    logMsg("\n");
 }
 
 /*----------------------------------------------------------------------*/
@@ -333,6 +321,45 @@ mboxIoctl(MBOX_ID mboxId, int codeFunc, void *pArg)
 
 /*----------------------------------------------------------------------*/
 
+int
+mboxRcv(MBOX_ID mboxId, MBOX_ID *pFromId, char *buf, int maxbytes,
+	int timeout)
+{
+    int nr;                       /* number of read bytes */
+    int takeStat;                 /* status of semTake() */
+    H2RNG_ID rid;
+
+    /* Compute local address of ring buffer */
+    rid = (H2RNG_ID)smObjGlobalToLocal(H2DEV_MBOX_RNG_ID(mboxId));
+
+    /* Flush the synchronisation semaphore */
+    h2semFlush(H2DEV_MBOX_SEM_ID(mboxId));
+
+    /* Wait for a message */
+    while (1) {
+
+	/* Check if a message is available */
+	if ((nr = h2rngNBytes (rid)) > 0) {
+	    /* Read it */
+	    nr = h2rngBlockGet (rid, (int *) pFromId, buf, maxbytes);
+	    LOGDBG(("comLib:mboxRcv: read %d bytes from mbox %d in mbox %d\n",
+		    nr, *(int *)pFromId, mboxId));
+	    return (nr);
+	}
+
+	/* return if ERROR */
+	if (nr < 0)
+	    return (ERROR);
+
+	/* otherwise, wait */
+	if ((takeStat = h2semTake (H2DEV_MBOX_SEM_ID(mboxId), timeout))
+	    != TRUE)
+	    return (takeStat);
+    }
+}
+
+/*----------------------------------------------------------------------*/
+
 /**
  **   mboxPause  - Wait for a message in a mailbox
  **
@@ -395,31 +422,6 @@ mboxPause(MBOX_ID mboxId, int timeout)
     } /* while */
 }
 
-/*----------------------------------------------------------------------*/
-
-STATUS
-mboxDelete(MBOX_ID mboxId)
-{
-    uid_t uid = getuid();
-
-    if (uid != H2DEV_UID(mboxId) && uid != H2DEV_UID(0)) {
-	errnoSet(S_mboxLib_NOT_OWNER);
-	return ERROR;
-    }
-    /* free the ring buffer */
-    h2rngDelete (smObjGlobalToLocal(H2DEV_MBOX_RNG_ID(mboxId)));
-
-    /* Free the synchronization semaphore */
-    h2semDelete (H2DEV_MBOX_SEM_ID(mboxId));
-
-    /* Free the mutex semaphore */
-    h2semDelete (H2DEV_MBOX_SEM_EXCL_ID(mboxId));
-
-    /* Free the h2 device */
-    h2devFree(mboxId);
-
-    return OK;
-}
 
 /*----------------------------------------------------------------------*/
 
@@ -442,57 +444,64 @@ mboxSkip(MBOX_ID mboxId)
 
 }
 
+
+#if !defined(__RTAI__) || defined(__KERNEL__)
+
 /*----------------------------------------------------------------------*/
+
+/**
+ **  mboxSend  -  Send a message to a mailbox
+ **
+ **  Description:
+ **  Sends a message to a mailbox device. Takes the mutex semaphore
+ **  for the device, check that it exists, computes the local address
+ **  of the ring buffer for this device, writes the messages in the
+ **  ring buffer and frees the synchronization semaphore to signal
+ **  the mailbox owner that a message was written.
+ **
+ **  Returns: OK or ERROR
+ **/
 
 STATUS
-mboxEnd(int taskId)
+mboxSend(MBOX_ID toId, MBOX_ID fromId, char *buf, int nbytes)
 {
-    int i, dev;
+    H2RNG_ID rngId;			/* ring buffer of the device */
+    H2SEM_ID semTask;
+    int result;
 
-    if (taskId == 0) {
-	taskId = taskIdSelf();
+    /* take the mutex semaphore of the device */
+    if (h2semTake (H2DEV_MBOX_SEM_EXCL_ID(toId), WAIT_FOREVER) != TRUE) {
+	return (ERROR);
     }
-    /* Device for the given task */
-    dev = taskGetUserData(taskId);
+    /* Get the local address of the ring buffer */
+    rngId = (H2RNG_ID)smObjGlobalToLocal(H2DEV_MBOX_RNG_ID(toId));
 
-    /* Free all mailboxes attached to this task */
-    for (i = 0; i < H2_DEV_MAX; i++) {
-	if (H2DEV_TYPE(i) == H2_DEV_TYPE_MBOX
-	    && H2DEV_MBOX_TASK_ID(i) == dev) {
-	    mboxDelete(i);
+    /* Write a block corresponding to the message */
+    if ((result = h2rngBlockPut (rngId, (int) fromId, buf, nbytes))
+	!= nbytes) {
+        LOGDBG(("comLib:mboxSend: wrote %d bytes in mbox %d\n", result, toId));
+	if (result == 0) {
+	    errnoSet (S_mboxLib_MBOX_FULL);
 	}
+	h2semGive (H2DEV_MBOX_SEM_EXCL_ID(toId));
+	return (ERROR);
     }
-    /* Free the global synchronisation semaphore of the task */
-    h2semDelete(H2DEV_TASK_SEM_ID(dev));
-    /* Free the device for this task */
-    h2devFree(dev);
-    return(OK);
+    /* Signal the mailbox that there's a message to read */
+    if (h2semGive(H2DEV_MBOX_SEM_ID(toId)) == ERROR) {
+	logMsg("erreur give semSigRd\n");
+    }
+    /* Signal the event to the task owning the mailbox */
+    semTask = H2DEV_TASK_SEM_ID(H2DEV_MBOX_TASK_ID(toId));
+    if (h2semGive(semTask) == ERROR) {
+	logMsg("erreur give semTask\n");
+    }
+    /* Free the mutex */
+    h2semGive(H2DEV_MBOX_SEM_EXCL_ID(toId));
+
+    /* OK, done */
+    LOGDBG(("comLib:mboxSend: wrote %d bytes in mbox %d\n", result, toId));
+    return (OK);
+
 }
 
-/*----------------------------------------------------------------------*/
-
-void
-mboxShow(void)
-{
-    int i;
-    int nMess, bytes, size;
-
-    if (h2devAttach() == ERROR) {
-	return;
-    }
-    logMsg("\n");
-    logMsg("Name                              Id     Size NMes    Bytes\n");
-    logMsg("-------------------------------- --- -------- ---- --------\n");
-    for (i = 0; i < H2_DEV_MAX; i++) {
-	if (H2DEV_TYPE(i) == H2_DEV_TYPE_MBOX) {
-	    mboxIoctl(i, FIO_SIZE, &size);
-	    mboxIoctl(i, FIO_NMSGS, &nMess);
-	    mboxIoctl(i, FIO_NBYTES, &bytes);
-	    logMsg("%-32s %3d %8d %4d %8d\n", H2DEV_NAME(i), i,
-		   size, nMess, bytes);
-	}
-    } /* for */
-    logMsg("\n");
-}
-
-/*----------------------------------------------------------------------*/
+#endif /* !__RTAI__ || __KERNEL__ */

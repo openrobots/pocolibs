@@ -18,11 +18,28 @@
 # $LAAS$
 #
 
-# --- RTAI-specific configuration ---------------------------------------
+# --- posix-specific configuration --------------------------------------
 
-# use the posix version for userspace lib
-VPATH=	$(srcdir)/os/posix:$(srcdir)
-
-MODSRCS+= \
-	h2errorLib.c		\
-	$(MODVPATH)/module.c
+SRCS+= \
+	commonStructLib.c	\
+	csLib.c			\
+	gcomLib.c		\
+	h2devLib.c		\
+	h2devOsLib.c		\
+	h2endianness.c		\
+	h2evnLib.c		\
+	h2initGlob.c		\
+	h2mathLib.c		\
+	h2rngLib.c		\
+	h2semLib.c		\
+	h2timeLib.c		\
+	h2timerLib.c		\
+	h2timerTest.c           \
+	mboxLib.c		\
+	mboxEssay.c             \
+	smMemLib.c		\
+	smMemOsLib.c		\
+	smObjLib.c		\
+	vfscanf.c               \
+	xesClient.c             \
+	xesStdio.c

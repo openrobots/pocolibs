@@ -1,6 +1,6 @@
 #
-# Copyright (c) 2004 CNRS/LAAS
-# Copyright (c) 2004 EPFL
+# Copyright (c) 2004 
+#      Autonomous Systems Lab, Swiss Federal Institute of Technology.
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -18,11 +18,16 @@
 # $LAAS$
 #
 
-# --- RTAI-specific configuration ---------------------------------------
+# --- posix-specific configuration --------------------------------------
 
-# use the posix version for userspace lib
-VPATH=	$(srcdir)/os/posix:$(srcdir)
+SRCS= \
+	posterLib.c 		\
+	localPosterLib.c	\
+	remotePosterLib.c
 
-MODSRCS+= \
-	h2errorLib.c		\
-	$(MODVPATH)/module.c
+SRCS_RPC= \
+	posters_clnt.c \
+	posters_xdr.c
+
+HDR_RPC=	posters.h
+

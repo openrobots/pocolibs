@@ -1,5 +1,6 @@
 #
-# Copyright (c) 2004 CNRS/LAAS
+# Copyright (c) 2004 
+#      Autonomous Systems Lab, Swiss Federal Institute of Technology.
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -29,8 +30,9 @@ LIBTOOL_LINKPOCOLIBS+=	-L../portLib $(PORTLIB)
 LIBTOOL_LINKPOCOLIBS+=	$(OS_LIBS)
 
 
-# fetch source files in posix subdir also
-VPATH+=		:$(srcdir)/os/posix
+# fetch source files in posix subdir
+VPATH=	$(srcdir)/os/posix:$(srcdir):$(top_srcdir)/compat
+
 
 # nothing specific here
 all-os:

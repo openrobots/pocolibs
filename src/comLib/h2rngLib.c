@@ -1,4 +1,6 @@
 /*
+ * Copyright (c) 2004 
+ *      Autonomous Systems Lab, Swiss Federal Institute of Technology.
  * Copyright (c) 1990, 2003-2004 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -37,16 +39,180 @@ __RCSID("$LAAS$");
 #if defined(__RTAI__) && defined(__KERNEL__)
 # include <linux/kernel.h>
 # include <linux/sched.h>
+# include <asm/uaccess.h>
 #else
-#include <sys/types.h>
+# include <sys/types.h>
 # include <stdlib.h>
 # include <string.h>
 #endif
 
+#include <taskLib.h>
 #include <errnoLib.h>
 #include <smMemLib.h>
 #include <h2rngLib.h>
 
+#define COMLIB_DEBUG_H2RNGLIB
+
+#ifdef COMLIB_DEBUG_H2RNGLIB
+# define LOGDBG(x)	logMsg x
+#else
+# define LOGDBG(x)
+#endif
+
+
+/*****************************************************************************
+*
+*   H2RNG_WR1  -  Ecrire buffer sur ring, sans retour au debut
+*
+*   Description :
+*   Ecrit directement un buffer sur le ring, sans le couper en deux morceaux.
+*
+*   Retourne :
+*   Neant
+*/
+
+#define H2RNG_WR1(pTo, buf, nbytes)	\
+  (					\
+   memcpy (pTo, buf, nbytes),		\
+   pTo = pTo + nbytes                   \
+   )                                                   
+
+
+/*****************************************************************************
+*
+*   H2RNG_WR2 -  Ecrire buffer sur ring, en deux morceaux
+*
+*   Description :
+*   Ecrit le contenu du buffer su le ring, en le coupant si necessaire
+*   en deux morceux (retour au debut du ring).
+*
+*   Retourne : Neant
+*/
+
+#define H2RNG_WR2(pTo, buf, nbytes, ntop, n, pDeb)	\
+  (                                                     \
+   (ntop == -1) ?                                       \
+   (                                                    \
+      H2RNG_WR1(pTo, buf, nbytes)			\
+    )                                                   \
+   :                                                    \
+   (                                                    \
+    (ntop <= nbytes) ?                                  \
+    (                                                   \
+     memcpy (pTo, buf, ntop),				\
+     n = nbytes - ntop,                                 \
+     memcpy (pDeb, buf + ntop, n),			\
+     ntop = -1,                                         \
+     pTo = pDeb + n                                     \
+     )                                                  \
+    :                                                   \
+    (                                                   \
+     memcpy (pTo, buf, nbytes),				\
+     ntop = ntop - nbytes,                              \
+     pTo = pTo + nbytes                                 \
+     )                                                  \
+    )                                                   \
+   )
+
+
+/****************************************************************************
+*
+*   BLK_WR1  -  Ecrire un block sur le ring (1 seul morceau)
+*
+*   Description :
+*   Ecrit un block sur le ring, sans retour au debut du ring (1 seul morceau).
+*   Sont ecrits : nombre de bytes du message, id du block, le message 
+*   de l'utilisateur et le caractere de fin.
+*
+*   Retourne : Neant
+*/
+
+#define BLK_WR1(pTo, idBlk, buf, nbytes)		\
+  (							\
+   H2RNG_WR1(pTo, (char *) &nbytes, sizeof(nbytes)),	\
+   H2RNG_WR1(pTo, (char *) &idBlk, sizeof(idBlk)),	\
+   H2RNG_WR1(pTo, buf, nbytes),				\
+   *pTo = H2RNG_CAR_END					\
+   )
+
+
+
+/*****************************************************************************
+*
+*   BLK_WR2  -  Ecrire un block sur le ring (2 morceaux)
+*
+*   Description :
+*   Ecrit un block sur le ring, si necessaire en le coupant en deux morceux.
+*   Sont ecrits : nombre de bytes du message, id du block, le message
+*   de l'utilisateur et le caractere de fin.
+*
+*   Retourne : Neant
+*/
+
+#define BLK_WR2(pTo, idBlk, buf, nbytes, ntop, pDeb)			\
+  (									\
+   H2RNG_WR2(pTo, (char *)&nbytes, sizeof(nbytes), ntop, n, pDeb),	\
+   H2RNG_WR2(pTo, (char *)&idBlk, sizeof(idBlk), ntop, n, pDeb),	\
+   H2RNG_WR2(pTo, buf, nbytes, ntop, n, pDeb),				\
+   *pTo = H2RNG_CAR_END							\
+   )
+
+
+
+/*****************************************************************************
+*
+*   H2RNG_RD1  -  Lire un buffer sur le ring (1 morceau) 
+*
+*   Description :
+*   Lit un nombre donne de bytes sur le ring (sans se preoccuper avec
+*   le retour au debut du ring)
+*
+*   Retourne : Neant
+*/
+
+#define H2RNG_RD1(pFrom, buf, nbytes)			\
+  (                                                     \
+   memcpy (buf, pFrom, nbytes),				\
+   pFrom = pFrom + nbytes                               \
+   )                                                                     
+
+
+
+/*****************************************************************************
+*   H2RNG_RD2  -  Lire un buffer sur le ring (2 morceaux)
+*
+*   Description :
+*   Lit un nombre donne de bytes sur le ring et les met sur un buffer
+*   fourni par l'utilisateur. Si necessaire, l'ecriture sur ce buffer
+*   est effectuee en 2 morceaux.
+*
+*   Retourne : Neant
+*/
+
+#define H2RNG_RD2(pFrom, buf, nbytes, ntop, n, pDeb)	\
+  (                                                     \
+   (ntop == -1) ?                                       \
+   (                                                    \
+    H2RNG_RD1(pFrom, buf, nbytes)			\
+    )                                                   \
+   :                                                    \
+   (                                                    \
+    (ntop <= nbytes) ?                                  \
+    (                                                   \
+     memcpy (buf, pFrom, ntop),				\
+     n = nbytes - ntop,                                 \
+     memcpy (buf + ntop, pDeb, n),			\
+     ntop = -1,                                         \
+     pFrom = pDeb + n                                   \
+     )                                                  \
+    :                                                   \
+    (                                                   \
+     memcpy (buf, pFrom, nbytes),			\
+     ntop = ntop - nbytes,                              \
+     pFrom = pFrom + nbytes                             \
+     )                                                  \
+    )                                                   \
+   )
 
 
 /*****************************************************************************
@@ -169,7 +335,7 @@ h2rngBufGet(H2RNG_ID rngId,		/* Identificateur du ring buffer */
 	errnoSet (S_h2rngLib_NOT_A_BYTE_RING);
 	return (ERROR);
     }
-    
+
     /* Valeurs congelees des pointeurs d'ecriture et de lecture */
     pWr = rngId->pWr;
     pRd = rngId->pRd;
@@ -185,7 +351,7 @@ h2rngBufGet(H2RNG_ID rngId,		/* Identificateur du ring buffer */
 	/* Verifier si plus grand que nombre de bytes a lire */
 	if (n1 > nbytes) {
 	    /* Faire une seule copie */
- 	    memcpy (buf, (char *) (rngId+1) + pRd, nbytes);
+	    memcpy (buf, (char *) (rngId+1) + pRd, nbytes);
 	    
 	    /* Actualiser pointeur de lecture et retourner */
 	    rngId->pRd = pRd + nbytes;
@@ -455,7 +621,8 @@ h2rngBlockGet(H2RNG_ID rngId, /* Identificateur du ring buffer */
 	}
 	
 	/* Lire le nombre de bytes du message ("net") */
-	H2RNG_RD2(pFrom, (char *) &nbytes, sizeof(nbytes), ntop, n, pDeb);
+	H2RNG_RD2(pFrom,
+		  (char *) &nbytes, sizeof(nbytes), ntop, n, pDeb);
 
 	/* Verifier si plus grand que le buffer de l'utilisateur */
 	if (nbytes > maxbytes) {
@@ -475,7 +642,8 @@ h2rngBlockGet(H2RNG_ID rngId, /* Identificateur du ring buffer */
 	}
 
 	/* Lire l'id du block */
-	H2RNG_RD2(pFrom, (char *) pidBlk, sizeof(*pidBlk), ntop, n, pDeb);
+	H2RNG_RD2(pFrom,
+		  (char *) pidBlk, sizeof(*pidBlk), ntop, n, pDeb);
       
 	/* Lire le message */
 	H2RNG_RD2(pFrom, buf, nbytes, ntop, n, pDeb);
@@ -609,7 +777,8 @@ h2rngBlockSpy(H2RNG_ID rngId, /* Identificateur du ring buffer */
 	}
 	
 	/* Lire le nombre de bytes du message ("net") */
-	H2RNG_RD2(pFrom, (char *) &nbytes, sizeof(nbytes), ntop, n, pDeb);
+	H2RNG_RD2(pFrom,
+		  (char *) &nbytes, sizeof(nbytes), ntop, n, pDeb);
 
 	/* Calculer la taille totale du message */
 	nt = nbytes + sizeof(nbytes) + sizeof(*pidBlk) + 4 - (nbytes & 3);
@@ -622,7 +791,8 @@ h2rngBlockSpy(H2RNG_ID rngId, /* Identificateur du ring buffer */
 	}
 	
 	/* Lire l'id du block */
-	H2RNG_RD2(pFrom, (char *) pidBlk, sizeof(*pidBlk), ntop, n, pDeb);
+	H2RNG_RD2(pFrom,
+		  (char *) pidBlk, sizeof(*pidBlk), ntop, n, pDeb);
 	
 	/* Garder le nombre de bytes du message */
 	*pnbytes = nbytes;
@@ -898,7 +1068,8 @@ h2rngNBlocks(H2RNG_ID rngId)
 	      }
 	  }
 	  /* Lire le nombre de bytes du message ("net") */
-	  H2RNG_RD2(pFrom, (char *) &nbytes, sizeof(nbytes), ntop, n, pDeb);
+	  H2RNG_RD2(pFrom,
+		    (char *) &nbytes, sizeof(nbytes), ntop, n, pDeb);
 
 	  /* Calculer la taille totale du message */
 	  nt = nbytes + sizeof(nbytes) + 8 - (nbytes & 3);
@@ -1010,7 +1181,8 @@ h2rngBlockSkip(H2RNG_ID rngId)
 	}
       }
       /* Lire le nombre de bytes du message ("net") */
-      H2RNG_RD2(pFrom, (char *) &nbytes, sizeof(nbytes), ntop, n, pDeb);
+      H2RNG_RD2(pFrom,
+		(char *) &nbytes, sizeof(nbytes), ntop, n, pDeb);
 
       /* Calculer la taille totale du message */
       nt = nbytes + sizeof(nbytes) + 8 - (nbytes & 3);
@@ -1086,14 +1258,3 @@ h2rngDelete(H2RNG_ID rngId)
     /* Liberer le pool de memoire */
     smMemFree ((char *) rngId);
 }
-
-
-
-
-
-
-
-
-
-
-

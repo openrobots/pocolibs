@@ -31,8 +31,6 @@ __RCSID("$LAAS$");
 #include "smMemLib.h"
 #include "smObjLib.h"
 
-#define COMLIB_DEBUG_H2DEVLIB
-
 #ifdef COMLIB_DEBUG_H2DEVLIB
 # define LOGDBG(x)	logMsg x
 #else
@@ -90,14 +88,19 @@ h2devInit(int smMemSize)
     key_t key;
     int i;
     
+    if (h2Devs) {
+       errnoSet(EEXIST);
+       return ERROR;
+    }
     key = h2devGetKey(H2_DEV_TYPE_H2DEV, 0, TRUE, NULL);
 
     h2Devs = rtai_kmalloc(key, sizeof(H2_DEV_STR)*H2_DEV_MAX);
     if (!h2Devs) {
-       LOGDBG(("comLib:h2devInit: cannot allocate memory\n"));
+       LOGDBG(("comLib:h2devInit: cannot allocate h2 devices\n"));
        errnoSet(S_smObjLib_SHMGET_ERROR);
        return ERROR;
     }
+    LOGDBG(("comLib:h2devInit: allocated h2 devices\n"));
 
     h2devMutex = semMCreate(0);
     if (!h2devMutex) {
@@ -131,6 +134,8 @@ h2devInit(int smMemSize)
     h2semGive(0);
     semGive(h2devMutex);
 
+    LOGDBG(("comLib:h2devInit: created sem#0\n"));
+
     /* Create memory pool */
     if (smMemInit(smMemSize) == ERROR) {
        int savedError;
@@ -142,17 +147,20 @@ h2devInit(int smMemSize)
        return ERROR;
     }
 
+    LOGDBG(("comLib:h2devInit: successfully initialized\n"));
     return OK;
 }
     
 /*----------------------------------------------------------------------*/
 
 /*
- * This is useless in kernel space - but of course it's here for compat.
+ * No actions are to be taken here, so just check that we are correctly
+ * initialized.
  */
 STATUS 
 h2devAttach(void)
 {
+   if (!h2Devs) errnoSet(S_h2devLib_NOT_INITIALIZED);
    return h2Devs?OK:ERROR;
 }
 
@@ -166,6 +174,8 @@ STATUS
 h2devEnd(void)
 {
     int i, rv = OK;
+
+    if (!h2Devs) return OK;
 
     /* Destroy devices according to their types */
     for (i = 0; i < H2_DEV_MAX; i++) {

@@ -153,14 +153,14 @@ h2timerAlloc(void)
     int nTimer;                     /* Numero du timer alloue */
     H2TIMER_ID timerId;             /* Identificateur du timer */
   
+    if (h2timerInited != TRUE) {
+       errnoSet(S_h2timerLib_TIMER_NOT_INIT);
+       return NULL;
+    }
+
     /* Prendre le semaphore de protection */
     semTake(timerMutex, WAIT_FOREVER);
 
-    if (!h2timerInited) {
-	    errnoSet(S_h2timerLib_TIMER_NOT_INIT);
-	    semGive(timerMutex);
-	    return NULL;
-    }
     /* Initialiser le ptr vers debut du tableau */
     timerId = timerTab;
 

@@ -662,6 +662,50 @@ taskGetUserData(long tid)
 /*----------------------------------------------------------------------*/
 
 /*
+ * Change task options
+ */
+STATUS
+taskOptionsSet(long tid, int mask, int newOptions)
+{
+   OS_TCB *tcb = (OS_TCB *)(tid == 0 ? taskIdSelf() : tid);
+
+   if (!tcb) return ERROR;
+   if (tcb->magic != TASK_MAGIC) {
+      fprintf(stderr, 
+	      "taskOptionsSet: bad/unregisterd taskId %ld %ld\n",
+	      tid, pthread_self());
+      return ERROR;
+   }
+
+   tcb->options = (tcb->options & ~mask) | newOptions;
+   return OK;
+}
+
+/*----------------------------------------------------------------------*/
+
+/*
+ * Examine task options
+ */
+STATUS
+taskOptionsGet(long tid, int *pOptions)
+{
+   OS_TCB *tcb = (OS_TCB *)(tid == 0 ? taskIdSelf() : tid);
+
+   if (!tcb) return ERROR;
+   if (tcb->magic != TASK_MAGIC) {
+      fprintf(stderr, 
+	      "taskOptionsGet: bad/unregisterd taskId %ld %ld\n",
+	      tid, pthread_self());
+      return ERROR;
+   }
+
+   if (pOptions) *pOptions = tcb->options;
+   return OK;
+}
+
+/*----------------------------------------------------------------------*/
+
+/*
  * Return the Task Id associated with a name 
  */
 long 

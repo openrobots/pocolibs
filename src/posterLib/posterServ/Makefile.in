@@ -17,14 +17,17 @@
 # $LAAS$
 #
 top_builddir=	@top_builddir@
-INSTALL=	@INSTALL@
+top_srcdir=	@top_srcdir@
 srcdir=		@srcdir@
 
 include ../../../Init.make
+-include $(srcdir)/os/$(OSAPI)/Makefile.inc
 
-CPPFLAGS += -I. -I../..
+INSTALL=	@INSTALL@
 
-VPATH= $(srcdir)
+CPPFLAGS+=	-I. -I../..
+
+VPATH=		@srcdir@
 
 SRCS = \
 	posterServ.c
@@ -32,17 +35,17 @@ SRCS = \
 SRCS_RPC = \
 	posters_svc.c
 
-OBJS = $(SRCS:%.c=%.o) $(SRCS_RPC:%.c=%.o)
+OBJS = $(SRCS:%.c=%.lo) $(SRCS_RPC:%.c=%.lo)
 
 SERV = posterServ
 
 all: $(SERV)
 
 $(SERV): $(OBJS)
-	$(LIBTOOL) --mode=link $(CC) -o $(SERV) $(LDFLAGS) $(OBJS) \
+	$(LTLD) -o $(SERV) $(LDFLAGS) $(OBJS) \
 	-L../../portLib -L../../errorLib -L../../comLib -L..  $(LIBS)
 
-posters.x: $(srcdir)/../os/$(OSAPI)/posters.x
+posters.x: $(srcdir)/../os/posix/posters.x
 	rm -f posters.x
 	$(LN) $< $@
 
@@ -59,8 +62,8 @@ posters.h: posters.x
 	$(RPCGEN) -h -o $@ $<
 
 
-%.o : %.c
-	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $<
+%.lo : %.c
+	$(LTCC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $< -prefer-non-pic
 
 clean:
 	rm -f $(OBJS)  $(SERV) $(SRCS_RPC) posters.h posters.x
@@ -68,8 +71,8 @@ clean:
 distclean: clean
 	rm -r Makefile DEPENDANCES
 
-depend DEPENDANCES::  posters.h $(SRCS) $(SRCS_RPC) 
-	$(MKDEP) -c$(CC) -oDEPENDANCES $(CPPFLAGS)  $?
+depend DEPENDANCES:: posters.h $(SRCS) $(SRCS_RPC) 
+	$(MKDEP) -c$(CC) -oDEPENDANCES -t.lo $(CPPFLAGS)  $?
 
 include DEPENDANCES
 

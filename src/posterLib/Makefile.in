@@ -1,6 +1,7 @@
 #
+# Copyright (c) 2004 
+#      Autonomous Systems Lab, Swiss Federal Institute of Technology.
 # Copyright (c) 1998, 2003-2004 CNRS/LAAS
-# Copyright (c) 2004 EPFL
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -21,23 +22,11 @@ top_srcdir=	@top_srcdir@
 srcdir=		@srcdir@
 
 include ../../Init.make
+-include $(srcdir)/os/$(OSAPI)/Makefile.inc
 
 INSTALL=	@INSTALL@
 
-VPATH+=		@srcdir@
-
-CPPFLAGS+=	-I. -I.. -I@srcdir@
-
-SRCS+= \
-	posterLib.c 		\
-	localPosterLib.c	\
-	remotePosterLib.c
-
-SRCS_RPC= \
-	posters_clnt.c \
-	posters_xdr.c
-
-HDR_RPC=	posters.h
+CPPFLAGS+=	-I. -I.. -I$(srcdir)
 
 OBJS=		$(SRCS:%.c=%.lo) $(SRCS_RPC:%.c=%.lo)
 
@@ -80,8 +69,8 @@ posters.h: posters.x
 %.lo: %.c
 	$(LTCC) -c $(CPPFLAGS) $(CFLAGS) -o $@ $<
 
-depend DEPENDANCES:: $(SRCS)  $(LIB_SRCS_RPC) $(HDR_RPC)
-	$(MKDEP) -c$(CC) -oDEPENDANCES $(CPPFLAGS) $?
+depend DEPENDANCES:: $(SRCS)  $(SRCS_RPC) $(HDR_RPC)
+	$(MKDEP) -c$(CC) -oDEPENDANCES -t.lo $(CPPFLAGS) $?
 
 clean: 
 	$(LIBTOOL) --mode=clean rm -f $(OBJS) $(LIB)
@@ -89,7 +78,7 @@ clean:
 distclean: clean
 	rm -f DEPENDANCES Makefile
 
-install:
+install::
 	$(MKINSTALLDIRS) $(LIBDIR)
 	$(LIBTOOL) --mode=install $(INSTALL) $(LIB) $(LIBDIR)
 
@@ -98,5 +87,4 @@ include DEPENDANCES
 endif
 
 # os specific rules
--include $(srcdir)/os/$(OSAPI)/Makefile.inc
 include $(top_srcdir)/Init.make.$(OSAPI)

@@ -141,8 +141,8 @@ h2init(int smMemSize)
 int
 h2end(void)
 {
-	
     printf("Removing csLib devices: ");
+    fflush(stdout);
     /* Destruction devices */
     if (h2devEnd() == ERROR) {
 	h2perror("\nh2devEnd");
@@ -158,49 +158,12 @@ h2end(void)
 int 
 cleanDevs(char *name)
 {
-    int i, match = 0;
-    POSTER_ID p;
-
-    if (h2devAttach() == ERROR) {
-	h2perror("cleanDevs");
-	return ERROR;
-    }
-    /* Destruction des devices restants */
-    for (i = 0; i < H2_DEV_MAX; i++) {
-	if (H2DEV_TYPE(i) != H2_DEV_TYPE_NONE && 
-	    fnmatch(name, H2DEV_NAME(i), 0) == 0) {
-	    printf("Freeing %s\n", H2DEV_NAME(i));
-	    match++;
-	    switch (H2DEV_TYPE(i)) {
-	      case H2_DEV_TYPE_MBOX:
-		mboxDelete(i);
-		break;
-	      case H2_DEV_TYPE_POSTER:
-		if (posterFind(H2DEV_NAME(i), &p) == OK) { 
-		    posterDelete(p);
-		}
-		break;
-	      case H2_DEV_TYPE_TASK:
-		h2semDelete(H2DEV_TASK_SEM_ID(i));
-		h2devFree(i);
-		break;
-	      case H2_DEV_TYPE_SEM:
-	      case H2_DEV_TYPE_NONE:
-		break;
-	      default:
-		/* error */
-		fprintf(stderr, "%s: unknown device type %d\n", 
-			progname, H2DEV_TYPE(i));
-		return ERROR;
-		break;
-	    } /* switch */
-	} 
-    } /* for */
-    if (match == 0) {
-	printf("No matching device\n");
-	return ERROR;
-    }
-    return OK;
+   if (h2devClean(name) == ERROR) {
+      h2perror("h2devClean");
+      return ERROR;
+   }
+   
+   return OK;
 }
     
 /*----------------------------------------------------------------------*/

@@ -1,5 +1,18 @@
-Version 2.0, xx April 2004
+Version 2.0, xx May 2004
 
+ 25. Preliminary RTAI/user-space support. posterLib requires a more
+     complicated implementation: as of now, posters can be shared between
+     RTAI-tasks and linux processes but this breaks the real-time
+     properties of RTAI-tasks.
+ 24. Added taskDelete() regression test.
+ 23. Added --with-debug option to configure script. It allows the
+     selection of independant components to debug.
+ 22. Added h2devClean() in comLib. This was previously defined in h2.c
+     but it was problematic for user-space RTAI version. Bumped comLib
+     minor.
+ 21. Added taskOptionsSet()/taskOptionsGet() in taskLib and a new task's
+     option bit PORTLIB_UNPRIVILEGED. This is used internally by comLib
+     for user space communication under RTAI. Bumped portLib minor.
  20. Reworked makefiles and configure scripts in order to be able to
      compile both kernel modules and userspace libraries with the same
      configure; make; make install step under RTAI. 

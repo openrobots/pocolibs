@@ -1,6 +1,6 @@
 #
-# Copyright (c) 2004 CNRS/LAAS
-# Copyright (c) 2004 EPFL
+# Copyright (c) 2004 
+#      Autonomous Systems Lab, Swiss Federal Institute of Technology.
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -20,10 +20,23 @@
 
 # --- RTAI-specific configuration ---------------------------------------
 
+VPATH=		$(srcdir):$(srcdir)/os/posix
+
+SRCS= \
+	posterLib.c		\
+	localPosterLib.c	\
+	remotePosterLib.c
+
+SRCS_RPC= \
+	posters_clnt.c \
+	posters_xdr.c
+
+HDR_RPC=	posters.h
+
 # because it's not yet possible to make a remote real-time version
 MOD_CPPFLAGS+= -DPOSTERLIB_ONLY_LOCAL
 
 MODSRCS+= \
-	posterLib.c 		\
-	localPosterLib.c	\
+	posterLib.c 			\
+	localPosterLib.c		\
 	$(MODVPATH)/module.c

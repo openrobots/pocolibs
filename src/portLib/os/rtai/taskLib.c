@@ -27,10 +27,8 @@ __RCSID("$LAAS$");
 #include "taskLib.h"
 #include "taskHookLib.h"
 
-#define PORTLIB_DEBUG_TASKLIB
-
 #ifdef PORTLIB_DEBUG_TASKLIB
-# define LOGDBG(x)	printk x
+# define LOGDBG(x)	logMsg x
 #else
 # define LOGDBG(x)
 #endif
@@ -125,7 +123,7 @@ taskLibInit(void)
 static void 
 taskCleanUp(void *tcb, int dummy)
 {
-   LOGDBG(("portLib:taskLib:taskCleanUp: calling delete hooks "
+   LOGDBG(("portLib:taskCleanUp: calling delete hooks "
 	   "for task 0x%p ('%s')\n", tcb, ((OS_TCB *)tcb)->name));
 
    executeHooks(deleteHooks, tcb);
@@ -150,7 +148,7 @@ taskStarter(int data)
     result = (*(tcb->entry))(p->arg1, p->arg2, p->arg3, p->arg4, p->arg5, 
 			     p->arg6, p->arg7, p->arg8, p->arg9, p->arg10);
 
-    LOGDBG(("portLib:taskLib:taskStarter: task 0x%p ('%s') "
+    LOGDBG(("portLib:taskStarter: task 0x%p ('%s') "
 	    "terminated normally\n", tcb, tcb->name));
 }
 
@@ -235,7 +233,7 @@ taskSpawn(char *name, int priority, int options, int stackSize,
    tcb->next = taskList;
    taskList = tcb;
 
-   LOGDBG(("portLib:taskLib:taskSpawn: spawning task 0x%p ('%s')\n",
+   LOGDBG(("portLib:taskSpawn: spawning task 0x%p ('%s')\n",
 	   tcb, tcb->name));
 
    /* wake up the task */
@@ -257,17 +255,17 @@ taskDelete(long tid)
    int status;
 
    if (!tcb) {
-      LOGDBG(("portLib:taskLib:taskDelete: no such task 0x%lx\n", tid));
+      LOGDBG(("portLib:taskDelete: no such task 0x%lx\n", tid));
       return ERROR;
    }
 
-   LOGDBG(("portLib:taskLib:taskDelete: deleting 0x%lx ('%s')\n",
+   LOGDBG(("portLib:taskDelete: deleting 0x%lx ('%s')\n",
 	   tid, tcb->name));
 
    /* delete hooks won't be run... */
    status = rt_task_delete(&tcb->rtid);
    if (status != 0) {
-      LOGDBG(("portLib:taskLib:taskDelete: no such task 0x%lx\n", tid));
+      LOGDBG(("portLib:taskDelete: no such task 0x%lx\n", tid));
    }
 
    /* Remove from task List.
@@ -313,7 +311,7 @@ taskSuspend(long tid)
 {
    OS_TCB *tcb = taskTcb(tid);
 
-   LOGDBG(("portLib:taskLib:taskSuspend: suspending 0x%lx ('%s')\n",
+   LOGDBG(("portLib:taskSuspend: suspending 0x%lx ('%s')\n",
 	   tid, tcb->name));
 
    if (rt_task_suspend(&tcb->rtid) != 0)
@@ -335,7 +333,7 @@ taskResume(long tid)
    if (rt_task_resume(&tcb->rtid) != 0)
       return ERROR;
 
-   LOGDBG(("portLib:taskLib:taskResume: resuming 0x%lx ('%s')\n",
+   LOGDBG(("portLib:taskResume: resuming 0x%lx ('%s')\n",
 	   tid, tcb->name));
    return OK;
 }
@@ -404,11 +402,11 @@ taskDelay(int ticks)
    OS_TCB *tcb = taskTcb(0);
 
    if (!tcb) {
-      LOGDBG(("portLib:taskLib:taskDelay: called outside task context\n"));
+      LOGDBG(("portLib:taskDelay: called outside task context\n"));
       errnoSet(S_portLib_NOT_IN_A_TASK);
       return ERROR;
    }
-   LOGDBG(("portLib:taskLib:taskDelay: delaying 0x%p ('%s') for %d ticks\n",
+   LOGDBG(("portLib:taskDelay: delaying 0x%p ('%s') for %d ticks\n",
 	   tcb, tcb->name, ticks));
 
    switch(ticks) {
@@ -421,7 +419,7 @@ taskDelay(int ticks)
 	 break;
    }
 
-   LOGDBG(("portLib:taskLib:taskDelay: delayed 0x%p ('%s')\n",
+   LOGDBG(("portLib:taskDelay: delayed 0x%p ('%s')\n",
 	   tcb, tcb->name));
    return OK;
 }
@@ -438,20 +436,10 @@ taskIdSelf(void)
    OS_TCB *t;
 
    rtid = rt_whoami();
-   if (!rtid) {
-      LOGDBG(("portLib:taskLib:taskIdSelf: not in a task\n"));
-      return 0x0;
-   }
+   if (!rtid) return 0x0;
 
    t = (OS_TCB *)rtid;
-
-   LOGDBG(("portLib:taskLib:taskIdSelf: taskIdSelf says %p\n", t));
-
-   if (t->magic != PORTLIB_TASK_MAGIC) {
-      LOGDBG(("portLib:taskLib:taskIdSelf: rtai task 0x%p do not match "
-	      "any portLib task\n", rtid));
-      return 0x0;
-   }
+   if (t->magic != PORTLIB_TASK_MAGIC) return 0x0;
 
    return (long)t;
 }
@@ -497,6 +485,38 @@ taskGetUserData(long tid)
    }
 
    return tcb->userData;
+}
+
+/*----------------------------------------------------------------------*/
+
+/*
+ * Change task options
+ */
+STATUS
+taskOptionsSet(long tid, int mask, int newOptions)
+{
+   OS_TCB *tcb = taskTcb(tid);
+
+   if (!tcb) return ERROR;
+
+   tcb->options = (tcb->options & ~mask) | newOptions;
+   return OK;
+}
+
+/*----------------------------------------------------------------------*/
+
+/*
+ * Examine task options
+ */
+STATUS
+taskOptionsGet(long tid, int *pOptions)
+{
+   OS_TCB *tcb = taskTcb(tid);
+
+   if (!tcb) return ERROR;
+
+   if (pOptions) *pOptions = tcb->options;
+   return OK;
 }
 
 /*----------------------------------------------------------------------*/
@@ -764,7 +784,7 @@ errnoSet(int errorValue)
 {
    OS_TCB *tcb = taskTcb(0);
 
-   LOGDBG(("portLib: errno=%d\n", errorValue));
+   LOGDBG(("portLib: errno set to %d\n", errorValue));
 
    if (tcb != NULL) {
       tcb->errorStatus = errorValue;

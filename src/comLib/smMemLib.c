@@ -37,8 +37,6 @@ __RCSID("$LAAS$");
 #include <smObjLib.h>
 #include <h2devLib.h>
 
-#define COMLIB_DEBUG_SMMEMLIB
-
 /* handle MALLOC_TRACE */
 #ifdef MALLOC_TRACE
 # define LOGDBG(x)    malloc_trace x

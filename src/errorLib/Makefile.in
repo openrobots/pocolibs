@@ -1,6 +1,7 @@
 #
+# Copyright (c) 2004 
+#      Autonomous Systems Lab, Swiss Federal Institute of Technology.
 # Copyright (c) 1998, 2003-2004 CNRS/LAAS
-# Copyright (c) 2004 EPFL
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -22,18 +23,17 @@ top_srcdir=	@top_srcdir@
 srcdir=		@srcdir@
 
 include ../../Init.make
+-include $(srcdir)/os/$(OSAPI)/Makefile.inc
 
 INSTALL=	@INSTALL@
 
-CPPFLAGS += -I..
+CPPFLAGS+=	-I..
 
-VPATH=		$(srcdir)
+SRCS+=		h2errorLib.c
+OBJS=		$(SRCS:%.c=%.lo)
 
-SRCS = h2errorLib.c
-OBJS = $(SRCS:%.c=%.lo)
-
-SHLIB_MAJOR = 2
-SHLIB_MINOR = 0
+SHLIB_MAJOR=	2
+SHLIB_MINOR=	0
 
 BASENAME = errorLib
 LIB = lib$(BASENAME).la
@@ -49,7 +49,7 @@ $(LIB): $(OBJS)
 	$(LTCC) -c $(CPPFLAGS) $(CFLAGS) -o $@ $<
 
 depend DEPENDANCES:: $(SRCS)
-	$(MKDEP) -c$(CC) -o DEPENDANCES $(CPPFLAGS) $?
+	$(MKDEP) -c$(CC) -o DEPENDANCES -t.lo $(CPPFLAGS) $?
 
 clean: 
 	$(LIBTOOL) --mode=clean rm -f $(OBJS) $(LIB)
@@ -57,7 +57,7 @@ clean:
 distclean: clean
 	rm -f DEPENDANCES Makefile
 
-install: $(LIB)
+install:: $(LIB)
 	$(MKINSTALLDIRS) $(BINDIR) $(LIBDIR)
 	$(INSTALL) h2addErrno $(BINDIR)
 	$(LIBTOOL) --mode=install $(INSTALL) $(LIB) $(LIBDIR)
@@ -67,5 +67,4 @@ include DEPENDANCES
 endif
 
 # os specific rules
--include $(srcdir)/os/$(OSAPI)/Makefile.inc
 include $(top_srcdir)/Init.make.$(OSAPI)

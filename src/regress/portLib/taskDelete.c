@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003-2004 CNRS/LAAS
+ * Copyright (c) 2004 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,31 +14,23 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-/***
- *** Global initialization function for an RTAI task using comLib
- ***
- *** ticksPerSec -> system clock frequency
- ***                0 -> no clock
- ***
- ***/
-
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
-#include "h2initGlob.h"
+#include <portLib.h>
+#include <taskLib.h>
 
-/**
- ** comLib initialization for an RTAI module
- **/
+#if defined(__RTAI__) && defined(__KERNEL__)
+# include <rtai_sched.h>
+#else
+# include <stdio.h>
+#endif
 
-STATUS
-h2initGlob(int ticksPerSec)
+int
+pocoregress_init()
 {
-   /* There is nothing to do here. comLib should already be present in
-    * the kernel and configured properly. */
-
-   /* Maybe we should however report an error if ticksPerSec is not the
-    * same as the current one? */
-
-   return OK;
+   logMsg("trying to delete ourselves\n");
+   taskDelete(0);
+   logMsg("not deleted...\n");
+   return 0;
 }

@@ -47,6 +47,9 @@
 /* vfscanf */
 #undef HAVE_VFSCANF
 
+/* fnmatch */
+#undef HAVE_FNMATCH
+
 /* Use timer_* functions ? */
 #undef HAVE_POSIX_TIMERS
 
@@ -76,3 +79,23 @@
 
 /* rpcgen -C generates _svc() prototypes */
 #undef HAVE_RPCGEN_C
+
+/* debug portLib:taskLib  */
+#undef PORTLIB_DEBUG_TASKLIB
+
+/* debug comLib:h2devLib  */
+#undef COMLIB_DEBUG_H2DEVLIB
+
+/* debug comLib:smMemLib  */
+#undef COMLIB_DEBUG_SMMEMLIB
+
+/* debug comLib:h2evnLib  */
+#undef COMLIB_DEBUG_H2EVNLIB
+
+/* debug comLib:mboxLib  */
+#undef COMLIB_DEBUG_MBOXLIB
+
+/* debug comLib:gcomLib  */
+#undef COMLIB_DEBUG_GCOMLIB
+
+

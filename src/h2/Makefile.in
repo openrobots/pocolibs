@@ -1,4 +1,6 @@
 #
+# Copyright (c) 2004 
+#      Autonomous Systems Lab, Swiss Federal Institute of Technology.
 # Copyright (c) 1998, 2003 CNRS/LAAS
 #
 # Permission to use, copy, modify, and distribute this software for any
@@ -17,35 +19,40 @@
 #
 
 top_builddir=	@top_builddir@
-INSTALL=	@INSTALL@
+top_srcdir=	@top_srcdir@
+srcdir=		@srcdir@
 
 include ../../Init.make
+-include $(srcdir)/os/$(OSAPI)/Makefile.inc
 
-CPPFLAGS += -I..
+INSTALL=	@INSTALL@
 
-VPATH=	@top_srcdir@/src/h2
+CPPFLAGS+=	-I..
 
-SRCS = h2.c
-OBJS = $(SRCS:%.c=%.o)
-PROG = h2
+VPATH=		@srcdir@
+
+SRCS=		h2.c
+OBJS=		$(SRCS:%.c=%.lo)
+
+PROG=		h2
 
 all: $(PROG)
 
 $(PROG): $(OBJS)
-	$(LIBTOOL) --mode=link $(CC) -o $(PROG) $(CFLAGS) $(LDFLAGS) $(OBJS) \
-	-L../portLib -L../errorLib -L../comLib -L../posterLib $(LIBS)
+	$(LTLD) -o $(PROG) $(CFLAGS) $(LDFLAGS) $(OBJS) \
+	  -L../portLib -L../errorLib -L../comLib -L../posterLib $(LIBS)
 
-%.o: %.c
-	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $<
+%.lo: %.c
+	$(LTCC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $< -prefer-non-pic
 
 depend DEPENDANCES: $(SRCS)
-	$(MKDEP) -c$(CC) -oDEPENDANCES 	$(CPPFLAGS) $?
+	$(MKDEP) -c$(CC) -oDEPENDANCES -t.lo $(CPPFLAGS) $?
 
 clean: 
-	rm -f $(OBJS) $(PROG)
+	$(LIBTOOL) --mode=clean rm -f $(OBJS) $(PROG)
 
 distclean: clean
-	rm -f Makefile DEPENDANCES
+	rm -f DEPENDANCES Makefile
 
 install:
 	$(MKINSTALLDIRS) $(BINDIR)

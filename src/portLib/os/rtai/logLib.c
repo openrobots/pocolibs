@@ -17,6 +17,7 @@
 __RCSID("$LAAS$");
 
 #include <linux/kernel.h>
+#include <linux/sched.h>
 
 #define LOGLIB_C
 #include "logLib.h"
@@ -29,5 +30,8 @@ int
 logMsg(const char *fmt,
        int arg1, int arg2, int arg3, int arg4, int arg5, int arg6)
 {
+   const char *n = taskName(0);
+
+   printk(KERN_ERR "%s:", n?n:"<null>");
    return printk(fmt, arg1, arg2, arg3, arg4, arg5, arg6);
 }

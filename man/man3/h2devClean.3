@@ -1,0 +1,30 @@
+.\" $Id$
+.TH h2devClean 3 "April 2004"
+.SH NAME
+h2devClean \- delete 
+.SM comLib
+devices matching a glob pattern
+.SH SYNOPSIS
+.nf
+.B "#include <portLib.h>"
+.B "#include <h2devLib.h>"
+
+.B "STATUS h2devClean(char *pattern)"
+.fi
+.SH DESCRIPTION
+.IR h2devClean
+searches for 
+.SM comLib
+devices matching
+.I pattern
+and delete them.
+.SH "RETURN VALUE"
+.IR OK
+if one or more devices were deleted.
+
+.IR ERROR
+in case of an error. In this case it calls
+.IR errnoSet(3)
+with the corresponding Unix or comLib error code.
+.SH "SEE ALSO"
+.IR h2devFree(3)

@@ -21,23 +21,26 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
-#include <linux/module.h>
+#include <portLib.h>
 
-#include <rtai_sched.h>
+#ifdef __KERNEL__
+# include <linux/module.h>
+# include <rtai_sched.h>
+#else
+# include <stdio.h>
+# include <fcntl.h>
+#endif /* __KERNEL__ */
+
+#define KEEP_STATIC_INLINE /* ... */
 #include <rtai_shm.h>
 
-#include <portLib.h>
 #include <errnoLib.h>
-
 #include <smMemLib.h>
 #include <smObjLib.h>
 #include <h2devLib.h>
 
-
-#define COMLIB_DEBUG_SMMEMLIB
-
 #ifdef COMLIB_DEBUG_SMMEMLIB
-# define LOGDBG(x)	printk x
+# define LOGDBG(x)	logMsg x
 #else
 # define LOGDBG(x)
 #endif
@@ -68,13 +71,18 @@ smMemInit(int smMemSize)
         return ERROR;
     }    
     /* Allocate memory */
+#ifdef __KERNEL__
     addr = rtai_kmalloc(key, smMemSize + 2*sizeof(SM_MALLOC_CHUNK));
+#else
+    addr = rtai_malloc(key, smMemSize + 2*sizeof(SM_MALLOC_CHUNK));
+#endif
     if (!addr) {
        h2devFree(dev);
        errnoSet(S_smObjLib_SHMGET_ERROR);
        return ERROR;
     }
     H2DEV_MEM_SHM_ID(dev) = key;
+    H2DEV_MEM_SIZE(dev) = smMemSize;
     
     /* Mark bloc as free */
     header = (SM_MALLOC_CHUNK *)addr + 1;
@@ -98,12 +106,28 @@ smMemAttach(void)
 {
     int dev;
     
-    if (smMemFreeList != NULL) {
-	return OK;
-    }
+    if (smMemFreeList != NULL) return OK;
+
     dev = h2devFind(SM_MEM_NAME, H2_DEV_TYPE_MEM);
-    if (dev < 0) {
-	return ERROR;
+    LOGDBG(("comLib:smMemAttach: shm device is %d, %d bytes\n",
+	    dev, H2DEV_MEM_SIZE(dev)));
+    if (dev < 0) return ERROR;
+
+#ifdef __KERNEL__
+    /* nothing to do */
+#else
+    {
+       SM_MALLOC_CHUNK *addr;
+
+       addr = rtai_malloc(H2DEV_MEM_SHM_ID(dev),
+			  H2DEV_MEM_SIZE(dev) + 2*sizeof(SM_MALLOC_CHUNK));
+       LOGDBG(("comLib:smMemAttach: attached to shm at 0x%p\n", addr));
+       smMemFreeList = addr + 1;
+    }
+#endif
+    if (smMemFreeList == NULL) {
+       errnoSet(S_smObjLib_SHMGET_ERROR);
+       return ERROR;
     }
 
     return OK;
@@ -119,17 +143,19 @@ smMemEnd(void)
 {
     int dev;
 
-    if (smMemFreeList == NULL) {
-	return ERROR;
-    }
+    if (smMemFreeList == NULL) return OK;
+
     dev = h2devFind(SM_MEM_NAME, H2_DEV_TYPE_MEM);
-    if (dev < 0) {
-	return ERROR;
-    }
+    if (dev < 0) return ERROR;
+
     /* Detach memory */
-    smMemFreeList = NULL;
+#ifdef __KERNEL__
     rtai_kfree(H2DEV_MEM_SHM_ID(dev));
-    
+#else
+    rtai_free(H2DEV_MEM_SHM_ID(dev), smMemBase());
+#endif
+    smMemFreeList = NULL;
+        
     /* Free h2 device */
     h2devFree(dev);
     

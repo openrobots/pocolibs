@@ -23,7 +23,8 @@
 /*
  * Flags for tasks
  */
-#define VX_FP_TASK	0x0008
+#define VX_FP_TASK		0x0008 /* f-point coprocessor support */
+#define PORTLIB_UNPRIVILEGED	0x8000 /* INTERNAL: comLib/rtai only */
 
 /*
  * Opaque task descriptor
@@ -56,6 +57,8 @@ extern long taskIdSelf ( void );
 extern OS_TCB *taskTcb ( long tid );
 extern STATUS taskSetUserData ( long tid, unsigned long data );
 extern unsigned long taskGetUserData ( long tid );
+extern STATUS taskOptionsGet ( long tid, int *pOptions );
+extern STATUS taskOptionsSet ( long tid, int mask, int newOptions );
 extern long taskNameToId(char *name);
 
 #endif

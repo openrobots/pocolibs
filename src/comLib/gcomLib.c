@@ -35,6 +35,12 @@ __RCSID("$LAAS$");
 #include "h2devLib.h"
 #include "gcomLib.h"
 
+#ifdef COMLIB_DEBUG_GCOMLIB
+# define LOGDBG(x)     logMsg x
+#else
+# define LOGDBG(x)
+#endif
+
 /* Memory allocation routine - allocates 0'ed buffers */
 #if defined(__RTAI__) && defined(__KERNEL__)
 
@@ -91,7 +97,7 @@ gcomInit(char *procName, int rcvMboxSize, int replyMboxSize)
     /* Nom du mailbox de replique */
     strncpy (replyMboxName, procName, H2_DEV_MAX_NAME - 1);
     strcat (replyMboxName, "R");
-    
+
     /* Allouer et Initialiser les tableaux */
     myTaskNum = MY_TASK_DEV;
     sendTab[myTaskNum] = (SEND *)calloc(MAX_SEND, sizeof(SEND));
@@ -99,11 +105,16 @@ gcomInit(char *procName, int rcvMboxSize, int replyMboxSize)
 	errnoSet(S_gcomLib_MALLOC_FAILED);
 	return ERROR;
     }
+
     letterTab[myTaskNum] = (LETTER *)calloc(MAX_LETTER, sizeof(LETTER));
     if (letterTab[myTaskNum] == NULL) {
 	errnoSet(S_gcomLib_MALLOC_FAILED);
 	return ERROR;
     }
+
+    LOGDBG(("comLib:gcomInit: arrays allocated for mbox %d (`%s')\n",
+	    myTaskNum, procName));
+
     /* Creation mailbox de reception */
     if (rcvMboxSize != 0) {
 	if (mboxCreate(procName, rcvMboxSize, 
@@ -111,6 +122,7 @@ gcomInit(char *procName, int rcvMboxSize, int replyMboxSize)
 	    return ERROR;
 	}
     }
+
     /* Creation mailbox de replique */
     if (replyMboxSize != 0) {
 	if (mboxCreate(replyMboxName, replyMboxSize, 
@@ -1094,6 +1106,9 @@ gcomDispatch (MBOX_ID replyMbox)
     /* Boucler tant qu'il y aura des repliques */
     while (mboxIoctl (replyMbox, FIO_NBYTES, (char *) &nbytes) == OK &&
 	   nbytes != 0) {
+        LOGDBG(("comLib:gcomDispatch: %d bytes in mbox %d\n",
+		nbytes, replyMbox));
+
 	/* Epier le contenu du mailbox */
 	if (mboxSpy (replyMbox, &fromId, &nbytes, (char *) &hdr, 
 		     sizeof (LETTER_HDR)) == sizeof (LETTER_HDR) &&

@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 1990, 2003 CNRS/LAAS
+ * Copyright (c) 2004 
+ *      Autonomous Systems Lab, Swiss Federal Institute of Technology.
+ * Copyright (c) 1990, 2003-2004 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -28,6 +30,8 @@ __RCSID("$LAAS$");
 # include <unistd.h>
 #endif
 
+#include <fnmatch.h>
+
 #include "errnoLib.h"
 #include "h2semLib.h"
 #include "mboxLib.h"
@@ -39,6 +43,12 @@ __RCSID("$LAAS$");
 
 #if defined(__RTAI__) && defined(__KERNEL__)
 # define getuid()      0
+#endif
+
+#ifdef COMLIB_DEBUG_H2DEVLIB
+# define LOGDBG(x)	logMsg x
+#else
+# define LOGDBG(x)
 #endif
 
 /* Local fucntions prototypes */
@@ -73,6 +83,7 @@ h2devAlloc(char *name, H2_DEV_TYPE type)
 	    h2Devs[i].type = type;
 	    h2Devs[i].uid = getuid();
 	    h2semGive(0);
+	    LOGDBG(("comLib:h2devAlloc: created device %d\n", i));
 	    return i;
 	}
     } /* for */
@@ -105,6 +116,64 @@ h2devFree(int dev)
     h2semGive(0);
     return OK;
 }
+
+
+/*----------------------------------------------------------------------*/
+
+/**
+ ** Clean h2 devices matching glob pattern `name'.
+ **/
+
+STATUS
+h2devClean(const char *name)
+{
+   int i, match = 0;
+   POSTER_ID p;
+
+   if (h2devAttach() == ERROR) {
+      return ERROR;
+   }
+   /* Look for devices */
+   for (i = 0; i < H2_DEV_MAX; i++) {
+      if (H2DEV_TYPE(i) != H2_DEV_TYPE_NONE && 
+	  fnmatch(name, H2DEV_NAME(i), 0) == 0) {
+	 logMsg("Freeing %s\n", H2DEV_NAME(i));
+	 match++;
+	 switch (H2DEV_TYPE(i)) {
+	      case H2_DEV_TYPE_MBOX:
+		 mboxDelete(i);
+		 break;
+	      case H2_DEV_TYPE_POSTER:
+#if 0
+		if (posterFind(H2DEV_NAME(i), &p) == OK) { 
+		    posterDelete(p);
+		}
+#endif
+		h2devFree(i);
+		break;
+	      case H2_DEV_TYPE_TASK:
+		h2semDelete(H2DEV_TASK_SEM_ID(i));
+		h2devFree(i);
+		break;
+	      case H2_DEV_TYPE_SEM:
+	      case H2_DEV_TYPE_NONE:
+		break;
+	      default:
+		/* error */
+		logMsg("comLib: unknown device type %d\n", H2DEV_TYPE(i));
+		return ERROR;
+		break;
+	    } /* switch */
+	} 
+    } /* for */
+
+    if (match == 0) {
+	logMsg("No matching device\n");
+	return ERROR;
+    }
+    return OK;
+}
+
 
 /*----------------------------------------------------------------------*/
 

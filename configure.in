@@ -1,5 +1,7 @@
 dnl autoconf script for portLib/comLib (aka pocolibs)
 dnl
+dnl Copyright (c) 2004 
+dnl      Autonomous Systems Lab, Swiss Federal Institute of Technology.
 dnl Copyright (c) 2003-2004 CNRS/LAAS
 dnl
 dnl GPL, since some parts were copied from other configure.in
@@ -254,6 +256,40 @@ AC_TRY_LINK([#include <stdio.h>],
 	[AC_DEFINE(HAVE_VFSCANF)],
 	[AC_MSG_RESULT([no])]
 )
+
+AC_CHECK_FUNCS([fnmatch],[], [
+	COMLIB_COMPATSRC="${COMLIB_COMPATSRC} fnmatch.c"
+])
+AC_SUBST(COMLIB_COMPATSRC)
+
+
+dnl --- Debugging options -----------------------------------------------
+
+AC_ARG_WITH(debug,
+           AC_HELP_STRING([--with-debug=all task h2dev smmem h2evn mbox gcom],
+               [print debugging information at run-time]),
+           [opt_debug=$withval],[opt_debug=])
+
+if test "x$opt_debug" = "xall"; then
+   opt_debug="task h2dev smmem h2evn mbox gcom"
+fi
+for dopt in "$opt_debug"; do 
+	test -z "$dopt" && break
+
+	case "$dopt" in
+	   task)	AC_DEFINE(PORTLIB_DEBUG_TASKLIB) ;;
+
+	   h2dev)	AC_DEFINE(COMLIB_DEBUG_H2DEVLIB) ;;
+	   smmem)	AC_DEFINE(COMLIB_DEBUG_SMMEMLIB) ;;
+	   h2evn)	AC_DEFINE(COMLIB_DEBUG_H2EVNLIB) ;;
+	   mbox)	AC_DEFINE(COMLIB_DEBUG_MBOXLIB) ;;
+	   gcom)	AC_DEFINE(COMLIB_DEBUG_GCOMLIB) ;;
+
+	esac
+done
+
+
+dnl --- Make makefiles --------------------------------------------------
 
 AC_CONFIG_HEADER(src/pocolibs-config.h)
 AC_OUTPUT(Init.make

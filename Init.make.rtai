@@ -1,6 +1,6 @@
 #
-# Copyright (c) 2004 CNRS/LAAS
-# Copyright (c) 2004 EPFL
+# Copyright (c) 2004 
+#      Autonomous Systems Lab, Swiss Federal Institute of Technology.
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -24,13 +24,13 @@
 BINEXT=.o
 LIBTOOL_LINKPOCOLIBS=
 
-# use posix sources for user-space library
-VPATH+=		:$(srcdir)/os/posix
+CPPFLAGS+=	-D__RTAI__
+
 MODVPATH=	os/rtai
 
-MODDIR=		module
+MODDIR=		modules
 MOD=		$(MODDIR)/lib$(BASENAME).o
-MOD_CPPFLAGS+=	-I$(RTAI_INCLUDES) -D__RTAI__ -D__KERNEL__ -DMODULE
+MOD_CPPFLAGS+=	-I$(RTAI_INCLUDES) -D__KERNEL__ -DMODULE
 
 MODOBJS=$(MODSRCS:%.c=$(MODDIR)/%.lo)
 
@@ -48,6 +48,11 @@ $(MODDIR)/%.lo: %.c
 # object file directory
 $(MODDIR)/$(MODVPATH):
 	mkdir -p $@/$(MODVPATH)
+
+# install
+install:: all-os
+	$(MKINSTALLDIRS) $(LIBDIR)/$(MODDIR)
+	$(LIBTOOL) --mode=install $(INSTALL) $(MOD) $(LIBDIR)/$(MODDIR)
 
 # module dependencies
 depend $(MODDIR)/DEPENDANCES:: $(MODDIR)/$(MODVPATH)

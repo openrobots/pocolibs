@@ -1,6 +1,7 @@
 #
+# Copyright (c) 2004 
+#      Autonomous Systems Lab, Swiss Federal Institute of Technology.
 # Copyright (c) 1998, 2003-2004 CNRS/LAAS
-# Copyright (c) 2004 EPFL
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -22,42 +23,23 @@ top_srcdir=	@top_srcdir@
 srcdir=		@srcdir@
 
 include ../../Init.make
+-include $(srcdir)/os/$(OSAPI)/Makefile.inc
 
 INSTALL=	@INSTALL@
 
-CPPFLAGS +=	-I..
-CPPFLAGS +=	-DPOSTER_SERV_PATH=\"$(BINDIR)/posterServ\"
+CPPFLAGS+=	-I..
+CPPFLAGS+=	-DPOSTER_SERV_PATH=\"$(BINDIR)/posterServ\"
 
-VPATH=		$(srcdir)
+COMLIB_COMPATSRC=@COMLIB_COMPATSRC@
+ifneq (,$(COMLIB_COMPATSRC))
+CPPFLAGS+=	-I$(top_srcdir)/compat
+endif
 
-SRCS += \
-	commonStructLib.c	\
-	csLib.c			\
-	gcomLib.c		\
-	h2devLib.c		\
-	h2devOsLib.c		\
-	h2endianness.c		\
-	h2evnLib.c		\
-	h2initGlob.c		\
-	h2mathLib.c		\
-	h2rngLib.c		\
-	h2semLib.c		\
-	h2timeLib.c		\
-	h2timerLib.c		\
-	h2timerTest.c           \
-	mboxLib.c		\
-	mboxEssay.c             \
-	smMemLib.c		\
-	smMemOsLib.c		\
-	smObjLib.c		\
-	vfscanf.c               \
-	xesClient.c             \
-	xesStdio.c
+SRCS+=		$(COMLIB_COMPATSRC)
+OBJS=		$(SRCS:%.c=%.lo)
 
-OBJS = $(SRCS:%.c=%.lo)
-
-SHLIB_MAJOR = 2
-SHLIB_MINOR = 2
+SHLIB_MAJOR=	2
+SHLIB_MINOR=	3
 
 BASENAME= 	comLib
 LIB=		lib$(BASENAME).la
@@ -73,7 +55,7 @@ $(LIB): $(OBJS)
 	$(LTCC) -c $(CPPFLAGS) $(CFLAGS) $<
 
 depend DEPENDANCES:: $(SRCS)
-	$(MKDEP) -c$(CC) -oDEPENDANCES 	$(CPPFLAGS) $?
+	$(MKDEP) -c$(CC) -oDEPENDANCES -t.lo $(CPPFLAGS) $?
 
 clean: 
 	$(LIBTOOL) --mode=clean rm -f $(OBJS) $(LIB)
@@ -81,7 +63,7 @@ clean:
 distclean: clean
 	rm -f DEPENDANCES Makefile
 
-install: $(LIB)
+install:: $(LIB)
 	$(MKINSTALLDIRS) $(LIBDIR)
 	$(LIBTOOL) --mode=install $(INSTALL) $(LIB) $(LIBDIR)
 
@@ -90,5 +72,4 @@ include DEPENDANCES
 endif
 
 # os specific rules
--include $(srcdir)/os/$(OSAPI)/Makefile.inc
 include $(top_srcdir)/Init.make.$(OSAPI)

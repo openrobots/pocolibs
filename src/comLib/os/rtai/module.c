@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 CNRS/LAAS
+ * Copyright (c) 2004 EPFL
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,6 +19,7 @@ __RCSID("$LAAS$");
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/kernel.h>
+#include <linux/fs.h>
 #include <linux/errno.h>
 
 #include <portLib.h>
@@ -27,39 +28,81 @@ __RCSID("$LAAS$");
 #include <h2timerLib.h>
 #include <smMemLib.h>
 
+#include "h2device.h"
+
 MODULE_AUTHOR ("LAAS/CNRS");
 MODULE_DESCRIPTION ("comLib - real-time communication layer");
 MODULE_LICENSE ("BSD");
 
-int shm_size = SM_MEM_SIZE;
-MODULE_PARM(shm_size, "i");
-MODULE_PARM_DESC(shm_size,
-		 "Shared memory segment size (default 4Mo)");
+int h2dev_major = H2DEV_DEVICE_MAJOR;	/* defaults to dynamic allocation */
+MODULE_PARM(h2dev_major, "i");
+MODULE_PARM_DESC(h2dev_major, "h2dev major number");
+
+static struct file_operations fops;
+
+#include "h2initGlob.h"
+
+/**
+ ** comLib initialization for an RTAI module
+ **/
+
+STATUS
+h2initGlob(int ticksPerSec)
+{
+   /* There is nothing to do here. comLib should already be present in
+    * the kernel and configured properly. */
+
+   /* Maybe we should however report an error if ticksPerSec is not the
+    * same as the current one? */
+
+   return OK;
+}
+
+
+/**
+ ** comLib initialization
+ **/
 
 int
 comLib_init(void)
 {
-   if (h2devInit(shm_size) == ERROR) {
-      logMsg("comLib: could not initialize h2 devices\n");
-      return -EINVAL;
-   }
-   logMsg("comLib: using %d bytes of shared memory\n", shm_size);
+   int status;
 
-   if (sysClkRateGet() != 0) {
-      if (h2timerInit() == ERROR) {
-	 logMsg("comLib: could not initialize h2 timers\n");
-	 h2devEnd();
-	 return -EINVAL;
-      }
+   /* initialize timers */
+   if (h2timerInit() == ERROR) {
+      logMsg("comLib: could not initialize h2 timers\n");
+      return -EIO;
    }
+   logMsg("comLib: timers initialized\n");
 
-   logMsg("comLib: h2 devices initialized\n");
+   /* register /dev/h2dev device. XXX we should support devfs. */
+   memset(&fops, 0, sizeof(fops));
+   SET_MODULE_OWNER(&fops);
+   fops.open = h2devopen;
+   fops.release = h2devrelease;
+   fops.ioctl = h2devioctl;
+
+   status = register_chrdev(h2dev_major, H2DEV_DEVICE_NAME, &fops);
+   if (status < 0) {
+      logMsg("comLib: cannot register device `" H2DEV_DEVICE_NAME
+	     "' with major `%d'\n", h2dev_major);
+      return status;
+   }
+   if (h2dev_major == 0) h2dev_major = status; /* dynamic allocation */
+
+   logMsg("comLib: registered device `" H2DEV_DEVICE_NAME
+	  "' with major %d\n", h2dev_major);
+
+   logMsg("comLib: loaded\n");
    return 0;
 }
 
 void
 comLib_exit(void)
 {
+   int status;
+
+   /* destroy all remaining devices */
    if (h2timerEnd() == ERROR) {
       logMsg("comLib: could not delete h2 timers\n");
    }
@@ -67,6 +110,14 @@ comLib_exit(void)
    if (h2devEnd() == ERROR) {
       logMsg("Error: could not delete h2 devices\n");
    }
+
+   /* unregister /dev/h2dev device */
+   status = unregister_chrdev(h2dev_major, H2DEV_DEVICE_NAME);
+   if (status < 0) {
+      logMsg("comLib: cannot unregister device\n");
+   }
+
+   logMsg("comLib: unloaded\n");
 }
 
 module_init(comLib_init);
