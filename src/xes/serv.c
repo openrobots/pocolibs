@@ -156,7 +156,7 @@ main(int argc, char *argv[])
      */
     if ((pid = fork()) != 0) {
 	printf("xes_server version %s.%s\n"
-	       "Copyright (C) LAAS/CNRS 1991-2000\n",
+	       "Copyright (C) LAAS/CNRS 1991-2005\n",
 	       major_version, minor_version);
 	/* Creation du fichier xes-pid */
 	pid_file = fopen(PID_FILE, "w");
