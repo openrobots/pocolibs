@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2004 CNRS/LAAS
+ * Copyright (c) 1990-2005 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -71,7 +71,7 @@ h2initGlob(int ticksPerSec)
 	}
     }
     printf("Hilare2 execution environment version 2.0\n"
-	   "Copyright (c) 1999-2004 CNRS-LAAS\n");
+	   "Copyright (c) 1999-2005 CNRS-LAAS\n");
 
     return OK;
 }
