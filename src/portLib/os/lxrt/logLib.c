@@ -19,6 +19,7 @@ __RCSID("$LAAS$");
 #include <rtai_lxrt.h>
 
 #define LOGLIB_C
+#include "portLib.h"
 #include "logLib.h"
 
 /*
