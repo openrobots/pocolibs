@@ -18,6 +18,7 @@
 include Init.make
 
 SUBDIRS=\
+	include \
 	src/portLib  \
 	src/errorLib \
 	src/comLib \

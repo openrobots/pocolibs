@@ -37,8 +37,8 @@ abs_srcdir=     @abs_srcdir@
 BINDIR=         @bindir@
 LIBDIR=         @libdir@
 DATADIR=        @datadir@
-INCLUDEDIR=     @includedir@/gdhe
-MODULESDIR=     @libdir@/gdhe
+INCLUDEDIR=     @includedir@
+MODULESDIR=     @libdir@
 
 CC=             @CC@
 PURIFY=         @PURIFY@

@@ -1,6 +1,7 @@
 
 Version 2.0, xx september 2003
 
+4. Install include files (Anthony Mallet).
 3. Fix detection of thread-related options in C compilers.
 2. Adapt the build system to use GNU configure and libtool.
 1. Import the current internal LAAS version

@@ -144,6 +144,7 @@ AC_TRY_LINK([#include <stdio.h>],
 AC_CONFIG_HEADER(src/config.h)
 AC_OUTPUT(Init.make
 	Makefile
+	include/Makefile
 	src/portLib/Makefile
 	src/errorLib/Makefile
 	src/errorLib/h2addErrno
