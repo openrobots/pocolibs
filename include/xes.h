@@ -27,6 +27,9 @@
 #ifndef XES_H
 #define XES_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define PORT 1236
 
@@ -92,4 +95,8 @@ extern int h2scanf ( const char *fmt, void *value );
 #define stderr (xesStdoutOfThread())
 
 #endif /* XES_STDIO_C */
+#ifdef __cplusplus
+};
+#endif
+
 #endif

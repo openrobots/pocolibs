@@ -32,6 +32,10 @@
 
 #include <errnoLib.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 
 /* 
  * Macros pour decoder un code d'erreur "a la VxWorks"
@@ -112,4 +116,8 @@ char const * h2getMsgErrno(int numErr);
 
 /*--------------------- fin de chargement du fichier ----------------------*/
  
+#ifdef __cplusplus
+};
+#endif
+
 #endif

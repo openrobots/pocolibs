@@ -18,11 +18,19 @@
 #ifndef _SYSLIB_H
 #define _SYSLIB_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern STATUS sysClkConnect ( FUNCPTR routine, int arg );
 extern void sysClkEnable ( void );
 extern void sysClkDisable ( void );
 extern STATUS sysClkRateSet ( int ticksPerSecond );
 extern int sysClkRateGet ( void );
  
+
+#ifdef __cplusplus
+};
+#endif
 
 #endif

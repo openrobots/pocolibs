@@ -18,6 +18,10 @@
 #ifndef _H2EVNLIB_H
 #define _H2EVNLIB_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define   M_h2evnLib                    507
 
 #define  S_h2evnLib_BAD_TASK_ID     ((M_h2evnLib << 16) | 0)
@@ -26,4 +30,8 @@ extern void h2evnClear ( void );
 extern STATUS h2evnSignal ( int taskId );
 extern BOOL h2evnSusp ( int timeout );
  
+#ifdef __cplusplus
+};
+#endif
+
 #endif

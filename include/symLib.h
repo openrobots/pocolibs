@@ -18,6 +18,10 @@
 #ifndef _SYMLIB_H
 #define _SYMLIB_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef void *SYMTAB_ID;
 extern SYMTAB_ID sysSymTbl;
 
@@ -43,5 +47,9 @@ STATUS symFindByName(SYMTAB_ID symTblId, char *name, char **pValue,
 		     SYM_TYPE *pType);
 STATUS symFindByValue(SYMTAB_ID symTldId, char *value, char *name, 
 		      int *pValue, SYM_TYPE *pType);
+
+#ifdef __cplusplus
+};
+#endif
 
 #endif

@@ -20,6 +20,10 @@
 
 #include "semLib.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*
  * Flags for tasks
  */
@@ -60,5 +64,9 @@ extern unsigned long taskGetUserData ( long tid );
 extern STATUS taskOptionsGet ( long tid, int *pOptions );
 extern STATUS taskOptionsSet ( long tid, int mask, int newOptions );
 extern long taskNameToId(char *name);
+
+#ifdef __cplusplus
+};
+#endif
 
 #endif

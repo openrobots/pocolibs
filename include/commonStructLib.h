@@ -24,6 +24,10 @@
 
 #include "semLib.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Flag d'indication d'initialisation de la structure */
 #define  COMMON_STRUCT_INIT_FLAG                  0x11223344
 
@@ -35,7 +39,6 @@
 
 /* Codes d'erreur */
 #define  S_commonStructLib_ISNT_COMMON_STRUCT     (M_commonStructLib | 0)
-
 
 /* Definition de type de l'en-tete des structures communes de donnees */
 typedef struct {
@@ -54,5 +57,8 @@ extern STATUS commonStructDelete ( void *pCommonStruct );
 extern STATUS commonStructGive ( void *pCommonStruct );
 extern STATUS commonStructTake ( void *pCommonStruct );
 
+#ifdef __cplusplus
+};
+#endif
 
 #endif /* COMMON_STRUCT_H */

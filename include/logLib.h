@@ -19,6 +19,10 @@
 #ifndef _LOGLIB_H
 #define _LOGLIB_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern STATUS	logInit(int fd, int maxMsgs);
 extern void	logEnd(void);
 
@@ -29,4 +33,9 @@ extern int logMsg ( const char *fmt, int arg1, int arg2, int arg3, int arg4,
 extern int logMsg ( const char *fmt, ... );
 #endif
 
+#ifdef __cplusplus
+};
+#endif
+
 #endif /* _LOGLIB_H */
+

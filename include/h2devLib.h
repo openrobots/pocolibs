@@ -23,6 +23,10 @@
 #include "h2rngLib.h"
 #include "h2endianness.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  ** H2 device structures
  ** The array of h2 devices is stored in shared memory. 
@@ -174,5 +178,9 @@ extern long h2devGetKey ( int type, int dev, BOOL create, int *pFd );
 extern int h2devGetSemId ( void );
 extern STATUS h2devInit ( int smMemSize );
 extern STATUS h2devShow ( void );
+
+#ifdef __cplusplus
+};
+#endif
 
 #endif

@@ -18,8 +18,18 @@
 #ifndef _ERRNOLIB_H
 #define _ERRNOLIB_H
 
+#include <portLib.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* prototypes */
 extern int errnoGet ( void );
 extern STATUS errnoSet ( int errorValue );
+
+#ifdef __cplusplus
+};
+#endif
 
 #endif /* _ERRNOLIB_H */

@@ -19,6 +19,10 @@
 #define  H2_MATH_LIB_H
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*****************************************************************************/
 /*   LABORATOIRE D'AUTOMATIQUE ET D'ANALYSE DE SYSTEMES - LAAS / CNRS        */
 /*   PROJET HILARE II  -  COMPLEMENT AUX ROUTINES MATH. DE VXWORKS           */
@@ -93,5 +97,9 @@ double integCosFresnel ();
 double integSinFresnel ();
 #endif
 
+
+#ifdef __cplusplus
+};
+#endif
 
 #endif

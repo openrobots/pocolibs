@@ -18,6 +18,10 @@
 #ifndef _PORTLIB_H
 #define _PORTLIB_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  ** General definitions found on other some systems
  **/
@@ -69,6 +73,10 @@ typedef void *(*VOIDPTRFUNCPTR)();
 #define MAX(a,b) ((a)>(b)?(a):(b))
 #endif
 
+#ifdef __cplusplus
+};
+#endif
+
 /* XXX Does this belong here ?? */
 /* Number of tick per second of the clock */
 #include <sysLib.h>
@@ -77,6 +85,10 @@ typedef void *(*VOIDPTRFUNCPTR)();
 #define TICK_US (1000000/NTICKS_PER_SEC)
 
 #include "logLib.h" /* older versions used to define logMsg() here */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* Error codes */
 #define M_portLib			(1 << 16)
@@ -90,5 +102,9 @@ typedef void *(*VOIDPTRFUNCPTR)();
  */
 extern STATUS osInit(int);
 extern void   osExit(void);
+
+#ifdef __cplusplus
+};
+#endif
 
 #endif /* _PORTLIB_H */

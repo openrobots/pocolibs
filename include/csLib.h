@@ -37,6 +37,10 @@
 
 #include "gcomLib.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Nombre max de types de requetes traitees par un serveur */
 #define  NMAX_RQST_TYPE                25
 
@@ -136,5 +140,9 @@ extern STATUS csServRqstExec ( SERV_ID servId );
 extern STATUS csServRqstIdFree ( SERV_ID servId, int rqstId );
 extern STATUS csServRqstParamsGet ( SERV_ID servId, int rqstId, 
     char *rqstDataAdrs, int rqstDataSize, FUNCPTR decodFunc );
+
+#ifdef __cplusplus
+};
+#endif
 
 #endif /* CS_LIB_H */

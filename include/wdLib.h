@@ -18,6 +18,10 @@
 #ifndef _WDLIB_H
 #define _WDLIB_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define M_wdLib         (34 << 16)
 
 typedef struct wdog *WDOG_ID;
@@ -36,5 +40,9 @@ extern STATUS wdDelete ( WDOG_ID wdId );
 extern STATUS wdStart ( WDOG_ID wdId, int delay, FUNCPTR pRoutine, 
 			long parameter );
 extern STATUS wdCancel ( WDOG_ID wdId );
+
+#ifdef __cplusplus
+};
+#endif
 
 #endif

@@ -18,6 +18,14 @@
 #ifndef _H2INITGLOB_H
 #define _H2INITGLOB_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern STATUS h2initGlob(int tickPerSec); 
+
+#ifdef __cplusplus
+};
+#endif
 
 #endif

@@ -32,6 +32,10 @@
 
 #include "mboxLib.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Flag d'initialisation */
 #define   GCOM_FLAG_INIT                  0x12348765
 
@@ -136,5 +140,9 @@ void gcomReplyLetterBySendId (int sendId, LETTER_ID *pIntermedReplyLetter,
     LETTER_ID *pFinalReplyLetter);
 void gcomSelect(char *sendIdTable);
 
+
+#ifdef __cplusplus
+};
+#endif
 
 #endif /* GCOM_LIB_H */

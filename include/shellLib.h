@@ -20,6 +20,10 @@
 
 #include <stdio.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern STATUS executeCmd ( char *cmdbuf, int clientSock, int clientError, 
 			  int recur );
 
@@ -27,4 +31,8 @@ extern int get_args ( int line_length, char *line, char **argv );
 extern void getstr ( int soc, char *buf, int cnt, char *errmesg );
 extern void parse_args(int firstArg, int argc, char *argv[], int argType[]);
 extern void shellMainLoop(FILE *in, FILE *out, FILE *err, char *prompt);
+#ifdef __cplusplus
+};
+#endif
+
 #endif

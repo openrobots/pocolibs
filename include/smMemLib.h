@@ -18,6 +18,10 @@
 #ifndef _SMMEMLIB_H
 #define _SMMEMLIB_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Nom du device h2 associe */
 #define SM_MEM_NAME "smMem"
 
@@ -46,4 +50,8 @@ void *smMemCalloc(size_t elemNum, size_t elemSize);
 void *smMemRealloc(void *pBlock, size_t newSize);
 STATUS smMemFree(void *ptr); 
 void smMemShow(int option);
+#ifdef __cplusplus
+};
+#endif
+
 #endif

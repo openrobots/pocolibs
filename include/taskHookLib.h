@@ -18,6 +18,10 @@
 #ifndef _TASKHOOKLIB_H
 #define _TASKHOOKLIB_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void taskHookInit(void);
 STATUS taskCreateHookAdd(FUNCPTR createHook);
 STATUS taskCreateHookDelete(FUNCPTR createHook);
@@ -25,5 +29,9 @@ STATUS taskSwitchHookAdd(FUNCPTR switchHook);
 STATUS taskSwitchHookDelete(FUNCPTR switchHook);
 STATUS taskDeleteHookAdd(FUNCPTR deleteHook);
 STATUS taskDeleteHookDelete(FUNCPTR deleteHook);
+
+#ifdef __cplusplus
+};
+#endif
 
 #endif

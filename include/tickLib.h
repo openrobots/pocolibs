@@ -18,6 +18,10 @@
 #ifndef _TICKLIB_H
 #define _TICKLIB_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define M_tickLib       (60 << 16)
 
 extern unsigned long long vxTicks;
@@ -26,5 +30,9 @@ extern void tickAnnounce ( void );
 extern void tickSet ( unsigned long ticks );
 extern unsigned long tickGet ( void );
  
+
+#ifdef __cplusplus
+};
+#endif
 
 #endif

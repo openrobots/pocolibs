@@ -25,6 +25,10 @@
 
 #include "semLib.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Flag d'indication d'initialisation */
 #define  H2TIMER_FLG_INIT                 0x44444444
 
@@ -70,5 +74,9 @@ extern STATUS h2timerPauseReset ( H2TIMER_ID timerId );
 extern STATUS h2timerStop ( H2TIMER_ID timerId );
 extern STATUS h2timerChangePeriod ( H2TIMER_ID timerId, int periode );
 extern STATUS h2timerFree ( H2TIMER_ID timerId );
+
+#ifdef __cplusplus
+};
+#endif
 
 #endif /* _H2TIMERLIB_H */

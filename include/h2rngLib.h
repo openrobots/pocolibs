@@ -36,6 +36,10 @@
    de ring buffers, version HILARE II  (inter-processeurs)
 */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 
 
 /* Types des ring buffers */
@@ -231,4 +235,8 @@ extern int h2rngNBytes ( H2RNG_ID rngId );
 
 
 /*------------- fin de chargement du fichier --------------------------------*/
+#ifdef __cplusplus
+};
+#endif
+
 #endif

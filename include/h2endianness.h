@@ -28,6 +28,10 @@
 #ifndef H2_ENDIANNESS_H
 #define H2_ENDIANNESS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum H2_ENDIANNESS {
   H2_BIG_ENDIAN,
   H2_LITTLE_ENDIAN
@@ -45,6 +49,10 @@ extern H2_ENDIANNESS h2localEndianness (void);
 /* If the macro is not defined (h2endiannessMacro.h) then call C function */
 #ifndef H2_LOCAL_ENDIANNESS
 #define H2_LOCAL_ENDIANNESS (h2localEndianness())
+#endif
+
+#ifdef __cplusplus
+};
 #endif
 
 #endif /* H2_ENDIANNESS_H */

@@ -18,6 +18,10 @@
 #ifndef _SMOBJLIB_H
 #define _SMOBJLIB_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Code du module */
 #define M_smObjLib (72)
 
@@ -27,5 +31,9 @@
 
 void *smObjGlobalToLocal(void *globalAdrs);
 void *smObjLocalToGlobal(void *localAdrs);
+
+#ifdef __cplusplus
+};
+#endif
 
 #endif
