@@ -27,15 +27,14 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#ifdef UNIX
+#ifndef VXWORKS
 #include <netdb.h>
 #endif
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
 #include <unistd.h>
-
-extern int errno;
+#include <errno.h>
 
 /*
 ** serversock()
