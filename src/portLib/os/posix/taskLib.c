@@ -90,6 +90,7 @@ static STATUS executeHooks(TASK_HOOK_LIST *list, OS_TCB *tcb);
 /*
  * Two functions to map a VxWorks-like  priority to a Posix priority
  */
+#ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
 static int
 priorityVxToPosix(int priority)
 {
@@ -100,6 +101,7 @@ priorityVxToPosix(int priority)
 		return -1;
 	}
 }
+#endif
 
 /*----------------------------------------------------------------------*/
 
@@ -242,9 +244,9 @@ taskSpawn(char *name, int priority, int options, int stackSize,
     pthread_attr_t thread_attr;
     pthread_t thread_id;
     struct sched_param thread_param;
-#ifndef NO_SCHEDPARAM
+#ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
     int policy;
-#endif /* NO_SCHEDPARAM */
+#endif /* HAVE_PTHREAD_ATTR_SETSCHEDPOLICY */
     int status;
     OS_TCB *tcb;
     char bufName[12];
@@ -600,8 +602,8 @@ taskIdSelf(void)
     }
     tcb = (OS_TCB *)pthread_getspecific(taskControlBlock);
     if (tcb->magic != TASK_MAGIC) {
-	fprintf(stderr, "taskIdSelf: bad task specific data: %ld %ld\n",
-		(long)tcb, pthread_self());
+	fprintf(stderr, "taskIdSelf: bad task specific data: %lx %lx\n",
+		(unsigned long)tcb, (unsigned long)pthread_self());
 	abort();
     }
     return (long)tcb;
@@ -648,8 +650,8 @@ taskGetUserData(long tid)
     if (tcb != NULL) {
 	if (tcb->magic != TASK_MAGIC) {
 	    fprintf(stderr, 
-		"taskGetUserData: bad/unregisterd taskId %ld %ld\n",
-		tid, pthread_self());
+		"taskGetUserData: bad/unregisterd taskId %ld %lx\n",
+		tid, (unsigned long)pthread_self());
 	    return 0;
 	}
         return tcb->userData;
@@ -672,8 +674,8 @@ taskOptionsSet(long tid, int mask, int newOptions)
    if (!tcb) return ERROR;
    if (tcb->magic != TASK_MAGIC) {
       fprintf(stderr, 
-	      "taskOptionsSet: bad/unregisterd taskId %ld %ld\n",
-	      tid, pthread_self());
+	      "taskOptionsSet: bad/unregisterd taskId %ld %lx\n",
+	      tid, (unsigned long)pthread_self());
       return ERROR;
    }
 
@@ -694,8 +696,8 @@ taskOptionsGet(long tid, int *pOptions)
    if (!tcb) return ERROR;
    if (tcb->magic != TASK_MAGIC) {
       fprintf(stderr, 
-	      "taskOptionsGet: bad/unregisterd taskId %ld %ld\n",
-	      tid, pthread_self());
+	      "taskOptionsGet: bad/unregisterd taskId %ld %lx\n",
+	      tid, (unsigned long)pthread_self());
       return ERROR;
    }
 
