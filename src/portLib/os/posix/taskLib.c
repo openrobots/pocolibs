@@ -149,7 +149,7 @@ taskLibInit(void)
     if (tcb == NULL) {
 	return ERROR;
     }
-    snprintf(name, sizeof(name), "tUnix%d", getpid());
+    snprintf(name, sizeof(name), "tUnix%d", (int)getpid());
     tcb->name = strdup(name);
 #ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
     pthread_getschedparam(pthread_self(), &policy, &param);
