@@ -18,8 +18,6 @@
 #ifndef _ERRNOLIB_H
 #define _ERRNOLIB_H
 
-#include "portLib.h"
-
 /* prototypes */
 extern int errnoGet ( void );
 extern STATUS errnoSet ( int errorValue );

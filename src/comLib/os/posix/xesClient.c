@@ -68,6 +68,7 @@ __RCSID("$LAAS$");
 #include <stdarg.h>
 #include <stdlib.h>
 
+#include "portLib.h"
 #include "xes.h"
 
 static char *xes_host = "localhost";	/* le nom du serveur xes */

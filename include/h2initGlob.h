@@ -18,8 +18,6 @@
 #ifndef _H2INITGLOB_H
 #define _H2INITGLOB_H
 
-#include "portLib.h"
-
 extern STATUS h2initGlob(int tickPerSec); 
 
 #endif

@@ -27,10 +27,6 @@
 #ifndef XES_H
 #define XES_H
 
-#include <stdio.h>
-#include <stdarg.h>
-
-#include "portLib.h"
 
 #define PORT 1236
 

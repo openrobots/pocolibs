@@ -22,11 +22,12 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
+#include <errno.h>
+#include <pthread.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <pthread.h>
 #include <string.h>
-#include <errno.h>
 
 #include "portLib.h"
 #include "h2initGlob.h"

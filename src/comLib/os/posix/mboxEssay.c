@@ -40,6 +40,7 @@ __RCSID("$LAAS$");
 #include <stdlib.h>
 #include <errnoLib.h>
 #include <string.h>
+#include <stdarg.h>
 
 #ifdef VXWORKS
 #include "h2sysLib.h"

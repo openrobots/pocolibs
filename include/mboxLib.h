@@ -18,12 +18,6 @@
 #ifndef _MBOXLIB_H
 #define _MBOXLIB_H
 
-#ifndef VXWORKS
-#  include "portLib.h"
-#else
-#  include <vxWorks.h>
-#endif
-
 typedef int MBOX_ID;
 
 
