@@ -34,7 +34,7 @@
 #include <signal.h>
 #include <fcntl.h>
 #include <termios.h>
-#ifndef linux
+#ifndef __linux__
 #include <sys/filio.h>
 #endif
 #include <sys/types.h>
@@ -172,7 +172,7 @@ main(int argc, char *argv[])
     /* 
      * Detache le serveur du terminal
      */
-#if !defined(SVR4) && !defined(linux)
+#if !defined(SVR4) && !defined(__linux__)
     i = open("/dev/tty", 2);
     if (i >= 0) {
 	(void) ioctl(i, TIOCNOTTY, (char *) 0);
@@ -556,7 +556,7 @@ create_window(int *win_fd, int *win_pid)
 
     if((pid = vfork()) == 0) {
 
-#if !defined(SVR4) && !defined(linux)
+#if !defined(SVR4) && !defined(__linux__)
 	setpgrp(0, getpid());
 #else
 	setsid();
@@ -608,7 +608,7 @@ create_window(int *win_fd, int *win_pid)
 	perror("xes: set non-blocking io");
     }
 
-#ifdef linux
+#ifdef __linux__
     (void)signal(SIGPIPE, pipeHandler);
 #endif
 
