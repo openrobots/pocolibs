@@ -57,7 +57,8 @@ install:: all-os
 # module dependencies
 depend $(MODDIR)/DEPENDANCES:: $(MODDIR)/$(MODVPATH)
 depend $(MODDIR)/DEPENDANCES:: $(MODSRCS)
-	$(MKDEP) -c$(CC) -o$(MODDIR)/DEPENDANCES $(CPPFLAGS) $(MOD_CPPFLAGS) $?
+	$(MKDEP) -c$(CC) -o$(MODDIR)/DEPENDANCES -d$(MODDIR) -t.lo \
+		$(CPPFLAGS) $(MOD_CPPFLAGS) $?
 
 ifneq (,$(MODSRCS))
 ifneq (distclean,$(MAKECMDGOALS))
