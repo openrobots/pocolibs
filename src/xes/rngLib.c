@@ -38,9 +38,8 @@
 *   Retourne : identificateur du ring buffer ou NULL
 */
 
-RNG_ID rngCreate (nbytes)
-     int nbytes;             /* Nombre de bytes */
-
+RNG_ID
+rngCreate(size_t nbytes) 
 {
   RNG_ID rngId;             /* Pointeur vers tete */
 
@@ -48,7 +47,7 @@ RNG_ID rngCreate (nbytes)
   nbytes = nbytes + 1;
 
   /* Allouer memoire pour l'en-tete et pour le buffer */
-  if ((rngId = (RNG_ID) malloc ((u_int) (nbytes + sizeof (RNG_HDR)))) == NULL)
+  if ((rngId = (RNG_ID) malloc (nbytes + sizeof (RNG_HDR))) == NULL)
     return (NULL);
 
   /* Initialiser l' en-tete */
@@ -72,16 +71,13 @@ RNG_ID rngCreate (nbytes)
 *    Retourne : Neant
 */
 
-void rngFlush (rngId)
-     RNG_ID rngId;       /* Identificateur du ring buffer */
-
+void
+rngFlush(RNG_ID rngId)
 {
   /* Reseter les pointeurs */
   rngId->pRd = 0;
   rngId->pWr = 0;
 }
-
-
 
 /*****************************************************************************
 *
@@ -90,20 +86,20 @@ void rngFlush (rngId)
 *    Description :
 *    Donne les valeurs des pointeurs du ring buffer
 *
+*     RNG_ID rngId;        Identificateur du ring buffer 
+*     int *ppRd;           Ou` mettre le pointeur de lecture 
+*     int *ppWr;           Ou` mettre le pointeur d'ecriture 
+*
 *    Retourne : Neant
 */
 
-void rngWhereIs (rngId, ppRd, ppWr)
-     RNG_ID rngId;       /* Identificateur du ring buffer */
-     int *ppRd;          /* Ou` mettre le pointeur de lecture */
-     int *ppWr;          /* Ou` mettre le pointeur d'ecriture */
+void 
+rngWhereIs(RNG_ID rngId, int *ppRd, int *ppWr)
 
 {
   *ppRd = rngId->pRd;
   *ppWr = rngId->pWr;
 }
-
-
 
 /*****************************************************************************
 *
@@ -117,11 +113,8 @@ void rngWhereIs (rngId, ppRd, ppWr)
 *    Retourne : nombre de bytes effectivement lus.
 */
 
-int rngBufGet (rngId, buf, maxbytes)
-     RNG_ID rngId;         /* Identificateur du ring buffer */
-     char *buf;            /* Pointeur vers buffer utilisateur */
-     int maxbytes;         /* Nombre max. de bytes a lire */
-
+int
+rngBufGet(RNG_ID rngId, char *buf, size_t maxbytes)
 {
   int n1, n2, nbytes;                          
   int pWr, pRd;                 
@@ -187,11 +180,8 @@ int rngBufGet (rngId, buf, maxbytes)
 *   Nombre de bytes effectivement copies
 */
 
-int rngBufPut (rngId, buf, nbytes)
-     RNG_ID rngId;                  /* Ring buffer ou mettre les bytes */
-     char *buf;                     /* Buffer a copier */
-     int nbytes;                    /* Nombre de bytes a essayer de copier */
-
+int 
+rngBufPut(RNG_ID rngId, char *buf, size_t nbytes)
 {
   int n1, n2;                          
   int pWr, pRd;                 
@@ -254,13 +244,11 @@ int rngBufPut (rngId, buf, nbytes)
 *   Retourne :
 */
  
-int rngBufSkip (rngId, nbytes)
-     RNG_ID rngId;    /* Pointeur vers le ring buffer */
-     int nbytes;      /* Nobre de bytes a sauter */
- 
+int
+rngBufSkip(RNG_ID rngId, int nbytes)
 {
   int pRd;            /* Valeur du pointeur de lecture */
-  int size;           /* Taille du ring buffer */
+  size_t size;           /* Taille du ring buffer */
  
   /* Obtenir la taille du ring buffer */
   size = rngId->size;
@@ -294,13 +282,11 @@ int rngBufSkip (rngId, nbytes)
 *   Retourne : nombre de bytes epies
 */
  
-int rngBufSpy (rngId, buf, maxbytes)
-     RNG_ID rngId;         /* Identificateur du ring buffer */
-     char *buf;            /* Pointeur vers buffer utilisateur */
-     int maxbytes;         /* Nombre max. de bytes a epier */
- 
+int 
+rngBufSpy(RNG_ID rngId, char *buf, size_t maxbytes) 
 {
-  int n1, n2, nbytes;                          
+  int n1, n2; 
+  size_t nbytes;                          
   int pWr, pRd;
  
   /* Valeurs congelees des pointeurs d'ecriture et de lecture */
@@ -357,9 +343,7 @@ int rngBufSpy (rngId, buf, maxbytes)
 */
 
 int 
-rngIsEmpty (rngId)
-     RNG_ID rngId;    /* Pointeur vers le ring buffer */
-
+rngIsEmpty(RNG_ID rngId)
 {
   return (rngId->pRd == rngId->pWr);
 }
@@ -375,9 +359,8 @@ rngIsEmpty (rngId)
 *   Retourne : nombre de bytes dans le ring buffer
 */
 
-int rngNBytes (rngId)
-     RNG_ID rngId;    /* Pointeur vers le ring buffer */
-     
+int
+rngNBytes(RNG_ID rngId)
 {
   int dp;
 
@@ -401,9 +384,8 @@ int rngNBytes (rngId)
 *   Retourne : OK ou ERROR
 */
 
-void rngDelete (rngId)
-     RNG_ID rngId;    /* Pointeur vers le ring buffer */
-
+void 
+rngDelete(RNG_ID rngId)
 {
   /* Liberer le pool de memoire */
   free ((char *) rngId);

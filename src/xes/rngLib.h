@@ -20,18 +20,18 @@
 typedef struct {
     int pRd;                             /* Pointeur de lecture */
     int pWr;                             /* Pointeur d'ecriture */
-    int size;                            /* Taille du ring buffer */
+    size_t size;                            /* Taille du ring buffer */
 } RNG_HDR;
 
 typedef RNG_HDR *RNG_ID;
 
 #ifdef __STDC__
 int rngIsEmpty (RNG_ID rngId);
-RNG_ID rngCreate (int nbytes);
-int rngBufPut (RNG_ID rngId, char *buf, int nbytes);
+RNG_ID rngCreate (size_t nbytes);
+int rngBufPut (RNG_ID rngId, char *buf, size_t nbytes);
 int rngBufSkip (RNG_ID rngId, int nbytes);
-int rngBufGet (RNG_ID rngId, char *buf, int maxbytes);
-int rngBufSpy (RNG_ID rngId, char *buf, int maxbytes);
+int rngBufGet (RNG_ID rngId, char *buf, size_t maxbytes);
+int rngBufSpy (RNG_ID rngId, char *buf, size_t maxbytes);
 int rngNBytes (RNG_ID rngId);
 void rngDelete (RNG_ID rngId);
 void rngFlush (RNG_ID rngId);
