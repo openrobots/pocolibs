@@ -46,7 +46,7 @@ $(PROG).pure: $(OBJS) $(LIBH2) $(LIBOS)
 %.o: %.c
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $<
 
-DEPENDANCES: $(SRCS)
+depend DEPENDANCES: $(SRCS)
 	$(MKDEP) -c$(CC) -oDEPENDANCES $(CPPFLAGS) $?
 
 clean:
