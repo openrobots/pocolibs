@@ -286,10 +286,7 @@ posterFindPath(char *posterName, REMOTE_POSTER_ID *pPosterId)
 
 
 static STATUS 
-remotePosterFind (posterName, pPosterId)
-	char *posterName;		/* Nom du poster */
-	POSTER_ID *pPosterId;		/* Ou` mettre l'id du poster */
-	
+remotePosterFind (char *posterName, POSTER_ID *pPosterId)
 {
 	POSTER_FIND_RESULT *res;
 	REMOTE_POSTER_ID remPosterId;
