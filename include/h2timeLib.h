@@ -18,8 +18,14 @@
 #ifndef _H2TIMELIB_H
 #define _H2TIMELIB_H
 
+#include <portLib.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Def. type structure de temps */
-typedef struct {
+typedef struct H2TIME_STR {
   unsigned long ntick;               /* ticks number */
   unsigned short msec;               /* milli-seconds */
   unsigned short sec;                /* seconds */
@@ -32,12 +38,19 @@ typedef struct {
 } H2TIME;
 
 /* Prototypes */
+struct timeval;
 
 extern STATUS h2timeAdj ( H2TIME *pTimeStr );
 extern STATUS h2timeGet ( H2TIME *pTimeStr );
+extern void h2timeFromTimeval(H2TIME* pTimeStr, const struct timeval* tv);
+extern void timevalFromH2time(struct timeval* tv, const H2TIME* pTimeStr);
 extern void h2timeInit ( void );
 extern STATUS h2timeInterval ( H2TIME *pOldTime, unsigned long *pNmsec );
 extern STATUS h2timeSet ( H2TIME *pTimeStr );
 extern void h2timeShow ( void );
+
+#ifdef __cplusplus
+};
+#endif
 
 #endif /* _H2TIMELIB_H */
