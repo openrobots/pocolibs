@@ -19,6 +19,7 @@ __RCSID("$LAAS$");
 #include <linux/module.h>
 
 #include <rtai_sched.h>
+#include <rtai_nam2num.h>
 #include <rtai_shm.h>
 
 #include "portLib.h"
@@ -73,6 +74,9 @@ h2devGetKey(int type, int dev, BOOL dummy, int *dummy2)
 
    key = nam2num("h2devs") & 0xfffff000;
    key |= (dev*H2DEV_MAX_TYPES + type) & 0xfff;
+
+   LOGDBG(("comLib:h2devGetKey: key for type %d and dev %d is %d\n",
+	   type, dev, key));
 
    return key;
 }

@@ -27,6 +27,7 @@ __RCSID("$LAAS$");
 #include <sys/stat.h>
 #include <linux/kdev_t.h>
 
+#include <rtai_nam2num.h>
 #define KEEP_STATIC_INLINE /* ... */
 #include <rtai_shm.h>
 
@@ -35,6 +36,12 @@ __RCSID("$LAAS$");
 #include <h2devLib.h>
 
 #include "h2device.h"
+
+#ifdef COMLIB_DEBUG_H2DEVLIB
+# define LOGDBG(x)	logMsg x
+#else
+# define LOGDBG(x)
+#endif
 
 /* Global h2devices -
  * 
@@ -72,6 +79,9 @@ h2devGetKey(int type, int dev, BOOL dummy, int *dummy2)
    key = nam2num("h2devs") & 0xfffff000;
    key |= (dev*H2DEV_MAX_TYPES + type) & 0xfff;
 
+   LOGDBG(("comLib:h2devGetKey: key for type %d and dev %d is %d\n",
+	   type, dev, key));
+
    return key;
 }
 
@@ -85,6 +95,7 @@ h2devGetKey(int type, int dev, BOOL dummy, int *dummy2)
 STATUS
 h2devInit(int smMemSize)
 {
+   STATUS s;
    struct h2devop op;   
 
    if (h2devfd >= 0) {
@@ -101,9 +112,15 @@ h2devInit(int smMemSize)
       return ERROR;
    }
 
+   LOGDBG(("comLib:h2devInit: opened /dev/" H2DEV_DEVICE_NAME "\n"));
+
    /* initialize on kernel side */
    op.arg[0]._long = smMemSize;
-   return doioctl(H2DEV_IOC_DEVINIT, &op);
+   s = doioctl(H2DEV_IOC_DEVINIT, &op);
+
+   LOGDBG(("comLib:h2devInit: done with kernel init\n"));
+
+   return s;
 }
 
 
@@ -118,6 +135,7 @@ h2devAttach(void)
 {
    struct h2devop op;   
    long key;
+   int i;
 
    if (h2devfd >= 0) return OK;
 
@@ -130,11 +148,15 @@ h2devAttach(void)
       return ERROR;
    }
 
+   LOGDBG(("comLib:h2devAttach: opened /dev/" H2DEV_DEVICE_NAME "\n"));
+
    if (doioctl(H2DEV_IOC_DEVATTACH, &op) != OK) {
       close(h2devfd);
       h2devfd = -1;
       return ERROR;
    }
+
+   LOGDBG(("comLib:h2devAttach: attached to h2 devices\n"));
 
    h2Devs = rtai_malloc(key, sizeof(H2_DEV_STR)*H2_DEV_MAX);
    if (!h2Devs) {
@@ -144,6 +166,18 @@ h2devAttach(void)
       errnoSet(S_smObjLib_SHMGET_ERROR);
       return ERROR;
    }
+
+   LOGDBG(("comLib:h2devAttach: mapped h2 devices at %p\n", h2Devs));
+
+   LOGDBG(("Id   Type   UID Name\n"));
+   LOGDBG(("------------------------------------------------\n"));
+   for (i = 0; i < H2_DEV_MAX; i++) {
+      if (H2DEV_TYPE(i) != H2_DEV_TYPE_NONE) {
+	 LOGDBG(("%2d %2d %5d %s\n", i, H2DEV_TYPE(i), H2DEV_UID(i),
+		 H2DEV_NAME(i)?H2DEV_NAME(i):"?"));
+      }
+   } /* for */
+   LOGDBG(("------------------------------------------------\n"));
 
    return OK;
 }

@@ -31,7 +31,6 @@ __RCSID("$LAAS$");
 # include <fcntl.h>
 #endif /* __KERNEL__ */
 
-#define KEEP_STATIC_INLINE /* ... */
 #include <rtai_shm.h>
 
 #include <errnoLib.h>
@@ -92,7 +91,8 @@ smMemInit(int smMemSize)
     header->signature = SIGNATURE;
     
     smMemFreeList = header;
-    
+
+    LOGDBG(("comLib:smMemInit: shm created, %d bytes\n", smMemSize));
     return OK;
 } 
 
@@ -109,8 +109,8 @@ smMemAttach(void)
     if (smMemFreeList != NULL) return OK;
 
     dev = h2devFind(SM_MEM_NAME, H2_DEV_TYPE_MEM);
-    LOGDBG(("comLib:smMemAttach: shm device is %d, %d bytes\n",
-	    dev, H2DEV_MEM_SIZE(dev)));
+    LOGDBG(("comLib:smMemAttach: shm device is %d, key %d, %d bytes\n",
+	    dev, H2DEV_MEM_SHM_ID(dev), H2DEV_MEM_SIZE(dev)));
     if (dev < 0) return ERROR;
 
 #ifdef __KERNEL__
@@ -121,7 +121,7 @@ smMemAttach(void)
 
        addr = rtai_malloc(H2DEV_MEM_SHM_ID(dev),
 			  H2DEV_MEM_SIZE(dev) + 2*sizeof(SM_MALLOC_CHUNK));
-       LOGDBG(("comLib:smMemAttach: attached to shm at 0x%p\n", addr));
+       LOGDBG(("comLib:smMemAttach: attached to shm at %p\n", addr));
        smMemFreeList = addr + 1;
     }
 #endif

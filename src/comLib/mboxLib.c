@@ -397,7 +397,9 @@ mboxPause(MBOX_ID mboxId, int timeout)
 		    }
 		}
 	    } /* for */
+
 	    /* no message, wait for the synchronization semaphore */
+	    LOGDBG(("comLib:mboxPause: waiting on sem #%d\n", semId));
 	    if ((takeStatus = h2semTake(semId, timeout)) != TRUE) {
 		return (takeStatus);
 	    }
@@ -487,6 +489,7 @@ mboxSend(MBOX_ID toId, MBOX_ID fromId, char *buf, int nbytes)
 	return (ERROR);
     }
     /* Signal the mailbox that there's a message to read */
+    LOGDBG(("comLib:mboxSend: signaling sem #%d\n", H2DEV_MBOX_SEM_ID(toId)));
     if (h2semGive(H2DEV_MBOX_SEM_ID(toId)) == ERROR) {
 	logMsg("erreur give semSigRd\n");
     }

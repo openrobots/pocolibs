@@ -21,8 +21,6 @@ __RCSID("$LAAS$");
 #include "portLib.h"
 #include "taskLib.h"
 
-/* #define PORTLIB_DEBUG_SYSLIB */
-
 #ifdef PORTLIB_DEBUG_SYSLIB
 # define LOGDBG(x)	logMsg x
 #else
@@ -67,15 +65,22 @@ sysClkConnect(FUNCPTR routine, int arg)
 void
 sysClkEnable(void)
 {
+#ifdef CONFIG_PPC
+   /* I found out that periodic mode doesn't work on PPC. This is
+    * confirmed in rtai mailing lists, but the message was rather old.
+    * https://mail.rtai.org/pipermail/rtai/2002-September/000844.html */
+   rt_set_oneshot_mode();
+#else
    rt_set_periodic_mode();
+#endif
 
-   sysClkTickCount = start_rt_timer(sysClkTickCount);
+   start_rt_timer(sysClkTickCount);
 
    LOGDBG(("portLib:sysLib:sysClkEnable: starting rt timer at "
 	   "%d ticks/s (period %d)\n", sysClkTicksPerSecond, sysClkTickCount));
 
    sysClkThreadId = 
-      taskSpawn("sysClkThread", 10, VX_FP_TASK, 1024, sysClkThread);
+      taskSpawn("sysClkThread", 10, VX_FP_TASK, 10240, sysClkThread);
    if (sysClkThreadId == ERROR) {
       logMsg("portLib:sysClkEnable: cannot start clock thread\n");
       return;
@@ -114,7 +119,7 @@ sysClkRateSet(int ticksPerSecond)
     sysClkTicksPerSecond = ticksPerSecond;
 
     if (sysClkTicksPerSecond != 0)
-       sysClkTickCount = nano2count(1e9 / sysClkTicksPerSecond);
+       sysClkTickCount = nano2count(1000000000L / sysClkTicksPerSecond);
     else
        sysClkTickCount = 0;
 

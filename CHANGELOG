@@ -1,5 +1,7 @@
 Version 2.0, xx May 2004
 
+ 27. Added devfs support for RTAI.
+ 26. install-sh does not overwrite files if they were not modified.
  25. Preliminary RTAI/user-space support. posterLib requires a more
      complicated implementation: as of now, posters can be shared between
      RTAI-tasks and linux processes but this breaks the real-time

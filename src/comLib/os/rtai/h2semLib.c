@@ -21,7 +21,7 @@ __RCSID("$LAAS$");
 
 #include "portLib.h"
 
-#include <rtai_sched.h>
+#include <rtai_sem.h>
 
 #include "taskLib.h"
 #include "h2devLib.h"

@@ -17,7 +17,7 @@
 __RCSID("$LAAS$");
 
 #include <linux/slab.h>
-#include <rtai_sched.h>
+#include <rtai_sem.h>
 
 #include "portLib.h"
 #include "wdLib.h"

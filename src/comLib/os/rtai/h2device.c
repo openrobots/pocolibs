@@ -30,7 +30,17 @@ __RCSID("$LAAS$");
 
 #include "h2device.h"
 
-DECLARE_WAIT_QUEUE_HEAD(wq);
+#ifdef COMLIB_DEBUG_H2DEVLIB
+# define LOGDBG(x)	logMsg x
+# define LOGKDBG(x)	printk x
+
+static const char *	h2ioctlname(int n);
+#else
+# define LOGDBG(x)
+# define LOGKDBG(x)
+#endif
+
+static DECLARE_WAIT_QUEUE_HEAD(wq);
 
 /* local functions */
 static int copy_to_buffer(struct h2device *h, void *user, size_t len);
@@ -50,18 +60,18 @@ h2devopen(struct inode *i, struct file *f)
    char tName[16];
    struct h2device *h;
 
+   LOGKDBG(("h2device: opening device\n"));
+
    /* setup private data */
    h = kmalloc(sizeof(*h), GFP_KERNEL);
    if (!h) return -ENOMEM;
+   f->private_data = h;
 
-   sema_init(&h->sem, 1/*full*/);
    h->userbuffer = NULL;
    h->usersize = 0;
-
+   sema_init(&h->sem, 1/*full*/);
    h->sync = semBCreate(0, SEM_EMPTY);
    if (!h->sync) { e = ENOMEM; goto err; }
-
-   f->private_data = h;
 
    /* spawn the task that will handle ioctls on behalf of the process
     * performing the open(). This is an unprivileged task. */
@@ -69,6 +79,8 @@ h2devopen(struct inode *i, struct file *f)
    h->ioTid = taskSpawn(tName, H2DEV_IOCTASKPRI,
 			VX_FP_TASK|PORTLIB_UNPRIVILEGED,
 			H2DEV_IOCTASKSTACKSZ, tIoctlTask, h);
+
+   LOGKDBG(("h2device: device successfully opened\n"));
    return 0;
 
   err:
@@ -84,10 +96,14 @@ h2devrelease(struct inode *i, struct file *f)
 
    if (!h) return 0;
 
+   LOGKDBG(("h2device: releasing device\n"));
+
    taskDelete(h->ioTid);
    if (h->sync) semDelete(h->sync);
    if (h->userbuffer) kfree(h->userbuffer);
    kfree(h);
+
+   LOGKDBG(("h2device: device released\n"));
    return 0;
 }
 
@@ -102,12 +118,16 @@ h2devioctl(struct inode *i, struct file *f,
    if (_IOC_TYPE(request) != H2DEV_IOC_MAGIC) return -ENOTTY;
    if (_IOC_NR(request) > H2DEV_IOC_MAXNR) return -ENOTTY;
 
+   LOGKDBG(("h2device: handling %s\n", h2ioctlname(request)));
+
    /* lock other threads of this process */
    if (down_interruptible(&h->sem)) return -ERESTARTSYS;
 
    /* copy arguments into kernel space */
    if (_IOC_DIR(request) & _IOC_WRITE) {
       size = (char *)&h->op.arg[H2_IOARGS_IN(request)] - (char *)&h->op;
+
+      LOGKDBG(("h2device: copying %d bytes from user\n", size));
 
       if (copy_from_user(&h->op, (void *)arg, size)) {
 	 up(&h->sem);
@@ -128,13 +148,42 @@ h2devioctl(struct inode *i, struct file *f,
    h->request = request;
    h->done = 0;
 
-   /* let the async task perform the job */
-   semGive(h->sync);
-   wait_event_interruptible(wq, h->done);
+   switch(h->request) {
+      /* Some operations are not real-time, so we do them here: they
+       * involve allocating shared memory, which is not possible in hard
+       * real-time. For the real-time operations, see the default case
+       * below. */
+      case H2DEV_IOC_DEVINIT:
+	 h->or.err = h2devInit(h->op.arg[0]._long);
+	 break;
+
+      case H2DEV_IOC_DEVEND:
+	 h->or.err = h2devEnd();
+	 break;
+
+      default:
+	 /* let the async task do the job in hard real-time */
+	 semGive(h->sync);
+
+	 while (!h->done) {
+	    if (signal_pending(current)) break;
+	    schedule();
+	 }
+
+	 LOGKDBG(("h2device: async task done\n"));
+	 if (!h->done) {
+	    up(&h->sem);
+	    LOGKDBG(("h2device: interrupted by signal\n"));
+	    return -ERESTARTSYS;
+	 }
+	 break;
+   }
 
    /* copy results to user space */
    if (_IOC_DIR(request) & _IOC_READ) {
       size = (char *)&h->or.arg[H2_IOARGS_OUT(request)] - (char *)&h->or;
+
+      LOGKDBG(("h2device: copying %d bytes to user\n", size));
 
       if (copy_to_user((void *)arg, &h->or, size)) {
 	 up(&h->sem);
@@ -143,6 +192,8 @@ h2devioctl(struct inode *i, struct file *f,
    }
 
    up(&h->sem);
+
+   LOGKDBG(("h2device: %s handled\n", h2ioctlname(request)));
    return h->or.err?-EIO:0;
 }
 
@@ -187,12 +238,13 @@ tIoctlTask(struct h2device *h)
    while(1) {
       semTake(h->sync, WAIT_FOREVER);
 
+      LOGDBG(("handling %s\n", h2ioctlname(h->request)));
+
       switch(h->request) {
 #define IOCOP(x, y)	case H2DEV_IOC_ ## x: s = ((y)==ERROR)?ERROR:OK; break
 
 	 /* h2devLib */
-	 IOCOP(DEVINIT,		h2devInit(h->op.arg[0]._long));
-	 IOCOP(DEVEND,		h2devEnd());
+	 /* DEVINIT and DEVEND are not handled here */
 	 IOCOP(DEVATTACH,	h2devAttach());
 	 IOCOP(DEVALLOC,
 	       h->or.arg[0]._long = h2devAlloc(h->op.arg[0]._string,
@@ -231,6 +283,45 @@ tIoctlTask(struct h2device *h)
 
       /* signal process we're done */
       h->done = 1;
-      wake_up_interruptible(&wq);
+
+      LOGDBG(("done %s\n", h2ioctlname(h->request)));
    }
 }
+
+
+#ifdef COMLIB_DEBUG_H2DEVLIB
+static const char *
+h2ioctlname(int n)
+{
+   static const struct iocnames {
+      int number;
+      const char *name;
+   } list[] = {
+      { H2DEV_IOC_DEVINIT,	"H2DEV_IOC_DEVINIT"	},
+      { H2DEV_IOC_DEVEND,	"H2DEV_IOC_DEVEND"	},
+      { H2DEV_IOC_DEVATTACH,	"H2DEV_IOC_DEVATTACH"	},
+      { H2DEV_IOC_DEVALLOC,	"H2DEV_IOC_DEVALLOC"	},
+      { H2DEV_IOC_DEVFREE,	"H2DEV_IOC_DEVFREE"	},
+      { H2DEV_IOC_DEVCLEAN,	"H2DEV_IOC_DEVCLEAN"	},
+      { H2DEV_IOC_DEVFIND,	"H2DEV_IOC_DEVFIND"	},
+      { H2DEV_IOC_DEVSHOW,	"H2DEV_IOC_DEVSHOW"	},
+
+      { H2DEV_IOC_SEMALLOC,	"H2DEV_IOC_SEMALLOC"	},
+      { H2DEV_IOC_SEMDELETE,	"H2DEV_IOC_SEMDELETE"	},
+      { H2DEV_IOC_SEMTAKE,	"H2DEV_IOC_SEMTAKE"	},
+      { H2DEV_IOC_SEMGIVE,	"H2DEV_IOC_SEMGIVE"	},
+      { H2DEV_IOC_SEMFLUSH,	"H2DEV_IOC_SEMFLUSH"	},
+      { H2DEV_IOC_SEMSHOW,	"H2DEV_IOC_SEMSHOW"	},
+
+      { H2DEV_IOC_MBOXSEND,	"H2DEV_IOC_MBOXSEND"	},
+
+      { -1, NULL }
+   };
+
+   struct iocnames *p;
+   for(p=list; p->name; p++)
+      if (p->number == n) return p->name;
+
+   return "unknown";
+}
+#endif /* COMLIB_DEBUG_H2DEVLIB */

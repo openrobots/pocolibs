@@ -18,6 +18,7 @@ __RCSID("$LAAS$");
 
 #include <linux/slab.h>
 #include <rtai_sched.h>
+#include <rtai_schedcore.h>
 
 #include "portLib.h"
 #include "errnoLib.h"
@@ -91,8 +92,9 @@ static void	taskCleanUp(void *tcb, int dummy);
 static int
 priorityVxToRTAI(int priority)
 {
-   return RT_HIGHEST_PRIORITY +
-      ((RT_LOWEST_PRIORITY - RT_HIGHEST_PRIORITY) / 255) * priority;
+   return RT_SCHED_HIGHEST_PRIORITY +
+      ((RT_SCHED_LOWEST_PRIORITY - RT_SCHED_HIGHEST_PRIORITY) / 255) *
+      priority;
 }
 
 /*----------------------------------------------------------------------*/
@@ -100,8 +102,8 @@ priorityVxToRTAI(int priority)
 static int 
 priorityRTAIToVx(int priority)
 {
-   return 255 * (priority - RT_HIGHEST_PRIORITY) /
-      (RT_LOWEST_PRIORITY - RT_HIGHEST_PRIORITY);
+   return 255 * (priority - RT_SCHED_HIGHEST_PRIORITY) /
+      (RT_SCHED_LOWEST_PRIORITY - RT_SCHED_HIGHEST_PRIORITY);
 }
 
 /*----------------------------------------------------------------------*/
@@ -220,7 +222,7 @@ taskSpawn(char *name, int priority, int options, int stackSize,
       return ERROR;
    }
 
-   if (__set_exit_handler(&tcb->rtid, taskCleanUp, tcb, 0) == 0) {
+   if (set_exit_handler(&tcb->rtid, taskCleanUp, tcb, 0) == 0) {
       kfree(tcb->name);
       kfree(tcb);
       errnoSet(S_portLib_NO_MEMORY);
@@ -262,12 +264,13 @@ taskDelete(long tid)
    LOGDBG(("portLib:taskDelete: deleting 0x%lx ('%s')\n",
 	   tid, tcb->name));
 
-   /* delete hooks won't be run... */
+   /* delete hooks are run */
    status = rt_task_delete(&tcb->rtid);
    if (status != 0) {
       LOGDBG(("portLib:taskDelete: no such task 0x%lx\n", tid));
    }
 
+#if 0
    /* Remove from task List.
     * Locking required?? Also, this is O(n). Wouldn't it be worth using
     * doubly chained lists? */
@@ -283,7 +286,9 @@ taskDelete(long tid)
    }
    if (tcb->name) kfree(tcb->name);
    kfree(tcb);
+#endif
     
+   LOGDBG(("portLib:taskDelete: deleted 0x%lx\n", tid));
    return OK;
 }
 

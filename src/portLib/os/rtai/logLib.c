@@ -20,6 +20,8 @@ __RCSID("$LAAS$");
 #include <linux/sched.h>
 
 #define LOGLIB_C
+#include "portLib.h"
+#include "taskLib.h"
 #include "logLib.h"
 
 /*
