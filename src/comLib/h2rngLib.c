@@ -34,6 +34,7 @@ __RCSID("$LAAS$");
 #include <portLib.h>
 #endif
 
+#include <sys/types.h>
 #include <stdlib.h>
 #include <errnoLib.h>
 #include <string.h>
