@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003 CNRS/LAAS
+ * Copyright (c) 1990, 2003-2004 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -36,7 +36,7 @@ __RCSID("$LAAS$");
 #include "h2timerLib.h"
 
 static  int delayCount;                /* Compteur global de synchronisation */
-static pthread_mutex_t timerMutex = PTHREAD_MUTEX_INITIALIZER;
+static SEM_ID timerMutex;
 static WDOG_ID timerWd;			/* watchdog du compteur */
 static H2TIMER timerTab[NMAX_TIMERS]; /* Tableau de timers */
 static BOOL h2timerInited = FALSE;
@@ -58,11 +58,12 @@ h2timerInit(void)
 {
     int nTimer;
     
-    pthread_mutex_lock(&timerMutex);
+    timerMutex = semMCreate(0);
+    semTake(timerMutex, WAIT_FOREVER);
 
     /* Cree le watchdog du timer et le semaphore de protection */
     if ((timerWd = wdCreate ()) == NULL) {
-	pthread_mutex_unlock(&timerMutex);
+	semGive(timerMutex);
 	return ERROR;
     }
 
@@ -83,7 +84,7 @@ h2timerInit(void)
     delayCount = 0;
     
     /* Liberer le semaphore de protection */
-    pthread_mutex_unlock(&timerMutex);
+    semGive(timerMutex);
     
     /* Lance le watch dog global du timer */
     wdStart (timerWd, 1, (FUNCPTR) timerInt, 0);
@@ -91,6 +92,38 @@ h2timerInit(void)
     h2timerInited = TRUE;
     return OK;
 }
+
+
+/******************************************************************************
+*
+*   h2timerEnd  -  Cleanup timers
+*
+*   Returns: OK or ERROR
+*/
+STATUS 
+h2timerEnd(void)
+{
+    int nTimer;
+
+    if (h2timerInited != TRUE) return OK;
+    
+    /* Stop global watch dog */
+    wdDelete (timerWd);
+
+    semTake(timerMutex, WAIT_FOREVER);
+    for (nTimer = 0; nTimer < NMAX_TIMERS; nTimer++) {
+       semDelete(timerTab[nTimer].semSync);
+       timerTab[nTimer].semSync = NULL;
+    }
+    semGive(timerMutex);
+    
+    /* Free global semaphore */
+    semDelete(timerMutex);
+    
+    h2timerInited = FALSE;
+    return OK;
+}
+
 
 /*****************************************************************************
 *
@@ -110,10 +143,11 @@ h2timerAlloc(void)
     H2TIMER_ID timerId;             /* Identificateur du timer */
   
     /* Prendre le semaphore de protection */
-    pthread_mutex_lock(&timerMutex);
+    semTake(timerMutex, WAIT_FOREVER);
 
     if (!h2timerInited) {
 	    errnoSet(S_h2timerLib_TIMER_NOT_INIT);
+	    semGive(timerMutex);
 	    return NULL;
     }
     /* Initialiser le ptr vers debut du tableau */
@@ -124,7 +158,7 @@ h2timerAlloc(void)
 	/* Retourner erreur si pas trouve timer libre */
 	if (nTimer == NMAX_TIMERS) {
 	    errnoSet (S_h2timerLib_TOO_MUCH_TIMERS);
-	    pthread_mutex_unlock(&timerMutex);
+	    semGive(timerMutex);
 	    return (NULL);
 	}
 
@@ -137,7 +171,7 @@ h2timerAlloc(void)
     timerId->flagInit = H2TIMER_FLG_INIT;
 
     /* Liberer le semaphore et retourner */
-    pthread_mutex_unlock(&timerMutex);
+    semGive(timerMutex);
     return (timerId);
 }
 

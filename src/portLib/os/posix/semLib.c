@@ -27,21 +27,39 @@ __RCSID("$LAAS$");
 #include "tickLib.h"
 #include "semLib.h"
 
+#ifndef NO_POSIX_SEMAPHORES
+#include <semaphore.h>
+#else
+#include "tw_sem.h"
+#endif
+
+/* semaphore structure */
+struct SEM_ID {
+   enum { SEM_T_BIN, SEM_T_CNT, SEM_T_MTX } type;
+   union {
+      sem_t sem;
+      pthread_mutex_t mtx;
+   } v;
+};
+
+
 /*
  * Create and initialize a binary semaphore 
  */
 SEM_ID
 semBCreate(int options, SEM_B_STATE initialState)
 {
-    sem_t *sem;
+    SEM_ID sem;
     int status;
 
-    sem = (sem_t *)malloc(sizeof(sem_t));
+    sem = malloc(sizeof(struct SEM_ID));
     if (sem == NULL) {
 	return NULL;
     }
-    status = sem_init(sem, 0, initialState);
+    sem->type = SEM_T_BIN;
+    status = sem_init(&sem->v.sem, 0, initialState);
     if (status != 0) {
+        free(sem);
 	errnoSet(errno);
 	return NULL;
     }
@@ -54,32 +72,46 @@ semBCreate(int options, SEM_B_STATE initialState)
 SEM_ID
 semCCreate(int options, int initialCount)
 {
-    sem_t *sem;
+    SEM_ID sem;
     int status;
 
-    sem = (sem_t *)malloc(sizeof(sem_t));
+    sem = malloc(sizeof(struct SEM_ID));
     if (sem == NULL) {
 	return NULL;
     }
-    status = sem_init(sem, 0, initialCount);
+    sem->type = SEM_T_CNT;
+    status = sem_init(&sem->v.sem, 0, initialCount);
     if (status != 0) {
+        free(sem);
 	errnoSet(errno);
 	return NULL;
     }
     return sem;
 }
 
-#ifdef notyet
 /*
  * Create and initialize a mutex semaphore 
  */
 SEM_ID
 semMCreate(int options)
 {
-    /* Could be a mutex lock */
-    return NULL;
+    SEM_ID sem;
+    int status;
+
+    sem = malloc(sizeof(struct SEM_ID));
+    if (sem == NULL) {
+       return NULL;
+    }
+    sem->type = SEM_T_MTX;
+    status = pthread_mutex_init(&sem->v.mtx, NULL);
+    if (status != 0) {
+       free(sem);
+       errnoSet(status);
+       return NULL;
+    }
+
+    return sem;
 }
-#endif
 
 /*
  * Destroy a semaphore
@@ -88,8 +120,17 @@ STATUS
 semDelete(SEM_ID semId)
 {
     int status;
-    
-    status = sem_destroy(semId);
+
+    switch(semId->type) {
+       case SEM_T_MTX:
+         status = pthread_mutex_destroy(&semId->v.mtx);
+         break;
+
+       default:
+         status = sem_destroy(&semId->v.sem);
+         break;
+    }
+
     if (status != 0) {
 	errnoSet(errno);
 	return(ERROR);
@@ -106,7 +147,15 @@ semGive(SEM_ID semId)
 {
     int status;
     
-    status = sem_post(semId);
+    switch(semId->type) {
+       case SEM_T_MTX:
+         status = pthread_mutex_unlock(&semId->v.mtx);
+         break;
+
+       default:          
+         status = sem_post(&semId->v.sem);
+         break;
+    }
     if (status != 0) {
 	errnoSet(errno);
 	return(ERROR);
@@ -130,26 +179,47 @@ semTake(SEM_ID semId, int timeout)
 {
     WDOG_ID timer;
     unsigned long ticks;
+    int status, e;
 
     switch (timeout) {
       case WAIT_FOREVER:
 	while (1) {
-	    if (sem_wait(semId) < 0) {
+	   switch(semId->type) {
+	      case SEM_T_MTX:
+		 status = pthread_mutex_lock(&semId->v.mtx);
+		 break;
+
+	      default:
+		 status = sem_wait(&semId->v.sem);
+		 break;
+	   }
+	   if (status != 0) {
 		if (errno == EINTR) {
 		    continue;
 		} else {
 		    errnoSet(errno);
 		    return(ERROR);
 		}
-	    } else {
-		break;
-	    }
+	   } else {
+	      break;
+	   }
 	}/* while */
 	break;
 	
       case 0:
-	if (sem_trywait(semId) < 0) {
-	    if (errno == EAGAIN) {
+	 switch(semId->type) {
+	    case SEM_T_MTX:
+	       e = EBUSY;
+	       status = pthread_mutex_trylock(&semId->v.mtx);
+	       break;
+
+	    default:
+	       e = EAGAIN;
+	       status = sem_trywait(&semId->v.sem);
+	       break;
+	 }
+	 if (status != 0) {
+	    if (errno == e) {
 		errnoSet(S_objLib_OBJ_TIMEOUT);
 		return ERROR;
 	    } else {
@@ -164,7 +234,16 @@ semTake(SEM_ID semId, int timeout)
 	wdStart(timer, timeout, (FUNCPTR)semHandler, 0);
 
 	while (1) {
-	    if (sem_wait(semId) < 0) {
+	   switch(semId->type) {
+	      case SEM_T_MTX:
+		 status = pthread_mutex_lock(&semId->v.mtx);
+		 break;
+
+	      default:
+		 status = sem_wait(&semId->v.sem);
+		 break;
+	   }
+	   if (status != 0) {
 		if (errno == EINTR) {
 		    if (tickGet() - ticks > timeout) {
 			errnoSet(S_objLib_OBJ_TIMEOUT);
@@ -194,12 +273,18 @@ semTake(SEM_ID semId, int timeout)
 STATUS
 semFlush(SEM_ID semId)
 {
-    while (sem_trywait(semId) < 0 && errno == EAGAIN) {
-	sem_post(semId);
-    }
-    if (sem_post(semId) != 0) {
-	return ERROR;
-    } 
-    return OK;
-}
+   switch(semId->type) {
+      case SEM_T_MTX:
+	 return ERROR; /* one should not flush a mutex? */
+	 break;
 
+      default:
+	 while (sem_trywait(&semId->v.sem) < 0 && errno == EAGAIN) {
+	    sem_post(&semId->v.sem);
+	 }
+	 if (sem_post(&semId->v.sem) != 0) {
+	    return ERROR;
+	 }
+	 return OK;
+   }
+}

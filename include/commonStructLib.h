@@ -1,6 +1,6 @@
 /* $LAAS$ */
 /*
- * Copyright (c) 1991, 2003 CNRS/LAAS
+ * Copyright (c) 1991, 2003-2004 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -22,6 +22,7 @@
    pour le partage de donnees entre des taches d'une meme CPU.
 */
 
+#include "semLib.h"
 #include <pthread.h>
 
 /* Flag d'indication d'initialisation de la structure */
@@ -39,11 +40,10 @@
 
 /* Definition de type de l'en-tete des structures communes de donnees */
 typedef struct {
-  int initFlag;				/* Flag  d'initialisation */
-  int nBytes;				/* Nombre de bytes de la structure */
-  pthread_mutex_t *semId;		/* Semaphore d'exclusion mutuelle 
-					   de la structure */
-  int unused;				/* pour alignement de la structure */
+  int initFlag;		/* initialization flag */
+  int nBytes;		/* number of bytes in the structure */
+  SEM_ID semId;		/* mutex semaphore for the structure */
+  int unused;		/* for alignment */
 } COMMON_STRUCT_HDR, *COMMON_STRUCT_ID;
 
 

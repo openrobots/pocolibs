@@ -1,6 +1,6 @@
 /* $LAAS$ */
 /*
- * Copyright (c) 1998, 2003 CNRS/LAAS
+ * Copyright (c) 1998, 2003-2004 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -17,12 +17,6 @@
 
 #ifndef _SEMLIB_H
 #define _SEMLIB_H
-
-#ifndef NO_POSIX_SEMAPHORES
-#include <semaphore.h>
-#else
-#include "tw_sem.h"
-#endif
 
 /* Code du module */
 #define M_semLib (22 << 16)
@@ -47,12 +41,13 @@ enum {
     SEM_Q_PRIORITY
 };
 
-/* Type de semaphore */
-typedef sem_t *SEM_ID;
+/* semaphore definition - see semLib.c for actual definition */
+typedef struct SEM_ID *SEM_ID;
 
 /* Prototypes */
 extern SEM_ID semBCreate ( int options, SEM_B_STATE initialState );
 extern SEM_ID semCCreate ( int options, int initialCount );
+extern SEM_ID semMCreate ( int options );
 extern STATUS semDelete ( SEM_ID semId );
 extern STATUS semGive ( SEM_ID semId );
 extern STATUS semTake ( SEM_ID semId, int timeout );

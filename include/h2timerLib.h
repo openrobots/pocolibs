@@ -1,6 +1,6 @@
 /* $LAAS$ */
 /*
- * Copyright (c) 1999, 2003 CNRS/LAAS
+ * Copyright (c) 1999, 2003-2004 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -62,6 +62,7 @@ typedef struct {
  
 
 extern STATUS h2timerInit ( void );
+extern STATUS h2timerEnd ( void );
 extern H2TIMER_ID h2timerAlloc ( void );
 extern STATUS h2timerStart ( H2TIMER_ID timerId, int periode, int delay );
 extern STATUS h2timerPause ( H2TIMER_ID timerId );

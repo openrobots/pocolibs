@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003 CNRS/LAAS
+ * Copyright (c) 1990, 2003-2004 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -148,9 +148,9 @@ commonStructCreate(int len,		/* Taille de la structure commune
 		   void **pStructAdrs)	/* Ou` mettre adresse de base 
 					   de la structure */ 
 {
-    char *pStrPool;          /* Adresse du pool de memoire alloue */
-    int poolSize;            /* Taille du pool de memoire */
-    pthread_mutex_t *semId;		/* Semaphore d'exclusion mutuelle */
+    char *pStrPool;	/* memory pool address */
+    int poolSize;	/* memory pool size */
+    SEM_ID semId;	/* mutex semaphore */
     int status;
 
     /* Obtenir la taille du pool de memoire */
@@ -160,14 +160,8 @@ commonStructCreate(int len,		/* Taille de la structure commune
     if ((pStrPool = malloc(poolSize)) == NULL)
 	return ERROR;
     
-    /* Creer un semaphore d'exclusion mutuelle */
-    if ((semId = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t))) == NULL) {
-	free(pStrPool);
-	return ERROR;
-    }
-    if ((status = pthread_mutex_init(semId, NULL)) != 0) {
-	errnoSet(status);
-	free(semId);
+    /* Create a mutex semaphore */
+    if ((semId = semMCreate(0)) == NULL) {
 	free(pStrPool);
 	return ERROR;
     }
@@ -218,8 +212,8 @@ commonStructTake(void *pCommonStruct)	/* Adresse de base de la structure */
 	return (ERROR);
     }
   
-    /* Prendre le semaphore d'exclusion mutuelle */
-    pthread_mutex_lock(strId->semId);
+    /* Wait for mutex */
+    semTake(strId->semId, WAIT_FOREVER);
     return (OK);
 }
 
@@ -249,8 +243,8 @@ commonStructGive(void *pCommonStruct)	/* Adresse de base de la structure */
 	return ERROR;
     }
     
-    /* Liberer le semaphore d'exclusion mutuelle */
-    pthread_mutex_unlock(strId->semId);
+    /* Signal mutex */
+    semGive(strId->semId);
     return (OK);
 }
 
@@ -282,16 +276,16 @@ commonStructCopy(void *pCommonStruct, /* Adresse base structure */
 	return ERROR;
     }
     
-    /* Prendre le semaphore d'exclusion mutuelle */
-    pthread_mutex_lock(strId->semId);
+    /* Wait for mutex */
+    semTake(strId->semId, WAIT_FOREVER);
     
     /* Effectuer le transfert des donnees (en fonction de la direction) */
     if (toFromFlag == TO)
 	memcpy (pBuf, pCommonStruct, strId->nBytes);
     else memcpy (pCommonStruct, pBuf, strId->nBytes);
     
-    /* Liberer le semaphore d'exclusion mutuelle */
-    pthread_mutex_unlock(strId->semId);
+    /* Signal mutex */
+    semGive(strId->semId);
     return OK;
 }
 
@@ -324,9 +318,8 @@ commonStructDelete(void *pCommonStruct) /* Adresse de base de la structure */
     /* Indiquer que la structure commune de donnees a ete supprimee */
     strId->initFlag = FALSE;
     
-    /* Supprimer le semaphore d'exclusion mutuelle */
-    pthread_mutex_destroy(strId->semId);
-    free(strId->semId);
+    /* Destroy mutex semaphore */
+    semDelete(strId->semId);
     
     /* Liberer le pool de memoire et retourner */
     free((char *) strId);

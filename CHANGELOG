@@ -1,5 +1,10 @@
 Version 2.0, xx April 2004
 
+ 14. Implemented and added semMCreate() and converted commonStruct.c and
+     h2timerLib.c functions to use it instead of pthread_*
+     routines. Added h2timerEnd() that undo h2timerInit() actions. Made
+     SEM_ID an opaque data type in order to hide some pthread-specific
+     stuff from headers.
  13. Made OS_TCB an opaque data type and put the definition in
      taskLib.c. Moved the errnoGet,Set() functions into taskLib.c since
      they need access to the TCB. Replaced tcb->name by taskName() calls
