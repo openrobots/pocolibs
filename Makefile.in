@@ -17,7 +17,7 @@
 
 include Init.make
 
-mkinstalldirs = $(SHELL) $(srcdir)/mkinstalldirs
+mkinstalldirs = $(SHELL) @srcdir@/mkinstalldirs
 
 DISTNAME= @PACKAGE@-@VERSION@
 
@@ -67,16 +67,16 @@ distclean:
 		$(MAKE) -C $$d distclean ; \
 	done
 
-DIST_COMMON = BUGS CHANGELOG Init.make.in Makefile.in README aclocal.m4 \
-	config.guess config.sub configure configure.in \
-	install-sh mkinstalldirs
+DIST_COMMON = BUGS CHANGELOG Init.make.in Init.make.posix Init.make.rtai \
+	Makefile.in README aclocal.m4 libtool.m4 pocolibs.m4 config.guess \
+	config.sub configure configure.in ltmain.sh install-sh mkinstalldirs
 DIST_SUBDIRS = doc include man src
 
 DISTFILES = $(DIST_COMMON) $(DIST_SUBDIRS)
 
 dist:
 	-mkdir $(DISTNAME)
-	(cd $(srcdir) ; gnutar cf - --exclude=CVS --exclude=.#* \
+	(cd @srcdir@ ; gnutar cf - --exclude=CVS --exclude=.#* \
 		$(DISTFILES)) | \
 	( cd $(DISTNAME) ; tar xpf - )
 	tar cf - $(DISTNAME) | gzip -c -9 > $(DISTNAME).tar.gz
