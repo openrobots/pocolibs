@@ -30,6 +30,7 @@
 #define USE_SYSV_PTY
 #define USE_STREAMS
 #define USE_RLIMIT
+#undef XTERM_S_OPT_SLASH
 
 #endif /* Solaris 2.x */
 
@@ -38,6 +39,7 @@
 #undef USE_SYSV_PTY
 #undef USE_STREAMS
 #undef USE_RLIMIT
+#undef XTERM_S_OPT_SLASH
 
 #endif /* SunOS 4.1.x */
 
@@ -46,6 +48,7 @@
 #define USE_SYSV_PTY
 #undef USE_STREAMS
 #define USE_RLIMIT
+#define XTERM_S_OPT_SLASH
 
 #endif /* linux */
 
@@ -54,6 +57,7 @@
 #undef USE_SYSV_PTY
 #undef USE_STREAMS
 #undef USE_RLIMIT
+#define XTERM_S_OPT_SLASH
 
 #endif /* __NetBSD__ */
 
@@ -61,6 +65,7 @@
 #define USE_SYSV_PTY
 #undef USE_STREAMS
 #undef USE_RLIMIT
+#undef XTERM_S_OPT_SLASH
 #endif
 
 #ifndef USE_SYSV_PTY
