@@ -189,6 +189,18 @@ else
 	fi
 fi
 
+# Linux requires -D_XOPEN_SOURCE=500 to build with libpthread and -Wall
+AC_MSG_CHECKING([whether you need -D_XOPEN_SOURCE to use libpthread])
+xopen=no
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
+		#include <sys/types.h>
+		#include <pthread.h>
+	],[
+		pthread_rwlock_t lock;
+	])], [xopen=no], [CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE=500"; xopen=yes])
+AC_MSG_RESULT([$xopen])
+
+
 dnl --- end of checks for pthread ---------------------------------------
 
 
