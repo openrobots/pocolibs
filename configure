@@ -10002,23 +10002,35 @@ if test "${enable_debug+set}" = set; then
 else
   opt_debug=no
 fi;
-if test "x$opt_debug" = "xfull"; then
-    CFLAGS="${CFLAGS} -g3 -O0 -DDEBUG"
-    CXXFLAGS="${CFLAGS}"
-    echo "$as_me:$LINENO: result: building with full debug info: -g3 -O0" >&5
+if test "$GCC" = yes; then
+    if test "x$opt_debug" = "xfull"; then
+    	CFLAGS="${CFLAGS} -g3 -O0 -DDEBUG"
+    	CXXFLAGS="${CFLAGS}"
+    	echo "$as_me:$LINENO: result: building with full debug info: -g3 -O0" >&5
 echo "${ECHO_T}building with full debug info: -g3 -O0" >&6
-elif test "x$opt_debug" = "xyes"; then
-    CFLAGS="${CFLAGS} -g -O1 -DDEBUG"
-    CXXFLAGS="${CFLAGS}"
-    echo "$as_me:$LINENO: result: building with debug info: -g -O1" >&5
+    elif test "x$opt_debug" = "xyes"; then
+    	CFLAGS="${CFLAGS} -g -O1 -DDEBUG"
+    	CXXFLAGS="${CFLAGS}"
+    	echo "$as_me:$LINENO: result: building with debug info: -g -O1" >&5
 echo "${ECHO_T}building with debug info: -g -O1" >&6
-elif test "x$opt_debug" = "xno"; then
-    CFLAGS="${CFLAGS} -O3 -DNDEBUG"
-    CXXFLAGS="${CFLAGS} -O3 -finline-functions"
-    echo "$as_me:$LINENO: result: building without debug mode: -g -O2" >&5
-echo "${ECHO_T}building without debug mode: -g -O2" >&6
+    elif test "x$opt_debug" = "xno"; then
+    	CFLAGS="${CFLAGS} -O3 -DNDEBUG"
+    	CXXFLAGS="${CFLAGS} -finline-functions"
+    	echo "$as_me:$LINENO: result: building without debug mode: -O3" >&5
+echo "${ECHO_T}building without debug mode: -O3" >&6
+    fi
+else
+        if test "x$opt_debug" = "x" -o "x$opt_debug" = "xno"; then
+	CFLAGS="${CFLAGS} -O -DNDEBUG"
+	echo "$as_me:$LINENO: result: building without debug info: -O" >&5
+echo "${ECHO_T}building without debug info: -O" >&6
+    else
+	CFLAGS="${CFLAGS} -g -DDEBUG"
+	echo "$as_me:$LINENO: result: building with debug info: -g" >&5
+echo "${ECHO_T}building with debug info: -g" >&6
+    fi
+    CXXFLAGS="${CFLAGS}"
 fi
-
 
 
 # Check whether --with-debug-output or --without-debug-output was given.
