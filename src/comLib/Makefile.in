@@ -1,5 +1,5 @@
 #
-# Copyright (c) 1998, 2003 CNRS/LAAS
+# Copyright (c) 1998, 2003-2004 CNRS/LAAS
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -18,12 +18,14 @@
 
 top_builddir=	@top_builddir@
 include ../../Init.make
+include @top_srcdir@/Init.make.$(OSAPI)
+-include @srcdir@/os/$(OSAPI)/Makefile.inc
 
 INSTALL=	@INSTALL@
 
 CPPFLAGS += -I.. -DPOSTER_SERV_PATH=\"@bindir@/posterServ\"
 
-VPATH= 	@top_srcdir@/src/comLib
+VPATH= 	@srcdir@/os/$(OSAPI):@srcdir@
 
 SRCS = \
 	commonStructLib.c	\
@@ -54,18 +56,18 @@ SHLIB_MINOR = 1
 
 BASENAME = libcomLib
 
-LIB = $(BASENAME).la
+LIB = $(BASENAME)$(LIBEXT)
 
 all: $(LIB)
 
 $(LIB): $(OBJS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJS:%.o=%.lo) \
-	-rpath $(LIBDIR) -version-info $(SHLIB_MAJOR):$(SHLIB_MINOR) \
-	-L../portLib -L../errorLib -R$(LIBDIR) $(PORTLIB) $(ERRORLIB) $(LIBM)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJS:%.o=%.lo) 	\
+		$(LIBTOOL_LINKOPT) $(LIBTOOL_LINKPORTLIB)	\
+		$(LIBTOOL_LINKERRORLIB)
 
 %.o: %.c
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $<
-
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $< \
+		$(LIBTOOL_COPT)
 
 depend DEPENDANCES: $(SRCS)
 	$(MKDEP) -c$(CC) -oDEPENDANCES 	$(CPPFLAGS) $?

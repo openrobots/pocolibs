@@ -46,13 +46,15 @@ MKDEP=          @MKDEP@
 
 LIBTOOL=	@LIBTOOL@
 
-CPPFLAGS=	-I@abs_srcdir@/include
+CPPFLAGS=	-I@abs_srcdir@/include @CPPFLAGS@
 CFLAGS=		@CFLAGS@
 LDFLAGS=	@LDFLAGS@
 
 HAS_X=		@HAS_X@
 XCPPFLAGS=	@XCPPFLAGS@
 XLDFLAGS=	@XLDFLAGS@
+
+OSAPI=		@OSAPI@
 
 # Base directory of the software
 ROOTROBOTS ?= 	@prefix@

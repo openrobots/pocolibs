@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2003 CNRS/LAAS
+# Copyright (c) 2003-2004 CNRS/LAAS
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -19,12 +19,14 @@
 
 top_builddir=		@top_builddir@
 include ../../Init.make
+include @top_srcdir@/Init.make.$(OSAPI)
+-include @srcdir@/os/$(OSAPI)/Makefile.inc
 
 INSTALL=		@INSTALL@
 
 CPPFLAGS += -I..
 
-VPATH=  @top_srcdir@/src/portLib
+VPATH=  @srcdir@/os/$(OSAPI):@srcdir@
 
 SRCS = \
 	errnoLib.c 		\
@@ -44,16 +46,17 @@ SHLIB_MINOR=0
 
 BASENAME = libportLib
 
-LIB = $(BASENAME).la
+LIB = $(BASENAME)$(LIBEXT)
 
 all: $(LIB)
 
 $(LIB): $(OBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJS:%.o=%.lo) \
-	-rpath $(LIBDIR) -version-info $(SHLIB_MAJOR):$(SHLIB_MINOR)
+		$(LIBTOOL_LINKOPT)
 
 %.o: %.c
-	$(LIBTOOL) --mode=compile $(CC) -c $(CFLAGS) $(CPPFLAGS) $<
+	$(LIBTOOL) --mode=compile $(CC) -c $(CFLAGS) $(CPPFLAGS) $< \
+		$(LIBTOOL_COPT)
 
 depend DEPENDANCES: $(SRCS)
 	$(MKDEP) -c$(CC) -oDEPENDANCES $(CPPFLAGS) $?
@@ -70,4 +73,6 @@ install: $(LIB)
 	$(MKINSTALLDIRS) $(LIBDIR)
 	$(LIBTOOL) --mode=install $(INSTALL) $(LIB) $(LIBDIR)
 
+ifneq (distclean,$(MAKECMDGOALS))
 include DEPENDANCES
+endif

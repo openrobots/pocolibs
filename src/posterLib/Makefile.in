@@ -1,5 +1,5 @@
 #
-# Copyright (c) 1998, 2003 CNRS/LAAS
+# Copyright (c) 1998, 2003-2004 CNRS/LAAS
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -20,10 +20,12 @@ srcdir=		@srcdir@
 INSTALL=	@INSTALL@
 
 include ../../Init.make
+include @top_srcdir@/Init.make.$(OSAPI)
+-include @srcdir@/os/$(OSAPI)/Makefile.inc
 
-VPATH= @top_srcdir@/src/posterLib
+VPATH= @srcdir@/os/$(OSAPI):@srcdir@
 
-CPPFLAGS += -I. -I..
+CPPFLAGS += -I. -I.. -I@srcdir@
 
 SRCS = \
 	posterLib.c \
@@ -34,6 +36,8 @@ SRCS_RPC = \
 	posters_clnt.c \
 	posters_xdr.c
 
+HDR_RPC = posters.h
+
 OBJS = $(SRCS:%.c=%.o) $(SRCS_RPC:%.c=%.o)
 
 SHLIB_MAJOR = 2
@@ -41,15 +45,14 @@ SHLIB_MINOR = 1
 
 BASENAME = libposterLib
 
-LIB = $(BASENAME).la
+LIB = $(BASENAME)$(LIBEXT)
 
 all: $(LIB)
 
 $(LIB): $(OBJS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJS:%.o=%.lo) \
-	-version-info $(SHLIB_MAJOR):$(SHLIB_MINOR) -rpath $(LIBDIR) \
-	-L../portLib -L../errorLib -L../comLib \
-	$(PORTLIB) $(ERRORLIB) $(COMLIB) 
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJS:%.o=%.lo)	\
+		$(LIBTOOL_LINKOPT) $(LIBTOOL_LINKPORTLIB)	\
+		$(LIBTOOL_LINKERRORLIB) $(LIBTOOL_LINKCOMLIB)
 
 #----------------------------------------------------------------------
 # RPC specific rules
@@ -58,25 +61,26 @@ $(LIB): $(OBJS)
 # Solaris' rpcgen that generate a bogus include line for posters.h
 # if a path is prepended to posters.x in the argument line
 #
-posters_clnt.c: $(srcdir)/posters.x
+posters_clnt.c: posters.x
 	rm -f $@
-	(cd $(srcdir) ; $(RPCGEN) -l posters.x) > $@
+	(cd $(dir $<) ; $(RPCGEN) -l posters.x) > $@
 
-posters_xdr.c: $(srcdir)/posters.x
+posters_xdr.c: posters.x
 	rm -f $@
-	(cd $(srcdir) ; $(RPCGEN) -c posters.x) > $@
+	(cd $(dir $<) ; $(RPCGEN) -c posters.x) > $@
 
-posters.h: $(srcdir)/posters.x
+posters.h: posters.x
 	rm -f $@
-	(cd $(srcdir) ; $(RPCGEN) -h posters.x) > $@
+	(cd $(dir $<) ; $(RPCGEN) -h posters.x) > $@
 
 #----------------------------------------------------------------------
 # Regles generiques
 
 %.o: %.c
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $<
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $< \
+		$(LIBTOOL_COPT)
 
-depend DEPENDANCES:: posters.h $(SRCS)  $(LIB_SRCS_RPC)
+depend DEPENDANCES:: $(SRCS)  $(LIB_SRCS_RPC) $(HDR_RPC)
 	$(MKDEP) -c$(CC) -oDEPENDANCES $(CPPFLAGS) $?
 
 clean: 

@@ -42,9 +42,9 @@ $(SERV): $(OBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $(SERV) $(LDFLAGS) $(OBJS) \
 	-L../../portLib -L../../errorLib -L../../comLib -L..  $(LIBS)
 
-posters.x: $(srcdir)/../posters.x
+posters.x: $(srcdir)/../os/$(OSAPI)/posters.x
 	rm -f posters.x
-	$(LN) $(srcdir)/../posters.x $@
+	$(LN) $< $@
 
 install:
 	$(MKINSTALLDIRS) $(BINDIR)

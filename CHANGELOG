@@ -1,17 +1,19 @@
 Version 2.0, xx April 2004
 
-9. Get rid of the remaining ifdef __DARWIN__ checks. They are not
-   needed with Mac OS X 10.3.3 anymore, and I don't intend to support
-   earlier versions.
-8. Add support for rpcgen -C in posterServ. Removes one of the 
-   last #ifdef <system>, and makes this stuff build on MacOS X.
-7. Split aclocal.m4. 
-6. Effectively handle the possibility to disable X11 (xes).
-5. Look for rpcgen instead of blindly using `rpcgen' (useful for
-   cross-compiling).
-4. Install include files (Anthony Mallet).
-3. Fix detection of thread-related options in C compilers.
-2. Adapt the build system to use GNU configure and libtool.
-1. Import the current internal LAAS version
+ 10. Created os/posix subdirectories and moved some posix specific files
+     in there in order to prepare the upcoming rtai support.
+  9. Get rid of the remaining ifdef __DARWIN__ checks. They are not
+     needed with Mac OS X 10.3.3 anymore, and I don't intend to support
+     earlier versions.
+  8. Add support for rpcgen -C in posterServ. Removes one of the 
+     last #ifdef <system>, and makes this stuff build on MacOS X.
+  7. Split aclocal.m4. 
+  6. Effectively handle the possibility to disable X11 (xes).
+  5. Look for rpcgen instead of blindly using `rpcgen' (useful for
+     cross-compiling).
+  4. Install include files (Anthony Mallet).
+  3. Fix detection of thread-related options in C compilers.
+  2. Adapt the build system to use GNU configure and libtool.
+  1. Import the current internal LAAS version
 
 $LAAS$
