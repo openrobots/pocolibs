@@ -1,0 +1,43 @@
+#
+# Copyright (c) 2004 CNRS/LAAS
+#
+# Permission to use, copy, modify, and distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+#
+#
+# $LAAS$
+#
+
+# --- lxrt specific configuration --------------------------------------
+
+CPPFLAGS+=	-D__LXRT__
+
+CPPFLAGS += -I$(RTAI_INCLUDES)
+
+# produce shared libraries
+BINEXT=
+LIBEXT=.la
+LIBTOOL_COPT=
+LIBTOOL_LINKOPT= \
+	-rpath $(LIBDIR) -version-info $(SHLIB_MAJOR):$(SHLIB_MINOR) \
+	-R$(LIBDIR)
+
+LIBTOOL_LINKPORTLIB=	-L$(top_builddir)/src/portLib -lportLib
+LIBTOOL_LINKERRORLIB=	-L$(top_builddir)/src/errorLib -lerrorLib
+LIBTOOL_LINKCOMLIB=	-L$(top_builddir)/src/comLib -lcomLib
+LIBTOOL_LINKPOSTERLIB=	-L$(top_builddir)/src/posterLib -lposterLib
+
+# fetch source files in posix subdir
+VPATH=	$(srcdir)/os/posix:$(srcdir):$(top_srcdir)/compat
+
+# nothing specific here
+all-os:

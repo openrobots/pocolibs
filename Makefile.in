@@ -23,13 +23,14 @@ DISTNAME= @PACKAGE@-@VERSION@
 
 SUBDIRS=\
 	include				\
-	src/portLib			\
-	src/errorLib			\
-	src/comLib			\
-	src/posterLib			\
-	src/posterLib/posterServ	\
-	src/h2				\
-	src/shell
+	src/portLib
+
+#	src/errorLib			\
+#	src/comLib			\
+#	src/posterLib			\
+#	src/posterLib/posterServ	\
+#	src/h2				\
+#	src/shell
 
 ifeq (yes,$(HAS_X))
 SUBDIRS+= src/xes

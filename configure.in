@@ -59,7 +59,7 @@ AC_DEFUN([AC_CHECK_RTAI_INCLUDES],
 
 # configure options
 AC_ARG_WITH(rtai,
-           AC_HELP_STRING([--with-rtai=yes|no],
+           AC_HELP_STRING([--with-rtai=yes|no|lxrt],
                [configure to use RTAI]),
            [opt_rtai=$withval],[opt_rtai=no])
 AC_ARG_WITH(rtai-includes,
@@ -71,6 +71,12 @@ AC_ARG_WITH(rtai-includes,
 if test "x$opt_rtai" = "xyes"; then
    OSAPI=rtai
    AC_MSG_RESULT([Configuring to use RTAI])
+   AC_CHECK_RTAI_INCLUDES(RTAI_INCLUDES, $opt_rtai_includes)
+
+elif test "x$opt_rtai" = "xlxrt"; then
+   OSAPI=lxrt
+   AC_DEFINE(__LXRT__)
+   AC_MSG_RESULT([Enabling LXRT userspace support])
    AC_CHECK_RTAI_INCLUDES(RTAI_INCLUDES, $opt_rtai_includes)
 
 elif test "x$opt_rtai" = "xno"; then :
