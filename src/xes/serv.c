@@ -43,7 +43,7 @@
 #include <sys/wait.h>
 #include <sys/time.h>
 #include <sys/resource.h>
-#if defined(USE_STREAMS) || defined(USE_SYSV_PTY)
+#if defined(USE_STREAMS)
 #include <sys/stream.h>
 #include <sys/stropts.h>
 #endif
@@ -577,7 +577,7 @@ create_window(int *win_fd, int *win_pid)
 	return -1;
     }
 
-#if defined(USE_SYSV_PTY) || defined(USE_STREAMS)
+#if defined(USE_SYSV_PTY) && defined(USE_STREAMS)
     if (ioctl(slave, I_PUSH, "ptem") < 0) {
 	perror("xes: push ptem");
 	return -1;
