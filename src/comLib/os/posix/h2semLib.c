@@ -44,7 +44,7 @@ __RCSID("$LAAS$");
 union semun {
     int val;
     struct semid_ds *buf;
-    ushort *array;
+    unsigned short *array;
 };
 #endif
 
