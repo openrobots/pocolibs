@@ -1,6 +1,6 @@
 # -*- Makefile -*-
 #
-# Copyright (c) 2000, 2003 CNRS/LAAS
+# Copyright (c) 2000, 2004 CNRS/LAAS
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -16,40 +16,45 @@
 #
 # $LAAS$
 #
+top_builddir=	@top_builddir@
+srcdir=		@srcdir@
+INSTALL=	@INSTALL@
 
-include ../../../Init.make
+include ../../../../Init.make
+-include $(srcdir)/os/$(OSAPI)/Makefile.inc
+
+VPATH=		@srcdir@
 
 CPPFLAGS += -I../../..
 #----------------------------------------------------------------------
 # Test programs
-TESTR = $(TARGET)/testRead
-TESTW = $(TARGET)/testWrite
+TESTR = testRead
+TESTW = testWrite
 
 all: $(TESTR) $(TESTW)
 
-$(TESTR): testRead.c 
-	$(CC) -o $(TESTR) $(LDFLAGS) $(CPPFLAGS) $(CFLAGS) testRead.c $(LIBS)
+$(TESTR): testRead.lo
+	$(LTLD) -o $(TESTR) $(CFLAGS) $(LDFLAGS) testRead.lo \
+	-L../../../portLib -L../../../errorLib -L../../../comLib \
+	-L../.. $(LIBS)
 
-$(TESTW): testWrite.c
-	$(CC) -o $(TESTW) $(LDFLAGS) $(CPPFLAGS) $(CFLAGS) testWrite.c $(LIBS)
+$(TESTW): testWrite.lo
+	$(LTLD) -o $(TESTW) $(CFLAGS) $(LDFLAGS) testWrite.lo \
+	-L../../../portLib -L../../../errorLib -L../../../comLib \
+	-L../.. $(LIBS)
 
-$(TARGET)/%.o : %.c
-	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $<
+%.lo : %.c
+	$(LTCC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $<
 
-depend $(TARGET)/DEPENDANCES:: $(TARGET)
 
-depend $(TARGET)/DEPENDANCES:: testRead.c testWrite.c
-	$(MKDEP) -c$(CC) -o$(TARGET)/DEPENDANCES -d'$$(TARGET)' \
-	-s H2UNIX=$(H2UNIX) $(CPPFLAGS) $?
-
-$(TARGET):
-	-mkdir -p $@
+depend DEPENDANCES: testRead.c testWrite.c
+	$(MKDEP) -c$(CC) -oDEPENDANCES $(CPPFLAGS) $?
 
 clean:
-	rm -f  $(TESTW) $(TESTR) 
+	$(LIBTOOL) --mode=clean rm -f  $(TESTW) $(TESTR) 
 
 install:
 	@echo "Nothing to do"
 
-include $(TARGET)/DEPENDANCES
+include DEPENDANCES
 

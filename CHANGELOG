@@ -1,4 +1,5 @@
 Version 2.0, xx July 2004
+ 35. autotoolize the build of the basic poster test programs.
  34. Start over with libtool style shared libraries version numbers. 
      Bump all major revisions to make sure nothing bad happens.
  33. Add a configure test for usablility of POSIX timers for a 
