@@ -1,0 +1,98 @@
+.\" $LAAS$
+.\" Copyright (c) 1999-2005 CNRS/LAAS
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd January 21, 2005
+.Dt sysLib 3
+.Os pocoLibs
+.Sh NAME 
+.Nm sysLib
+.Nd system specific functions in pocoLib
+.Sh SYNOPSIS
+.Fd #include <portLib.h>
+.Fd #include <sysLib.h>
+.Ft STATUS
+.Fn sysClkConnect "FUNCPTR routine" "int arg"
+.Ft void
+.Fn sysClkEnable void
+.Ft void
+.Fn sysClkDisable void
+.Ft STATUS
+.Fn sysClkRateSet "int ticksPerSecond"
+.Ft int
+.Fn sysClkRateGet void
+.Sh DESCRIPTION
+The sysLib library groups all functions that are system dependant and
+provided by board support packages (BSP) under VxWorks. In the case of
+pocoLibs, only clock handling functions are provided by sysLib. 
+.Pp
+The 
+.Fn sysClkConnect
+function arranges for the specified
+.Fa routine
+to be called, passing it the integer specified by
+.Fa arg
+at each tick of the system clock. 
+.Pp
+The
+.Fn sysClkEnable 
+and
+.Fn sysClkDisable
+functions are used to enable and disable the system clock. 
+When the system clock is disabled, the associated routine will not be
+called.
+.Pp
+The rate of the system clock can be set with the
+.Fn sysClkRateSet
+function, to the given
+.Fa ticksPerSecond
+value. The initial rate of the system clock is defined by the call to 
+.Xr h2initGlob 3 .
+.Pp
+The current rate of the system clock is returned by the 
+.Fn sysClkRateGet
+function.
+.Sh RETURN VALUES
+.Fn sysClkConnects
+and
+.Fn sysClkRateSet
+return 
+.Dv OK
+or 
+.Dv ERROR
+if an error occured.
+.Sh ERRORS
+When a function fails it calls
+.Xr errnoSet 3
+with the error code returned by the underlying operating system. 
+There is no sysLib specific error code defined in pocoLibs.
+.Sh BUGS
+On POSIX based systems, the system clock can be implemented by using
+either POSIX defined real-time timers, using
+.Xr timer_create 3
+or traditionnal Unix timers based on 
+.Xr setitimer 2 . 
+On certain Linux kernel revisions the setitimer based timers offer better
+performance than the POSIX real-time timers. Normally the configure
+script probes the behaviour of both kind of timers and selects the
+best suiting flavour. The --disable-posix-timers configure option can
+be used to force use of traditional Unix timers at build time. 
+.Pp
+Linking pocoLibs application with external libraries that use the 
+.Dv SIGALRM
+signal is known to cause problems to the system clock.
+.Sh SEE ALSO
+.Xr h2initGlob 3
+.Xr tickLib 3
+.Xr timer_create 3

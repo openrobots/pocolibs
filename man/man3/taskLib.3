@@ -1,0 +1,194 @@
+.\" $LAAS$
+.\" Copyright (c) 1999-2005 CNRS/LAAS
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd January 21, 2005
+.Dt taskLib 3
+.Os pocoLibs
+.Sh NAME 
+.Nm taskLib 
+.Nd task handling library
+.Sh SYNOPSIS
+.Fd #include <portLib.h>
+.Fd #include <taskLib.h>
+.Ft STATUS 
+.Fn taskLibInit "void"
+.Ft long
+.Fn taskSpawn "char *name" "int priority" "int options" "int stackSize"  \
+	  "FUNCPTR entryPt"  ...
+.Ft STATUS 
+.Fn taskDelete "long tid"
+.Ft const char *
+.Fn taskName "long tid"
+.Ft STATUS 
+.Fn taskSuspend "long tid"
+.Ft STATUS 
+.Fn taskResume "long tid"
+.Ft STATUS 
+.Fn taskPrioritySet "long tid" "int newPriority"
+.Ft STATUS 
+.Fn taskPriorityGet "long tid" "int *pPriority"
+.Ft STATUS 
+.Fn taskLock "void"
+.Ft STATUS 
+.Fn taskUnlock "void"
+.Ft STATUS 
+.Fn taskDelay "int ticks"
+.Ft long 
+.Fn taskIdSelf "void"
+.Sh DESCRIPTION
+The 
+.Nm taskLib
+library handles tasks in the
+.Nm pocoLib 
+environment.
+.Fn taskLibInit
+initializes the library, and is generally called by the global
+initialization function of pocoLib,
+.Xr h2initGlob 3 .
+.Pp
+The 
+.Fn taskSpawn 
+function creates a new task in pocoLib.
+.Fa name
+is the external name given to the new task.
+.Fa priority
+is the priority of the new task. The value is interpreted  following
+the VxWorks convention, where 0 is the highest priority and 255 the
+lowest one. The mapping of the priority specified here to priorities
+provided by the underlying system is implementation-dependant. 
+.Fa options
+is an OR-ed mask of possible task options. Valid options include:
+.Bl -tag -width Er
+.It Bq Er VX_FP_TASK
+Indicates that the given task is using floating point values in
+expressions, and thus hints the underlying system that the
+floating-point context of the task should be saved and restored across
+task switches. 
+.El
+.Pp
+.Fa stackSize 
+specifies the amount of memory to use for the stack of
+the new task. Not all systems use the specified value.
+.Fa entryPt 
+is the pointer to a function returning an int and taking up to ten
+integer parameters. 
+The rest of the parameters (up to ten integers) are passed to
+.Fn taskSpawn
+are transmitted to the new function.
+.Pp
+The 
+.Fn taskDelete
+function deletes (terminates) the specified task.
+.Pp
+The 
+.Fn taskSuspend
+function is supposed to suspend the execution of the given task. 
+In the implementation of pocoLibs on POSIX systems, it is implemented
+by a call to
+.Xr abort 2
+in order to save a core image of the process. 
+This is done this way because in traditional pocoLibs applications, 
+.Fn taskSuspend
+is used to stop a failed task for debugging purposes. 
+.Pp
+The 
+.Fn taskResume 
+function is supposed to restart a suspended task.
+On POSIX systems, this function is not currently implemented.
+.Pp
+The 
+.Fn taskPrioritySet
+function sets the priority of the specified task.
+.Pp
+The 
+.Fn taskPriorityGet
+function returns in
+.Fa pPriority
+the current priority of the task specified by
+.Fa tid .
+.Pp
+The 
+.Fn taskLock
+and
+.Fn taskUnLock
+functions are used to block and unblock the task scheduler on the
+system. This has the effect of locking the current processus on the
+processor for the given interval.
+These functions are not implemented on POSIX systems.
+.Pp
+The 
+.Fn taskDelay
+function suspends the execution of the current task for the specified
+number of 
+.Fa ticks .
+.Pp
+The 
+.Fn taskIdSelf
+function returs the identifier of the current task. In most of the
+above mentionned functions, if 
+.Fa tid
+is zero, it will design the current task (ie 
+.Fn taskIdSelf ).
+.Sh RETURN VALUES
+Most 
+.Nm taskLib
+functions return a 
+.Ft STATUS
+(
+.Dv OK or 
+.Dv ERROR
+)
+and set the current errno of the task.
+.Fn taskPrioritySet
+returns the current priority of the designated task.
+.Fn taskIdSelf
+returns the identifier of the current task. 
+.Sh ERRORS
+The functions in 
+.Fn taskLib
+can set the following error codes:
+.Bl -tag -width Er
+.It Bq Er S_portLib_NO_MEMORY
+A call to
+.Xr malloc 3
+failed and returned a 
+.Dv NULL
+pointer. 
+.It Bq Er S_portLib_NO_SUCH_TASK
+There is no task with the given
+.Fa name 
+in the system.
+.It Bq Er S_portLib_NO_IN_A_TASK
+The called function is only valid within a task that was created by
+.Fn taskSpawn
+in order to provide the required execution context.
+.It Bq Er S_portLib_INVALID_TASKID
+The specified task identifier is not pointing to a valid task
+descriptor. It is not the result of a 
+.Fn taskSpawn
+call, or the contents of the descriptor has been overwritten by some
+buffer overflow in the code. 
+.It Bq Er S_portLib_NOT_IMPLEMENTED
+The given function has not been implemented on the given system. 
+.El
+.Sh SEE ALSO
+.Xr h2initGlob 3
+.Sh BUGS
+There are many bugs in the implementation of 
+.Nm taskLib
+based on POSIX threads which are caused by limitations in the POSIX
+threads model. Some functions which exist in VxWorks cannot be
+implemented under POSIX systems.
+

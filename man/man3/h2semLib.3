@@ -1,0 +1,116 @@
+.\" $LAAS$
+.\" Copyright (c) 1999-2005 CNRS/LAAS
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd January 21, 2005
+.Dt h2semLib 3
+.Os pocoLibs
+.Sh NAME 
+.Nm h2semLib 
+.Nd shared semaphores library for pocoLibs
+.Sh SYNOPSIS
+.Fd #include <portLib.h>
+.Fd "#include <h2semLib.h>"
+.Ft STATUS
+.Fn h2semInit "int num" "int *pSemId"
+.Ft H2SEM_ID 
+.Fn h2semAlloc "int type"
+.Ft STATUS 
+.Fn h2semDelete "H2SEM_ID semaphore"
+.Ft STATUS
+.Fn h2semGive "H2SEM_ID semaphore"
+.Ft STATUS
+.Fn h2semTake "H2SEM_ID semId" "int timeout"
+.Ft STATUS
+.Fn h2semFlush "H2SEM_ID semId"
+.Ft STATUS
+.Fn h2semSet "H2SEM_ID semId" "int value"
+.Ft void
+.Fn h2semEnd void
+.Sh DESCRIPTION
+.Fn h2semAlloc 
+creates a shared counting semaphore.
+.Fa type 
+can be
+.Dv H2SEM_SYNC
+to specify a semaphore which is to be used for synchronisation
+purpose, that is a private semaphore,
+or 
+.Dv H2SEM_EXCL
+to create a semaphore which is used as a mutual exclusion semaphore.
+.Pp
+.Fn h2semTake
+implements the 
+.Em P
+operation on the semaphore.
+.Fa timeout
+specifies a number of tick in which the operation must succeed. If the
+semaphore was not taken with this delay, 
+.Dv ERROR
+is returned and the errno value of the task is set to
+.Dv S_objLib_TIMEOUT .
+.Pp
+.Fn h2semGive
+implements the 
+.Em V
+operation on the given semaphore. 
+.Pp
+.Fn h2semFlush
+resets the value of the specified semaphore to 0,
+causing the next call to
+.Fn h2semTake
+to effectively block the calling task.
+.Pp
+.Fn h2semSet
+sets the absolute value of a semaphore.
+.Fa value
+indicates the new value of the counting semaphore.
+.Pp
+.Fn h2semDelete
+deletes a semaphore from the process and releases any resources used
+by the semaphore. 
+.Fa semId
+is the identifier of the semaphore to delete. 
+.Sh RETURN VALUE
+.Fn h2semAlloc
+returns the semaphore identifier for the newly created semaphore or
+NULL in case of an error. In that case an error code is left in the
+task's errno value. 
+.Pp
+.Fn h2semDelete ,
+.Fn h2semGive ,
+.Fn h2semTake
+and 
+.Fn h2semFlush
+return
+.Dv OK
+or 
+.Dv ERROR 
+in case an error occured. In that case an error code is left in the
+task's errno value.
+.Sh ERRORS
+The task's errno value can be set to an error code from the operating
+system or to:
+.Bl -tag -width Er
+.It Bq Er S_objLib_OBJ_TIMEOUT
+A timeout occured on a
+.Fn h2semTake
+operation.
+.Sh NOTE
+The behaviour of processes blocked on a semaphore when it is deleted is
+not defined.
+.Sh SEE ALSO
+.Xr semLib 3 ,
+.Xr semctl 2 ,
+.Xr semget 2 .

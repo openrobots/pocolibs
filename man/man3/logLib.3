@@ -1,5 +1,5 @@
 .\" $LAAS$
-.\" Copyright (c) 1999, 2005 CNRS/LAAS
+.\" Copyright (c) 1999-2005 CNRS/LAAS
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -14,33 +14,50 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .Dd January 21, 2005
-.Dt osInit 3
+.Dt logLib 3
 .Os pocoLibs
 .Sh NAME 
-.Nm osInit
-.Nd Initialize the portLib part of pocoLibs
+.Nm logLib
+.Nd message logging library for pocoLibs
 .Sh SYNOPSIS
 .Fd "#include <portLib.h>"
-.Ft STATUS 
-.Fn osInit "int clkRate"
+.Fd "#include <logLib.h>"
+.Ft STATUS
+.Fn logInit "int fd" "int maxMsgs"
+.Ft void
+.Fn logEnd void
+.Ft int 
+.Fn logMsg "const char *fmt" ...
 .Sh DESCRIPTION
-.Fn osInit
-initializes the real-time OS library. It should be called one before
-any call to other functions of the library. The 
-.Fa clkRate
-parameter specifies the clock rate used in this process. A value of 
-.Dv 0
-disable the clock. The maximum value on most systems is the 
-.Dv HZ
-constant, which is generally equal to 100. 
-.Sh RETURN VALUE
-.Fn osInit
-returns 
-.Dv OK
-or 
+.Fn logMsg
+queues a formatted message to the logging facility of 
+.Nm pocoLibs .
+.Fa fmt
+is a 
+.Xr printf 3
+style format string, subsequent arguments are formatted according to
+the specifiers found in the format string. 
+.Pp
+.Fn logInit
+initialises the logging facility. 
+.Fa fd 
+is an open file descriptor.
+.Fa maxMsgs 
+is the maximum number of messages that will be queued in the logging
+facility. 
+.Pp
+.Fn logEnd
+terminates the logging facility.
+.Sh RETURN VALUES
+.Fn logMsg
+returns the number of characters queued.
+.Pp
+.Fn logInit
+returns
+.Dv
+OK
+or
 .Dv ERROR
-in case of an error. Then it sets the 
-.Fa errno
-value of the task.
+and sets the error code of the task in case of an error.
 .Sh SEE ALSO
-.Xr h2devLib 3
+.Xr printf 3 .

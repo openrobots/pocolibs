@@ -1,0 +1,132 @@
+.\" $LAAS$
+.\" Copyright (c) 1999-2005 CNRS/LAAS
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd January 21, 2005
+.Dt semLib 3
+.Os pocoLibs
+.Sh NAME 
+.Nm semLib 
+.Nd semaphore library for pocoLibs
+.Sh SYNOPSIS
+.Fd #include <portLib.h>
+.Fd "#include <semLib.h>"
+.Ft SEM_ID 
+.Fn semBCreate "int options"  "SEM_B_STATE initalState"
+.Ft SEM_ID 
+.Fn semCCreate "int options" "int value"
+.Ft SEM_ID
+.Fn semMCreate "int options"
+.Ft STATUS 
+.Fn semDelete "SEM_ID semaphore"
+.Ft STATUS
+.Fn semGive "SEM_ID semaphore"
+.Ft STATUS
+.Fn semTake "SEM_ID semId" "int timeout"
+.Ft STATUS
+.Fn semFlush "SEM_ID semId"
+.Sh DESCRIPTION
+.Fn semBCreate 
+creates a binary semaphore.
+.Fn semCCreate 
+creates a counting semaphore.
+.Fn smMCreate
+creates a mutual exclusion semaphore. In the case of a POSIX-style
+operating system,  all these three semaphore types
+are local to the Unix process that created them. 
+.Pp
+.Fa options
+can be
+.Dv SEM_Q_FIFO
+to specify that tasks waiting on the semaphore are dequeued in a FIFO
+order, or 
+.Dv SEM_Q_PRIORITY
+to specify that tasks waiting on the semaphore are dequeued by
+decreasing priority.
+.Pp
+.Fa initialState
+indicates the initial state of a binary semaphore, either 
+.Dv SEM_EMPTY 
+or
+.Dv SEM_FULL
+.Pp
+.Fa value
+indicates the initial value of a counting semaphore.
+.Pp
+.Fn semTake
+implements the 
+.Em P
+operation on the semaphore.
+.Fa timeout
+specifies a number of tick in which the operation must succeed. If the
+semaphore was not taken with this delay, 
+.Dv ERROR
+is returned and the errno value of the task is set to
+.Dv S_objLib_TIMEOUT .
+.Pp
+.Fn semGive
+implements the 
+.Em V
+operation on the given semaphore. 
+.Pp
+.Fn semFlush
+resets the value of a counting or binary semaphore to 0 or 
+.Dv SEM_EMPTY ,
+causing the next call to
+.Fn semTake
+to effectively block the calling task.
+.Pp
+.Fn semDelete
+deletes a semaphore from the process and releases any resources used
+by the semaphore. 
+.Fa semaphore
+is the identifier of the semaphore to delete. 
+.Pp
+.Sh RETURN VALUE
+.Fn semBCreate
+and
+.Fn semCCreate
+return the semaphore identifier for the newly created semaphore or
+NULL in case of an error. In that case an error code is left in the
+task's errno value. 
+.Pp
+.Fn semDelete ,
+.Fn semGive ,
+.Fn semTake
+and 
+.Fn semFlush
+return
+.Dv OK
+or 
+.Dv ERROR 
+in case an error occured. In that case an error code is left in the
+task's errno value.
+.Sh ERRORS
+The task's errno value can be set to an error code from the operating
+system or to:
+.Bl -tag -width Er
+.It Bq Er S_objLib_OBJ_TIMEOUT
+A timeout occured on a
+.Fn semTake
+operation.
+.Sh NOTE
+The behaviour of processes blocked on a semaphore when it is deleted is
+not defined.
+.Sh SEE ALSO
+.Xr sem_init 3 ,
+.Xr sem_wait 3 ,
+.Xr sem_post 3 ,
+.Xr pthread_mutex_create 3 ,
+.Xr pthread_mutex_lock 3 ,
+.Xr pthread_mutex_unlock 3 .

@@ -1,5 +1,5 @@
 .\" $LAAS$
-.\" Copyright (c) 1999, 2005 CNRS/LAAS
+.\" Copyright (c) 1999-2005 CNRS/LAAS
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -14,33 +14,34 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .Dd January 21, 2005
-.Dt osInit 3
+.Dt errorLib 3
 .Os pocoLibs
 .Sh NAME 
-.Nm osInit
-.Nd Initialize the portLib part of pocoLibs
+.Nm errorLib
+.Nd error code manipulation for pocoLibs
 .Sh SYNOPSIS
 .Fd "#include <portLib.h>"
+.Fd "#include <errnoLib.h>"
+.Ft int 
+.Fn errnoGet void
 .Ft STATUS 
-.Fn osInit "int clkRate"
+.Fn errnoSet "int errorCode"
 .Sh DESCRIPTION
-.Fn osInit
-initializes the real-time OS library. It should be called one before
-any call to other functions of the library. The 
-.Fa clkRate
-parameter specifies the clock rate used in this process. A value of 
-.Dv 0
-disable the clock. The maximum value on most systems is the 
-.Dv HZ
-constant, which is generally equal to 100. 
-.Sh RETURN VALUE
-.Fn osInit
-returns 
-.Dv OK
-or 
-.Dv ERROR
-in case of an error. Then it sets the 
-.Fa errno
-value of the task.
+.Fn errnoGet
+returns the 
+.Nm pocoLibs
+error code associated with the current task.
+.Pp
+.Fn errnoSet
+sets the 
+.Nm pocoLibs
+error code associated with the current thread to the value passed in 
+.Fa errorCode .
+.Sh COMPATIBILITY
+.Fn errnoGet 
+and 
+.Fn errnoSet
+are designed to emulate the VxWorks function of the same name.
 .Sh SEE ALSO
-.Xr h2devLib 3
+.Xr errno 3 ,
+.Xr strerror 3 .
