@@ -463,6 +463,7 @@ copyin(int in, RNG_ID out)
 
 /**
  ** Copy characters from a ring buffer to a file descriptor
+ **/
 void 
 copyout(RNG_ID in, int out) 
 {
@@ -477,7 +478,7 @@ copyout(RNG_ID in, int out)
 	
 	if ((n = write(out, buf, n)) <= 0) {
 	    if (errno == EWOULDBLOCK || errno == EAGAIN) {
-		/* rien ecrit - tant pis on reessaye + tard */
+		/* nothing written - try again later */
 		return;
 	    } else {
 		perror("xes: write");
