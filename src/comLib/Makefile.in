@@ -47,9 +47,9 @@ LIB=		lib$(BASENAME).la
 all: all-os $(LIB)
 
 $(LIB): $(OBJS)
-	$(LTLD) -o $@ $(OBJS) -rpath $(LIBDIR) -R$(LIBDIR)		  \
-		-L../errorLib $(ERRORLIB) -L../portLib $(PORTLIB) $(LIBM) \
-		-version-info $(SHLIB_MAJOR):$(SHLIB_MINOR)
+	$(LTLD) -o $@ $(OBJS) -rpath $(LIBDIR) -R$(LIBDIR)		\
+		-L../errorLib $(ERRORLIB) -L../portLib $(PORTLIB)	\
+		$(OS_LIBS) -version-info $(SHLIB_MAJOR):$(SHLIB_MINOR)
 
 %.lo: %.c
 	$(LTCC) -c $(CPPFLAGS) $(CFLAGS) $<
