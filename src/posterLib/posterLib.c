@@ -103,6 +103,13 @@ posterDelete(POSTER_ID posterId)
     STATUS res;
     POSTER_STR *p = (POSTER_STR *)posterId;
 
+    if (p == NULL) {
+#ifdef DEBUG
+	    fprintf(stderr, "posterDelete: bad posterId: NULL\n");
+#endif
+	    errnoSet(S_posterLib_POSTER_CLOSED);
+	    return ERROR;
+    }
     POSTER_INIT;
     res = p->funcs->delete(p->posterId);
     /* Don't free the POSTER_STR struct. It should stay around, so that 
