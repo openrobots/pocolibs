@@ -267,7 +267,7 @@ h2rngCreate(int type,			/* Type du ring buffer */
     
     /* Allouer memoire pour l'en-tete et pour le buffer */
     if ((rngId = (H2RNG_ID) 
-	 smMemMalloc ((u_int) (nbytes + sizeof (H2RNG_HDR)))) == NULL) {
+	 smMemMalloc ((size_t) (nbytes + sizeof (H2RNG_HDR)))) == NULL) {
 	return ((H2RNG_ID) NULL);
     }
     
