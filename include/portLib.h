@@ -94,8 +94,10 @@ extern "C" {
 #define M_portLib			(1 << 16)
 #define  S_portLib_OK			(M_portLib | 0)
 #define  S_portLib_NO_MEMORY		(M_portLib | 1)
-#define  S_portLib_NOT_IN_A_TASK	(M_portLib | 3)
 #define  S_portLib_NO_SUCH_TASK		(M_portLib | 2)
+#define  S_portLib_NOT_IN_A_TASK	(M_portLib | 3)
+#define  S_portLib_INVALID_TASKID	(M_portLib | 4)
+#define  S_portLib_NOT_IMPLEMENTED	(M_portLib | 5)
 
 /*
  * Prototypes
