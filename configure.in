@@ -76,7 +76,11 @@ fi
 AC_PROG_INSTALL
 
 dnl check for mkdep
+AC_ARG_VAR(MKDEP, [full path of the LAAS' dependency generator])
 AC_PATH_PROG(MKDEP, mkdep, no, $prefix/bin:$exec_prefix/bin:$PATH)
+if test "x$MKDEP" = "xno"; then
+    AC_MSG_ERROR( [Cannot find the mkdep executable, needed to build pocolibs] )
+fi
 
 dnl check for rpcgen
 AC_ARG_VAR(RPCGEN, [Remote Procedure Call (RPC) protocol compiler])
@@ -249,17 +253,43 @@ AC_SUBST(COMLIB_COMPATSRC)
 
 dnl --- Debugging options -----------------------------------------------
 
-AC_ARG_WITH(debug,
-           AC_HELP_STRING([--with-debug=all task sys h2dev smmem h2evn mbox gcom],
+AC_ARG_ENABLE(valgrind,
+            AC_HELP_STRING([--enable-valgrind], [compile with valgrind support]),
+            [valgrind=$enableval], [valgrind=no])
+if test "x$valgrind" = "xyes"; then
+    PKG_CHECK_MODULES(VALGRIND, valgrind >= 1.1, 
+        [ AC_DEFINE(VALGRIND_SUPPORT) ], [ AC_ERROR(Valgrind not present and Valgrind support requested) ])
+fi
+
+AC_ARG_ENABLE(debug,
+           [AC_HELP_STRING([--enable-debug=full yes no], [compile with debug info])],
+                [opt_debug=$enableval],[opt_debug=no])
+if test "x$opt_debug" = "xfull"; then
+    CFLAGS="${CFLAGS} -g3 -O0 -DDEBUG"
+    CXXFLAGS="${CFLAGS}"
+    AC_MSG_RESULT([building with full debug info: -g3 -O0])
+elif test "x$opt_debug" = "xyes"; then
+    CFLAGS="${CFLAGS} -g -O1 -DDEBUG"
+    CXXFLAGS="${CFLAGS}"
+    AC_MSG_RESULT([building with debug info: -g -O1])
+elif test "x$opt_debug" = "xno"; then
+    CFLAGS="${CFLAGS} -O3 -DNDEBUG"
+    CXXFLAGS="${CFLAGS} -O3 -finline-functions"
+    AC_MSG_RESULT([building without debug mode: -g -O2])
+fi
+
+
+AC_ARG_WITH(debug-output,
+           AC_HELP_STRING([--with-debug-output=all task sys h2dev smmem h2evn mbox gcom],
            [print debugging information at run-time (comma separated list)]),
-           [opt_debug=$withval],[opt_debug=])
+           [opt_debug_output=$withval],[opt_debug_output=])
 
 if test "x$opt_debug" = "xall"; then
    opt_debug="task,sys,h2dev,smmem,h2evn,mbox,gcom"
 fi
 
 ac_save_ifs=$IFS; IFS=","
-for dopt in $opt_debug; do 
+for dopt in $opt_debug_output; do 
 	test -z "$dopt" && break
 
 	AC_MSG_RESULT([debugging $dopt])
@@ -277,6 +307,13 @@ for dopt in $opt_debug; do
 done
 IFS=$ac_save_ifs
 
+dnl --- Check perl path ----------------------------------------------------
+dnl Check for perl
+AC_ARG_VAR(PERL, full path of Perl interpreter)
+AC_PATH_PROG(PERL, perl, no)
+if test "x$PERL" = "xno"; then
+    AC_MSG_ERROR(Cannot find the perl executable)
+fi
 
 dnl --- Make makefiles --------------------------------------------------
 
