@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2003 CNRS/LAAS
+ * Copyright (c) 2004 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,53 +16,18 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
-#include "portLib.h"
-#include <signal.h>
+#include <stdio.h>
 
-#include "taskLib.h"
-#include "tickLib.h"
-#include "sysLib.h"
-#include "symLib.h"
+#define LOGLIB_C
+#include "logLib.h"
 
-/**
- ** Global initialisation of all OS-level services (VxWorks Emulation)
- **/
+/*
+ * Message logging facilities
+ */
 
-STATUS
-osInit(int clkRate)
+int
+logMsg(const char *fmt,
+       int arg1, int arg2, int arg3, int arg4, int arg5, int arg6)
 {
-    
-    /* Initialize task library */
-    if (taskLibInit() == ERROR) {
-	return ERROR;
-    }
-
-    /* Initialize watchdog library */
-    if (wdLibInit() == ERROR) {
-       return ERROR;
-    }
-
-    if (clkRate > 0) {
-	/* Start system clock */
-	sysClkConnect((FUNCPTR)tickAnnounce, 0);
-	sysClkRateSet(clkRate);
-	sysClkEnable();
-    }
-
-    /* initialize symbol table access */
-    if (symLibInit() == ERROR) {
-	return ERROR;
-    }
-    return OK;
-}
-    
-
-/**
- ** Cleanup routine
- **/
-
-void
-osExit()
-{
-   sysClkDisable();
+   return fprintf(stderr, fmt, arg1, arg2, arg3, arg4, arg5, arg6);
 }

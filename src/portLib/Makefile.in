@@ -30,6 +30,7 @@ VPATH=  @srcdir@/os/$(OSAPI):@srcdir@
 
 SRCS = \
 	errnoLib.c 		\
+	logLib.c 		\
 	osInit.c		\
 	semLib.c		\
 	shellLib.c		\

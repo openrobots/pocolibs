@@ -1,5 +1,8 @@
 Version 2.0, xx April 2004
 
+ 12. Added taskName() and osExit() functions to portLib. Turned the
+     logMsg #define into a real function definition and created logLib.h
+     header.
  11. Moved config.h to pocolibs-config.h in order to prevent name clashes
      with <linux/config.h> when compiling linux modules.
  10. Created os/posix subdirectories and moved some posix specific files

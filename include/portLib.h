@@ -1,6 +1,6 @@
 /* $LAAS$ */
 /*
- * Copyright (c) 1998, 2003 CNRS/LAAS
+ * Copyright (c) 1998, 2003-2004 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -84,12 +84,12 @@ typedef void *(*VOIDPTRFUNCPTR)();
 /* Duration of one tick in micro-seconds */
 #define TICK_US (1000000/NTICKS_PER_SEC)
 
-/* Some systems provide a logMsg() - emulate it using printf() for now */
-#define logMsg printf
+#include "logLib.h" /* older versions used to define logMsg() here */
 
 /*
  * Prototypes
  */
 extern STATUS osInit(int);
+extern void   osExit(void);
 
 #endif /* _PORTLIB_H */

@@ -1,6 +1,6 @@
 /* $LAAS$ */
 /*
- * Copyright (c) 1999, 2003 CNRS/LAAS
+ * Copyright (c) 1999, 2003-2004 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -70,6 +70,7 @@ extern long taskSpawn ( char *name, int priority, int options,
 		       int stackSize, FUNCPTR entryPt, ... );
 #endif
 extern STATUS taskDelete ( long tid );
+extern const char *taskName ( long tid );
 extern STATUS taskSuspend ( long tid );
 extern STATUS taskResume ( long tid );
 extern STATUS taskPrioritySet ( long tid, int newPriority );

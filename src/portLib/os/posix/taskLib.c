@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2003 CNRS/LAAS
+ * Copyright (c) 1999, 2003-2004 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -389,6 +389,20 @@ taskDelete(long tid)
     free(tcb);
     
     return OK;
+}
+
+/*----------------------------------------------------------------------*/
+
+/* 
+ * Return the name of a task
+ */   
+const char * 
+taskName(long tid)
+{
+   OS_TCB *tcb = taskTcb(tid);
+
+   if (!tcb) return NULL;
+   return tcb->name;
 }
 
 /*----------------------------------------------------------------------*/
