@@ -39,15 +39,15 @@
 #        #define \w_REPORT \d                 -> nom du module
 #-----------------------------------------------------------------------
 
-$robots = $ENV{'ROOTROBOTS'} ? $ENV{'ROOTROBOTS'} : "/usr/local/robots";
+$robots = $ENV{'ROOTROBOTS'} ? $ENV{'ROOTROBOTS'} : "@prefix@";
 
 
 if ($#ARGV < 0) {
     die("usage: h2addErrno [-init] <file1> <file2>....\n");
 }
 
-$file = "$robots/posix/include/h2errorList.h";
-$filesave  = "$robots/posix/include/h2errorList.save.h";
+$file = "$robots/include/h2errorList.h";
+$filesave  = "$robots/include/h2errorList.save.h";
 
 
 #--
@@ -68,9 +68,9 @@ $filesave  = "$robots/posix/include/h2errorList.save.h";
 #	      "$wind_base/target/h/*Lib.h", 
 #	      "$wind_base/target/h/vwModNum.h", 
 # Erreurs bibliotheques h2
-	      "$robots/posix/include/*.h",
+	      "$robots/include/*.h",
 # Erreurs modules generator
-	      "$robots/nomadic/modules/*/auto/*Error.h",
+#	      "$robots/nomadic/modules/*/auto/*Error.h",
 );
 
 
