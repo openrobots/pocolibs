@@ -15,7 +15,7 @@
  */
 
 /*
- * Base' sur: 
+ * Based on: 
  *
  * slavewindow.c
  *
@@ -86,9 +86,6 @@ extern int serversock(int port);
 
 /*----------------------------------------------------------------------*/
 
-/**
- ** traitement des signaux
- **/
 void
 sigHandler(int sig)
 {
@@ -105,9 +102,9 @@ pipeHandler(int sig)
 /*----------------------------------------------------------------------*/
 
 /**
- ** Le programme principal:
+ ** Main program
  **
- ** Cree un socket, attend une connexion puis cree le xterm esclave
+ ** Create a socket, wait for a connection and create a slave xterm
  **/
 
 int
@@ -130,7 +127,7 @@ main(int argc, char *argv[])
 
 #ifdef USE_X
     /* 
-     * Connexion au serveur X
+     * Connect to the X server
      */
     dpy = XOpenDisplay(NULL);
     if (dpy == NULL) {
@@ -139,21 +136,21 @@ main(int argc, char *argv[])
     }
 #endif
     /*
-     * Verifie si /tmp/xes-pid existe
+     * Test if the lock file (tmp/xes-pid) exists
      */
     if (access(PID_FILE, F_OK | R_OK) == 0) {
-	fprintf(stderr, "xes: %s existe\nUtilisez kill_xes\n", PID_FILE);
+	fprintf(stderr, "xes: %s exists\nUse kill_xes\n", PID_FILE);
 	exit(1);
     }
     
     /*
-     * Lancement en backgound
+     * Put into background
      */
     if ((pid = fork()) != 0) {
 	printf("xes_server version %s.%s\n"
 	       "Copyright (C) LAAS/CNRS 1991-2005\n",
 	       major_version, minor_version);
-	/* Creation du fichier xes-pid */
+	/* Create the log file */
 	pid_file = fopen(PID_FILE, "w");
 	if (pid_file == NULL) {
 	    perror("xes: create /tmp/xes-pid");
@@ -165,7 +162,7 @@ main(int argc, char *argv[])
 	exit(0);
     }
     /* 
-     * Detache le serveur du terminal
+     * Detach the server from its controlling terminal
      */
 #if !defined(SVR4) && !defined(__linux__)
     i = open("/dev/tty", 2);
@@ -178,7 +175,7 @@ main(int argc, char *argv[])
 #endif
 
     /*
-     * installe handler signaux pour fin propre
+     * Install signal handlers for a clean shutdown
      */
     signal(SIGHUP, SIG_IGN);
     signal(SIGINT, sigHandler);
@@ -186,7 +183,7 @@ main(int argc, char *argv[])
     signal(SIGTERM, sigHandler);
 
     /*
-     * Creation du service
+     * Create the service
      */
     serv_socket_fd = serversock(PORT);
     if (serv_socket_fd < 0) {
@@ -223,11 +220,11 @@ main(int argc, char *argv[])
     }
 
     /*
-     * boucle d'attente d'evenements
+     * Event loop
      */
     
     while (1) {
-	/* Creation du masque pour select */
+	/* Setup select(2) masks */
 	FD_ZERO(&ibits);
 	FD_ZERO(&obits);
 	FD_ZERO(&ebits);
@@ -249,7 +246,7 @@ main(int argc, char *argv[])
 	FD_SET(serv_socket_fd, &ebits);
 
 #ifdef USE_X
-	/* traite les evenements X */
+	/* Handle X events */
 	FD_SET(ConnectionNumber(dpy), &ebits);
 	FD_SET(ConnectionNumber(dpy), &ibits);
 #endif
@@ -257,7 +254,7 @@ main(int argc, char *argv[])
 	timeout.tv_sec = 0;
 	timeout.tv_usec = 100000;
 	
-	/* Effectue les wait sur les fils eventuellement morts */
+	/* Wait(2) for dead child processes */
 	while ((pid = waitpid(-1, &child_stat, WNOHANG)) > 0) {
 	    for (i = 0; i < tablesize; i++) {
 		if (win_pid[i] == pid) {
@@ -269,11 +266,11 @@ main(int argc, char *argv[])
 	    } /* for */
 	} /* while */
 
-	/* Attente d'un evenement  d'ES */
+	/* Wait for some I/O event */
 	stat = select(tablesize, &ibits, &obits, &ebits,
 		      &timeout);
 
-	/* Depuis 4.1.1, select est interruptible */
+	/* select can be interrupted, restart it if needed */
 	if (stat == -1 && errno == EINTR)
 	    continue;
 	
@@ -284,31 +281,31 @@ main(int argc, char *argv[])
 	
 #ifdef USE_X
 	/*
-	 * Evenements X
+	 * X events
 	 */
 	if (FD_ISSET(ConnectionNumber(dpy), &ibits)) {
-	    /* Connexion fermée */
+	    /* closed connection */
 	    if (QLength(dpy) == 0) {
 		unlink(PID_FILE);
 		exit(0);
 	    }
-	    /* Traitement des évenements (?) */
+	    /* Handle events (?) */
 	    for (i = 0; i < QLength(dpy); i++) {
 		XNextEvent(dpy, &event);
 		fprintf(stderr, "xes: XEvent: %d\n", event.type);
 	    }
 	}
 	if (FD_ISSET(ConnectionNumber(dpy), &ebits)) {
-	    fprintf(stderr, "Erreur X\n");
+	    fprintf(stderr, "X connection error\n");
 	    unlink(PID_FILE);
 	    exit (0);
 	}
 #endif    
 	/*
-	 * Demande de connexion
+	 * Connection request
 	 */
 	if (FD_ISSET(serv_socket_fd, &ibits)) {
-	    /* Recherche d'une connexion libre */
+	    /* look for a free connection slot */
 	    newconn = -1;
 	    for (i = 0; i < tablesize; i++)
 		if (open_socket_fd[i] == -1) {
@@ -316,11 +313,11 @@ main(int argc, char *argv[])
 		    break;
 		}
 	    if (newconn == -1) {
-		fprintf(stderr, "xes: peut pas accepter nouvelle connexion\n");
+		fprintf(stderr, "xes: can't accept a new connection\n");
 		continue;
 	    }
 
-	    /* Creation des Ring Buffer associe' */
+	    /* Create the ring buffers for this connection */
 	    win_rng[newconn] = rngCreate(RNG_SIZE);
 	    if (win_rng[newconn] == NULL) {
 		perror("xes: cannot allocate ring buffer");
@@ -332,7 +329,7 @@ main(int argc, char *argv[])
 		continue;
 	    }
 
-	    /* creation de la connexion avec le client */
+	    /* accept the connection from the client */
 	    length = sizeof(struct sockaddr); 
 	    open_socket_fd[newconn] = accept(serv_socket_fd,
 					     &(open_socket[newconn]), &length);
@@ -341,25 +338,25 @@ main(int argc, char *argv[])
 		continue;
 	    }
 
-	    /* Passage en mode non-bloquant de ce fd */
+	    /* Switch to non-blocking I/O for this file descriptor */
 	    if (fcntl(open_socket_fd[newconn], F_SETFL, O_NONBLOCK) < 0) {
 		perror("xes: set socket flags");
 	    }
 	    
-	    /* creation de la fenetre d'ES */
+	    /* Open a new X terminal for this connection */
 	    if (create_window(&win[newconn], &win_pid[newconn]) < 0) {
 		perror("xes: create_window");
 		continue;
 	    }
 	}
 
-	/* Erreur sur le socket serveur */
+	/* Error on the server socket */
 	if (FD_ISSET(serv_socket_fd, &ebits)) {
-	    printf("xes: erreur sur serv_soket_fd\n");
+	    printf("xes: error on serv_soket_fd\n");
 	}
 
 	/*
-	 * Teste le traffic entre les clients et les fenetres
+	 * Check for traffic between the server and the open windows
 	 */
 	for (i = 0; i < tablesize; i++) {
 	    
@@ -423,7 +420,7 @@ main(int argc, char *argv[])
 /*----------------------------------------------------------------------*/
 
 /**
- ** Copie des caracte`res d'un file descriptor sur un autre
+ ** Copy characters from one file descriptor to a ring buffer
  **/
 
 int 
@@ -464,6 +461,8 @@ copyin(int in, RNG_ID out)
 
 /*----------------------------------------------------------------------*/
 
+/**
+ ** Copy characters from a ring buffer to a file descriptor
 void 
 copyout(RNG_ID in, int out) 
 {
@@ -495,7 +494,7 @@ copyout(RNG_ID in, int out)
 /*----------------------------------------------------------------------*/
 
 /**
- ** Creation d'un Xterm esclave
+ ** Create a slave X terminal window
  **/
 int 
 create_window(int *win_fd, int *win_pid)
@@ -597,7 +596,7 @@ create_window(int *win_fd, int *win_pid)
     }
 #endif
 
-    /* Passe en mode no echo pour recevoir le junk */
+    /* Switch to no-echo mode to receive some line noise that may be present */
     if (tcgetattr(slave, &termioStr) < 0) {
 	perror("xes: tcgetattr");
     }
@@ -605,7 +604,7 @@ create_window(int *win_fd, int *win_pid)
     if (tcsetattr(slave, TCSANOW, &termioStr) < 0) {
 	perror("xes: tcsetattr");
     }
-    /* Repasse en mode bloquant */
+    /* Switch back to blocking mode */
     if (fcntl(slave, F_SETFL, 0) < 0) {
 	perror("xes: set blocking io");
     }
@@ -630,7 +629,7 @@ create_window(int *win_fd, int *win_pid)
 /*----------------------------------------------------------------------*/
 
 /**
- ** definit le mode par defaut du terminal
+ ** Set the default terminal modes
  **/
 void set_term_modes(to)
 int to;
