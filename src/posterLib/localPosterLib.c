@@ -93,7 +93,7 @@ localPosterCreate(char *name, int size, POSTER_ID *pPosterId)
     unsigned char *pool;
     
     if (pPosterId != NULL) {
-	*pPosterId = 0L;
+	*pPosterId = NULL;
     }
 
     /* Allocation d'un h2dev */

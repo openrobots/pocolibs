@@ -145,7 +145,7 @@ remotePosterCreate(char *name,		/* Name of the device to create */
 		return(ERROR);
 	}
 	
-	remPosterId->vxPosterId = (void *)(long)res->id;
+	remPosterId->vxPosterId = (void *)res->id;
 	remPosterId->client = client;
 	remPosterId->pid = getpid();
 	remPosterId->endianness = H2_LOCAL_ENDIANNESS;
@@ -197,7 +197,7 @@ remotePosterWrite (POSTER_ID posterId,	/* Id of the poster */
 		errnoSet(S_remotePosterLib_NOT_OWNER);
 		return(ERROR);
 	}
-	param.id = (uint64_t)(long)remPosterId->vxPosterId;
+	param.id = (int)(long)remPosterId->vxPosterId;
 	param.offset = offset;
 	param.length = nbytes;
 	param.data.data_val = buf;
@@ -360,7 +360,7 @@ remotePosterRead(POSTER_ID posterId,   /* Id of the poster to read */
 	REMOTE_POSTER_ID remPosterId = (REMOTE_POSTER_ID)posterId;
 	
 	
-	param.id = (uint64_t)(long)(remPosterId->vxPosterId);
+	param.id = (int)(long)(remPosterId->vxPosterId);
 	param.length = nbytes;
 	param.offset = offset;
 	
@@ -411,7 +411,7 @@ remotePosterTake(POSTER_ID posterId, POSTER_OP op)
 		return(ERROR);
 	} /* switch */
 	
-	param.id = (uint64_t)(long)(remPosterId->vxPosterId);
+	param.id = (int)(long)(remPosterId->vxPosterId);
 	param.length = remPosterId->dataSize;
 	param.offset = 0;
 	
@@ -468,7 +468,7 @@ remotePosterGive(POSTER_ID posterId)
 	
 	if (remPosterId->op == POSTER_WRITE) {
 		/* copy local cache back to the server */
-		param.id = (uint64_t)(long)remPosterId->vxPosterId;
+		param.id = (int)(long)remPosterId->vxPosterId;
 		param.offset = 0;
 		param.length = remPosterId->dataSize;
 		param.data.data_val = remPosterId->dataCache;
@@ -570,7 +570,7 @@ remotePosterIoctl(POSTER_ID posterId,	/* poster Id */
 	POSTER_IOCTL_PAR param;
 	POSTER_IOCTL_RESULT *res;
 	
-	param.id = (uint64_t)(long)remPosterId->vxPosterId;
+	param.id = (int)(long)remPosterId->vxPosterId;
 	param.cmd = code;
 	res = poster_ioctl_1(&param, remPosterId->client);
 	if (res == NULL) {

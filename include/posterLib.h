@@ -40,7 +40,7 @@ typedef enum {
 #define POSTER_VME_A24     3		/* VME A24 space */
 #define POSTER_REMOTE	   4            /* poster accessed using posterServ */
 
-typedef long POSTER_ID;
+typedef void *POSTER_ID;
 
 #define POSTER_MAGIC 0x89012345
 

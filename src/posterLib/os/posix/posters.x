@@ -21,11 +21,6 @@
  *** Definition of the RPC protocol
  ***/
 
-%#include <sys/types.h>
-%#include <inttypes.h>
-#ifdef RPC_XDR
-%extern int xdr_uint64_t(XDR *, uint64_t *);
-#endif
 
 enum POSTER_STATUS {
     POSTER_OK,
@@ -34,7 +29,7 @@ enum POSTER_STATUS {
 
 struct POSTER_FIND_RESULT {
     int status;
-    uint64_t id;
+    int id;
     int length;
     int endianness;
 };
@@ -47,18 +42,18 @@ struct POSTER_CREATE_PAR {
 
 struct POSTER_CREATE_RESULT {
     int status;
-    uint64_t id;
+    int id;
 };
 
 struct POSTER_WRITE_PAR {
-    uint64_t id;
+    int id;
     int offset;
     int length;
     char data<>;
 };
 
 struct POSTER_READ_PAR {
-    uint64_t id;
+    int id;
     int offset;
     int length;
 };
@@ -69,7 +64,7 @@ struct POSTER_READ_RESULT {
 };
 
 struct POSTER_IOCTL_PAR {
-    uint64_t id;
+    int id;
     int cmd;
 };
 

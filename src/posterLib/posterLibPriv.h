@@ -52,7 +52,7 @@ typedef struct POSTER_STR {
     char name[H2_DEV_MAX_NAME];		/* name of the poster */
     POSTER_ACCESS_TYPE type;		/* type local ou remote */
     H2_ENDIANNESS endianness;           /* data (ie, writer) endianness */
-    long posterId;			/* id specifique */
+    POSTER_ID posterId;			/* id specifique */
     const POSTER_FUNCS *funcs;		/* pointeurs vers les fonctions */
     struct POSTER_STR *next;		/* pointer to next element */
 } POSTER_STR;

@@ -26,6 +26,8 @@ __RCSID("$LAAS$");
 # include <stdlib.h>
 # include <string.h>
 #endif
+#include <sys/types.h>
+#include <inttypes.h>
 
 #include <h2devLib.h>
 #include <posterLib.h>
@@ -92,7 +94,7 @@ posterCreate(char *name, int size, POSTER_ID *pPosterId)
 
     /* record poster */
     strcpy(p->name, name);
-    *pPosterId = (long)p;
+    *pPosterId = (POSTER_ID)p;
 
     /* Add to list */
     p->next = allPosters;
@@ -152,7 +154,7 @@ posterFind(char *name, POSTER_ID *pPosterId)
     for (p = allPosters; p != NULL; p = p->next) {
 	if (strcmp(p->name, name) == 0) {
 	    /* found */
-		*pPosterId = (long)p;
+		*pPosterId = (POSTER_ID)p;
 
 	    return OK;
 	}
@@ -176,7 +178,7 @@ posterFind(char *name, POSTER_ID *pPosterId)
 	p->next = allPosters;
 	allPosters = p;
 	/* Return value */
-	*pPosterId = (long)p;
+	*pPosterId = (POSTER_ID)p;
 	return OK;
     } 
 
@@ -197,7 +199,7 @@ posterFind(char *name, POSTER_ID *pPosterId)
 	p->next = allPosters;
 	allPosters = p;
 	/* Return value */
-	*pPosterId = (long)p;
+	*pPosterId = (POSTER_ID)p;
 	return OK;
     }
 #endif /* POSTERLIB_ONLY_LOCAL */
