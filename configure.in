@@ -173,5 +173,6 @@ AC_OUTPUT(Init.make
 	src/posterLib/posterServ/Makefile
 	src/h2/Makefile
 	src/shell/Makefile
+	src/xes/Makefile
 )
 
