@@ -34,10 +34,10 @@ SYMTAB_ID sysSymTbl = NULL;
 STATUS
 symLibInit(void)
 {
-    /* Chargement de la table des symboles du process */
+    /* Load the process's own symbol table */
     sysSymTbl = dlopen(NULL, RTLD_LAZY);
     if (sysSymTbl == NULL) {
-	fprintf(stderr, "Erreur dlopen() %s\n", dlerror());
+	fprintf(stderr, "dlopen() error %s\n", dlerror());
 	return ERROR;
     }
     return OK;
@@ -68,5 +68,8 @@ STATUS
 symFindByValue(SYMTAB_ID symTldId, char *value, char *name, 
 	       int *pValue, SYM_TYPE *pType)
 {
-    return ERROR;
+	/* Not implemented - and not trivial to implement without 
+	   fetching GNU binutils */
+	errnoSet(S_symLib_NOT_IMPLEMENTED);
+	return ERROR;
 }
