@@ -34,7 +34,10 @@ fi
 AC_PROG_INSTALL
 
 dnl check for mkdep
+AC_ARG_VAR(RPCGEN, [Remote Procedure Call (RPC) protocol compiler])
+
 AC_PATH_PROG(MKDEP, mkdep, no, $prefix/bin:$exec_prefix/bin:$PATH)
+AC_PATH_PROG(RPCGEN, rpcgen, no, [$PATH])
 
 dnl check for purify
 opt_purify=no
@@ -55,14 +58,21 @@ AC_TYPE_SIGNAL
 
 dnl check for X
 AC_PATH_X
-if test "x$x_includes" = "x"; then
+if test "x$x_includes" = "xNONE"; then
+  HAS_X=no
   XCPPFLAGS=
   XLDFLAGS=
 else
-  XCPPFLAGS=-I$x_includes
-  XLDFLAGS=-L$x_libraries
+  HAS_X=yes
+ if test "x$x_includes" = "x"; then
+   XCPPFLAGS=
+   XLDFLAGS=
+ else
+   XCPPFLAGS=-I$x_includes
+   XLDFLAGS=-L$x_libraries
+ fi
 fi
-AC_SUBST(XCPPFLAGS XLDFLAGS)
+AC_SUBST(HAS_X XCPPFLAGS XLDFLAGS)
 
 dnl
 
@@ -96,7 +106,7 @@ AC_CACHE_CHECK(
 	)
 	CFLAGS=$ac_save_CFLAGS
 )
-if test $poco_cv_gcc_pthread = yes; then
+if test "$poco_cv_gcc_pthread" = "yes"; then
 	poco_threads=""
 	CFLAGS="$CFLAGS -pthread"
 	LDFLAGS="$LDFLAGS -pthread";
@@ -112,7 +122,7 @@ else
 		)
 		CFLAGS=$ac_save_CFLAGS
 	)
-	if test $poco_cv_cc_mt = yes; then
+	if test "$poco_cv_cc_mt" = "yes"; then
 		CFLAGS="$CFLAGS -mt";
 		LDFLAGS="$LDFLAGS -mt";
 	else
