@@ -41,6 +41,9 @@
 #endif /* __GNUC__ */
 #endif
 
+/* Define this to identify Darwin/Mac OS X */
+#undef __DARWIN__
+
 /* Define as the return type of signal handlers (int or void).  */
 #undef RETSIGTYPE
 
@@ -59,7 +62,7 @@
 /* posix thread_getschedparam */
 #undef HAVE_PTHREAD_GETSCHEDPARAM
 
-/* posix threads stack size hnadling */
+/* posix threads stack size handling */
 #undef HAVE_PTHREAD_ATTR_STACKSIZE
 
 /* posix threads scheduling policies */

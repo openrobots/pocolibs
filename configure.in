@@ -19,8 +19,17 @@ AC_SUBST(PACKAGE)
 AC_SUBST(VERSION)
 AC_REVISION($LAAS$)
 
+if test $host_os = darwin; then
+	AC_DEFINE(__DARWIN__)
+fi
+
 AC_LIBTOOL_DLOPEN
 AC_PROG_LIBTOOL
+
+dnl add -ldl if needed 
+if test -n $lt_cv_dlopen_libs ; then
+	LIBS=$lt_cv_dlopen_libs
+fi
 
 AC_PROG_INSTALL
 
@@ -65,12 +74,30 @@ if test $poco_cv_gcc_pthread = yes; then
 	poco_threads=""
 	CFLAGS="$CFLAGS -pthread"
 else
+	AC_CACHE_CHECK(
+		[if compiler recognizes -mt],
+		poco_cv_cc_mt,
+		ac_save_CFLAGS=$CFLAGS
+		CFLAGS="$CFLAGS -mt"
+		AC_LANG_SAVE
+		AC_LANG_C
+		AC_TRY_LINK([#include <pthread.h>],
+			[void *p = pthread_create;],
+			poco_cv_cc_mt=yes,
+			poco_cv_cc_mt=no
+		)
+		AC_LANG_RESTORE
+		CFLAGS=$ac_save_CFLAGS
+	)
+	if test $poco_cv_cc_mt = yes; then
+		CFLAGS="$CFLAGS -mt";
+	fi
 	AC_CHECK_LIB(pthread,pthread_create,poco_threads=-lpthread,
              [AC_CHECK_LIB(c_r,pthread_create,poco_threads=-lc_r)])
 fi
 
 if test -n $poco_threads ; then
-	LIBS=-lpthread
+	LIBS="-lpthread $LIBS"
 fi
 
 AC_SEARCH_LIBS([fabs], [m])
