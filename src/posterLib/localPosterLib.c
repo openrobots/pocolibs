@@ -89,11 +89,11 @@ const POSTER_FUNCS posterLocalFuncs = {
 static STATUS
 localPosterCreate(char *name, int size, POSTER_ID *pPosterId)
 {
-    int dev;
+    long dev;
     unsigned char *pool;
     
     if (pPosterId != NULL) {
-	*pPosterId = NULL;
+	*pPosterId = 0L;
     }
 
     /* Allocation d'un h2dev */
@@ -153,7 +153,7 @@ localPosterMemCreate(
 static STATUS
 localPosterDelete(POSTER_ID posterId)
 {
-    int dev = (int)posterId;
+    long dev = (long)posterId;
     unsigned char *pool;
     uid_t uid = getuid();
 
@@ -187,7 +187,7 @@ localPosterDelete(POSTER_ID posterId)
 static STATUS
 localPosterFind(char *name, POSTER_ID *pPosterId)
 {
-    int p;
+    long p;
 
     /* Recherche du device h2 correspondant */
     p = h2devFind(name, H2_DEV_TYPE_POSTER);
@@ -226,7 +226,7 @@ localPosterWrite(POSTER_ID posterId, int offset, void *buf, int nbytes)
 static int 
 localPosterRead(POSTER_ID posterId, int offset, void *buf, int nbytes)
 {
-    int dev = (int)posterId;
+    long dev = (long)posterId;
     int nRd;
 
     /* Calculer le nombre d'octets a lire */
@@ -253,7 +253,7 @@ localPosterRead(POSTER_ID posterId, int offset, void *buf, int nbytes)
 static STATUS
 localPosterTake(POSTER_ID posterId, POSTER_OP op)
 {
-    int dev = (int)posterId;
+    long dev = (long)posterId;
 
     if (dev < 0 || dev >= H2_DEV_MAX 
 	|| H2DEV_TYPE(dev) != H2_DEV_TYPE_POSTER) {
@@ -277,7 +277,7 @@ localPosterTake(POSTER_ID posterId, POSTER_OP op)
 static STATUS
 localPosterGive(POSTER_ID posterId)
 {
-    int dev = (int)posterId;
+    long dev = (long)posterId;
     H2TIME date;
 
     if (dev < 0 || dev >= H2_DEV_MAX 
@@ -309,7 +309,7 @@ localPosterGive(POSTER_ID posterId)
 static void *
 localPosterAddr(POSTER_ID posterId)
 {
-    int dev = (int)posterId;
+    long dev = (long)posterId;
 
     if (dev < 0 || dev >= H2_DEV_MAX 
 	|| H2DEV_TYPE(dev) != H2_DEV_TYPE_POSTER) {
@@ -327,7 +327,7 @@ localPosterAddr(POSTER_ID posterId)
 static STATUS
 localPosterSetEndianness(POSTER_ID posterId, H2_ENDIANNESS endianness)
 {
-    int dev = (int)posterId;
+    long dev = (long)posterId;
 
     if (dev < 0 || dev >= H2_DEV_MAX 
 	|| H2DEV_TYPE(dev) != H2_DEV_TYPE_POSTER) {
@@ -345,7 +345,7 @@ localPosterSetEndianness(POSTER_ID posterId, H2_ENDIANNESS endianness)
 static STATUS
 localPosterGetEndianness(POSTER_ID posterId, H2_ENDIANNESS *endianness)
 {
-    int dev = (int)posterId;
+    long dev = (long)posterId;
 
     if (dev < 0 || dev >= H2_DEV_MAX 
 	|| H2DEV_TYPE(dev) != H2_DEV_TYPE_POSTER) {
@@ -364,7 +364,7 @@ localPosterGetEndianness(POSTER_ID posterId, H2_ENDIANNESS *endianness)
 static STATUS
 localPosterIoctl(POSTER_ID posterId, int code, void *parg)
 {
-    int dev = (int)posterId;
+    long dev = (long)posterId;
     STATUS retval;
 
     if (dev < 0 || dev >= H2_DEV_MAX 
@@ -396,14 +396,15 @@ localPosterIoctl(POSTER_ID posterId, int code, void *parg)
 	    retval = ERROR;
 	}
 	/* Nombre de millisecondes depuis la derniere ecriture */
-	if (h2timeInterval(H2DEV_POSTER_DATE(dev), (u_long *)parg) == ERROR) {
+	if (h2timeInterval(H2DEV_POSTER_DATE(dev), 
+		(unsigned long *)parg) == ERROR) {
 	    retval = ERROR;
 	}
 	break;
 
       case FIO_GETSIZE:
 	/* Size of the poster */
-	*(u_long *)parg = H2DEV_POSTER_SIZE(dev);
+	*(size_t *)parg = H2DEV_POSTER_SIZE(dev);
 	break;
 
       default:

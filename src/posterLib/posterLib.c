@@ -92,7 +92,7 @@ posterCreate(char *name, int size, POSTER_ID *pPosterId)
 
     /* record poster */
     strcpy(p->name, name);
-    *pPosterId = p;
+    *pPosterId = (long)p;
 
     /* Add to list */
     p->next = allPosters;
@@ -152,7 +152,7 @@ posterFind(char *name, POSTER_ID *pPosterId)
     for (p = allPosters; p != NULL; p = p->next) {
 	if (strcmp(p->name, name) == 0) {
 	    /* found */
-	    *pPosterId = p;
+		*pPosterId = (long)p;
 
 	    return OK;
 	}
@@ -176,7 +176,7 @@ posterFind(char *name, POSTER_ID *pPosterId)
 	p->next = allPosters;
 	allPosters = p;
 	/* Return value */
-	*pPosterId = p;
+	*pPosterId = (long)p;
 	return OK;
     } 
 
@@ -197,7 +197,7 @@ posterFind(char *name, POSTER_ID *pPosterId)
 	p->next = allPosters;
 	allPosters = p;
 	/* Return value */
-	*pPosterId = p;
+	*pPosterId = (long)p;
 	return OK;
     }
 #endif /* POSTERLIB_ONLY_LOCAL */

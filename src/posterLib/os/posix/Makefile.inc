@@ -23,7 +23,8 @@
 SRCS= \
 	posterLib.c 		\
 	localPosterLib.c	\
-	remotePosterLib.c
+	remotePosterLib.c	\
+	xdr.c
 
 SRCS_RPC= \
 	posters_clnt.c \

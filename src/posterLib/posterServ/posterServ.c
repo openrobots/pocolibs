@@ -194,7 +194,7 @@ SVC(poster_read_1)(POSTER_READ_PAR *param, struct svc_req *clnt)
     res.data.data_len = param->length;
     res.data.data_val = malloc(param->length);
 
-    if (posterRead((void *)param->id, param->offset, res.data.data_val,
+    if (posterRead(param->id, param->offset, res.data.data_val,
 		   param->length) == ERROR) {
 	res.status = errnoGet();
 	if (verbose) {

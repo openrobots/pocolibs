@@ -17,11 +17,11 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
+#include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <memory.h>
 #include <rpc/rpc.h>
 
 #include <portLib.h>
@@ -144,7 +144,7 @@ remotePosterCreate(char *name,		/* Nom du device a creer */
 		return(ERROR);
 	}
 	
-	remPosterId->vxPosterId = (void *)res->id;
+	remPosterId->vxPosterId = (void *)(long)res->id;
 	remPosterId->client = client;
 	remPosterId->pid = getpid();
 	remPosterId->endianness = H2_LOCAL_ENDIANNESS;
@@ -197,7 +197,7 @@ remotePosterWrite (POSTER_ID posterId,	/* Identificateur du poster */
 		errnoSet(S_remotePosterLib_NOT_OWNER);
 		return(ERROR);
 	}
-	param.id = (int)remPosterId->vxPosterId;
+	param.id = (uint64_t)(long)remPosterId->vxPosterId;
 	param.offset = offset;
 	param.length = nbytes;
 	param.data.data_val = buf;
@@ -259,7 +259,7 @@ posterFindPath(char *posterName, REMOTE_POSTER_ID *pPosterId)
 				if (*pPosterId == NULL) {
 					return(ERROR);
 				}
-				(*pPosterId)->vxPosterId = (void *)(res->id);
+				(*pPosterId)->vxPosterId = (void *)(long)(res->id);
 				(*pPosterId)->client = client;
 				(*pPosterId)->dataSize = res->length;
 				(*pPosterId)->dataCache = malloc(res->length);
@@ -328,7 +328,7 @@ remotePosterFind (posterName, pPosterId)
 	remPosterId = (REMOTE_POSTER_ID)malloc(sizeof(REMOTE_POSTER_STR));
 	if (remPosterId == NULL)
 		return(ERROR);
-	remPosterId->vxPosterId = (void *)(res->id);
+	remPosterId->vxPosterId = (void *)(long)(res->id);
 	remPosterId->client = client;
 	/* record endianness in REMOTE_POSTER_STR */
 	remPosterId->endianness = res->endianness;
@@ -364,7 +364,7 @@ remotePosterRead(POSTER_ID posterId,   /* Identificateur du poster a lire */
 	REMOTE_POSTER_ID remPosterId = (REMOTE_POSTER_ID)posterId;
 	
 	
-	param.id = (int)(remPosterId->vxPosterId);
+	param.id = (uint64_t)(long)(remPosterId->vxPosterId);
 	param.length = nbytes;
 	param.offset = offset;
 	
@@ -415,7 +415,7 @@ remotePosterTake(POSTER_ID posterId, POSTER_OP op)
 		return(ERROR);
 	} /* switch */
 	
-	param.id = (int)(remPosterId->vxPosterId);
+	param.id = (uint64_t)(long)(remPosterId->vxPosterId);
 	param.length = remPosterId->dataSize;
 	param.offset = 0;
 	
@@ -472,7 +472,7 @@ remotePosterGive(POSTER_ID posterId)
 	
 	if (remPosterId->op == POSTER_WRITE) {
 		/* recopie du cache local dans le poster */
-		param.id = (int)remPosterId->vxPosterId;
+		param.id = (uint64_t)(long)remPosterId->vxPosterId;
 		param.offset = 0;
 		param.length = remPosterId->dataSize;
 		param.data.data_val = remPosterId->dataCache;
@@ -575,7 +575,7 @@ remotePosterIoctl(POSTER_ID posterId,	/* Identificateur du poster */
 	POSTER_IOCTL_PAR param;
 	POSTER_IOCTL_RESULT *res;
 	
-	param.id = (int)remPosterId->vxPosterId;
+	param.id = (uint64_t)(long)remPosterId->vxPosterId;
 	param.cmd = code;
 	res = poster_ioctl_1(&param, remPosterId->client);
 	if (res == NULL) {
