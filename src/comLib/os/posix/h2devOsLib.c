@@ -41,9 +41,13 @@ __RCSID("$LAAS$");
 #include "smMemLib.h"
 #include "smObjLib.h"
 
+#ifdef VALGRIND_SUPPORT
+#include <valgrind/memcheck.h>
+#endif
+
 /* Paths pour le lancement de posterServ */
-#ifndef POSTERSERV_PATH
-#define POSTERSERV_PATH "/usr/local/robots/bin/posterServ"
+#ifndef POSTER_SERV_PATH
+#define POSTER_SERV_PATH "/usr/local/robots/bin/posterServ"
 #endif
 
 /**
@@ -286,6 +290,12 @@ h2devAttach(void)
     close(fd);
 
     pthread_mutex_unlock(&h2devMutex);
+
+
+#ifdef VALGRIND_SUPPORT
+    VALGRIND_MAKE_READABLE(h2Devs, sizeof(H2_DEV_STR) * H2_DEV_MAX);
+#endif
+    
     return OK;
 }
 

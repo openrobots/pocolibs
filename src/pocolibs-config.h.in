@@ -101,4 +101,7 @@
 /* debug comLib:gcomLib  */
 #undef COMLIB_DEBUG_GCOMLIB
 
+/* use valgrind hints */
+#undef VALGRIND_SUPPORT
+
 
