@@ -20,19 +20,21 @@
 top_builddir=	@top_builddir@
 top_srcdir=	@top_srcdir@
 srcdir=		@srcdir@
+builddir= @builddir@
+abs_builddir= @abs_builddir@
 
 include ../../Init.make
 -include $(srcdir)/os/$(OSAPI)/Makefile.inc
 
 INSTALL=	@INSTALL@
 
-CPPFLAGS+=	-I. -I.. -I$(srcdir)
+CPPFLAGS+=	-I$(srcdir) -I$(abs_builddir)
 
 OBJS=		$(SRCS:%.c=%.lo) $(SRCS_RPC:%.c=%.lo)
 
-SHLIB_CURRENT=	3
-SHLIB_REVISION=	0
-SHLIB_AGE=	0
+SHLIB_CURRENT=	4
+SHLIB_REVISION=	1
+SHLIB_AGE=	1
 
 BASENAME= 	posterLib
 LIB=		lib$(BASENAME).la
@@ -41,8 +43,7 @@ all: all-os $(LIB)
 
 $(LIB): $(OBJS)
 	$(LTLD) -o $@ $(OBJS) -rpath $(LIBDIR) -R$(LIBDIR)	\
-	-L../comLib $(COMLIB) -L../errorLib $(ERRORLIB)		\
-	-L../portLib $(PORTLIB)					\
+	$(COMLIB) $(ERRORLIB) $(PORTLIB)					\
 	-version-info $(SHLIB_CURRENT):$(SHLIB_REVISION):$(SHLIB_AGE)
 
 #----------------------------------------------------------------------
@@ -52,6 +53,7 @@ $(LIB): $(OBJS)
 # Solaris' rpcgen that generate a bogus include line for posters.h
 # if a path is prepended to posters.x in the argument line
 #
+RPC_OUTPUT=posters_clnt.c posters_xdr.c posters.h
 posters_clnt.c: posters.x
 	rm -f $@
 	(cd $(dir $<) ; $(RPCGEN) -l posters.x) > $@
@@ -70,11 +72,8 @@ posters.h: posters.x
 %.lo: %.c
 	$(LTCC) -c $(CPPFLAGS) $(CFLAGS) -o $@ $<
 
-depend DEPENDANCES:: $(SRCS)  $(SRCS_RPC) $(HDR_RPC)
-	$(MKDEP) -c$(CC) -oDEPENDANCES -t.lo $(CPPFLAGS) $?
-
 clean:: 
-	$(LIBTOOL) --mode=clean rm -f $(OBJS) $(LIB)
+	$(LIBTOOL) --mode=clean rm -f $(OBJS) $(LIB) $(RPC_OUTPUT)
 
 distclean:: clean
 	rm -f DEPENDANCES Makefile
@@ -83,7 +82,10 @@ install::
 	$(MKINSTALLDIRS) $(LIBDIR)
 	$(LIBTOOL) --mode=install $(INSTALL) $(LIB) $(LIBDIR)
 
-ifneq (distclean,$(MAKECMDGOALS))
+ifeq ($(findstring clean,$(MAKECMDGOALS)),)
+depend DEPENDANCES:: $(SRCS) posters.h
+	$(MKDEP) -c$(CC) -oDEPENDANCES -t.lo $(CPPFLAGS) $?
+
 include DEPENDANCES
 endif
 
