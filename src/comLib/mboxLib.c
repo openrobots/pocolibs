@@ -23,6 +23,7 @@ __RCSID("$LAAS$");
 # include <linux/kernel.h>
 # include <linux/sched.h>
 #else
+# include <sys/types.h>
 # include <stdio.h>
 # include <string.h>
 # include <unistd.h>
