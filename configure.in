@@ -31,32 +31,6 @@ dnl --- OS flavour checks -----------------------------------------------
 
 dnl RTAI support
 
-# AC_CHECK_RTAI_INCLUDES(var, path)
-AC_DEFUN([AC_CHECK_RTAI_INCLUDES],
-[
-   AC_MSG_CHECKING([for RTAI includes])
-   AC_CACHE_VAL(ac_cv_path_rtai,
-    [
-       IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS=":"
-        ac_tmppath="$2:/usr/realtime/include:/usr/src/rtai/include"
-        for ac_dir in $ac_tmppath; do 
-            test -z "$ac_dir" && ac_dir=.
-            if eval test -f $ac_dir/rtai.h; then
-               eval ac_cv_path_rtai="$ac_dir"
-               break
-            fi
-       done
-       IFS="$ac_save_ifs"
-    ])
-   $1="$ac_cv_path_rtai"
-   if test -n "[$]$1"; then
-      AC_MSG_RESULT([$]$1)
-   else
-      AC_MSG_ERROR([cannot find RTAI includes], 2)
-   fi
-   AC_SUBST($1)
-])
-
 # configure options
 AC_ARG_WITH(rtai,
            AC_HELP_STRING([--with-rtai=yes|no|lxrt],
@@ -66,12 +40,17 @@ AC_ARG_WITH(rtai-includes,
            AC_HELP_STRING([--with-rtai-includes=DIR],
                [RTAI headers are in DIR]),
            [opt_rtai_includes=$withval])
+AC_ARG_WITH(linux-kernel-includes,
+           AC_HELP_STRING([--with-linux-kernel-includes=DIR],
+               [linux kernel headers are in DIR]),
+           [opt_lnxkern_includes=$withval])
 
 # make related stuff
 if test "x$opt_rtai" = "xyes"; then
    OSAPI=rtai
    AC_MSG_RESULT([Configuring to use RTAI])
    AC_CHECK_RTAI_INCLUDES(RTAI_INCLUDES, $opt_rtai_includes)
+   AC_CHECK_LINUXKERNEL_INCLUDES(LNXKERN_INCLUDES, $opt_lnxkern_includes)
 
 elif test "x$opt_rtai" = "xlxrt"; then
    OSAPI=lxrt
@@ -283,13 +262,14 @@ main(int argc, char *argv[])
 	if (time_difference(&tp2, &tp1) < 1200000) 
 		exit(0);
 	else {
-		fprintf(stderr, "no able to generate 100 ticks/s\n");
+		fprintf(stderr, "not able to generate 100 ticks/s\n");
 		exit(2);
 	}
 }
 ],
 	[AC_MSG_RESULT([yes])]
  	[AC_DEFINE(HAVE_POSIX_TIMERS)],
+	[AC_MSG_RESULT([no])],
 	[AC_MSG_RESULT([no])]
 )
 

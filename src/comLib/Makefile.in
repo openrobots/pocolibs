@@ -58,10 +58,10 @@ $(LIB): $(OBJS)
 depend DEPENDANCES:: $(SRCS)
 	$(MKDEP) -c$(CC) -oDEPENDANCES -t.lo $(CPPFLAGS) $?
 
-clean: 
+clean:: 
 	$(LIBTOOL) --mode=clean rm -f $(OBJS) $(LIB)
 
-distclean: clean
+distclean:: clean
 	rm -f DEPENDANCES Makefile
 
 install:: $(LIB)

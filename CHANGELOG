@@ -1,9 +1,11 @@
 Version 2.0, xx September 2004
+ 37. Added --with-linux-kernel-includes option to specify the path to
+     linux kernel headers when compiling for RTAI.
  36. Revert the change that made the posterId in posterServ an uint64_t.
  35. Autotoolize the build of the poster test programs.
  34. Start over with libtool style shared libraries version numbers. 
      Bump all major revisions to make sure nothing bad happens.
- 33. Add a configure test for usablility of POSIX timers for a 
+ 33. Add a configure test for usabilility of POSIX timers for a 
      100Hz sysClk.
  32. Add a 'tick' regress test to check the accuracy of sysClk. 
      (Linux 2.4 POSIX timers are known to be unable to set a clock

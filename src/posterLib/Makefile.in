@@ -73,10 +73,10 @@ posters.h: posters.x
 depend DEPENDANCES:: $(SRCS)  $(SRCS_RPC) $(HDR_RPC)
 	$(MKDEP) -c$(CC) -oDEPENDANCES -t.lo $(CPPFLAGS) $?
 
-clean: 
+clean:: 
 	$(LIBTOOL) --mode=clean rm -f $(OBJS) $(LIB)
 
-distclean: clean
+distclean:: clean
 	rm -f DEPENDANCES Makefile
 
 install::
