@@ -48,7 +48,7 @@ $(TESTW): testWrite.lo
 
 
 depend DEPENDANCES: testRead.c testWrite.c
-	$(MKDEP) -c$(CC) -oDEPENDANCES $(CPPFLAGS) $?
+	$(MKDEP) -c$(CC) -t.lo -oDEPENDANCES $(CPPFLAGS) $?
 
 clean:
 	$(LIBTOOL) --mode=clean rm -f $(TESTW) $(TESTR) $(TESTW).lo $(TESTR).lo
