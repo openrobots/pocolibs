@@ -46,7 +46,7 @@ MKDEP=          @MKDEP@
 
 LIBTOOL=	@LIBTOOL@
 
-CPPFLAGS=	-I@abs_srcdir@/include @ENDIAN_DEFINES@
+CPPFLAGS=	-I@abs_srcdir@/include
 CFLAGS=
 
 # Base directory of the software

@@ -67,3 +67,7 @@
 
 /* snprintf */
 #undef HAVE_SNPRINTF
+
+/* Endianness */
+#undef WORDS_BIGENDIAN
+

@@ -38,12 +38,8 @@ fi
 
 dnl processor tests 
 AC_C_BIGENDIAN
-if test "$ac_cv_c_bigendian" = "yes"; then
-  ENDIAN_DEFINES=-DIS_BIG_ENDIAN
-else
-  ENDIAN_DEFINES=-DIS_LITTLE_ENDIAN
-fi
-AC_SUBST(ENDIAN_DEFINES)
+
+AC_TYPE_SIGNAL
 
 AC_CONFIG_HEADER(src/config.h)
 AC_OUTPUT(Init.make

@@ -41,21 +41,15 @@ H2_ENDIANNESS h2localEndianness (void)
 
   /* Little endian */
   if (u.c[1] == 1) {
-#if defined(IS_BIG_ENDIAN)
-    printf ("** ERROR h2localEndianness: this library was wrongly compiled with flag IS_LITTLE_ENDIAN\n");
-#elif defined(IS_LITTLE_ENDIAN)
-#else
-    printf ("WARNING h2localEndianness: flag IS_LITTLE_ENDIAN was not defined\n");
+#if defined(WORDS_BIGENDIAN)
+    printf ("** ERROR h2localEndianness: this library was compiled with wrong endianness\n");
 #endif
     return H2_LITTLE_ENDIAN;
   }
   
   /* Big endian */
-#if defined(IS_LITTLE_ENDIAN)
-  printf ("** ERROR h2localEndianness: this library was wrongly compiled with flag IS_LITTLE_ENDIAN\n");
-#elif defined(IS_BIG_ENDIAN)
-#else
-  printf ("WARNING h2localEndianness: flag IS_BIG_ENDIAN not defined\n");
+#if !defined(WORDS_BIGENDIAN)
+  printf ("** ERROR h2localEndianness: this library was compiled with wrong endianness\n");
 #endif
   return H2_BIG_ENDIAN;
 }

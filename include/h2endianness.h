@@ -36,13 +36,10 @@ typedef enum H2_ENDIANNESS {
 /* Returns the local endianness */
 extern H2_ENDIANNESS h2localEndianness (void);
 
-
-#if defined(IS_LITTLE_ENDIAN)
-#define H2_LOCAL_ENDIANNESS H2_LITTLE_ENDIAN
-#elif defined(IS_BIG_ENDIAN)
+#ifdef WORDS_BIGENDIAN
 #define H2_LOCAL_ENDIANNESS H2_BIG_ENDIAN
-#else 
-#error "h2endianness.h: flag -DIS_BIG_ENDIAN or -DIS_LITTLE_ENDIAN required"
+#else
+#define H2_LOCAL_ENDIANNESS H2_LITTLE_ENDIAN
 #endif
 
 /* If the macro is not defined (h2endiannessMacro.h) then call C function */
