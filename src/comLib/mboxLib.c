@@ -48,7 +48,7 @@ __RCSID("$LAAS$");
  **  cette routine. 
  **/
 STATUS 
-mboxInit(char *procName)
+mboxInit(char *procName)		/* unused parameter procName */
 {
     int tid = taskIdSelf();
     OS_TCB *tcb = taskTcb(tid);
