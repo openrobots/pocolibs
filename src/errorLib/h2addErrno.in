@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl -- -*-perl-*-
+#! @PERL@ -- -*-perl-*-
 #
 # Copyright (c) 1992, 2003 CNRS/LAAS
 #
