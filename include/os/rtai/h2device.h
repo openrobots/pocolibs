@@ -92,6 +92,7 @@ struct h2devop {
 /* device private data */
 struct h2device {
    struct semaphore sem;	/* mutex semaphore */
+   struct task_struct *user;	/* user process/thread */
    long ioTid;			/* RT-task performing operations */
    SEM_ID sync;			/* synchronization with RT-task */
    int done;

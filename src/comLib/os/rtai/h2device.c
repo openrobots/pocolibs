@@ -32,15 +32,13 @@ __RCSID("$LAAS$");
 
 #ifdef COMLIB_DEBUG_H2DEVLIB
 # define LOGDBG(x)	logMsg x
-# define LOGKDBG(x)	printk x
+# define LOGKDBG(x)
 
 static const char *	h2ioctlname(int n);
 #else
 # define LOGDBG(x)
 # define LOGKDBG(x)
 #endif
-
-static DECLARE_WAIT_QUEUE_HEAD(wq);
 
 /* local functions */
 static int copy_to_buffer(struct h2device *h, void *user, size_t len);
@@ -151,8 +149,8 @@ h2devioctl(struct inode *i, struct file *f,
    switch(h->request) {
       /* Some operations are not real-time, so we do them here: they
        * involve allocating shared memory, which is not possible in hard
-       * real-time. For the real-time operations, see the default case
-       * below. */
+       * real-time anyway. For the real-time operations, see the default
+       * case below. */
       case H2DEV_IOC_DEVINIT:
 	 h->or.err = h2devInit(h->op.arg[0]._long);
 	 break;
@@ -163,12 +161,11 @@ h2devioctl(struct inode *i, struct file *f,
 
       default:
 	 /* let the async task do the job in hard real-time */
-	 semGive(h->sync);
+	 h->user = current;
+	 set_current_state(TASK_INTERRUPTIBLE);
 
-	 while (!h->done) {
-	    if (signal_pending(current)) break;
-	    schedule();
-	 }
+	 semGive(h->sync);
+	 schedule();
 
 	 LOGKDBG(("h2device: async task done\n"));
 	 if (!h->done) {
@@ -283,6 +280,7 @@ tIoctlTask(struct h2device *h)
 
       /* signal process we're done */
       h->done = 1;
+      wake_up_process(h->user);
 
       LOGDBG(("done %s\n", h2ioctlname(h->request)));
    }
