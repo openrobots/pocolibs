@@ -203,7 +203,7 @@ taskLibInit(void)
 					 0, 0, SCHED_FIFO, 1);
     if(tcb->LXRT_task == NULL)
       {
-	fprintf(stderr, "rt_task_init_schmod, taskLibInit failed\n");
+	fprintf(stderr, "rt_task_init_schmod, taskLibInit failed, name=%s\n", tcb->name);
 	return ERROR;
       }
 
