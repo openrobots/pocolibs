@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 2003 CNRS/LAAS
+ * Copyright (c) 1996, 2004 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -77,11 +77,11 @@ const POSTER_FUNCS posterRemoteFuncs = {
 
 /*****************************************************************************
 *
-* remotePosterInit - Routine d'initialisation de la bibliotheque
+* remotePosterInit - Initialization routine 
 *
 * Description : 
 *
-* Retourne : OK ou ERROR
+* Returns : OK or ERROR
 */
 static STATUS 
 remotePosterInit(void)
@@ -93,18 +93,19 @@ remotePosterInit(void)
 
 /******************************************************************************
 *
-*  posterCreate  -  Creation d'un poster
+*  posterCreate  -  Poster creation
 *
-*  Description: Cette function provoque la creation du poster par la tache
-*               posterServ sur VxWorks. (sur le rack POSTER_HOST)
+*  Description: this function triggers the creation of the poster 
+*               in the posterServ task on the remote host (described by
+*               POSTER_HOST).
 *
-*  Retourne :  OK ou ERROR
+*  Returns :  OK or ERROR
 */
 
 static STATUS 
-remotePosterCreate(char *name,		/* Nom du device a creer */
-    int size,				/* Taille poster - en bytes */
-    POSTER_ID *pPosterId)		/* Ou` mettre l'id du poster */
+remotePosterCreate(char *name,		/* Name of the device to create */
+    int size,				/* Poster size in bytes */
+    POSTER_ID *pPosterId)		/* where to store the resulting Id */
 {
 	POSTER_CREATE_PAR param;
 	POSTER_CREATE_RESULT *res;
@@ -151,7 +152,7 @@ remotePosterCreate(char *name,		/* Nom du device a creer */
 	
 	xdr_free((xdrproc_t)xdr_POSTER_CREATE_RESULT, (char *)res);
 	
-	/* Allocation du cache des donne'es */
+	/* Allocate a data cache */
 	remPosterId->dataSize = size;
 	remPosterId->dataCache = malloc(size);
 	if (remPosterId->dataCache == NULL) {
@@ -164,13 +165,11 @@ remotePosterCreate(char *name,		/* Nom du device a creer */
 
 
 static STATUS 
-remotePosterMemCreate(char *name,	/* Nom du device a creer */
-    int busSpace,			/* espace d'adressage de 
-					   l'addresse pPool */
-    void *pPool,			/* adresse Pool de memoire pour 
-					   le poster */
-    int size,				/* Taille poster - en bytes */
-    POSTER_ID *pPosterId)		/* Ou` mettre l'id du poster */
+remotePosterMemCreate(char *name,	/* Device name to be created */
+    int busSpace,			/* Address space of the memoy pool */
+    void *pPool,			/* Effective address within the pool */
+    int size,				/* Poster size, in bytes */
+    POSTER_ID *pPosterId)		/* Where to store the result */
 {
 	fprintf(stderr, "posterMemCreate: not suppored on Unix\n");
 	return(ERROR);
@@ -178,16 +177,17 @@ remotePosterMemCreate(char *name,	/* Nom du device a creer */
 
 /*****************************************************************************
 *
-*  posterWrite  -  Ecrire sur un poster
+*  posterWrite  -  Write data to a poster
 *
-*  Retourne : nombre de bytes effectivement ecrit ou ERROR.
+*  Returns : number of bytes really written or ERROR
 */
 
 static int 
-remotePosterWrite (POSTER_ID posterId,	/* Identificateur du poster */ 
-    int offset,				/* Offset par rapport debut poster */
-    void *buf,				/* Message a ecrire */
-    int nbytes)				/* Nombre de bytes a ecrire */
+remotePosterWrite (POSTER_ID posterId,	/* Id of the poster */ 
+    int offset,				/* Offset relative to the start 
+					   of the poster */
+    void *buf,				/* message to write */
+    int nbytes)				/* number of bytes to write */
 {
 	POSTER_WRITE_PAR param;
 	int *res;
@@ -220,14 +220,13 @@ remotePosterWrite (POSTER_ID posterId,	/* Identificateur du poster */
 
 /******************************************************************************
 *
-*   posterFind  -  Chercher un poster par son nom
+*   posterFind  -  Find a poster by name
 * 
-*   Description:  Cette fonction permet de s'initialiser comme client
-*                 du serveur de posters ainsi que la mbox. Il associe en
-*                 outre un numero au nom du poster.
+*   Description:  this function looks through POSTER_PATH for a 
+*                 posterServ process providing the named poster
 *
-*   Retourne :
-*   OK ou ERROR
+*   Returns :
+*   OK or ERROR
 */
 
 static STATUS 
@@ -253,7 +252,7 @@ posterFindPath(char *posterName, REMOTE_POSTER_ID *pPosterId)
 		if (client != NULL) {
 			res = poster_find_1(&posterName, client);
 			if (res != NULL && res->status == POSTER_OK) {
-				/* Allocation stucture cache */
+				/* Allocate a cache stucture  */
 				*pPosterId = (REMOTE_POSTER_ID)
 				    malloc(sizeof(REMOTE_POSTER_STR));
 				if (*pPosterId == NULL) {
@@ -304,7 +303,7 @@ remotePosterFind (char *posterName, POSTER_ID *pPosterId)
 		res = NULL;
 	}
 	
-	/* Recherche dans POSTER_PATH */
+	/* search along POSTER_PATH */
 	if (res == NULL) {
 		if (client !=  NULL)
 			clnt_destroy(client);
@@ -329,9 +328,9 @@ remotePosterFind (char *posterName, POSTER_ID *pPosterId)
 	remPosterId->client = client;
 	/* record endianness in REMOTE_POSTER_STR */
 	remPosterId->endianness = res->endianness;
-	/* On ne pourra pas ecrire dans un poster trouve' */
+	/* the found poster cannot be written */
 	remPosterId->pid = -1;
-	/* Allocation de la structure cache */
+	/* Allocate the cache structure */
 	remPosterId->dataSize = res->length;
 	remPosterId->dataCache = malloc(res->length);
 	xdr_free((xdrproc_t)xdr_POSTER_FIND_RESULT, (char *)res);
@@ -341,20 +340,20 @@ remotePosterFind (char *posterName, POSTER_ID *pPosterId)
 
 /******************************************************************************
 *
-*  posterRead  -  Lire un poster
+*  posterRead  -  read a poster
 *
-*  Description : Envoi une requete de lecture de poster au serveur de posters
-*                et transmet les donne'es lues.
+*  Description : sends a read request to the posterServ process
+*                and store the received data
 *
-*  Retourne : nombre de bytes lus ou ERROR.
+*  Returns : number of bytes read or ERROR
 */
 
 
 static int 
-remotePosterRead(POSTER_ID posterId,   /* Identificateur du poster a lire */
-    int offset,			       /* Offset a partir du debut du poster */
-    void *buf,			       /* Buffer ou` mettre les informations */
-    int nbytes)			       /* Nombre de bytes a lire */	
+remotePosterRead(POSTER_ID posterId,   /* Id of the poster to read */
+    int offset,			       /* offset from start of poster */
+    void *buf,			       /* buffer to store the data */
+    int nbytes)			       /* number of bytes to read */	
 {
 	POSTER_READ_RESULT *res;
 	static POSTER_READ_PAR param;
@@ -384,11 +383,11 @@ remotePosterRead(POSTER_ID posterId,   /* Identificateur du poster a lire */
 
 /******************************************************************************
 *
-*   posterTake - Prendre l'acces a un poster
+*   posterTake - take access control to a poster
 *
-*   Retourne : OK ou ERROR
+*   Returns : OK or ERROR
 *
-*   Sur UNIX, recopie du poster dans le cache des donne'es
+*   On remote posters, copy the poster contents into the data cache
 */
 static STATUS 
 remotePosterTake(POSTER_ID posterId, POSTER_OP op)
@@ -453,11 +452,11 @@ remotePosterTake(POSTER_ID posterId, POSTER_OP op)
 
 /******************************************************************************
 * 
-*   posterGive - Liberer l'acces a un poster
+*   posterGive - release access control to a poster
 *
-*   Retourne : OK ou ERROR
+*   Retourns : OK or ERROR
 *
-*   Sur UNIX, recopie du cache des donne'es vers le poster
+*   On remote posters, copy back the cached data into the remote server
 */
 static STATUS
 remotePosterGive(POSTER_ID posterId)
@@ -468,7 +467,7 @@ remotePosterGive(POSTER_ID posterId)
 	
 	
 	if (remPosterId->op == POSTER_WRITE) {
-		/* recopie du cache local dans le poster */
+		/* copy local cache back to the server */
 		param.id = (uint64_t)(long)remPosterId->vxPosterId;
 		param.offset = 0;
 		param.length = remPosterId->dataSize;
@@ -491,9 +490,9 @@ remotePosterGive(POSTER_ID posterId)
 
 /*****************************************************************************
 *
-*   posterAddr - retourne l'adresse des donne'es du poster
+*   posterAddr - returns a local memory address of the poster
 *
-*   Retourne : adresse ou NULL
+*   Returns : address or NULL
 */
 static void *
 remotePosterAddr(POSTER_ID posterId)
@@ -505,7 +504,7 @@ remotePosterAddr(POSTER_ID posterId)
  *
 *   posterSetEndianness - 
 *
-*   Retourne : 
+*   Returns : OK 
 */
 static STATUS
 remotePosterSetEndianness(POSTER_ID posterId, H2_ENDIANNESS endianness)
@@ -518,7 +517,7 @@ remotePosterSetEndianness(POSTER_ID posterId, H2_ENDIANNESS endianness)
 *
 *   posterGetEndianness - 
 *
-*   Retourne : 
+*   Returns : 
 */
 static STATUS
 remotePosterGetEndianness(POSTER_ID posterId, H2_ENDIANNESS *endianness)
@@ -529,9 +528,9 @@ remotePosterGetEndianness(POSTER_ID posterId, H2_ENDIANNESS *endianness)
 
 /******************************************************************************
 *
-*   posterDelete  -  Deleter un poster
+*   posterDelete  -  Delete a poster
 *
-*   Retourne : OK ou ERROR
+*   Returns : OK or ERROR
 */
 
 static STATUS 
@@ -553,19 +552,18 @@ remotePosterDelete(POSTER_ID posterId)
 
 /*****************************************************************************
 *
-*   posterIoctl  -  Demande de renseignements sur le poster
+*   posterIoctl  -  Ask information about a poster
 *
 *   Description:
-*   Analogue a la fonction ioctl sous UNIX, cette routine permet la demande
-*   de renseignements sur un poster.
+*   This functions access some control information about posters
 *
-*   Retourne : OK ou ERROR
+*   Returns : OK or ERROR
 */
 
 static STATUS 
-remotePosterIoctl(POSTER_ID posterId,	/* Identificateur du poster */
-    int code,				/* Code de la fonction a executer */
-    void *parg)				/* Adresse argument entree/sortie */
+remotePosterIoctl(POSTER_ID posterId,	/* poster Id */
+    int code,				/* code of the control function */
+    void *parg)				/* address of in/out arguments */
 {
 	REMOTE_POSTER_ID remPosterId = (REMOTE_POSTER_ID)posterId;
 	
@@ -597,12 +595,12 @@ remotePosterIoctl(POSTER_ID posterId,	/* Identificateur du poster */
 
 /*****************************************************************************
 *
-*  posterShow  -  Montre l'etat des devices poster du systeme
+*  posterShow  -  show the list of posters in the system
 *
 *  Description :
-*  L'etat des devices poster est envoye a la sortie standard.
+*  A list of existing posters is written to stdout
 *
-*  Retourne : OK ou ERROR.
+*  Returns : OK or ERROR.
 */
 
 static STATUS 
