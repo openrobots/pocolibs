@@ -19,6 +19,9 @@
 #define _ERRNOLIB_H
 
 #include "portLib.h"
-#include "errnoLibProto.h" 
 
-#endif
+/* prototypes */
+extern int errnoGet ( void );
+extern STATUS errnoSet ( int errorValue );
+
+#endif /* _ERRNOLIB_H */

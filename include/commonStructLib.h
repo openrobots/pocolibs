@@ -48,8 +48,12 @@ typedef struct {
 
 
 /* prototypes */
-#include "commonStructLibProto.h"
+extern STATUS commonStructCopy ( void *pCommonStruct, int toFromFlag, 
+    void *pBuf );
+extern STATUS commonStructCreate ( int len, void **pStructAdrs );
+extern STATUS commonStructDelete ( void *pCommonStruct );
+extern STATUS commonStructGive ( void *pCommonStruct );
+extern STATUS commonStructTake ( void *pCommonStruct );
 
 
-/*------------- fin de chargement du fichier --------------------------------*/
-#endif
+#endif /* COMMON_STRUCT_H */

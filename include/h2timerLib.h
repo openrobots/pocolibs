@@ -60,6 +60,14 @@ typedef struct {
     SEM_ID semSync;			/* semaphore de synchronisation */
 } H2TIMER, *H2TIMER_ID;
  
-#include "h2timerLibProto.h"
 
-#endif
+extern STATUS h2timerInit ( void );
+extern H2TIMER_ID h2timerAlloc ( void );
+extern STATUS h2timerStart ( H2TIMER_ID timerId, int periode, int delay );
+extern STATUS h2timerPause ( H2TIMER_ID timerId );
+extern STATUS h2timerPauseReset ( H2TIMER_ID timerId );
+extern STATUS h2timerStop ( H2TIMER_ID timerId );
+extern STATUS h2timerChangePeriod ( H2TIMER_ID timerId, int periode );
+extern STATUS h2timerFree ( H2TIMER_ID timerId );
+
+#endif /* _H2TIMERLIB_H */

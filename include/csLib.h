@@ -106,8 +106,35 @@ typedef struct {
   CLIENT_RQST rqstTab[CLIENT_NMAX_RQST_ID];   /* Tab. parametres requetes */
 } CS_CLIENT, *CLIENT_ID;
 
-#include "csLibProto.h"
 
+extern STATUS csClientEnd ( CLIENT_ID clientId );
+extern STATUS csClientInit ( char *servMboxName, int maxRqstSize, 
+    int maxIntermedReplySize, int maxFinalReplySize, CLIENT_ID *pClientId );
+extern int csClientReplyRcv ( CLIENT_ID clientId, int rqstId, int block, 
+    char *intermedReplyDataAdrs, int intermedReplyDataSize, 
+    FUNCPTR intermedReplyDecodFunc, char *finalReplyDataAdrs, 
+    int finalReplyDataSize, FUNCPTR finalReplyDecodFunc );
+extern int csClientRqstIdFree ( CLIENT_ID clientId, int rqstId );
+extern STATUS csClientRqstSend ( CLIENT_ID clientId, int rqstType, 
+    char *rqstDataAdrs, int rqstDataSize, FUNCPTR codFunc, BOOL intermedFlag, 
+    int intermedReplyTout, int finalReplyTout, int *pRqstId );
+extern STATUS csMboxEnd ( void );
+extern STATUS csMboxInit ( char *mboxBaseName, int rcvMboxSize, 
+    int replyMboxSize );
+extern int csMboxStatus ( int mask );
+extern int csMboxWait ( int timeout, int mboxMask );
+extern STATUS csServEnd ( SERV_ID servId );
+extern STATUS csServFuncInstall ( SERV_ID servId, int rqstType, 
+    FUNCPTR rqstFunc );
+extern STATUS csServInit ( int maxRqstDataSize, int maxReplyDataSize, 
+    SERV_ID *pServId );
+extern STATUS csServInitN ( int maxRqstDataSize, int maxReplyDataSize, 
+    int nbRqstFunc, SERV_ID *pServId );
+extern STATUS csServReplySend ( SERV_ID servId, int rqstId, int replyType, 
+    int replyBilan, char *replyDataAdrs, int replyDataSize, FUNCPTR codFunc );
+extern STATUS csServRqstExec ( SERV_ID servId );
+extern STATUS csServRqstIdFree ( SERV_ID servId, int rqstId );
+extern STATUS csServRqstParamsGet ( SERV_ID servId, int rqstId, 
+    char *rqstDataAdrs, int rqstDataSize, FUNCPTR decodFunc );
 
-/*------------- fin de chargement du fichier --------------------------------*/
-#endif
+#endif /* CS_LIB_H */

@@ -35,6 +35,12 @@ typedef struct {
 } H2TIME;
 
 /* Prototypes */
-#include "h2timeLibProto.h"
 
-#endif
+extern STATUS h2timeAdj ( H2TIME *pTimeStr );
+extern STATUS h2timeGet ( H2TIME *pTimeStr );
+extern void h2timeInit ( void );
+extern STATUS h2timeInterval ( H2TIME *pOldTime, u_long *pNmsec );
+extern STATUS h2timeSet ( H2TIME *pTimeStr );
+extern void h2timeShow ( void );
+
+#endif /* _H2TIMELIB_H */
