@@ -37,25 +37,11 @@ __RCSID("$LAAS$");
 #include <smObjLib.h>
 #include <h2devLib.h>
 
-
-#define SIGNATURE 0xdeadbeef
-#define MDEBUG
-
 /**
- ** Allocation unit header
+ ** Global variables
  **/
-typedef struct SM_MALLOC_CHUNK {
-    size_t length;		/* usable size */
-    struct SM_MALLOC_CHUNK *next;
-    struct SM_MALLOC_CHUNK *prev;
-    unsigned long signature;	/* for alignement */
-} SM_MALLOC_CHUNK;
-
-/**
- ** Static variables
- **/
-/* free_list est exprime en adresse locale */
-static SM_MALLOC_CHUNK *free_list = NULL; /* free chunks list */
+/* smMemFreeList is a local address */
+SM_MALLOC_CHUNK *smMemFreeList = NULL; /* free chunks list */
 #ifdef MALLOC_TRACE
 FILE *malloc_trace_file = NULL;
 #endif
@@ -71,7 +57,7 @@ FILE *malloc_trace_file = NULL;
 
 /* free list traversal until cond */
 #define EVERY_FREE(cond) \
-    for (c = free_list; c != NULL; \
+    for (c = smMemFreeList; c != NULL; \
          c = smObjGlobalToLocal(c->next)) {\
         if (cond) { \
 	    break; \
@@ -217,7 +203,7 @@ internal_malloc(size_t size)
 	} else {
 	    
 	    /* supress it from free list */
-	    remove_chunk(&free_list, c);
+	    remove_chunk(&smMemFreeList, c);
 	    c->next = MALLOC_MAGIC;
 	    return((void *)(c+1));
 	}
@@ -226,129 +212,6 @@ internal_malloc(size_t size)
     }
 
 } /* malloc */
-   
-/*----------------------------------------------------------------------*/
-
-/*
- * Cree le segment de memoire partagee
- */
-STATUS 
-smMemInit(int smMemSize)
-{
-    key_t key;
-    int dev;
-    void *addr;
-    SM_MALLOC_CHUNK *header;
-    
-    /* allocation d'un device h2 */
-    dev = h2devAlloc(SM_MEM_NAME, H2_DEV_TYPE_MEM);
-    if (dev == ERROR) {
-        return ERROR;
-    }
-    /* Clef associee aux SHM */
-    key = h2devGetKey(H2_DEV_TYPE_MEM, dev, FALSE, NULL);
-    if (key == ERROR) {
-        return ERROR;
-    }    
-    /* Creation du segment de memoire partage'e */
-    do {
-        H2DEV_MEM_SHM_ID(dev) = shmget(key, 
-				       smMemSize + 2*sizeof(SM_MALLOC_CHUNK), 
-				       (IPC_CREAT | IPC_EXCL | PORTLIB_MODE));
-        if (H2DEV_MEM_SHM_ID(dev) < 0 && errno != EINTR) {
-            h2devFree(dev);
-            errnoSet(S_smObjLib_SHMGET_ERROR);
-            return ERROR;
-        }
-    } while (H2DEV_MEM_SHM_ID(dev) < 0);
-    /* Attach du SHM */
-    do {
-        addr = shmat(H2DEV_MEM_SHM_ID(dev), NULL, 0);
-        if (addr == (void *)-1 && errno != EINTR) {
-            shmctl(H2DEV_MEM_SHM_ID(dev), IPC_RMID, NULL);
-            h2devFree(dev);
-            errnoSet(S_smObjLib_SHMAT_ERROR);
-            return ERROR;
-	}
-    } while (addr == (void *)-1);
-    
-    /* Memorise le bloc comme libre */
-    header = (SM_MALLOC_CHUNK *)addr + 1;
-    header->length = smMemSize;
-    header->next = NULL;
-    header->prev = NULL;
-    header->signature = SIGNATURE;
-    
-    free_list = header;
-    
-    return OK;
-} 
-
-/*----------------------------------------------------------------------*/
-
-/*
- * Attache le segment de memoire partagee
- */
-STATUS
-smMemAttach(void)
-{
-    int dev;
-    void *addr;
-    
-    if (free_list != NULL) {
-	return OK;
-    }
-    dev = h2devFind(SM_MEM_NAME, H2_DEV_TYPE_MEM);
-    if (dev < 0) {
-	return ERROR;
-    }
-
-    /* Attach du SHM */
-    do {
-        addr = shmat(H2DEV_MEM_SHM_ID(dev), NULL, 0);
-        if (addr == (void *)-1 && errno != EINTR) {
-            errnoSet(S_smObjLib_SHMAT_ERROR);
-            shmctl(H2DEV_MEM_SHM_ID(dev), IPC_RMID, NULL);
-            h2devFree(dev);
-            return ERROR;
-	}
-    } while (addr == (void *)-1);
-    free_list = (SM_MALLOC_CHUNK *)addr + 1;
-
-    return OK;
-}
-
-/*----------------------------------------------------------------------*/
-
-/*
- * Libere le segment de memoire partagee 
- */
-STATUS
-smMemEnd(void)
-{
-    int dev;
-
-    if (smMemAttach() == ERROR) {
-	return ERROR;
-    }
-    if (free_list == NULL) {
-	return ERROR;
-    }
-    dev = h2devFind(SM_MEM_NAME, H2_DEV_TYPE_MEM);
-    if (dev < 0) {
-	return ERROR;
-    }
-    /* Detach le shared memory segment */
-    shmdt((char *)(free_list - 1));
-    free_list = NULL;
-    /* Libere le shared memory segment */
-    shmctl(H2DEV_MEM_SHM_ID(dev), IPC_RMID, NULL);
-    
-    /* Libere le device h2 */
-    h2devFree(dev);
-    
-    return OK;
-}
     
 /*----------------------------------------------------------------------*/
 
@@ -359,12 +222,12 @@ smMemEnd(void)
 unsigned long
 smMemBase(void)
 {
-    if (free_list == NULL) {
+    if (smMemFreeList == NULL) {
 	if (smMemAttach() == ERROR) {
 	    return 0;
 	}
     }
-    return (unsigned long)(free_list - 1);
+    return (unsigned long)(smMemFreeList - 1);
 }
 
 /*----------------------------------------------------------------------*/
@@ -377,7 +240,7 @@ smMemMalloc(unsigned int nBytes)
 {
     void *result;
     
-    if (free_list == NULL) {
+    if (smMemFreeList == NULL) {
 	if (smMemAttach() == ERROR) {
 	    return NULL;
 	}
@@ -460,14 +323,14 @@ smMemFree(void *ptr)
 	return ERROR;
     }
     /* insert free chunk in the free list */
-    insert_after(&free_list, oc);
+    insert_after(&smMemFreeList, oc);
     /* test if can merge with preceding chunk */
     c = smObjGlobalToLocal(oc->prev);
     if (c != NULL && 
 	oc == (SM_MALLOC_CHUNK *)((char *)c + REAL_SIZE(c->length))) {
 	/* merge */
 	c->length += REAL_SIZE(oc->length);
-	remove_chunk(&free_list, oc);
+	remove_chunk(&smMemFreeList, oc);
 	oc = c;
    }
     /* test if can merge with following chunk */
@@ -475,7 +338,7 @@ smMemFree(void *ptr)
     if (c == (SM_MALLOC_CHUNK *)((char *)oc + REAL_SIZE(oc->length))) {
 	/* merge (=> oc->next != NULL) */
 	oc->length += REAL_SIZE(c->length);
-	remove_chunk(&free_list, c);
+	remove_chunk(&smMemFreeList, c);
     }
     return OK;
 }
@@ -497,7 +360,7 @@ smMemShow(BOOL option)
 	printf(" --- ---------- ----------\n");
     }
     /* Parcours de la liste des blocs libres */
-    for (c = free_list; c != NULL; c = smObjGlobalToLocal(c->next)) {
+    for (c = smMemFreeList; c != NULL; c = smObjGlobalToLocal(c->next)) {
 	assert(c->signature == SIGNATURE);
 	blocks++;
 	bytes += c->length;

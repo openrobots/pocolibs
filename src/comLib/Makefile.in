@@ -32,6 +32,7 @@ SRCS = \
 	csLib.c			\
 	gcomLib.c		\
 	h2devLib.c		\
+	h2devOsLib.c		\
 	h2evnLib.c		\
 	h2initGlob.c		\
 	h2mathLib.c		\
@@ -43,6 +44,7 @@ SRCS = \
 	mboxEssay.c		\
 	mboxLib.c		\
 	smMemLib.c		\
+	smMemOsLib.c		\
 	smObjLib.c		\
 	vfscanf.c		\
 	xesClient.c		\

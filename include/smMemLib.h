@@ -28,6 +28,15 @@
 #define SM_MEM_SIZE 0x100000		/* 1Mo seulement sous Solaris */
 #endif
 
+/* Allocation unit header */
+typedef struct SM_MALLOC_CHUNK {
+    unsigned long length;      /* usable size */
+    struct SM_MALLOC_CHUNK *next;
+    struct SM_MALLOC_CHUNK *prev;
+    unsigned long signature;   /* for alignement */
+#define SIGNATURE 0xdeadbeef
+} SM_MALLOC_CHUNK;
+
 STATUS smMemInit(int smMemSize);
 STATUS smMemAttach(void);
 STATUS smMemEnd(void);
