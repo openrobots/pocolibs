@@ -40,6 +40,7 @@ typedef int SYM_TYPE;
 
 #define M_symLib        (28 << 16)
 #define S_symLib_SYMBOL_NOT_FOUND       (M_symLib | 1)
+#define S_symLib_NOT_IMPLEMENTED	(M_symLib | 2)
 
 /* Prototypes */
 STATUS symLibInit(void);
