@@ -69,7 +69,7 @@ getyesno(int def)
 	}
 	
 	/* skip white space */
-	for (i = 0; i < sizeof(rep) && isspace(rep[i]); i++) ;
+	for (i = 0; i < sizeof(rep) && isspace((int)rep[i]); i++) ;
 	if (i == sizeof(rep)) {
 	    /* Empty line */
 	    return def;
