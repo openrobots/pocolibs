@@ -33,7 +33,7 @@ logInit(int fd, int maxMsgs)
 }
 
 void
-logEnd()
+logEnd(void)
 {
    ;
 }
