@@ -108,7 +108,7 @@ static int clientsock(host, port)
     server.sin_family = AF_INET;
     server.sin_port = htons(port);
 
-    if (isdigit(host[0]))
+    if (isdigit((int)host[0]))
 	server.sin_addr.s_addr = inet_addr(host);
     else {
 
