@@ -27,11 +27,7 @@ __RCSID("$LAAS$");
 #include "tickLib.h"
 #include "semLib.h"
 
-#ifndef NO_POSIX_SEMAPHORES
 #include <semaphore.h>
-#else
-#include "tw_sem.h"
-#endif
 
 /* semaphore structure */
 struct SEM_ID {
