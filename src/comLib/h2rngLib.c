@@ -715,10 +715,10 @@ h2rngBlockGet(H2RNG_ID rngId, /* Identificateur du ring buffer */
 
 /*****************************************************************************
 *
-*    h2rngBlockSpy  -  Spionner le contenu du ring buffer
+*    h2rngBlockSpy  -  Espionner le contenu du ring buffer
 *
 *    Description :
-*    Spionne le contenu du 1er block dans le ring buffer.
+*    Espionne le contenu du 1er block dans le ring buffer.
 *    Obtient le nombre de bytes du message, l'id du block et
 *    un e'chantillon des donnees du block
 *
