@@ -407,9 +407,7 @@ STATUS
 h2devEnd(void)
 {
     int i, rv = OK;
-#ifndef __DARWIN__
     POSTER_ID p;
-#endif
 
     if (h2devAttach() == ERROR) {
 	/* Detruit le fichier de verrou a tout hasard */
@@ -430,16 +428,9 @@ h2devEnd(void)
 	    mboxDelete(i);
 	    break;
 	  case H2_DEV_TYPE_POSTER:
-#ifndef __DARWIN__
 	    if (posterFind(H2DEV_NAME(i), &p) == OK) {
 		posterDelete(p);
 	    }
-#else
-	    /* On Darwin strict libraries dependencies are required 
-	     * So posterLib functions cannot be called here 
-	     * Thus only free local resources */
-	    H2DEV_TYPE(i) = H2_DEV_TYPE_NONE;
-#endif
 	    break;
 	  case H2_DEV_TYPE_SEM:
 	    /* Rien a faire, les semaphores sont liberes plus loin */

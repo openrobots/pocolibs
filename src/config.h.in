@@ -41,9 +41,6 @@
 #endif /* __GNUC__ */
 #endif
 
-/* Define this to identify Darwin/Mac OS X */
-#undef __DARWIN__
-
 /* Define as the return type of signal handlers (int or void).  */
 #undef RETSIGTYPE
 

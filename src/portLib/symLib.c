@@ -21,11 +21,7 @@ __RCSID("$LAAS$");
  ***/
 
 #include <stdio.h>
-#ifndef __DARWIN__
 #include <dlfcn.h>
-#else
-#include <mach-o/dyld.h>
-#endif
 
 #include "portLib.h"
 #include "errnoLib.h"
@@ -39,13 +35,11 @@ STATUS
 symLibInit(void)
 {
     /* Chargement de la table des symboles du process */
-#ifndef __DARWIN__
     sysSymTbl = dlopen(NULL, RTLD_LAZY);
     if (sysSymTbl == NULL) {
 	fprintf(stderr, "Erreur dlopen() %s\n", dlerror());
 	return ERROR;
     }
-#endif
     return OK;
 }
 
@@ -55,7 +49,6 @@ STATUS
 symFindByName(SYMTAB_ID symTblId, char *name, char **pValue,
 	      SYM_TYPE *pType)
 {
-#ifndef __DARWIN__
     void *addr;
 
     addr = dlsym(symTblId, name);
@@ -66,19 +59,6 @@ symFindByName(SYMTAB_ID symTblId, char *name, char **pValue,
     }
     *pValue = (char *)addr;
     *pType = SYM_GLOBAL;
-#else
-    NSSymbol *nssym = NULL;
-
-    if (NSIsSymbolNameDefined(name)) {
-	    nssym = NSLookupAndBindSymbol(name);
-    } 
-    if (nssym == NULL) {
-	    errnoSet(S_symLib_SYMBOL_NOT_FOUND);
-	    return ERROR;
-    } 
-    *pValue = NSAddressOfSymbol(nssym);
-    *pType = SYM_GLOBAL;
-#endif
     return OK;
 }
 

@@ -33,9 +33,7 @@ __RCSID("$LAAS$");
 #include "taskLib.h"
 #include "taskHookLib.h"
 
-#ifndef __DARWIN__
 extern int main(int, char **);
-#endif
 
 static pthread_key_t taskControlBlock;
 static OS_TCB *taskList = NULL;
@@ -131,11 +129,7 @@ taskLibInit(void)
     tcb->policy = policy;
     tcb->priority = priorityPosixToVx(param.sched_priority);
     tcb->options = 0;
-#ifndef __DARWIN__
     tcb->entry = main;
-#else
-    tcb->entry = NULL;
-#endif
     tcb->errorStatus = errno;
     /* Process and thread ids */
     tcb->pid = getpid();

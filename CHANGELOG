@@ -1,5 +1,8 @@
 Version 2.0, xx April 2004
 
+9. Get rid of the remaining ifdef __DARWIN__ checks. They are not
+   needed with Mac OS X 10.3.3 anymore, and I don't intend to support
+   earlier versions.
 8. Add support for rpcgen -C in posterServ. Removes one of the 
    last #ifdef <system>, and makes this stuff build on MacOS X.
 7. Split aclocal.m4. 
