@@ -59,7 +59,10 @@ __RCSID("$LAAS$");
 
 int verbose = 0;
 int _rpcsvcdirty = 0;
-
+#ifdef DEBUG
+/* reference created by Solaris rpcgen if DEBUG is defined */
+int _rpcpmstart = 0;
+#endif
 /*----------------------------------------------------------------------*/
 
 /**
