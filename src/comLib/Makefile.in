@@ -54,7 +54,7 @@ SRCS = \
 OBJS = $(SRCS:%.c=%.o)
 
 SHLIB_MAJOR = 2
-SHLIB_MINOR = 1
+SHLIB_MINOR = 2
 
 BASENAME = libcomLib
 
