@@ -42,8 +42,8 @@ __RCSID("$LAAS$");
 #include "smObjLib.h"
 
 /* Paths pour le lancement de posterServ */
-#ifndef EXEC_PREFIX
-#define EXEC_PREFIX "/usr/local/robots"
+#ifndef POSTERSERV_PATH
+#define POSTERSERV_PATH "/usr/local/robots/bin/posterServ"
 #endif
 
 /**
@@ -56,7 +56,7 @@ static int shmid = -1;
 static char h2devFileName[MAXPATHLEN];
 static pthread_mutex_t h2devMutex = PTHREAD_MUTEX_INITIALIZER;
 static int posterServPid = -1;		/* pid du serveur de posters */
-static char posterServPath[PATH_MAX];
+static char const posterServPath[] = POSTER_SERV_PATH;
 
 /* Prototypes fonctions locales */
 static int h2devFindAux(const char *name, H2_DEV_TYPE type);
@@ -211,8 +211,6 @@ h2devInit(int smMemSize)
     }
     /* Demarrage du serveur de posters */
     if (getenv("POSTER_HOST") == NULL) {
-	snprintf(posterServPath, PATH_MAX, "%s/bin/posterServ", 
-		 EXEC_PREFIX);
 	posterServPid = fork();
 	if (posterServPid == 0) {
 	    /* Processus fils */

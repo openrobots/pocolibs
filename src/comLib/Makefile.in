@@ -21,7 +21,7 @@ include ../../Init.make
 
 INSTALL=	@INSTALL@
 
-CPPFLAGS += -I.. -DROOTROBOTS=\"@prefix@\"
+CPPFLAGS += -I.. -DPOSTER_SERV_PATH=\"@bindir@/posterServ\"
 
 VPATH= 	@top_srcdir@/src/comLib
 
