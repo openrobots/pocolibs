@@ -150,10 +150,10 @@ h2timeShow(void)
  **/
 
 STATUS
-h2timeInterval (H2TIME *pOldTime, u_long *pNmsec)
+h2timeInterval (H2TIME *pOldTime, unsigned long *pNmsec)
 {
     H2TIME strTime;		/* Ou` mettre la valeur actuelle */
-    u_long ntick1, ntick2;	/* Nombre de ticks */
+    unsigned long ntick1, ntick2;	/* Nombre de ticks */
  
     /* Lire l'horloge */
     if (h2timeGet (&strTime) != OK)
@@ -165,7 +165,8 @@ h2timeInterval (H2TIME *pOldTime, u_long *pNmsec)
     
     /* Retourner l'intervalle de temps */
     *pNmsec = 1000 * ((ntick2 >= ntick1) ? (ntick2 - ntick1)
-		   : (((u_long) ~0 - ntick1) + 1 + ntick2))/NTICKS_PER_SEC;
+		   : (((unsigned long) ~0 - ntick1) + 1 + ntick2))
+			/NTICKS_PER_SEC;
     return (OK);
 } /* h2timeInterval */
 
