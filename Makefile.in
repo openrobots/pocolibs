@@ -32,6 +32,11 @@ SUBDIRS=\
 	src/shell			\
 	src/xes
 
+TEST_SUBDIRS = \
+   	src/regress \
+	src/posterLib/test/basic \
+	src/posterLib/test/endian
+
 all:
 	@for d in $(SUBDIRS) ; do \
 		$(MAKE) -C $$d all || exit 2; \
@@ -52,14 +57,15 @@ install:
 
 clean:
 	rm -rf $(DISTNAME) $(DISTNAME).tar.gz
-	@for d in $(SUBDIRS) ; do \
+	@for d in $(SUBDIRS) $(TEST_SUBDIRS); do \
 		$(MAKE) -C $$d clean ; \
 	done
 
 distclean: clean
-	@for d in $(SUBDIRS) ; do \
+	@for d in $(SUBDIRS) $(TEST_SUBDIRS); do \
 		$(MAKE) -C $$d distclean ; \
 	done
+	rm -f Makefile libtool config.log config.status src/pocolibs-config.h Init.make
 
 DIST_COMMON = BUGS CHANGELOG Init.make.in Init.make.posix Init.make.rtai \
 	Makefile.in README libtool.m4 pocolibs.m4 config.guess \

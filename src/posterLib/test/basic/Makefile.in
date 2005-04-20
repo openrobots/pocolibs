@@ -47,9 +47,6 @@ $(TESTW): testWrite.lo
 	$(LTCC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $<
 
 
-depend DEPENDANCES: testRead.c testWrite.c
-	$(MKDEP) -c$(CC) -t.lo -oDEPENDANCES $(CPPFLAGS) $?
-
 clean:
 	$(LIBTOOL) --mode=clean rm -f $(TESTW) $(TESTR) $(TESTW).lo $(TESTR).lo
 
@@ -59,5 +56,10 @@ distclean:
 install:
 	@echo "Nothing to do"
 
+ifeq ($(findstring clean,$(MAKECMDGOALS)),)
+depend DEPENDANCES:: testRead.c testWrite.c
+	$(MKDEP) -c$(CC) -oDEPENDANCES -t.lo $(CPPFLAGS) $?
+
 include DEPENDANCES
+endif
 

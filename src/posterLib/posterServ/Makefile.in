@@ -68,7 +68,7 @@ clean:
 	$(LIBTOOL) --mode=clean rm -f $(OBJS) $(SERV) $(SRCS_RPC) posters.h posters.x
 
 distclean: clean
-	rm -r Makefile DEPENDANCES
+	rm -f Makefile DEPENDANCES
 
 ifeq ($(findstring clean, $(MAKECMDGOALS)),)
 depend DEPENDANCES:: posters.h $(SRCS) $(SRCS_RPC) 

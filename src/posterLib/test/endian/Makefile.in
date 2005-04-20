@@ -66,8 +66,10 @@ distclean: clean
 # Dependances 
 MKDEPFLAGS = -k
 
-depend DEPENDANCES: testPosterLib.c testPosterWrite.c testPosterRead.c
-	$(MKDEP) $(MKDEPFLAGS) -c$(CC) -t.lo -oDEPENDANCES $(CPPFLAGS) $?
+ifeq ($(findstring clean,$(MAKECMDGOALS)),)
+depend DEPENDANCES:: testPosterLib.c testPosterWrite.c testPosterRead.c
+	$(MKDEP) -c$(CC) $(MKDEPBLAGS) -oDEPENDANCES -t.lo $(CPPFLAGS) $?
 
 include DEPENDANCES
+endif
 
