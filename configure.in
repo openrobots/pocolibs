@@ -19,7 +19,7 @@ if test "x${GCC}" = "xyes"; then
 fi
 
 PACKAGE=pocolibs
-VERSION=2.0
+VERSION=2.1beta1
 AC_SUBST(PACKAGE)
 AC_SUBST(VERSION)
 AC_REVISION($LAAS$)
@@ -331,6 +331,7 @@ dnl --- Make makefiles --------------------------------------------------
 AC_CONFIG_HEADER(src/pocolibs-config.h)
 AC_OUTPUT(Init.make
 	Makefile
+	pocolibs.pc
 	include/Makefile
 	src/portLib/Makefile
 	src/errorLib/Makefile

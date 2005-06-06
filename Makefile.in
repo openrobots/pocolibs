@@ -15,9 +15,11 @@
 #
 # $LAAS$
 
+top_srcdir=	@top_srcdir@
+
 include Init.make
 
-mkinstalldirs = $(SHELL) @srcdir@/mkinstalldirs
+INSTALL=	@INSTALL@
 
 DISTNAME= @PACKAGE@-@VERSION@
 
@@ -33,7 +35,7 @@ SUBDIRS=\
 	src/xes
 
 TEST_SUBDIRS = \
-   	src/regress \
+	src/regress \
 	src/posterLib/test/basic \
 	src/posterLib/test/endian
 
@@ -51,6 +53,8 @@ regress:
 	$(MAKE) -C src/regress regress
 
 install:
+	$(MKINSTALLDIRS) $(LIBDIR)/pkgconfig
+	$(INSTALL) pocolibs.pc $(LIBDIR)/pkgconfig
 	@for d in $(SUBDIRS) ; do \
 		$(MAKE) -C $$d install ;\
 	done
@@ -65,10 +69,11 @@ distclean: clean
 	@for d in $(SUBDIRS) $(TEST_SUBDIRS); do \
 		$(MAKE) -C $$d distclean ; \
 	done
-	rm -f Makefile libtool config.log config.status src/pocolibs-config.h Init.make
+	rm -f Makefile libtool config.log config.status src/pocolibs-config.h Init.make \
+		pocolibs.pc
 
 DIST_COMMON = BUGS CHANGELOG Init.make.in Init.make.posix Init.make.rtai \
-	Makefile.in README libtool.m4 pocolibs.m4 config.guess \
+	Makefile.in pocolib.pc.in README libtool.m4 pocolibs.m4 config.guess \
 	config.sub configure configure.in ltmain.sh install-sh mkinstalldirs
 DIST_SUBDIRS = doc include man src compat
 
