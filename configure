@@ -2513,7 +2513,7 @@ if test "x${GCC}" = "xyes"; then
 fi
 
 PACKAGE=pocolibs
-VERSION=2.0
+VERSION=2.1beta1
 
 
 
@@ -10136,7 +10136,7 @@ fi
 
           ac_config_headers="$ac_config_headers src/pocolibs-config.h"
 
-                                                                                                                                                      ac_config_files="$ac_config_files Init.make Makefile include/Makefile src/portLib/Makefile src/errorLib/Makefile src/errorLib/h2addErrno src/comLib/Makefile src/posterLib/Makefile src/posterLib/posterServ/Makefile src/posterLib/test/basic/Makefile src/posterLib/test/endian/Makefile src/h2/Makefile src/shell/Makefile src/xes/Makefile src/regress/Makefile"
+                                                                                                                                                                ac_config_files="$ac_config_files Init.make Makefile pocolibs.pc include/Makefile src/portLib/Makefile src/errorLib/Makefile src/errorLib/h2addErrno src/comLib/Makefile src/posterLib/Makefile src/posterLib/posterServ/Makefile src/posterLib/test/basic/Makefile src/posterLib/test/endian/Makefile src/h2/Makefile src/shell/Makefile src/xes/Makefile src/regress/Makefile"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -10664,6 +10664,7 @@ do
   # Handling of arguments.
   "Init.make" ) CONFIG_FILES="$CONFIG_FILES Init.make" ;;
   "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
+  "pocolibs.pc" ) CONFIG_FILES="$CONFIG_FILES pocolibs.pc" ;;
   "include/Makefile" ) CONFIG_FILES="$CONFIG_FILES include/Makefile" ;;
   "src/portLib/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/portLib/Makefile" ;;
   "src/errorLib/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/errorLib/Makefile" ;;
