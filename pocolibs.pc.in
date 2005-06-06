@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: pocolibs
+Description: communication libraries for Genom
+Version: @VERSION@
+Libs: -L${libdir} -lposterLib -lerrorLib -lcomLib -lportLib @LIBS@
+Cflags: -I${includedir}
