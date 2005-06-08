@@ -492,11 +492,14 @@ mboxSend(MBOX_ID toId, MBOX_ID fromId, char *buf, int nbytes)
     LOGDBG(("comLib:mboxSend: signaling sem #%d\n", H2DEV_MBOX_SEM_ID(toId)));
     if (h2semGive(H2DEV_MBOX_SEM_ID(toId)) == ERROR) {
 	logMsg("erreur give semSigRd\n");
+        return ERROR;
     }
     /* Signal the event to the task owning the mailbox */
     semTask = H2DEV_TASK_SEM_ID(H2DEV_MBOX_TASK_ID(toId));
-    if (h2semGive(semTask) == ERROR) {
+    if (h2semSet(semTask, 1) == ERROR) {
 	logMsg("erreur give semTask\n");
+        perror("");
+        return ERROR;
     }
     /* Free the mutex */
     h2semGive(H2DEV_MBOX_SEM_EXCL_ID(toId));
