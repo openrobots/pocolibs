@@ -1,5 +1,12 @@
-Version 2.0, xx January 2005
-
+Version 2.0, xx June 2005
+ 52. Add regression tests.
+ 51. Packaging fixes.
+ 50. Add a pkg-config data file and install it
+ 49. Write manual pages for portLib
+ 48. return S_symLib_NOT_IMPLEMENTED for symFindByValue()
+ 47. sprintf() -> snprintf() conversion
+ 46. less printf()s in portLib
+ 45. more comments translation
  44. Makefiles cleanups (Sylvain Joyeux, Matthieu Herrb).
  43. Add a h2semSet() function to force the value of a semaphore (Sylvain
      Joyeux).
