@@ -53,6 +53,9 @@
 /* Use timer_* functions ? */
 #undef HAVE_POSIX_TIMERS
 
+/* Use clock_gettime ? */
+#undef HAVE_CLOCK_GETTIME
+
 /* Use a separate thread for sysClk? */
 #undef USE_CLK_THREAD
 
