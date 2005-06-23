@@ -59,6 +59,33 @@ h2timeGet(H2TIME *pTimeStr)
     return(OK);
 } /* h2timeGet */
 
+STATUS
+h2GetTimeSpec(H2TIMESPEC *pTs)
+{
+#ifdef HAVE_CLOCK_GETTIME
+	struct timespec ts;
+	if (clock_gettime(CLOCK_REALTIME, &ts) < 0)
+		return ERROR;
+	if (pTs != NULL) {
+		pTs->tv_sec = ts.tv_sec;
+		pTs->tv_nsec = ts.tv_nsec;
+	}
+#else
+	struct timeval tv;
+
+#if defined(__RTAI__) && defined(__KERNEL__)
+	do_gettimeofday(&tv);
+#else
+	gettimeofday(&tv, NULL);
+#endif
+	if (pTs != NULL) {
+		pTs->tv_sec = tv.tv_sec;
+		pTs->tv_nsec = tv.tv_usec * 1000;
+	}
+#endif
+	return OK;
+}
+
 static int days_in_year[] = 
     { 0,                // Janvier
       31,               // Fevrier
