@@ -37,11 +37,18 @@ typedef struct H2TIME_STR {
   unsigned short year;               /* year */
 } H2TIME;
 
+/* Structure compatible with POSIX clock functions */
+typedef struct H2TIMESPEC_STR {
+	long tv_sec;
+	long tv_nsec;
+} H2TIMESPEC;
+
 /* Prototypes */
 struct timeval;
 
 extern STATUS h2timeAdj ( H2TIME *pTimeStr );
 extern STATUS h2timeGet ( H2TIME *pTimeStr );
+extern STATUS h2GetTimeSpec(H2TIMESPEC *pTs);
 extern void h2timeFromTimeval(H2TIME* pTimeStr, const struct timeval* tv);
 extern void timevalFromH2time(struct timeval* tv, const H2TIME* pTimeStr);
 extern void h2timeInit ( void );
