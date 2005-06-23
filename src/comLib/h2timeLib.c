@@ -153,13 +153,13 @@ h2timeFromTimeval(H2TIME* pTimeStr, const struct timeval* tv)
 void
 timevalFromH2time(struct timeval* tv, const H2TIME* pTimeStr)
 {
-    tv -> tv_usec = pTimeStr->msec*1000;
-
     int year = pTimeStr->year + 1900;
     int days = pTimeStr->date - 1
              + days_in_year[pTimeStr->month - 1]
              + ((pTimeStr->month > 2) ? is_bisextile(year) : 0)
              + days_since_epoch(year);
+
+    tv -> tv_usec = pTimeStr->msec*1000;
 
     tv -> tv_sec 
         = pTimeStr->sec 
