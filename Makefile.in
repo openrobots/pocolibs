@@ -21,7 +21,7 @@ include Init.make
 
 INSTALL=	@INSTALL@
 
-DISTNAME= @PACKAGE@-@VERSION@
+DISTNAME= @PACKAGE_TARNAME@-@PACKAGE_VERSION@
 
 SUBDIRS=\
 	include				\
@@ -74,7 +74,7 @@ distclean: clean
 
 DIST_COMMON = BUGS CHANGELOG Init.make.in Init.make.posix Init.make.rtai \
 	Makefile.in pocolibs.pc.in README libtool.m4 pocolibs.m4 config.guess \
-	config.sub configure configure.in ltmain.sh install-sh mkinstalldirs
+	config.sub configure configure.ac ltmain.sh install-sh mkinstalldirs
 DIST_SUBDIRS = doc include man src compat
 
 DISTFILES = $(DIST_COMMON) $(DIST_SUBDIRS)

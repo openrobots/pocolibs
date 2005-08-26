@@ -8,8 +8,9 @@ dnl GPL, since some parts were copied from other configure.in
 dnl 
 dnl $LAAS$
 dnl
-AC_INIT(src/comLib/csLib.c)
-AC_PREREQ(2.13)
+AC_REVISION($LAAS$)
+AC_INIT([pocolibs],[2.1beta1],[openrobots@laas.fr])
+AC_PREREQ(2.59)
 
 AC_CANONICAL_HOST
 
@@ -18,11 +19,6 @@ if test "x${GCC}" = "xyes"; then
   CFLAGS="${CFLAGS} -Wall"
 fi
 
-PACKAGE=pocolibs
-VERSION=2.1beta1
-AC_SUBST(PACKAGE)
-AC_SUBST(VERSION)
-AC_REVISION($LAAS$)
 
 AC_LIBTOOL_DLOPEN
 AC_PROG_LIBTOOL
