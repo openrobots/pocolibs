@@ -21,7 +21,7 @@ srcdir=		@srcdir@
 
 include $(top_builddir)Init.make
 
-VPATH=		@srcdir@
+vpath %.c	@srcdir@
 
 CPPFLAGS+=	$(MOD_CPPFLAGS)
 

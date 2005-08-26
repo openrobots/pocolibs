@@ -27,7 +27,7 @@ INSTALL=	@INSTALL@
 include $(top_builddir)/Init.make
 -include $(srcdir)/os/$(OSAPI)/Makefile.inc
 
-VPATH=		@srcdir@
+vpath %.c @srcdir@
 
 SRCS=		h2.c
 OBJS=		$(SRCS:%.c=%.lo)

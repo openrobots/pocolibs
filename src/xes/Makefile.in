@@ -18,6 +18,7 @@
 
 top_builddir=	@top_builddir@
 top_srcdir=	@top_srcdir@
+srcdir=		@srcdir@
 INSTALL=	@INSTALL@
 
 include $(top_builddir)/Init.make
@@ -27,7 +28,7 @@ CPPFLAGS += -DUSE_X
 XLIB = -lX11
 endif
 
-VPATH=	@top_srcdir@/src/xes
+vpath %.c ${srcdir}
 
 SRCS = \
 	rngLib.c \

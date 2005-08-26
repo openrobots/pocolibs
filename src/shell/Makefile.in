@@ -24,7 +24,7 @@ include $(top_builddir)/Init.make
 -include $(srcdir)/os/$(OSAPI)/Makefile.inc
 
 # CPPFLAGS += -DRSHD_DEBUG
-VPATH = $(srcdir)
+vpath %.c $(srcdir)
 
 PROG = shell
 SRCS = \

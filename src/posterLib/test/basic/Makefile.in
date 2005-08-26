@@ -23,7 +23,7 @@ INSTALL=	@INSTALL@
 include ../../../../Init.make
 -include $(srcdir)/os/$(OSAPI)/Makefile.inc
 
-VPATH=		@srcdir@
+vpath %.c @srcdir@
 
 CPPFLAGS += -I../../..
 #----------------------------------------------------------------------

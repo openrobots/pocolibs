@@ -27,7 +27,7 @@ INSTALL=	@INSTALL@
 
 CPPFLAGS+=	-I.
 
-VPATH=		@srcdir@
+vpath %.c @srcdir@
 
 SRCS = \
 	posterServ.c

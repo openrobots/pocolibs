@@ -38,7 +38,7 @@ LIBTOOL_LINKCOMLIB=	    $(COMLIB)
 LIBTOOL_LINKPOSTERLIB=	$(POSTERLIB)
 
 # fetch source files in posix subdir
-VPATH=	$(srcdir)/os/posix:$(srcdir):$(top_srcdir)/compat
+vpath %.c $(srcdir)/os/posix:$(srcdir):$(top_srcdir)/compat
 
 # nothing specific here
 all-os:

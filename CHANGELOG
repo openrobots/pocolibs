@@ -1,4 +1,11 @@
-Version 2.0, xx June 2005
+Version 2.1beta1, 26 August 2005
+
+ 56. Use vpath <pattern> instead of VPATH in Makefiles to minimize trouble 
+     when builddir != srcdir and srcdir has been configured already.
+ 55. Add a man page for h2time functions.
+ 54. Add a h2GetTimeSpec() function that returs a timespec-like structure.
+     This should be used instead of calling clock_gettime() directly. 
+ 53. Check for clock_gettime in configure scripts
  52. Add regression tests.
  51. Packaging fixes.
  50. Add a pkg-config data file and install it
