@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2003-2004 CNRS/LAAS
+ * Copyright (c) 1999, 2003 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -34,6 +34,12 @@ SYMTAB_ID sysSymTbl = NULL;
 STATUS
 symLibInit(void)
 {
+    /* Load the process's own symbol table */
+    sysSymTbl = dlopen(NULL, RTLD_LAZY);
+    if (sysSymTbl == NULL) {
+	fprintf(stderr, "dlopen() error %s\n", dlerror());
+	return ERROR;
+    }
     return OK;
 }
 
@@ -43,7 +49,17 @@ STATUS
 symFindByName(SYMTAB_ID symTblId, char *name, char **pValue,
 	      SYM_TYPE *pType)
 {
-    return ERROR;
+    void *addr;
+
+    addr = dlsym(symTblId, name);
+
+    if (addr == NULL) {
+	errnoSet(S_symLib_SYMBOL_NOT_FOUND);
+	return ERROR;
+    }
+    *pValue = (char *)addr;
+    *pType = SYM_GLOBAL;
+    return OK;
 }
 
 /*----------------------------------------------------------------------*/
@@ -52,5 +68,8 @@ STATUS
 symFindByValue(SYMTAB_ID symTldId, char *value, char *name, 
 	       int *pValue, SYM_TYPE *pType)
 {
-    return ERROR;
+	/* Not implemented - and not trivial to implement without 
+	   fetching GNU binutils */
+	errnoSet(S_symLib_NOT_IMPLEMENTED);
+	return ERROR;
 }
