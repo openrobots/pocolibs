@@ -47,6 +47,9 @@ LIB=		libportLib.la
 
 all: all-os $(LIB)
 
+test:
+	@echo $(OSAPI)
+
 # libtool library
 $(LIB): $(OBJS)
 	$(LTLD) -o $@ $(OBJS) -rpath $(LIBDIR) -R$(LIBDIR) $(OS_LIBS) \

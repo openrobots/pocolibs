@@ -22,10 +22,11 @@ top_builddir=	@top_builddir@
 top_srcdir=	@top_srcdir@
 srcdir=		@srcdir@
 
-INSTALL=	@INSTALL@
+include ${top_builddir}/Init.make
+include ${top_srcdir}/Init.make.${OSAPI}
+-include ${srcdir}/os/${OSAPI}/Makefile.inc
 
-include $(top_builddir)/Init.make
--include $(srcdir)/os/$(OSAPI)/Makefile.inc
+INSTALL=	@INSTALL@
 
 vpath %.c @srcdir@
 

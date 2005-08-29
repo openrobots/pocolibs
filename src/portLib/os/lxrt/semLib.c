@@ -40,6 +40,7 @@ __RCSID("$LAAS$");
 #include "errnoLib.h"
 #include "semLib.h"
 
+#define NAME_FIRST_SEM 0
 
 /* #define PORTLIB_DEBUG_SEMLIB */
 
@@ -306,7 +307,7 @@ semFlush(SEM_ID semId)
 */
 long int semLibGetNewName(void)
 {
-  unsigned long int semNum = 1;
+  unsigned long int semNum = NAME_FIRST_SEM + 1;
 
   static char initialized = 0;	/* 1=initialized */
   
@@ -326,7 +327,7 @@ long int semLibGetNewName(void)
 
       LOGDBG(("semLibGetNewName: initializing\n"));
 
-      /* perhaps sem named "0" already exists */
+      /* perhaps sem named "NAME_FIRST_SEM" already exists */
       semNumSem = rt_get_adr(0);
       if (semNumSem != NULL)
 	{
@@ -334,7 +335,7 @@ long int semLibGetNewName(void)
 	}
       else
 	{
-	  semNumSem = rt_typed_sem_init(0, 0, RES_SEM);
+	  semNumSem = rt_typed_sem_init(NAME_FIRST_SEM, 0, RES_SEM);
 	  if (semNumSem == NULL)
 	    {
 	      LOGDBG(("semLibGetNewName: rt_typed_sem_init error\n"));
@@ -428,7 +429,7 @@ long int semLibGetNewName(void)
 	}
       else
 	{
-	  semNum = *semNumPt = 1;
+	  semNum = *semNumPt = NAME_FIRST_SEM + 1;
 	}
 
       /* initialization done */

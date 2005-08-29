@@ -471,3 +471,16 @@ h2semShow(H2SEM_ID sem)
    return OK;
 
 }
+
+/*----------------------------------------------------------------------*/
+STATUS
+h2semSet(H2SEM_ID sem, int value)
+{
+  /* this is a hack - there's a race condition */
+  if (value == 1) {
+    h2semFlush(sem);
+    return h2semGive(sem);
+  }
+  errnoSet(S_h2semLib_NOT_IMPLEMENTED);
+  return ERROR;
+}
