@@ -70,8 +70,9 @@ h2initGlob(int ticksPerSec)
 	    return ERROR;
 	}
     }
-    printf("Hilare2 execution environment version 2.0\n"
-	   "Copyright (c) 1999-2005 CNRS-LAAS\n");
+    printf("%s execution environment version %s\n"
+	"Copyright (c) 1999-2005 CNRS-LAAS\n", 
+	PACKAGE_NAME, PACKAGE_VERSION);
 
     return OK;
 }
