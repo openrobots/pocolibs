@@ -107,4 +107,7 @@
 /* use valgrind hints */
 #undef VALGRIND_SUPPORT
 
-
+/* package name and version */
+#undef PACKAGE_VERSION
+#undef PACKAGE_NAME
+#undef PACKAGE_TARNAME
