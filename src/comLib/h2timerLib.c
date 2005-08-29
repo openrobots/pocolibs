@@ -70,6 +70,8 @@ h2timerInit(void)
 {
     int nTimer;
     
+    LOGDBG(("comLib:h2timerLib:h2timerInit: ---beginning\n"));
+
     timerMutex = semMCreate(0);
     semTake(timerMutex, WAIT_FOREVER);
 
@@ -99,6 +101,8 @@ h2timerInit(void)
     
     /* Lance le watch dog global du timer */
     wdStart (timerWd, 1, (FUNCPTR) timerInt, 0);
+
+    LOGDBG(("comLib:h2timerLib:h2timerInit: ---end\n"));
 
     h2timerInited = TRUE;
     return OK;
@@ -183,6 +187,8 @@ h2timerAlloc(void)
 
     /* Liberer le semaphore et retourner */
     semGive(timerMutex);
+
+    LOGDBG(("comLib:h2timerLib:h2timerAlloc: alloc %#x\n", timerId));
     return (timerId);
 }
 
@@ -396,7 +402,7 @@ timerInt(int arg)
     int nTimer;               /* Numero d'un timer */
     H2TIMER_ID timerId;       /* Ptr vers tableau de timers */
     
-    LOGDBG(("timerInt: delayCount %d\n", delayCount));
+    LOGDBG(("comLib:h2timerLib:timerInt: delayCount %d\n", delayCount));
 
     /* Incremente le compteur de delay */
     if (++delayCount >= MAX_DELAY)
@@ -420,7 +426,7 @@ timerInt(int arg)
 		if (++timerId->count == timerId->periode) {
 		    /* Reseter le compteur */
 		    timerId->count = 0;
-		    LOGDBG((" -- timer % declenche'\n", nTimer));
+		    LOGDBG((" -- timer %d triggered\n", nTimer));
 
 		    /* Liberer le semaphore */
 		    semGive (timerId->semSync);
