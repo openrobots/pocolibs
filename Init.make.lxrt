@@ -37,8 +37,13 @@ LIBTOOL_LINKERRORLIB=	  $(ERRORLIB)
 LIBTOOL_LINKCOMLIB=	    $(COMLIB)
 LIBTOOL_LINKPOSTERLIB=	$(POSTERLIB)
 
+# XXX 
+OS_LIBS +=	-L/usr/realtime/lib -llxrt
+
 # fetch source files in posix subdir
-vpath %.c $(srcdir)/os/posix:$(srcdir):$(top_srcdir)/compat
+vpath %.c $(srcdir)/os/lxrt:$(srcdir):$(top_srcdir)/compat
+vpath %.x $(srcdir)/os/posix
+
 
 # nothing specific here
 all-os:

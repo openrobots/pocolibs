@@ -48,6 +48,9 @@ extern long taskSpawn ( char *name, int priority, int options, int stackSize,
 extern long taskSpawn ( char *name, int priority, int options, 
 		       int stackSize, FUNCPTR entryPt, ... );
 #endif
+#ifdef __LXRT__
+extern STATUS taskJoin(long tid, void **val_return);
+#endif
 extern STATUS taskDelete ( long tid );
 extern const char *taskName ( long tid );
 extern STATUS taskSuspend ( long tid );

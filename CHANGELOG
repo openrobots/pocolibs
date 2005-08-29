@@ -1,3 +1,6 @@
+ 58. Merge missing parts of lxrt support in existing files.
+ 57. Add missing files for lxrt support.
+
 Version 2.1beta1, 26 August 2005
 
  56. Use vpath <pattern> instead of VPATH in Makefiles to minimize trouble 

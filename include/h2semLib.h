@@ -1,6 +1,6 @@
 /* $LAAS$ */
 /*
- * Copyright (c) 1998, 2003 CNRS/LAAS
+ * Copyright (c) 1998, 2005 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,6 +19,10 @@
 #define _H2SEMLIB_H
 
 #include "semLib.h"
+
+#ifdef __LXRT__
+#include "rtai_sem.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,7 +61,11 @@ extern STATUS h2semDelete ( H2SEM_ID sem );
 extern void h2semEnd ( void );
 extern BOOL h2semFlush ( H2SEM_ID sem );
 extern STATUS h2semGive ( H2SEM_ID sem );
+#ifndef __LXRT__
 extern STATUS h2semInit ( int num, int *pSemId );
+#else /* LXRT */
+extern STATUS h2semInit( int num, SEM *pSemId[]);
+#endif
 extern STATUS h2semShow ( H2SEM_ID sem );
 extern BOOL h2semTake ( H2SEM_ID sem, int timeout );
 extern STATUS h2semSet ( H2SEM_ID sem, int value );

@@ -33,7 +33,7 @@ extern "C" {
 #define S_semLib_NOT_A_SEM (M_semLib | 3)
 #define S_semLib_TIMEOUT (M_semLib | 4)
 #define S_semLib_RESOURCE_BUSY (M_semLib | 5)
- 
+#define S_semLib_LXRT_ERROR (M_semLib | 6) 
 
 /* Valeur initiale des semaphores binaires */
 typedef enum SEM_B_STATE {
