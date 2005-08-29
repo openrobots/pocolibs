@@ -102,15 +102,16 @@ getyesno(int def)
 int 
 h2init(int smMemSize)
 {
-    printf("Initializing comLib devices: ");
+    printf("Initializing %s devices: ", PACKAGE_NAME);
     fflush(stdout);
     /* Creation du tableau des devices h2 */
     if (h2devInit(smMemSize) == ERROR) {
 	/* Essai recuperation erreur */
 	switch (errnoGet()) {
 	  case EEXIST:
-	    printf("\ncomlib devices already exist on this machine.\n"
-		   "Do you want to delete and recreate them (y/n) ? ");
+	    printf("\n%s devices already exist on this machine.\n"
+		"Do you want to delete and recreate them (y/n) ? ",
+	        PACKAGE_NAME);
 	    if (getyesno(0)) { 
 		/* Try to remove the devices first */
 		h2devEnd();
@@ -147,12 +148,12 @@ h2init(int smMemSize)
     return OK;
 } /* h2init */
 
-/*----------------------------------------------------------------------*/
+/*------------------------------------------x----------------------------*/
 
 int
 h2end(void)
 {
-    printf("Removing csLib devices: ");
+    printf("Removing %s devices: ", PACKAGE_NAME);
     fflush(stdout);
     /* Destruction devices */
     if (h2devEnd() == ERROR) {
