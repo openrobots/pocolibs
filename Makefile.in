@@ -53,8 +53,8 @@ regress:
 	$(MAKE) -C src/regress regress
 
 install:
-	$(MKINSTALLDIRS) $(LIBDIR)/pkgconfig
-	$(INSTALL) pocolibs.pc $(LIBDIR)/pkgconfig
+	$(MKINSTALLDIRS) ${DESTDIR}$(LIBDIR)/pkgconfig
+	$(INSTALL) pocolibs.pc ${DESTDIR}$(LIBDIR)/pkgconfig
 	@for d in $(SUBDIRS) ; do \
 		$(MAKE) -C $$d install ;\
 	done

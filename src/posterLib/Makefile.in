@@ -79,8 +79,8 @@ distclean:: clean
 	rm -f DEPENDANCES Makefile
 
 install::
-	$(MKINSTALLDIRS) $(LIBDIR)
-	$(LIBTOOL) --mode=install $(INSTALL) $(LIB) $(LIBDIR)
+	$(MKINSTALLDIRS) ${DESTDIR}$(LIBDIR)
+	$(LIBTOOL) --mode=install $(INSTALL) $(LIB) ${DESTDIR}$(LIBDIR)
 
 ifeq ($(findstring clean,$(MAKECMDGOALS)),)
 depend DEPENDANCES:: $(SRCS) posters.h

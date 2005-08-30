@@ -65,10 +65,10 @@ flist=\
 all clean depend:
 
 install:
-	$(MKINSTALLDIRS) $(INCLUDEDIR)
+	$(MKINSTALLDIRS) ${DESTDIR}$(INCLUDEDIR)
 	@for f in $(flist); do						\
-		c="$(INSTALL_DATA) $(srcdir)/$$f $(INCLUDEDIR)/$$f";	\
-		echo $$c; $$c;						\
+	  c="$(INSTALL_DATA) $(srcdir)/$$f ${DESTDIR}$(INCLUDEDIR)/$$f";\
+	  echo $$c; $$c;						\
 	done
 
 distclean:

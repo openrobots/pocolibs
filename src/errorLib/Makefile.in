@@ -54,9 +54,9 @@ distclean:: clean
 	rm -f h2addErrno
 
 install:: $(LIB)
-	$(MKINSTALLDIRS) $(BINDIR) $(LIBDIR)
-	$(INSTALL) h2addErrno $(BINDIR)
-	$(LIBTOOL) --mode=install $(INSTALL) $(LIB) $(LIBDIR)
+	$(MKINSTALLDIRS) ${DESTDIR}$(BINDIR) ${DESTDIR}$(LIBDIR)
+	$(INSTALL) h2addErrno ${DESTDIR}$(BINDIR)
+	$(LIBTOOL) --mode=install $(INSTALL) $(LIB) ${DESTDIR}$(LIBDIR)
 
 ifeq ($(findstring clean,$(MAKECMDGOALS)),)
 depend DEPENDANCES:: $(SRCS)

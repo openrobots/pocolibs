@@ -56,7 +56,7 @@ distclean: clean
 
 install:
 	$(MKINSTALLDIRS) $(BINDIR)
-	$(LIBTOOL) --mode=install $(INSTALL) $(PROG) $(BINDIR)
+	$(LIBTOOL) --mode=install $(INSTALL) $(PROG) ${DESTDIR}$(BINDIR)
 
 ifeq ($(findstring clean,$(MAKECMDGOALS)),)
 depend DEPENDANCES: $(SRCS)

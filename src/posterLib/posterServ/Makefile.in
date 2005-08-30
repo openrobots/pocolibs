@@ -49,8 +49,8 @@ posters.x: $(srcdir)/../os/posix/posters.x
 	$(LN) $< $@
 
 install:
-	$(MKINSTALLDIRS) $(BINDIR)
-	$(LIBTOOL) --mode=install $(INSTALL) $(SERV) $(BINDIR)
+	$(MKINSTALLDIRS) ${DESTDIR}$(BINDIR)
+	$(LIBTOOL) --mode=install $(INSTALL) $(SERV) ${DESTDIR}$(BINDIR)
 
 posters_svc.c: posters.x
 	rm -f $@
