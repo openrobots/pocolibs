@@ -39,7 +39,6 @@ BINDIR=         @bindir@
 LIBDIR=         @libdir@
 DATADIR=        @datadir@
 INCLUDEDIR=     @includedir@
-MODULESDIR=     @libdir@
 
 CC=             @CC@
 PURIFY=         @PURIFY@
