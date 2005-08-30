@@ -5,6 +5,6 @@ includedir=@includedir@
 
 Name: pocolibs
 Description: communication libraries for Genom
-Version: @VERSION@
+Version: @PACKAGE_VERSION@
 Libs: -L${libdir} -lposterLib -lerrorLib -lcomLib -lportLib @LIBS@
 Cflags: -I${includedir}
