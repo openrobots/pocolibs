@@ -1,3 +1,5 @@
+ 59. Add a autogen.sh script to generate the configure script and garbage 
+     collect unneeded files.
  58. Merge missing parts of lxrt support in existing files.
  57. Add missing files for lxrt support.
 
