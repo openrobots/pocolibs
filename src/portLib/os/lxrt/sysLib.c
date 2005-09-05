@@ -42,12 +42,12 @@ __RCSID("$LAAS$");
  **
  ** Based on public VxWorks BSP Sources
  **/
-static FUNCPTR sysClkRoutine = NULL;
-static int sysClkArg = 0;
+static volatile FUNCPTR sysClkRoutine = NULL;
+static volatile int sysClkArg = 0;
 static int sysClkTicksPerSecond = 100;
 static int sysClkTickCount = 100;
-static int sysClkConnected = FALSE;
-static int sysClkRunning = FALSE;
+static volatile int sysClkConnected = FALSE;
+static volatile int sysClkRunning = FALSE;
 
 static int sysClkThread();
 static long sysClkThreadId;
@@ -59,6 +59,7 @@ static long sysClkThreadId;
 STATUS
 sysClkConnect(FUNCPTR routine, int arg)
 {
+    LOGDBG(("sysClkConnect\n"));
     sysClkRoutine = routine;
     sysClkArg = arg;
     sysClkConnected = TRUE;
@@ -74,6 +75,7 @@ sysClkEnable(void)
 {
   char name[12];
 
+  LOGDBG(("sysClkEnable\n"));
   rt_set_oneshot_mode();
    sysClkTickCount = start_rt_timer(sysClkTickCount);
 
@@ -87,6 +89,7 @@ sysClkEnable(void)
 
    snprintf(name, sizeof(name), "k%d", getpid());
 
+   LOGDBG(("portLib:sysLib:sysClkEnable: before taskSpawn\n"));
    sysClkThreadId = 
       taskSpawn(name, 10, VX_FP_TASK, 1024, sysClkThread);
    if (sysClkThreadId == ERROR) {
@@ -136,6 +139,8 @@ sysClkRateSet(int ticksPerSecond)
     else
        sysClkTickCount = 0;
 
+    LOGDBG(("sysClkRateSet running %d sysClkTickCount %d\n", 
+	    sysClkRunning, sysClkTickCount));
     if (sysClkRunning) {
 	sysClkDisable();
 	sysClkEnable();
@@ -178,7 +183,8 @@ sysClkThread()
 
   while(sysClkRunning != TRUE)
     {
-      rt_sleep(sysClkTickCount);
+      /* rt_sleep(sysClkTickCount); */
+      sleep(1);
     }
 
   LOGDBG(("portLib:sysLib:sysClkThread: ok, let's go! sysClkThreadId=%#x\n",
@@ -196,7 +202,7 @@ sysClkThread()
        return -1;
      }
 
-   while (sysClkRunning == TRUE)
+   while (sysClkRunning)
      {
        if (sysClkRoutine != NULL)
 	 {
