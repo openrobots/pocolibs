@@ -497,9 +497,8 @@ mboxSend(MBOX_ID toId, MBOX_ID fromId, char *buf, int nbytes)
     /* Signal the event to the task owning the mailbox */
     semTask = H2DEV_TASK_SEM_ID(H2DEV_MBOX_TASK_ID(toId));
     if (h2semSet(semTask, 1) == ERROR) {
-	logMsg("erreur give semTask\n");
-        perror("");
-        return ERROR;
+	logMsg("comLib:mboxSend:h2semSet: %s", h2getMsgErrno(errnoGet()));
+	return ERROR;
     }
     /* Free the mutex */
     h2semGive(H2DEV_MBOX_SEM_EXCL_ID(toId));
