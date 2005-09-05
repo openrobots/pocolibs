@@ -61,6 +61,9 @@ struct SEM_ID {
 };
 
 extern int	sysClkTickDuration(void);
+#ifdef PORTLIB_DEBUG_SEMLIB
+extern SEM_ID wdMutex;
+#endif
 
 /* not static because it is used in h2semLib */
 long int semLibGetNewName(void);
@@ -219,10 +222,13 @@ STATUS
 semGive(SEM_ID semId)
 {
     int status;
-    
-    LOGDBG(("portLib:semLib:semGive: signaling sem %d, type %s\n",
-	    semId->name, SEM_TYPE_STR(semId->type)));
 
+#if PORTLIB_DEBUG_SEMLIB
+    if (semId != wdMutex) {
+	LOGDBG(("portLib:semLib:semGive: signaling sem %d, type %s\n",
+		semId->name, SEM_TYPE_STR(semId->type)));
+    }
+#endif
     status = rt_sem_signal(semId->s);
     if (status == 0xffff) {
 	errnoSet(S_semLib_NOT_A_SEM);
@@ -240,9 +246,12 @@ semTake(SEM_ID semId, int timeout)
 {
    int status;
 
-   LOGDBG(("portLib:semLib:semTake: waiting sem %d, type %s, timeout %d\n",
-	   semId->name, SEM_TYPE_STR(semId->type), timeout));
-
+#ifdef PORTLIB_DEBUG_SEMLIB
+   if (semId != wdMutex) {
+       LOGDBG(("portLib:semLib:semTake: waiting sem %d, type %s, timeout %d\n",
+	       semId->name, SEM_TYPE_STR(semId->type), timeout));
+   }
+#endif
     switch (timeout) {
        case WAIT_FOREVER:
 	  status = rt_sem_wait(semId->s);
