@@ -133,7 +133,7 @@ h2timeFromTimeval(H2TIME* pTimeStr, const struct timeval* tv)
     pTimeStr->sec    = sec % 60;
     pTimeStr->minute = (sec / 60) % 60;
     pTimeStr->hour   = (sec / 3600) % 24;
-    pTimeStr->day   = 0;
+    pTimeStr->day   = 1;
     pTimeStr->date  = day + 1;
     pTimeStr->month = month + 1;
     pTimeStr->year  = year - 1900;
