@@ -111,8 +111,9 @@ int
 main(int argc, char *argv[])
 {
     struct sockaddr *open_socket;
-    int i, length, newconn, pid;
+    int i, newconn, pid;
     int stat, child_stat;
+    socklen_t length;
     fd_set ibits, obits, ebits;
     char buf[500];
     struct timeval timeout;
@@ -500,10 +501,13 @@ copyout(RNG_ID in, int out)
 int 
 create_window(int *win_fd, int *win_pid)
 {
-    int  master, slave, pid;
+    int  master = -1, slave, pid;
     struct termios termioStr;
     static char buf[100];
-    char *slave_path, *c;
+    char *slave_path;
+#ifdef XTERM_S_OPT_SLASH
+    char *c;
+#endif
 #ifndef USE_SYSV_PTY
     char *master_path;
 #endif
@@ -569,7 +573,7 @@ create_window(int *win_fd, int *win_pid)
 	setsid();
 #endif
 	signal(SIGPIPE, pipeHandler);
-	execlp("xterm", "xterm(xes)", buf, 0);
+	execlp("xterm", "xterm(xes)", buf, (char *)0);
 	fprintf(stderr, "xterm exec failed\n");
 	exit(1);
     }

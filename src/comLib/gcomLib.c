@@ -680,7 +680,7 @@ gcomLetterSend(MBOX_ID mboxId, LETTER_ID sendLetter,
     int sendId;            /* Identificateur du send */
     LETTER_HDR_ID pText;   /* Pointeur vers le texte de la lettre */
     int status;            /* Etat du reply */
-    int timeout;           /* Temps avant timeout */
+    int timeout = NO_WAIT;		/* Temps avant timeout */
     int myIndice;
     
     myIndice = MY_TASK_DEV;
@@ -835,7 +835,7 @@ int
 gcomReplyWait(int sendId, int replyLetterType)
 {
     int status;                    /* Etat de la replique */
-    int timeout;                   /* Temps qui reste jusqu'au timeout */
+    int timeout = NO_WAIT;		/* Temps qui reste jusqu'au timeout */
     int indice;
 
     indice = MY_TASK_DEV;

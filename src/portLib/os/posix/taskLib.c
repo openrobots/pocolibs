@@ -153,6 +153,7 @@ taskLibInit(void)
     pthread_getschedparam(pthread_self(), &policy, &param);
 #else
     policy = 0;
+    param.sched_priority = rr_min_priority;
 #endif
     tcb->policy = policy;
     tcb->priority = priorityPosixToVx(param.sched_priority);
@@ -361,6 +362,7 @@ taskSpawn(char *name, int priority, int options, int stackSize,
     tcb->policy = policy;
 #else
     tcb->policy = 0;
+    thread_param.sched_priority = rr_min_priority;
 #endif /* HAVE_PTHREAD_ATTR_SETSCHEDPOLICY */
     tcb->priority = priorityPosixToVx(thread_param.sched_priority);
 

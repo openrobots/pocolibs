@@ -35,6 +35,7 @@ __RCSID("$LAAS$");
 #include "h2semLib.h"
 #include "h2evnLib.h"
 #include "h2rngLib.h"
+#include "h2errorLib.h"
 #include "mboxLib.h"
 #include "smObjLib.h"
 
