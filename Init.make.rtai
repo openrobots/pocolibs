@@ -57,6 +57,7 @@ $(MODDIR)/%.lo: %.c
 $(MODDIR)/$(MODVPATH):
 	mkdir -p $@/$(MODVPATH)
 
+ifneq (,$(MODSRCS))
 # install
 install:: all-os
 	$(MKINSTALLDIRS) $(LIBDIR)/$(MODDIR)
@@ -75,7 +76,6 @@ depend $(MODDIR)/DEPENDANCES:: $(MODSRCS)
 	$(MKDEP) -c$(CC) -o$(MODDIR)/DEPENDANCES -d$(MODDIR) -t.lo \
 		$(CPPFLAGS) $(MOD_CPPFLAGS) $?
 
-ifneq (,$(MODSRCS))
 ifneq (distclean,$(MAKECMDGOALS))
 include $(MODDIR)/DEPENDANCES
 endif
