@@ -44,18 +44,18 @@ $(PROG): $(OBJS)
 %.lo: %.c
 	$(LTCC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $< -prefer-non-pic
 
-clean: 
+clean:: 
 	$(LIBTOOL) --mode=clean rm -f $(OBJS) $(PROG)
 
-distclean: clean
+distclean:: clean
 	rm -f DEPENDANCES Makefile
 
-install:
+install::
 	$(MKINSTALLDIRS) ${DESTDIR}$(BINDIR)
 	$(LIBTOOL) --mode=install $(INSTALL) $(PROG) ${DESTDIR}$(BINDIR)
 
 ifeq ($(findstring clean,$(MAKECMDGOALS)),)
-depend DEPENDANCES: $(SRCS)
+depend DEPENDANCES:: $(SRCS)
 	$(MKDEP) -c$(CC) -oDEPENDANCES -t.lo $(CPPFLAGS) $?
 
 include DEPENDANCES

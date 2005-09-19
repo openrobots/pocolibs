@@ -24,6 +24,7 @@ __RCSID("$LAAS$");
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
+#include <asm/mman.h>
 #include <sys/stat.h>
 #include <linux/kdev_t.h>
 

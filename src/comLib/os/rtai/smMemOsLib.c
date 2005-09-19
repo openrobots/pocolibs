@@ -23,6 +23,7 @@ __RCSID("$LAAS$");
 
 #include <portLib.h>
 
+# include <asm/mman.h>
 #ifdef __KERNEL__
 # include <linux/module.h>
 # include <rtai_sched.h>
