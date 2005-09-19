@@ -179,10 +179,8 @@ taskLibInit(void)
     tcb->magic = TASK_MAGIC;
 
     /* Register the TCB pointer in the thread-specific key */
-#ifdef DEBUG
-    fprintf(stderr, "registering task specific value %lu %lu\n",
-	(unsigned long)tcb, (unsigned long)pthread_self());
-#endif
+    LOGDBG(("registering task specific value %lu %lu\n",
+	    (unsigned long)tcb, (unsigned long)pthread_self()));
     if (pthread_setspecific(taskControlBlock, (void *)tcb) != 0) {
 	    fprintf(stderr, "pthread_setspecific failed\n");
 	return ERROR;
@@ -268,6 +266,7 @@ taskStarter(void *data)
     
     tcb->pid = getpid();
 
+    LOGDBG(("taskLib:taskStarter\n"));
     /* Register the TCB pointer in a thread-specific key */
     if (pthread_setspecific(taskControlBlock, (void *)tcb) != 0) {
 	return NULL;
