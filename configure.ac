@@ -208,6 +208,13 @@ AC_SEARCH_LIBS([atan], [m])
 
 AC_SEARCH_LIBS([timer_create], [rt])
 
+case `uname -r` in
+	*-adeos)
+		enable_posix_timers=no
+		AC_MSG_WARN([Running adeos, disabling posix timers])
+		;;
+esac
+
 AC_ARG_ENABLE([posix-timers], 
 	AC_HELP_STRING([--disable-posix-timers Force use of setitimer(2)],
 			[instead of timer_create(3p)]),
