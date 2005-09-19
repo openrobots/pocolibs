@@ -35,7 +35,8 @@ SHLIB_CURRENT=	3
 SHLIB_REVISION=	0
 SHLIB_AGE=	0
 
-LIB=		liberrorLib.la
+BASENAME=	errorLib
+LIB=		lib$(BASENAME).la
 
 all: all-os $(LIB)
 

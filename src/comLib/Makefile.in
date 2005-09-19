@@ -41,7 +41,8 @@ SHLIB_CURRENT=	5
 SHLIB_REVISION=	0
 SHLIB_AGE=	2
 
-LIB=		libcomLib.la
+BASENAME=	comLib
+LIB=		lib$(BASENAME).la
 
 all: all-os $(LIB)
 
