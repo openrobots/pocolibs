@@ -44,16 +44,13 @@ AC_ARG_WITH(linux-kernel-includes,
 # make related stuff
 if test "x$opt_rtai" = "xyes"; then
    OSAPI=rtai
+   AC_CHECK_RTAI
    AC_MSG_RESULT([Configuring to use RTAI])
-   AC_CHECK_RTAI_INCLUDES(RTAI_INCLUDES, $opt_rtai_includes)
-   AC_CHECK_LINUXKERNEL_INCLUDES(LNXKERN_INCLUDES, $opt_lnxkern_includes)
-
 elif test "x$opt_rtai" = "xlxrt"; then
    OSAPI=lxrt
    AC_DEFINE(__LXRT__)
-   AC_MSG_RESULT([Enabling LXRT userspace support])
-   AC_CHECK_RTAI_INCLUDES(RTAI_INCLUDES, $opt_rtai_includes)
-
+   AC_CHECK_RTAI  
+   AC_MSG_RESULT([Configuring to use LXRT])
 elif test "x$opt_rtai" = "xno"; then :
    OSAPI=posix
    AC_MSG_RESULT([Configuring to use POSIX])

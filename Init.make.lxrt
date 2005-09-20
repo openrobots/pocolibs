@@ -20,16 +20,19 @@
 
 # --- lxrt specific configuration --------------------------------------
 
-CPPFLAGS+=	-D__LXRT__
+LXRT_CFLAGS :=	$(shell $(RTAI_CONFIG) --lxrt-cflags)
+LXRT_LDFLAGS :=	$(shell $(RTAI_CONFIG) --lxrt-ldflags)
 
-CPPFLAGS += -I$(RTAI_INCLUDES)
+CPPFLAGS +=	-D__LXRT__
+
+CPPFLAGS += -I$(LXRT_CFLAGS)
 
 # produce shared libraries
 BINEXT=
 LIBEXT=.la
 
 # XXX 
-OS_LIBS +=	-L/usr/realtime/lib -llxrt
+OS_LIBS +=	$(LXRT_LDFLAGS) -llxrt
 
 # fetch source files in posix subdir
 vpath %.c $(srcdir)/os/lxrt:$(srcdir):$(top_srcdir)/compat

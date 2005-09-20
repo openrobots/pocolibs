@@ -32,9 +32,14 @@ MODVPATH=	os/rtai
 MODDIR=		modules
 MOD=		$(MODDIR)/lib$(BASENAME).o
 
-MOD_CPPFLAGS+=	-I$(RTAI_INCLUDES) -I$(LNXKERN_INCLUDES) \
+LNXKERN_INCLUDES:= $(shell $(RTAI_CONFIG) --linux-dir)/include
+RTAI_CFLAGS :=  $(shell $(RTAI_CONFIG) --modules-cflags)
+
+MOD_CPPFLAGS+= -I$(LNXKERN_INCLUDES) \
 	-I$(LNXKERN_INCLUDES)/asm/mach-default
 MOD_CPPFLAGS+=	-D__KERNEL__ -DMODULE
+
+MOD_CFLAGS+= $(RTAI_CFLAGS)
 
 ifeq (powerpc,$(host_cpu))
 MOD_CFLAGS+=	-fsigned-char -ffixed-r2 -mmultiple -mstring

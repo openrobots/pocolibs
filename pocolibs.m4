@@ -114,57 +114,14 @@ main(int argc, char *argv[])
  	[AC_DEFINE(HAVE_POSIX_TIMERS)],
 	[AC_MSG_RESULT([no])]
 )])dnl
-dnl --- look for RTAI includes ------------------------------------------
-dnl AC_CHECK_RTAI_INCLUDES(var, path)
-AC_DEFUN([AC_CHECK_RTAI_INCLUDES],
+
+dnl --- look for rtai installation -------------------------------------
+AC_DEFUN([AC_CHECK_RTAI],
 [
-   AC_MSG_CHECKING([for RTAI includes])
-   AC_CACHE_VAL(ac_cv_path_rtai,
-    [
-       IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS=":"
-        ac_tmppath="$2:/usr/realtime/include:/usr/src/rtai/include"
-        for ac_dir in $ac_tmppath; do 
-            test -z "$ac_dir" && ac_dir=.
-            if eval test -f $ac_dir/rtai.h; then
-               eval ac_cv_path_rtai="$ac_dir"
-               break
-            fi
-       done
-       IFS="$ac_save_ifs"
-    ])
-   $1="$ac_cv_path_rtai"
-   if test -n "[$]$1"; then
-      AC_MSG_RESULT([$]$1)
-   else
-      AC_MSG_ERROR([cannot find RTAI includes], 2)
-   fi
-   AC_SUBST($1)
+	AC_CHECK_PROG(RTAI_CONFIG, rtai-config, rtai-config)
+	if test "x$RTAI_CONFIG" = "x"; then
+		AC_MSG_ERROR([rtai-config not found. Please make sure you have included the directory where RTAI is installed to your PATH]);
+	fi
+	AC_SUBST(RTAI_CONFIG)
 ])
 
-
-dnl --- look for linux kernel includes ----------------------------------
-dnl AC_CHECK_LINUXKERNEL_INCLUDES(var, path)
-AC_DEFUN([AC_CHECK_LINUXKERNEL_INCLUDES],
-[
-   AC_MSG_CHECKING([for linux kernel includes])
-   AC_CACHE_VAL(ac_cv_path_kernel,
-    [
-       IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS=":"
-        ac_tmppath="$2:/usr/realtime/include:/usr/src/linux/include:/usr/include"
-        for ac_dir in $ac_tmppath; do 
-            test -z "$ac_dir" && ac_dir=.
-            if eval test -f $ac_dir/linux/kernel.h; then
-               eval ac_cv_path_kernel="$ac_dir"
-               break
-            fi
-       done
-       IFS="$ac_save_ifs"
-    ])
-   $1="$ac_cv_path_kernel"
-   if test -n "[$]$1"; then
-      AC_MSG_RESULT([$]$1)
-   else
-      AC_MSG_ERROR([cannot find linux kernel includes], 2)
-   fi
-   AC_SUBST($1)
-])

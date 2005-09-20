@@ -24,7 +24,7 @@
 VPATH=		$(srcdir)/os/rtai:$(srcdir):$(top_srcdir)/compat
 VPATH+=		:$(srcdir)/os/posix
 
-CPPFLAGS+=	-I$(RTAI_INCLUDES)
+CPPFLAGS+=	$(RTAI_CFLAGS)
 MOD_CPPFLAGS+=	-I$(top_srcdir)/compat
 
 # userspace library is for the most part a wrapper around ioctls
