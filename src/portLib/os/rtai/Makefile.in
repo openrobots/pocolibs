@@ -1,0 +1,34 @@
+srcdir=		@srcdir@
+
+#KERNELDIR := /lib/modules/$(shell uname -r)/build
+KERNELDIR := $(shell @RTAI_CONFIG@ --linux-dir)
+CC := $(shell @RTAI_CONFIG@ --cc)
+
+vpath %.c $(srcdir):$(srcdir)/../..
+
+KSRCS = \
+	rtai_osInit.c	\
+	rtai_logLib.c	\
+	rtai_semLib.c	\
+	rtai_symLib.c	\
+	rtai_sysLib.c	\
+	rtai_taskLib.c	\
+	rtai_tickLib.c	\
+	rtai_wdLib.c	\
+	rtai_module.c
+
+includes: $(KSRCS)
+
+rtai_%.c: %.c
+	ln -s $< $@
+
+
+all: includes
+	$(MAKE) -C $(KERNELDIR) M=`pwd` modules
+
+clean:
+	$(MAKE) -C $(KERNELDIR) M=`pwd` clean
+
+distclean: clean
+	rm -f $(KSRCS) Kbuild Makefile
+

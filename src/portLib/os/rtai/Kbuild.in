@@ -1,0 +1,19 @@
+top_builddir := @top_builddir@
+abs_srcdir := @abs_srcdir@
+srcdir := @srcdir@
+
+obj-m := portLib.o
+
+portLib-y := 	\
+	rtai_osInit.o	\
+	rtai_logLib.o	\
+	rtai_semLib.o	\
+	rtai_symLib.o	\
+	rtai_sysLib.o	\
+	rtai_taskLib.o	\
+	rtai_tickLib.o	\
+	rtai_wdLib.o	\
+	rtai_module.o
+
+EXTRA_CFLAGS := $(shell @RTAI_CONFIG@ --module-cflags) \
+	-I${M}/../../.. -I$(abs_srcdir)/../../../../include
