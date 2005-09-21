@@ -1,0 +1,30 @@
+#	$LAAS$
+
+srcdir := @srcdir@
+top_srcdir := @top_srcdir@
+
+RTAI_CONFIG := @RTAI_CONFIG@
+
+KERNELDIR := $(shell $(RTAI_CONFIG) --linux-dir)
+CC := $(shell $(RTAI_CONFIG) --cc)
+
+vpath %.c $(srcdir):$(srcdir)/../..:$(top_srcdir)/compat
+
+KSRCS = \
+	rtai_posterLib.c 	\
+	rtai_localPosterLib.c	\
+	rtai_module.c
+
+all: includes
+	$(MAKE) -C $(KERNELDIR) M=`pwd` modules
+
+includes: $(KSRCS)
+
+rtai_%.c: %.c
+	ln -s $< $@
+
+clean:
+	$(MAKE) -C $(KERNELDIR) M=`pwd` clean
+
+distclean: clean
+	rm -f $(KSRCS) Kbuild Makefile
