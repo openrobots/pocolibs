@@ -17,7 +17,9 @@
 __RCSID("$LAAS$");
 
 #include "portLib.h"
+#ifndef __KERNEL__
 #include <signal.h>
+#endif
 
 #include "taskLib.h"
 #include "tickLib.h"

@@ -41,9 +41,9 @@ __RCSID("$LAAS$");
 # include <linux/kernel.h>
 #else
 # include <stdio.h>
+# include <math.h>
 #endif
 
-#include <math.h>
 
 #include "h2mathTab.c"
 #include "h2mathLib.h"
