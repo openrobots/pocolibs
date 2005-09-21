@@ -20,9 +20,6 @@ __RCSID("$LAAS$");
  *** Emulate the symbol table handling functions from VxWorks
  ***/
 
-#include <stdio.h>
-#include <dlfcn.h>
-
 #include "portLib.h"
 #include "errnoLib.h"
 #include "symLib.h"
