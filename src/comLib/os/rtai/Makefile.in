@@ -1,0 +1,46 @@
+#	$LAAS$
+
+srcdir := @srcdir@
+top_srcdir := @top_srcdir@
+
+RTAI_CONFIG := @RTAI_CONFIG@
+
+KERNELDIR := $(shell $(RTAI_CONFIG) --linux-dir)
+CC := $(shell $(RTAI_CONFIG) --cc)
+
+vpath %.c $(srcdir):$(srcdir)/../..:$(top_srcdir)/compat
+
+KSRCS = \
+        rtai_commonStructLib.c	\
+        rtai_csLib.c		\
+        rtai_gcomLib.c		\
+        rtai_h2devLib.c		\
+        rtai_h2devOsLib.c	\
+        rtai_h2endianness.c	\
+        rtai_h2evnLib.c		\
+        rtai_h2mathLib.c	\
+        rtai_h2rngLib.c		\
+        rtai_h2semLib.c		\
+        rtai_h2timeLib.c	\
+        rtai_h2timerLib.c	\
+        rtai_mboxLib.c		\
+        rtai_smMemLib.c		\
+        rtai_smMemOsLib.c	\
+        rtai_smObjLib.c		\
+	rtai_h2device.c		\
+	rtai_module.c		\
+	rtai_fnmatch.c
+
+all: includes
+	$(MAKE) -C $(KERNELDIR) M=`pwd` modules
+
+includes: $(KSRCS)
+
+rtai_%.c: %.c
+	ln -s $< $@
+
+clean:
+	$(MAKE) -C $(KERNELDIR) M=`pwd` clean
+
+distclean: clean
+	rm -f $(KSRCS) Kbuild Makefile
