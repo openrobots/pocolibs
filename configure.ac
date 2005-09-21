@@ -348,3 +348,15 @@ AC_OUTPUT(Init.make
 	src/xes/Makefile
 	src/regress/Makefile
 )
+
+if test "x$opt_rtai" = "xyes"; then
+AC_OUTPUT(
+	src/errorLib/os/rtai/Kbuild
+	src/errorLib/os/rtai/Makefile
+	src/portLib/os/rtai/Kbuild
+	src/portLib/os/rtai/Makefile
+	src/comLib/os/rtai/Kbuild
+	src/comLib/os/rtai/Makefile
+	src/posterLib/os/rtai/Kbuild
+	src/posterLib/os/rtai/Makefile)
+fi
