@@ -1,6 +1,7 @@
-top_builddir := @top_builddir@
+#	$LAAS$
+
+RTAI_CONFIG := @RTAI_CONFIG@
 abs_srcdir := @abs_srcdir@
-srcdir := @srcdir@
 
 obj-m := portLib.o
 
@@ -15,5 +16,5 @@ portLib-y := 	\
 	rtai_wdLib.o	\
 	rtai_module.o
 
-EXTRA_CFLAGS := $(shell @RTAI_CONFIG@ --module-cflags) \
+EXTRA_CFLAGS := $(shell $(RTAI_CONFIG) --module-cflags) \
 	-I${M}/../../.. -I$(abs_srcdir)/../../../../include

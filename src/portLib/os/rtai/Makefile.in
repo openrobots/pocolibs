@@ -1,8 +1,10 @@
-srcdir=		@srcdir@
+#	$LAAS$
 
-#KERNELDIR := /lib/modules/$(shell uname -r)/build
-KERNELDIR := $(shell @RTAI_CONFIG@ --linux-dir)
-CC := $(shell @RTAI_CONFIG@ --cc)
+srcdir=		@srcdir@
+RTAI_CONFIG=	@RTAI_CONFIG@
+
+KERNELDIR := $(shell $(RTAI_CONFIG) --linux-dir)
+CC := $(shell $(RTAI_CONFIG) --cc)
 
 vpath %.c $(srcdir):$(srcdir)/../..
 
@@ -17,14 +19,13 @@ KSRCS = \
 	rtai_wdLib.c	\
 	rtai_module.c
 
+all: includes
+	$(MAKE) -C $(KERNELDIR) M=`pwd` modules
+
 includes: $(KSRCS)
 
 rtai_%.c: %.c
 	ln -s $< $@
-
-
-all: includes
-	$(MAKE) -C $(KERNELDIR) M=`pwd` modules
 
 clean:
 	$(MAKE) -C $(KERNELDIR) M=`pwd` clean
