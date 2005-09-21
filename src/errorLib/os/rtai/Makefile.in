@@ -1,0 +1,29 @@
+#	$LAAS$
+
+srcdir := @srcdir@
+RTAI_CONFIG := @RTAI_CONFIG@
+
+KERNELDIR := $(shell $(RTAI_CONFIG) --linux-dir)
+CC := $(shell @RTAI_CONFIG@ --cc)
+
+vpath %.c $(srcdir):$(srcdir)/../..
+
+KSRCS = \
+	rtai_h2errorLib.c \
+	rtai_module.c
+
+all: includes
+	$(MAKE) -C $(KERNELDIR) M=`pwd` modules
+
+includes: $(KSRCS)
+
+rtai_%.c: %.c
+	ln -s $< $@
+
+clean:
+	$(MAKE) -C $(KERNELDIR) M=`pwd` clean
+
+distclean: clean
+	rm -f $(KSRCS) Kbuild Makefile
+
+

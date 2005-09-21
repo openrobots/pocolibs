@@ -1,0 +1,11 @@
+abs_srcdir := @abs_srcdir@
+RTAI_CONFIG := @RTAI_CONFIG@
+
+obj-m := errorLib.o
+
+errorLib-y := \
+	rtai_h2errorLib.o \
+	rtai_module.o
+
+EXTRA_CFLAGS := $(shell $(RTAI_CONFIG) --module-cflags) \
+	-D__RTAI__ -I${M}/../../.. -I$(abs_srcdir)/../../../../include
