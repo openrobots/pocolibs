@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2004 
+# Copyright (c) 2004-2005
 #      Autonomous Systems Lab, Swiss Federal Institute of Technology.
 # Copyright (c) 1998, 2003-2004 CNRS/LAAS
 #
@@ -31,9 +31,9 @@ include $(top_builddir)/Init.make
 SRCS+=		h2errorLib.c
 OBJS=		$(SRCS:%.c=%.lo)
 
-SHLIB_CURRENT=	3
+SHLIB_CURRENT=	4
 SHLIB_REVISION=	0
-SHLIB_AGE=	0
+SHLIB_AGE=	1
 
 BASENAME=	errorLib
 LIB=		lib$(BASENAME).la
