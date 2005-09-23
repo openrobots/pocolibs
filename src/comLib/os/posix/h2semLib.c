@@ -33,7 +33,7 @@ __RCSID("$LAAS$");
 #include "h2devLib.h"
 #include "errnoLib.h"
 #include "h2semLib.h"
-const H2_ERROR h2semLibH2errMsgs[] = H2_SEM_LIB_H2_ERR_MSGS;
+static const H2_ERROR const h2semLibH2errMsgs[] = H2_SEM_LIB_H2_ERR_MSGS;
 
 #ifdef VALGRIND_SUPPORT
 #include <valgrind/memcheck.h>

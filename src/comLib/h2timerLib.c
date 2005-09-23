@@ -39,7 +39,7 @@ __RCSID("$LAAS$");
 #include "wdLib.h"
 #include "h2timerLib.h"
 
-const H2_ERROR h2timerLibH2errMsgs[] = H2_TIMER_LIB_H2_ERR_MSGS;
+static const H2_ERROR const h2timerLibH2errMsgs[] = H2_TIMER_LIB_H2_ERR_MSGS;
 
 /* #define COMLIB_DEBUG_H2TIMERLIB */
 

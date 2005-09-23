@@ -41,7 +41,7 @@ __RCSID("$LAAS$");
 #include "errnoLib.h"
 
 #include "commonStructLib.h"
-const H2_ERROR commonStructLibH2errMsgs[] = COMMON_STRUCT_LIB_H2_ERR_MSGS;
+static const H2_ERROR const commonStructLibH2errMsgs[] = COMMON_STRUCT_LIB_H2_ERR_MSGS;
 
 #if defined(__RTAI__) && defined(__KERNEL__)
 # define malloc(x)	kmalloc(x, GFP_KERNEL)

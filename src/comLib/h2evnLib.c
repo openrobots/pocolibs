@@ -29,7 +29,7 @@ __RCSID("$LAAS$");
 #include "h2devLib.h"
 #include "mboxLib.h"
 #include "h2evnLib.h"
-const H2_ERROR h2evnLibH2errMsgs[] = H2_EVN_LIB_H2_ERR_MSGS;
+static const H2_ERROR const h2evnLibH2errMsgs[] = H2_EVN_LIB_H2_ERR_MSGS;
 
 #include "errnoLib.h"
 

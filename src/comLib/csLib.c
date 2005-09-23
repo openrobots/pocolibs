@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003-2004 CNRS/LAAS
+ * Copyright (c) 1990, 2003-2005 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -42,7 +42,8 @@ __RCSID("$LAAS$");
 #include "errnoLib.h"
 #include "gcomLib.h"
 #include "csLib.h"
-const H2_ERROR csLibH2errMsgs[] = CS_LIB_H2_ERR_MSGS;
+static const H2_ERROR const csLibH2errMsgs[] = CS_LIB_H2_ERR_MSGS;
+
 
 #if defined(__RTAI__) && defined(__KERNEL__)
 # define malloc(x)     kmalloc(x, GFP_KERNEL)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003-2004 CNRS/LAAS
+ * Copyright (c) 1990, 2003-2005 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -38,8 +38,8 @@ __RCSID("$LAAS$");
 #include "mboxLib.h"
 #include "smObjLib.h"
 
-const H2_ERROR mboxLibH2errMsgs[] = MBOX_LIB_H2_ERR_MSGS;
-const H2_ERROR h2rngLibH2errMsgs[] = H2_RNG_LIB_H2_ERR_MSGS;
+static const H2_ERROR const mboxLibH2errMsgs[] = MBOX_LIB_H2_ERR_MSGS;
+static const H2_ERROR const h2rngLibH2errMsgs[] = H2_RNG_LIB_H2_ERR_MSGS;
 
 #ifdef COMLIB_DEBUG_MBOXLIB
 # define LOGDBG(x)     logMsg x
@@ -514,7 +514,7 @@ mboxSend(MBOX_ID toId, MBOX_ID fromId, char *buf, int nbytes)
     /* Signal the event to the task owning the mailbox */
     semTask = H2DEV_TASK_SEM_ID(H2DEV_MBOX_TASK_ID(toId));
     if (h2semSet(semTask, 1) == ERROR) {
-      logMsg("comLib:mboxSend:h2semSet: %s", h2getMsgErrno(errnoGet(), msg, 64));
+      logMsg("comLib:mboxSend:h2semSet: %s", h2getErrMsg(errnoGet(), msg, 64));
 	return ERROR;
     }
     /* Free the mutex */
