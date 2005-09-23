@@ -111,7 +111,7 @@ if ($ARGV[0] eq "-init") {
     }
     close(OLDFILE);
     if (!%errors || !%modules) {
-	die("ERROR: No errors found in $file");
+	print("WARNING: No errors found in $file\n");
     }
 }
 
