@@ -27,14 +27,8 @@ __RCSID("$LAAS$");
 #include "symLib.h"
 #include "wdLib.h"
 
-#include "h2semLib.h"
 #include "semLib.h"
-#include "symLib.h"
-#include "smObjLib.h"
 #include "portLib.h"
-
-#include "h2devLib.h"
-#include "h2evnLib.h"
 
 /**
  ** Global initialisation of all OS-level services (VxWorks Emulation)
@@ -45,12 +39,8 @@ osInit(int clkRate)
 {
 
     /* init all error msgs */
-    h2evnRecordH2ErrMsgs();
-    h2devRecordH2ErrMsgs();
-    h2semRecordH2ErrMsgs();
     semRecordH2ErrMsgs();
     symRecordH2ErrMsgs();
-    smObjRecordH2ErrMsgs();
     portRecordH2ErrMsgs();
 
     /* Initialize log library */
