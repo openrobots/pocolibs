@@ -31,7 +31,5 @@
   {"NOT_ENOUGH_MEMORY",  H2_DECODE_ERR(S_memLib_NOT_ENOUGH_MEMORY)},  \
 }
 
-extern const H2_ERROR memLibH2errMsgs[]; /* = MEM_LIB_H2_ERR_MSGS */
-
 
 #endif

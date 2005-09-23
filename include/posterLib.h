@@ -116,8 +116,6 @@ extern STATUS posterSetEndianness(POSTER_ID posterId, H2_ENDIANNESS endianness);
     {"BAD_FORMAT",       H2_DECODE_ERR(S_posterLib_BAD_FORMAT)}   \
   }
 
-extern const H2_ERROR posterLibH2errMsgs[]; /* = POSTER_LIB_H2_ERR_MSGS */
-
 /* Remote posters error codes  */
 #define S_remotePosterLib_POSTER_CLOSED    H2_ENCODE_ERR(M_remotePosterLib, 0)
 #define S_remotePosterLib_NOT_OWNER        H2_ENCODE_ERR(M_remotePosterLib, 1)
@@ -146,8 +144,6 @@ extern const H2_ERROR posterLibH2errMsgs[]; /* = POSTER_LIB_H2_ERR_MSGS */
     {"BAD_PARAMS",       H2_DECODE_ERR(S_remotePosterLib_BAD_PARAMS)},  \
     {"POSTER_HOST_NOT_DEFINED", H2_DECODE_ERR(S_remotePosterLib_POSTER_HOST_NOT_DEFINED)},  \
       }
-
-extern const H2_ERROR remotePosterLibH2errMsgs[]; /* = REMOTE_POSTER_LIB_H2_ERR_MSGS */
 
 #ifdef __cplusplus
 };

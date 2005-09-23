@@ -82,9 +82,6 @@ extern "C" {
    {"BAD_BLOCK_TYPE",        H2_DECODE_ERR(S_csLib_BAD_BLOCK_TYPE)},  \
      }
 
-extern const H2_ERROR csLibH2errMsgs[]; /* = CS_LIB_H2_ERR_MSGS */
-
-
 /*------------ Structures de donnees d'un serveur -----------------------*/
 
 /* Def. type struct. parametres associees requete recue par le serveur */

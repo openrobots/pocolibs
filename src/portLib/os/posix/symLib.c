@@ -26,7 +26,7 @@ __RCSID("$LAAS$");
 #include "portLib.h"
 #include "errnoLib.h"
 #include "symLib.h"
-const H2_ERROR symLibH2errMsgs[]   = SYM_LIB_H2_ERR_MSGS;
+static const H2_ERROR const symLibH2errMsgs[]   = SYM_LIB_H2_ERR_MSGS;
 
 SYMTAB_ID sysSymTbl = NULL;
 

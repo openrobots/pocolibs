@@ -34,7 +34,6 @@ extern "C" {
     {"ID_ERROR",          H2_DECODE_ERR(S_wdLib_ID_ERROR)},	\
     {"NOT_ENOUGH_MEMORY", H2_DECODE_ERR(S_wdLib_NOT_ENOUGH_MEMORY)},	\
 }
-extern const H2_ERROR wdLibH2errMsgs[];   /* = WD_LIB_H2_ERR_MSGS */ 
 
 
 /* -- STRUCTURES ----------------------------------------------- */

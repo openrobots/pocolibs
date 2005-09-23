@@ -63,8 +63,6 @@ typedef int H2SEM_ID;
     {"NOT_IMPLEMENTED",   H2_DECODE_ERR(S_h2semLib_NOT_IMPLEMENTED)},  \
   }
 
-extern const H2_ERROR h2semLibH2errMsgs[]; /* = H2_SEM_LIB_H2_ERR_MSGS */
-
 
 /* -- PROTOTYPES ----------------------------------------------- */
 

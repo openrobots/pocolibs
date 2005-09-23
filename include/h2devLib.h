@@ -157,8 +157,6 @@ typedef struct H2_DEV_STR {
   {"NOT_FOUND", 		H2_DECODE_ERR(S_h2devLib_NOT_FOUND)}, \
   }
 
-extern const H2_ERROR h2devLibH2errMsgs[]; /* = H2_DEV_LIB_H2_ERR_MSGS */
-
 
 extern H2_DEV_STR *h2Devs;
 

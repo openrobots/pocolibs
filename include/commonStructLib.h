@@ -57,8 +57,6 @@ typedef struct {
  {"ISNT_COMMON_STRUCT", H2_DECODE_ERR(S_commonStructLib_ISNT_COMMON_STRUCT)},  \
 }
 
-extern const H2_ERROR commonStructLibH2errMsgs[]; /* = COMMON_STRUCT_LIB_H2_ERR_MSGS */
-
 /* -- PROTOTYPES ------------------------------------------------- */
 
 extern STATUS commonStructCopy ( void *pCommonStruct, int toFromFlag, 

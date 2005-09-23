@@ -22,7 +22,7 @@ __RCSID("$LAAS$");
 #include <rtai_schedcore.h>
 
 #include "portLib.h"
-const H2_ERROR portLibH2errMsgs[]  = PORT_LIB_H2_ERR_MSGS;
+static const H2_ERROR const portLibH2errMsgs[]  = PORT_LIB_H2_ERR_MSGS;
 
 #include "errnoLib.h"
 #include "sysLib.h"

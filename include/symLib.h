@@ -52,8 +52,6 @@ typedef int SYM_TYPE;
     {"NOT_IMPLEMENTED",	  H2_DECODE_ERR(S_symLib_NOT_IMPLEMENTED)},  \
 }
 
-extern const H2_ERROR symLibH2errMsgs[]; /* = SYM_LIB_H2_ERR_MSGS */
-
 /* -- PROTOTYPES ----------------------------------------------- */
 int  symRecordH2ErrMsgs();
 STATUS symLibInit(void);

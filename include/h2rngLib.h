@@ -94,8 +94,6 @@ typedef H2RNG_HDR *H2RNG_ID;
    {"BIG_BLOCK",             H2_DECODE_ERR(S_h2rngLib_BIG_BLOCK)},  \
      }
 
-extern const H2_ERROR h2rngLibH2errMsgs[]; /* H2_RNG_LIB_H2_ERR_MSGS */
-
 /* RING macros */
 
 /****************************************************************************

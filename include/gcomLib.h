@@ -102,8 +102,6 @@ extern "C" {
    {"MALLOC_FAILED",         H2_DECODE_ERR(S_gcomLib_MALLOC_FAILED)},  \
   }
 
-extern const H2_ERROR gcomLibH2errMsgs[]; /* = GCOM_LIB_H2_ERR_MSGS */
-
 /* -- STRUCTURES ----------------------------------------------- */
 
 /* En-tete d'une lettre */

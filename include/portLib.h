@@ -108,8 +108,6 @@ extern "C" {
    {"NOT_IMPLEMENTED",	H2_DECODE_ERR(S_portLib_NOT_IMPLEMENTED)}  \
   }
 
-extern const H2_ERROR portLibH2errMsgs[]; /* = PORT_LIB_H2_ERR_MSGS */
-
 /* -- PROTOTYPES ----------------------------------------------- */
 int portRecordH2ErrMsgs();
 extern STATUS osInit(int);

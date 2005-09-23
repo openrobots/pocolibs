@@ -107,8 +107,6 @@ extern STATUS semFlush ( SEM_ID semId );
     {"LXRT_ERROR",    H2_DECODE_ERR(S_semLib_LXRT_ERROR)},  \
   }
 
-extern const H2_ERROR semLibH2errMsgs[]; /* = SEM_LIB_H2_ERR_MSGS */
-
 #ifdef __cplusplus
 };
 #endif

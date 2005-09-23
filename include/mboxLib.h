@@ -59,8 +59,6 @@ typedef int MBOX_ID;
    {"SHORT_MESSAGE",       H2_DECODE_ERR(S_mboxLib_SHORT_MESSAGE)},  \
   }
 
-extern const H2_ERROR mboxLibH2errMsgs[]; /* = MBOX_LIB_H2_ERR_MSGS */
-
 /* -- PROTOTYPES ----------------------------------------------- */
 extern STATUS mboxCreate ( char *name, int len, MBOX_ID *pMboxId );
 extern STATUS mboxDelete ( MBOX_ID mboxId );

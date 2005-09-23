@@ -33,8 +33,6 @@ extern "C" {
     {"BAD_TASK_ID",     H2_DECODE_ERR(S_h2evnLib_BAD_TASK_ID)},  \
 }
 
-extern const H2_ERROR h2evnLibH2errMsgs[]; /* = H2_EVN_LIB_H2_ERR_MSGS */
-
 /* -- PROTOTYPES ----------------------------------------------- */
 
 extern int h2evnRecordH2ErrMsgs();

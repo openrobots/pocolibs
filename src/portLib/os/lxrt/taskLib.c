@@ -30,6 +30,8 @@ __RCSID("$LAAS$");
 #include <rtai_lxrt.h>
 
 #include "portLib.h"
+static const H2_ERROR const portLibH2errMsgs[]  = PORT_LIB_H2_ERR_MSGS;
+
 #include "errnoLib.h"
 #include "sysLib.h"
 #define TASKLIB_C
@@ -96,6 +98,19 @@ TASK_HOOK_LIST *createHooks = NULL;
 TASK_HOOK_LIST *deleteHooks = NULL;
 
 static STATUS executeHooks(TASK_HOOK_LIST *list, OS_TCB *tcb);
+
+/*----------------------------------------------------------------------*/
+
+/*
+ * Record errors messages
+ */
+int
+portRecordH2ErrMsgs()
+{
+    return h2recordErrMsgs("portRecordH2ErrMsg", "portLib", M_portLib, 
+			   sizeof(portLibH2errMsgs)/sizeof(H2_ERROR), 
+			   portLibH2errMsgs);
+}
 /*----------------------------------------------------------------------*/
 
 /*

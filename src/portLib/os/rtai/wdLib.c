@@ -24,7 +24,7 @@ __RCSID("$LAAS$");
 #include "errnoLib.h"
 #include "semLib.h"
 #include "wdLib.h"
-const H2_ERROR wdLibH2errMsgs[] = WD_LIB_H2_ERR_MSGS;
+static const H2_ERROR const wdLibH2errMsgs[] = WD_LIB_H2_ERR_MSGS;
 
 WDOG_ID wdList = NULL;
 SEM_ID wdMutex;

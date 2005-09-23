@@ -87,8 +87,6 @@ extern STATUS h2timerFree ( H2TIMER_ID timerId );
     {"BAD_PERIOD",          H2_DECODE_ERR(S_h2timerLib_BAD_PERIOD)} \
   }
 
-extern const H2_ERROR h2timerLibH2errMsgs[]; /* = H2_TIMER_LIB_H2_ERR_MSGS */
-
 #ifdef __cplusplus
 };
 #endif

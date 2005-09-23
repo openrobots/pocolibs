@@ -36,8 +36,6 @@ extern "C" {
     {"SHMAT_ERROR",  H2_DECODE_ERR(S_smObjLib_SHMAT_ERROR)},  \
 }
 
-extern const H2_ERROR smObjLibH2errMsgs[]; /* = SM_OBJ_LIB_H2_ERR_MSGS */
-
 /* -- PROTOTYPES ----------------------------------------------- */
 int smObjRecordH2ErrMsgs();
 void *smObjGlobalToLocal(void *globalAdrs);

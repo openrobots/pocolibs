@@ -27,7 +27,7 @@ __RCSID("$LAAS$");
 #include <unistd.h>
 
 #include "portLib.h"
-const H2_ERROR portLibH2errMsgs[]  = PORT_LIB_H2_ERR_MSGS;
+static const H2_ERROR const portLibH2errMsgs[]  = PORT_LIB_H2_ERR_MSGS;
 
 
 #include "errnoLib.h"
