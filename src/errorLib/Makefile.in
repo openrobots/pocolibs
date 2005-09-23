@@ -52,11 +52,9 @@ clean::
 
 distclean:: clean
 	rm -f DEPENDANCES Makefile
-	rm -f h2addErrno
 
 install:: $(LIB)
 	$(MKINSTALLDIRS) ${DESTDIR}$(BINDIR) ${DESTDIR}$(LIBDIR)
-	$(INSTALL) h2addErrno ${DESTDIR}$(BINDIR)
 	$(LIBTOOL) --mode=install $(INSTALL) $(LIB) ${DESTDIR}$(LIBDIR)
 
 ifeq ($(findstring clean,$(MAKECMDGOALS)),)
