@@ -52,13 +52,14 @@ int testPosterWrite ()
   int sizeOut;
   H2_ENDIANNESS endianness;
   char c;
+  char msg[256];
 
   printf ("testPosterWrite: LOCAL ENDIANNESS = %d\n", h2localEndianness());
 
   /* create */
   if (posterCreate(TEST_POSTER_NAME, size, &posterIdC) == ERROR) {
     printf ("testPosterWrite: posterCreate(%s) failed : %s\n", 
-	    TEST_POSTER_NAME, h2getMsgErrno(errnoGet()));
+	    TEST_POSTER_NAME, h2getErrMsg(errnoGet(), msg, 256));
     return 1;
   }
   printf ("testPosterWrite: poster %s created. Id = %0x\n", 

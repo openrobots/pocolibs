@@ -35,8 +35,8 @@ __RCSID("$LAAS$");
 
 #include "posterLibPriv.h"
 
-const H2_ERROR posterLibH2errMsgs[] = POSTER_LIB_H2_ERR_MSGS;
-const H2_ERROR remotePosterLibH2errMsgs[] = REMOTE_POSTER_LIB_H2_ERR_MSGS;
+static const H2_ERROR const posterLibH2errMsgs[] = POSTER_LIB_H2_ERR_MSGS;
+static const H2_ERROR const remotePosterLibH2errMsgs[] = REMOTE_POSTER_LIB_H2_ERR_MSGS;
 
 
 #if defined(__RTAI__) && defined(__KERNEL__)
