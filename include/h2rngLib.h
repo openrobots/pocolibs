@@ -53,22 +53,6 @@ extern "C" {
 /* Caractere d'indication de la fin d'un block */
 #define  H2RNG_CAR_END   '$'
 
-
-/* Identificateur de la bibliotheque */
-#define   M_h2rngLib                    (501 << 16)
-
-/* Erreurs */
-#define  S_h2rngLib_ILLEGAL_NBYTES        (M_h2rngLib | 0)
-#define  S_h2rngLib_ILLEGAL_TYPE          (M_h2rngLib | 1)
-#define  S_h2rngLib_NOT_A_RING            (M_h2rngLib | 2)
-#define  S_h2rngLib_NOT_A_BYTE_RING       (M_h2rngLib | 3)
-#define  S_h2rngLib_NOT_A_BLOCK_RING      (M_h2rngLib | 4)
-#define  S_h2rngLib_ERR_SYNC              (M_h2rngLib | 5)
-#define  S_h2rngLib_SMALL_BUF             (M_h2rngLib | 6)
-#define  S_h2rngLib_SMALL_BLOCK           (M_h2rngLib | 7)
-#define  S_h2rngLib_BIG_BLOCK             (M_h2rngLib | 8)
-
-
 /* Tete d'un ring buffer */
 typedef struct {
   int flgInit;      /* Indicateur d'initialisation */
@@ -79,6 +63,38 @@ typedef struct {
 
 typedef H2RNG_HDR *H2RNG_ID;
 
+/* -- ERRORS CODES ----------------------------------------------- */
+
+#include "h2errorLib.h"
+
+/* Identificateur de la bibliotheque */
+#define   M_h2rngLib                    501
+
+/* Erreurs */
+#define  S_h2rngLib_ILLEGAL_NBYTES        H2_ENCODE_ERR(M_h2rngLib, 0)
+#define  S_h2rngLib_ILLEGAL_TYPE          H2_ENCODE_ERR(M_h2rngLib, 1)
+#define  S_h2rngLib_NOT_A_RING            H2_ENCODE_ERR(M_h2rngLib, 2)
+#define  S_h2rngLib_NOT_A_BYTE_RING       H2_ENCODE_ERR(M_h2rngLib, 3)
+#define  S_h2rngLib_NOT_A_BLOCK_RING      H2_ENCODE_ERR(M_h2rngLib, 4)
+#define  S_h2rngLib_ERR_SYNC              H2_ENCODE_ERR(M_h2rngLib, 5)
+#define  S_h2rngLib_SMALL_BUF             H2_ENCODE_ERR(M_h2rngLib, 6)
+#define  S_h2rngLib_SMALL_BLOCK           H2_ENCODE_ERR(M_h2rngLib, 7)
+#define  S_h2rngLib_BIG_BLOCK             H2_ENCODE_ERR(M_h2rngLib, 8)
+
+
+#define H2_RNG_LIB_H2_ERR_MSGS { \
+   {"ILLEGAL_NBYTES",        H2_DECODE_ERR(S_h2rngLib_ILLEGAL_NBYTES)},  \
+   {"ILLEGAL_TYPE",          H2_DECODE_ERR(S_h2rngLib_ILLEGAL_TYPE)},  \
+   {"NOT_A_RING",            H2_DECODE_ERR(S_h2rngLib_NOT_A_RING)},  \
+   {"NOT_A_BYTE_RING",       H2_DECODE_ERR(S_h2rngLib_NOT_A_BYTE_RING)},  \
+   {"NOT_A_BLOCK_RING",      H2_DECODE_ERR(S_h2rngLib_NOT_A_BLOCK_RING)},  \
+   {"ERR_SYNC",              H2_DECODE_ERR(S_h2rngLib_ERR_SYNC)},  \
+   {"SMALL_BUF",             H2_DECODE_ERR(S_h2rngLib_SMALL_BUF)},  \
+   {"SMALL_BLOCK",           H2_DECODE_ERR(S_h2rngLib_SMALL_BLOCK)},  \
+   {"BIG_BLOCK",             H2_DECODE_ERR(S_h2rngLib_BIG_BLOCK)},  \
+     }
+
+extern const H2_ERROR h2rngLibH2errMsgs[]; /* H2_RNG_LIB_H2_ERR_MSGS */
 
 /* RING macros */
 

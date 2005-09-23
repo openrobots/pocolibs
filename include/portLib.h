@@ -90,18 +90,28 @@ typedef void *(*VOIDPTRFUNCPTR)();
 extern "C" {
 #endif
 
-/* Error codes */
-#define M_portLib			(1 << 16)
-#define  S_portLib_OK			(M_portLib | 0)
-#define  S_portLib_NO_MEMORY		(M_portLib | 1)
-#define  S_portLib_NO_SUCH_TASK		(M_portLib | 2)
-#define  S_portLib_NOT_IN_A_TASK	(M_portLib | 3)
-#define  S_portLib_INVALID_TASKID	(M_portLib | 4)
-#define  S_portLib_NOT_IMPLEMENTED	(M_portLib | 5)
+/* -- ERRORS CODES ----------------------------------------------- */
+#include "h2errorLib.h"
+#define M_portLib			(1)
 
-/*
- * Prototypes
- */
+#define  S_portLib_NO_MEMORY		H2_ENCODE_ERR(M_portLib, 1)
+#define  S_portLib_NO_SUCH_TASK		H2_ENCODE_ERR(M_portLib, 2)
+#define  S_portLib_NOT_IN_A_TASK	H2_ENCODE_ERR(M_portLib, 3)
+#define  S_portLib_INVALID_TASKID	H2_ENCODE_ERR(M_portLib, 4)
+#define  S_portLib_NOT_IMPLEMENTED	H2_ENCODE_ERR(M_portLib, 5)
+
+#define PORT_LIB_H2_ERR_MSGS { \
+   {"NO_MEMORY",	H2_DECODE_ERR(S_portLib_NO_MEMORY)},	\
+   {"NO_SUCH_TASK",	H2_DECODE_ERR(S_portLib_NO_SUCH_TASK)},	\
+   {"NOT_IN_A_TASK",	H2_DECODE_ERR(S_portLib_NOT_IN_A_TASK)},  \
+   {"INVALID_TASKID",	H2_DECODE_ERR(S_portLib_INVALID_TASKID)},  \
+   {"NOT_IMPLEMENTED",	H2_DECODE_ERR(S_portLib_NOT_IMPLEMENTED)}  \
+  }
+
+extern const H2_ERROR portLibH2errMsgs[]; /* = PORT_LIB_H2_ERR_MSGS */
+
+/* -- PROTOTYPES ----------------------------------------------- */
+int portRecordH2ErrMsgs();
 extern STATUS osInit(int);
 extern void   osExit(void);
 

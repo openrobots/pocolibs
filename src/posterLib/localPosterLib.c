@@ -244,6 +244,7 @@ localPosterRead(POSTER_ID posterId, int offset, void *buf, int nbytes)
     /* Calculer le nombre d'octets a lire */
     nRd = MIN(nbytes, H2DEV_POSTER_SIZE(dev) - offset);
     if (nRd <= 0) {
+        errnoSet(S_posterLib_BAD_FORMAT);
 	return 0;
     }
     /* Prendre le semaphore d'exclusion mutuelle */

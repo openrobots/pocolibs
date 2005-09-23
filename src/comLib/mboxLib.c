@@ -33,11 +33,13 @@ __RCSID("$LAAS$");
 #include "errnoLib.h"
 #include "h2devLib.h"
 #include "h2semLib.h"
-#include "h2evnLib.h"
 #include "h2rngLib.h"
 #include "h2errorLib.h"
 #include "mboxLib.h"
 #include "smObjLib.h"
+
+const H2_ERROR mboxLibH2errMsgs[] = MBOX_LIB_H2_ERR_MSGS;
+const H2_ERROR h2rngLibH2errMsgs[] = H2_RNG_LIB_H2_ERR_MSGS;
 
 #ifdef COMLIB_DEBUG_MBOXLIB
 # define LOGDBG(x)     logMsg x
@@ -65,6 +67,14 @@ mboxInit(char *procName)		/* unused parameter procName */
     int tid = taskIdSelf();
     const char *tName;
     int dev;
+
+    /* record error msgs */
+    h2recordErrMsgs("mboxInit", "h2rngLib", M_h2rngLib, 			
+		    sizeof(h2rngLibH2errMsgs)/sizeof(H2_ERROR), 
+		    h2rngLibH2errMsgs);
+    h2recordErrMsgs("mboxInit", "mboxLib", M_mboxLib, 			
+		    sizeof(mboxLibH2errMsgs)/sizeof(H2_ERROR), 
+		    mboxLibH2errMsgs);
 
     if (tid == 0) return ERROR;
     tName = taskName(tid);
@@ -476,6 +486,7 @@ mboxSend(MBOX_ID toId, MBOX_ID fromId, char *buf, int nbytes)
     H2RNG_ID rngId;			/* ring buffer of the device */
     H2SEM_ID semTask;
     int result;
+    char msg[64];
 
     /* take the mutex semaphore of the device */
     if (h2semTake (H2DEV_MBOX_SEM_EXCL_ID(toId), WAIT_FOREVER) != TRUE) {
@@ -503,7 +514,7 @@ mboxSend(MBOX_ID toId, MBOX_ID fromId, char *buf, int nbytes)
     /* Signal the event to the task owning the mailbox */
     semTask = H2DEV_TASK_SEM_ID(H2DEV_MBOX_TASK_ID(toId));
     if (h2semSet(semTask, 1) == ERROR) {
-	logMsg("comLib:mboxSend:h2semSet: %s", h2getMsgErrno(errnoGet()));
+      logMsg("comLib:mboxSend:h2semSet: %s", h2getMsgErrno(errnoGet(), msg, 64));
 	return ERROR;
     }
     /* Free the mutex */

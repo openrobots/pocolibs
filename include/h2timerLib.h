@@ -43,17 +43,6 @@ extern "C" {
 #define  WAIT_DELAY                       1
 #define  RUNNING_TIMER                    2
 
-/* Code du module */
-#define   M_h2timerLib                  (504 << 16)
-
-/* Codes des erreurs */
-#define  S_h2timerLib_TIMER_NOT_INIT      (M_h2timerLib | 0)
-#define  S_h2timerLib_BAD_DELAY           (M_h2timerLib | 1)
-#define  S_h2timerLib_TOO_MUCH_TIMERS     (M_h2timerLib | 2)
-#define  S_h2timerLib_STOPPED_TIMER       (M_h2timerLib | 3)
-#define  S_h2timerLib_NOT_STOPPED_TIMER   (M_h2timerLib | 4)
-#define  S_h2timerLib_BAD_PERIOD          (M_h2timerLib | 5)
-
 /* Definition de type d'un timer h2 */
 typedef struct {
     int flagInit;			/* Indication d'initialisation */
@@ -74,6 +63,31 @@ extern STATUS h2timerPauseReset ( H2TIMER_ID timerId );
 extern STATUS h2timerStop ( H2TIMER_ID timerId );
 extern STATUS h2timerChangePeriod ( H2TIMER_ID timerId, int periode );
 extern STATUS h2timerFree ( H2TIMER_ID timerId );
+
+/* -- ERRORS CODES -- */
+#include "h2errorLib.h"
+
+/* Code du module */
+#define   M_h2timerLib   504
+
+/* Codes des erreurs */
+#define  S_h2timerLib_TIMER_NOT_INIT      H2_ENCODE_ERR(M_h2timerLib, 0)
+#define  S_h2timerLib_BAD_DELAY           H2_ENCODE_ERR(M_h2timerLib, 1)
+#define  S_h2timerLib_TOO_MUCH_TIMERS     H2_ENCODE_ERR(M_h2timerLib, 2)
+#define  S_h2timerLib_STOPPED_TIMER       H2_ENCODE_ERR(M_h2timerLib, 3)
+#define  S_h2timerLib_NOT_STOPPED_TIMER   H2_ENCODE_ERR(M_h2timerLib, 4)
+#define  S_h2timerLib_BAD_PERIOD          H2_ENCODE_ERR(M_h2timerLib, 5)
+
+#define H2_TIMER_LIB_H2_ERR_MSGS { \
+    {"TIMER_NOT_INIT",      H2_DECODE_ERR(S_h2timerLib_TIMER_NOT_INIT)}, \
+    {"BAD_DELAY",           H2_DECODE_ERR(S_h2timerLib_BAD_DELAY)},      \
+    {"TOO_MUCH_TIMERS",     H2_DECODE_ERR(S_h2timerLib_TOO_MUCH_TIMERS)}, \
+    {"STOPPED_TIMER",       H2_DECODE_ERR(S_h2timerLib_STOPPED_TIMER)}, \
+    {"NOT_STOPPED_TIMER",   H2_DECODE_ERR(S_h2timerLib_NOT_STOPPED_TIMER)}, \
+    {"BAD_PERIOD",          H2_DECODE_ERR(S_h2timerLib_BAD_PERIOD)} \
+  }
+
+extern const H2_ERROR h2timerLibH2errMsgs[]; /* = H2_TIMER_LIB_H2_ERR_MSGS */
 
 #ifdef __cplusplus
 };

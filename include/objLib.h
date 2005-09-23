@@ -1,6 +1,6 @@
 /* $LAAS$ */
 /*
- * Copyright (c) 1999, 2003 CNRS/LAAS
+ * Copyright (c) 1999, 2003-2005 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,9 +18,18 @@
 #ifndef _OBJLIB_H
 #define _OBJLIB_H
 
-#define M_objLib        (61 << 16)
+#error "bye obj"
 
-#define S_objLib_OBJ_ID_ERROR                   (M_objLib | 1)
-#define S_objLib_OBJ_TIMEOUT			(M_objLib | 2) 
+#include "h2errorLib.h"
+#define M_objLib        61
+
+#define S_objLib_OBJ_ID_ERROR       H2_ENCODE_ERR(M_objLib, 1)
+#define S_objLib_OBJ_TIMEOUT	    H2_ENCODE_ERR(M_objLib, 2) 
+
+#define OBJ_LIB_H2_ERRORS { \
+	{"OBJ_ID_ERROR", 1}, \
+	{"OBJ_TIMEOUT", 2} \
+}
+extern const H2_ERROR objLibH2errors[];   /* = OBJ_LIB_H2_ERRORS */ 
 
 #endif

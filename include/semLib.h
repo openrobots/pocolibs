@@ -1,6 +1,6 @@
 /* $LAAS$ */
 /*
- * Copyright (c) 1998, 2003-2004 CNRS/LAAS
+ * Copyright (c) 1998, 2003-2005 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -24,25 +24,16 @@
 extern "C" {
 #endif
 
-/* Code du module */
-#define M_semLib (22 << 16)
+/* -- STRUCTURES ------------------------------------------ */
 
-/* codes d'erreur */
-#define S_semLib_TOO_MANY_SEM (M_semLib | 1)
-#define S_semLib_ALLOC_ERROR (M_semLib | 2)
-#define S_semLib_NOT_A_SEM (M_semLib | 3)
-#define S_semLib_TIMEOUT (M_semLib | 4)
-#define S_semLib_RESOURCE_BUSY (M_semLib | 5)
-#define S_semLib_LXRT_ERROR (M_semLib | 6) 
-
-/* Valeur initiale des semaphores binaires */
+/* Initial value for binary semaphores */
 typedef enum SEM_B_STATE {
     SEM_EMPTY = 0,
     SEM_FULL = 1,
     SEM_UNALLOCATED = 32767
 } SEM_B_STATE;
 
-/* Flags des semaphores */
+/* Semaphores flags */
 enum {
     SEM_Q_FIFO,
     SEM_Q_PRIORITY
@@ -56,7 +47,13 @@ struct SEM_ID_STR;
 typedef struct SEM_ID_STR *SEM_ID;
 #endif
 
-/* Prototypes */
+/* -- PROTOTYPES ----------------------------------------------- */
+
+/** Record error messages
+ * @return 1 or 0 if problem
+ */
+int semRecordH2ErrMsgs();
+
 /** Creates and initializes a binary semaphore
  * @arg options semaphore options, unused on Posix systems
  * @arg initialState the initial state of the semaphore (one of the SEM_B_STATE value)
@@ -85,8 +82,35 @@ extern STATUS semGive ( SEM_ID semId );
 extern STATUS semTake ( SEM_ID semId, int timeout );
 extern STATUS semFlush ( SEM_ID semId );
 
+
+/* -- ERRORS CODES ----------------------------------------------- */
+
+#include "h2errorLib.h"
+
+/* Code du module */
+#define M_semLib 22
+
+/* codes d'erreur */
+#define S_semLib_TOO_MANY_SEM  H2_ENCODE_ERR(M_semLib, 1)
+#define S_semLib_ALLOC_ERROR   H2_ENCODE_ERR(M_semLib, 2)
+#define S_semLib_NOT_A_SEM     H2_ENCODE_ERR(M_semLib, 3)
+#define S_semLib_TIMEOUT       H2_ENCODE_ERR(M_semLib, 4)
+#define S_semLib_RESOURCE_BUSY H2_ENCODE_ERR(M_semLib, 5)
+#define S_semLib_LXRT_ERROR    H2_ENCODE_ERR(M_semLib, 6)
+ 
+#define SEM_LIB_H2_ERR_MSGS { \
+    {"TOO_MANY_SEM",  H2_DECODE_ERR(S_semLib_TOO_MANY_SEM)},  \
+    {"ALLOC_ERROR",   H2_DECODE_ERR(S_semLib_ALLOC_ERROR)},  \
+    {"NOT_A_SEM",     H2_DECODE_ERR(S_semLib_NOT_A_SEM)},    \
+    {"TIMEOUT",       H2_DECODE_ERR(S_semLib_TIMEOUT)},  \
+    {"RESOURCE_BUSY", H2_DECODE_ERR(S_semLib_RESOURCE_BUSY)},  \
+    {"LXRT_ERROR",    H2_DECODE_ERR(S_semLib_LXRT_ERROR)},  \
+  }
+
+extern const H2_ERROR semLibH2errMsgs[]; /* = SEM_LIB_H2_ERR_MSGS */
+
 #ifdef __cplusplus
 };
 #endif
 
-#endif
+#endif /* _SEMLIB_H */

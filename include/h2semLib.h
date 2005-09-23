@@ -31,30 +31,49 @@ extern "C" {
 /* Nombre max de semaphores par Id(SEMMSL) */
 #define MAX_SEM 20
 
-/* Code du module */
-#define M_h2semLib (503 << 16)
-
 /* Types de semaphores */
 #define   H2SEM_SYNC         0          /* Semaphore de synchronisation */
 #define   H2SEM_EXCL         1          /* Semaphore d'exclusion mutuelle */
 
-/* codes d'erreur */
-#define S_h2semLib_TOO_MANY_SEM (M_h2semLib | 1)
-#define S_h2semLib_ALLOC_ERROR (M_h2semLib | 2)
-#define S_h2semLib_NOT_A_SEM (M_h2semLib | 3)
-#define S_h2semLib_TIMEOUT (M_h2semLib | 4)
-#define S_h2semLib_BAD_SEM_TYPE (M_h2semLib | 5)
-#define S_h2semLib_PERMISSION_DENIED (M_h2semLib | 6)
-#define S_h2semLib_NOT_IMPLEMENTED (M_h2semLib | 7)
-
 typedef int H2SEM_ID;
 
+/* -- ERRORS CODES ----------------------------------------------- */
+
+#include "h2errorLib.h"
+
+/* Code du module */
+#define M_h2semLib  503
+
+/* codes d'erreur */
+#define S_h2semLib_TOO_MANY_SEM      H2_ENCODE_ERR(M_h2semLib, 1)
+#define S_h2semLib_ALLOC_ERROR       H2_ENCODE_ERR(M_h2semLib, 2)
+#define S_h2semLib_NOT_A_SEM         H2_ENCODE_ERR(M_h2semLib, 3)
+#define S_h2semLib_TIMEOUT           H2_ENCODE_ERR(M_h2semLib, 4)
+#define S_h2semLib_BAD_SEM_TYPE      H2_ENCODE_ERR(M_h2semLib, 5)
+#define S_h2semLib_PERMISSION_DENIED H2_ENCODE_ERR(M_h2semLib, 6)
+#define S_h2semLib_NOT_IMPLEMENTED   H2_ENCODE_ERR(M_h2semLib, 7)
+
+#define H2_SEM_LIB_H2_ERR_MSGS { \
+    {"TOO_MANY_SEM",      H2_DECODE_ERR(S_h2semLib_TOO_MANY_SEM)},   \
+    {"ALLOC_ERROR",       H2_DECODE_ERR(S_h2semLib_ALLOC_ERROR)},  \
+    {"NOT_A_SEM",         H2_DECODE_ERR(S_h2semLib_NOT_A_SEM)},	     \
+    {"TIMEOUT",           H2_DECODE_ERR(S_h2semLib_TIMEOUT)},  \
+    {"BAD_SEM_TYPE",      H2_DECODE_ERR(S_h2semLib_BAD_SEM_TYPE)},  \
+    {"PERMISSION_DENIED", H2_DECODE_ERR(S_h2semLib_PERMISSION_DENIED)},  \
+    {"NOT_IMPLEMENTED",   H2_DECODE_ERR(S_h2semLib_NOT_IMPLEMENTED)},  \
+  }
+
+extern const H2_ERROR h2semLibH2errMsgs[]; /* = H2_SEM_LIB_H2_ERR_MSGS */
+
+
+/* -- PROTOTYPES ----------------------------------------------- */
 
 /** Creates a new H2 semaphore of the given type
  * @return ERROR on error, the semaphore id on success
  * In case of an error, errnoGet() returns the according 
  * error code
  */
+extern int h2semRecordH2ErrMsgs();
 extern H2SEM_ID h2semAlloc (int type );
 extern STATUS h2semCreate0 ( int semId, int value );
 extern STATUS h2semDelete ( H2SEM_ID sem );

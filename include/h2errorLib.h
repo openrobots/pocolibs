@@ -1,6 +1,6 @@
 /* $LAAS$ */
 /*
- * Copyright (c) 1992, 2003 CNRS/LAAS
+ * Copyright (c) 1992-2005 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -15,44 +15,159 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-/*-------------- INDIQUER L'INCLUSION DE CE FICHIER ------------------------*/
- 
+
+/* ----------------------------------------------------------------------
+ *
+ * h2errorLib -   This library manages the error codes. It provides :
+ *
+ *                . Macros to encode/decode the error codes :
+ *                      H2_ENCODE_ERR/H2_DECODE_ERR
+ *                . Functions to record {error-code/error-string} couples :
+ *                      h2recordErrMsgs();
+ *                . Functions to get the string of a given error code :
+ *                      h2perror(), h2getMsgErrno()
+ *
+ * 1/ Errors encoding : 
+ * --------------------
+ * Every error code must be unique. For that the strategy follows the
+ * vxworks like strategy : a unique M_lib number (short) must be 
+ * attributed to the library or module that exports errors, and then 
+ * each error value err (short) is coded as following : 
+ *               S_lib_error = (M_lib << 16 | err)
+ * We recommend  to use the H2_ENCODE_ERR macro to encode the error.
+ *
+ * Example :
+ *
+ *      #define M_posterLib  		    510
+ *
+ *      #define S_posterLib_POSTER_CLOSED   H2_ENCODE_ERR(M_posterLib, 0)
+ *      #define S_posterLib_NOT_OWNER       H2_ENCODE_ERR(M_posterLib, 1)
+ *
+ * 2/ Error strings declaration :
+ * ------------------------------
+ * The error code is not very readable for a human, that's why it is nice 
+ * to have a string associated to each error including the name of the  
+ * library and the name of the error (eg: "S_posterLib_NOT_OWNER" instead
+ * of 33423361 (or even 510,1)).
+ *
+ * The function h2recordErrMsgs() allows to record all the couples 
+ * {error-code/error-string}. 
+ *
+ * First, each library must export a const array of H2_ERROR structures 
+ * of {"ERR_MSG", S_lib_ERR} couples. 
+ *
+ * Example:
+ *
+ *      #define POSTER_LIB_H2_ERR_MSGS {				   \
+ *        {"POSTER_CLOSED",   H2_DECODE_ERR(S_posterLib_POSTER_CLOSED)},   \
+ *        {"NOT_OWNER",       H2_DECODE_ERR(S_posterLib_NOT_OWNER)},       \
+ *      }
+ *
+ *      extern const H2_ERROR posterLibH2errMsgs[]; 
+ *
+ * with the array initialisation in the library source code :
+ *
+ *      const H2_ERROR posterLibH2errMsgs[] = POSTER_LIB_H2_ERR_MSGS;
+ *
+ *
+ * Then the array must be recorded within h2errorLib by the user of the 
+ * library using h2recordErrMsgs() :
+ *
+ *	h2recordErrMsgs("posterInit", "posterLib", M_posterLib, 
+ *			sizeof(posterLibH2errMsgs)/sizeof(H2_ERROR), 
+ *			posterLibH2errMsgs);
+ *
+ * This function can be hiden within the initialisation function of the 
+ * library, if any. If not, we recommend to provide a dedicated function 
+ * that will be call once by the user of the library.
+ *
+ * Example :
+ *
+ *      int posterInit()  / * or posterRecordH2ErrMsgs() * /
+ *      {
+ *         return h2recordErrMsgs("posterInit", "posterLib", M_posterLib, 
+ *			   sizeof(posterLibH2errMsgs)/sizeof(H2_ERROR), 
+ *			   posterLibH2errMsgs);
+ *      }
+ *
+ * Remark : Several calls of h2recordErrMsgs() has no effect (not a problem).
+ *
+ *
+ * 3/ Utilisation
+ * --------------
+ * Just call h2perror() or h2getMsgErrno()
+ *
+ *
+ * 4/ "Standard" errors
+ * --------------------
+ * They may be several error types that are common to several libraries or 
+ * modules. For instance, all GenoM modules can raise errors like 
+ * "ACTIVITY_FAILED" or "POSTER_CLOSED". Instead of defining one such
+ * error for each module (eg, S_m1_ACTIVITY_FAILED, S_m2_ACTIVITY_FAILED)
+ * one library can define "standard" errors that will be shared.
+ *
+ * Such errors must be encoded using the macro H2_ENCODE_STD_ERR(M_lib,err) 
+ * with a M_lib library id < 2^7=128. The remaining declaration procedure 
+ * is unchanged. Eg :
+ *
+ *    #define M_stdGenom 100
+ *    #define S_stdGenom_ACTIVITY_FAILED      H2_ENCODE_STD_ERR(M_stdGenom, 3)
+ *    [...]
+ *    extern const H2_ERROR genomH2errMsgs[];
+
+ * Then the module that wants to used a standard error just has to declare
+ * it as following : 
+ *    #define S_stdGenom_demo_ACTIVITY_FAILED \
+ *            H2_ENCODE_ERR(M_mod, H2_DECODE_ERR(S_stdGenom_ACTIVITY_FAILED))
+ * 
+ * IT DOES NOT HAVE TO RECORDED IT WITH h2recordErrMsgs(). Thus do not put
+ * it in the const H2_ERROR array of the errrors of the module.
+ *
+ * ---------------------------------------------------------------------- */
+
+
 #ifndef  H2_ERROR_LIB_H
 #define  H2_ERROR_LIB_H
-
-/****************************************************************************/
-/*   LABORATOIRE D'AUTOMATIQUE ET D'ANALYSE DE SYSTEMES - LAAS / CNRS       */
-/*   PROJET HILARE II - TRAITEMENT DES ERREURS                              */
-/*   FICHIER D'EN-TETE "h2errorLib.h"                                       */
-/****************************************************************************/
- 
-/* VERSION ACTUELLE / HISTORIQUE DES MODIFICATIONS :
-   version 1.1; Dec92; sf;
-*/
-
-#include <errnoLib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 
-/* 
- * Macros pour decoder un code d'erreur "a la VxWorks"
- */
-#define H2_SOURCE_ERR(numErr)      (numErr >= 0 ? (numErr)>>16 : numErr/100*100)
-#define H2_NUMBER_ERR(numErr)      (numErr >= 0 ? ((numErr)<<16)>>16 : - numErr + numErr/100*100)
+/* -- ERRORS ENCODING -------------------------------------------------- */
 
-/* 
- * Macros pour tester l'origine d'une erreur:
+/* M_id and err are encoded on 'signed short' (ie, < 2^15 = 32768) and 'short' */
+#define H2_ENCODE_ERR(M_id,err)   (M_id << 16 | (err&0xffff))
+
+/* M_id and err are encoded on 'half signed short' (ie, < 2^7 = 128) */
+#define H2_ENCODE_STD_ERR(M_id,err) ((M_id&0xff80) || (err&0xff00) ? 0 : ((M_id&0x7f)|0x80) << 8 | (err&0xff))
+
+#define H2_TEST_STD_ERR(err) ((err) & 0x8000)
+#define H2_SOURCE_STD_ERR(numErr) ((numErr&0x7f00)>>8)
+#define H2_NUMBER_STD_ERR(numErr) (numErr&0x00ff)
+
+/* -- ERRORS DECODING ------------------------------------------------ 
+ * according to VxWorks policy
+ */
+
+
+#define H2_SOURCE_ERR(numErr)      (numErr>>16)
+#define H2_NUMBER_ERR(numErr)      (numErr&0xffff)
+#define H2_DECODE_ERR(numErr)      H2_NUMBER_ERR(numErr)
+
+/* #define H2_SOURCE_ERR(numErr)      (numErr >= 0 ? (numErr)>>16 : numErr/100*100) */
+/* #define H2_NUMBER_ERR(numErr)      (numErr >= 0 ? ((numErr)<<16)>>16 : - numErr + numErr/100*100) */
+
+
+/* -- ERRORS CLASSIFICATIONS ---------------------------------------- 
  *
  *   NUMERO SOURCE:         SOURCE:
  *         n < 0              comLib UNIX  (old version)
  *         n = 0              system
+ *     n/100 = 1              genom
  *     n/100 = 5              comLib
  *     n/100 = 6              hardLib
  *     n/100 > 6              modules
- *     n/100 = 10             modules MARTHA
  *
  */
 #define H2_SYS_ERR_FLAG(numErr)                 /* Erreur systeme */ \
@@ -67,57 +182,32 @@ extern "C" {
  (numErr >= 0 && ((numErr)>>16)/100 == 6 ? TRUE : FALSE)
 #define H2_MODULE_ERR_FLAG(numErr)              /* Erreur modules */\
  (numErr >= 0 && ((numErr)>>16)/100 > 6 ? TRUE : FALSE)
-#define H2_MARTHA_ERR_FLAG(numErr)              /* Erreur modules martha */\
- (numErr >= 0 && ((numErr)>>16)/100 == 10 ? TRUE : FALSE)
 
-/*
- * Tableau de code d'erreur
- */
-typedef struct {
-  char *errorName;           /* Nom de l'erreur */
-  int errorNum;              /* Numero de l'erreur */
-} H2_FAILED_STRUCT, *H2_FAILED_STRUCT_ID;
+/* -- ERRORS STRUCTURES --------------------------------------------- */
 
-/*
- * Tableau des sources d'erreurs (ie bibliotheque ou module)
- */
-typedef struct {
-  char *sourceName;                /* Nom de la source */
-  int sourceNum;                   /* Numero de la source */
-  H2_FAILED_STRUCT_ID tabErrors;   /* Pointeur sur son tableau des erreurs */
-  int nbErrors;                    /* Nombre d'erreurs associees */
-} H2_SOURCE_FAILED_STRUCT, *H2_SOURCE_FAILED_STRUCT_ID;
-  
+typedef struct H2_ERROR {
+  const char *name;           /* error name (without source name) */
+  const short num;            /* error number (without source num) */
+} H2_ERROR;
 
-/*---------------- PROTOTYPES DES FONCTIONS EXTERNES -----------------------*/
+#include <errnoLib.h>
 
+
+/*---------------- PROTOTYPES of EXPORTED FUNCTIONS -----------------------*/
+
+int h2recordErrMsgs(char *bywho, char *moduleName, short moduleId, 
+		    int nbErrors, const H2_ERROR errMsgs[]);
 void h2printErrno(int numErr);
 void h2perror(char *string);
-char const * h2getMsgErrno(int numErr);
+char * h2getMsgErrno(int fullError, char *string, int maxLength);
+short h2decodeError(int error, short *num, 
+		    short *srcStd, short *numStd);
+void h2listModules();
+void h2listErrors();
 
-/*************************************************************
- * DESCRIPTION de h2printErrno
- *
- * Cette fonction permet de decoder un numero d'erreur et d'afficher le 
- * message correspondant s'il s'agit d'une erreur de module repertorie'e 
- * dans h2errorList.h. S'il s'agit d'une erreur systeme, elle fait appele 
- * aux fonctions specifiques.
- *
- * Pour etre repertorier les erreurs de H2 doivent etre definies selon le 
- * format VxWorks. Exemple:
- *
- * #define   M_locoMsgLib                       (704 << 16)
- * #define   S_locoMsgLib_BAD_GEO_DATA          (M_locoMsgLib | 2)
- *
- * Pour les repertorier effectivement, il faut appeler l'executable perl
- * 'h2addErrno' avec en parametre l'ensemble des fichiers (*.h) codant les 
- * modules (voir exemple dans README).
- */ 
-
-/*--------------------- fin de chargement du fichier ----------------------*/
- 
 #ifdef __cplusplus
 };
-#endif
+#endif /* __cplusplus */
 
-#endif
+/*--------------------- end file loading ----------------------*/
+#endif /* H2_ERROR_LIB_H */

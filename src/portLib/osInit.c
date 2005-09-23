@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2003 CNRS/LAAS
+ * Copyright (c) 1999, 2003-2005 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -27,6 +27,15 @@ __RCSID("$LAAS$");
 #include "symLib.h"
 #include "wdLib.h"
 
+#include "h2semLib.h"
+#include "semLib.h"
+#include "symLib.h"
+#include "smObjLib.h"
+#include "portLib.h"
+
+#include "h2devLib.h"
+#include "h2evnLib.h"
+
 /**
  ** Global initialisation of all OS-level services (VxWorks Emulation)
  **/
@@ -34,6 +43,16 @@ __RCSID("$LAAS$");
 STATUS
 osInit(int clkRate)
 {
+
+    /* init all error msgs */
+    h2evnRecordH2ErrMsgs();
+    h2devRecordH2ErrMsgs();
+    h2semRecordH2ErrMsgs();
+    semRecordH2ErrMsgs();
+    symRecordH2ErrMsgs();
+    smObjRecordH2ErrMsgs();
+    portRecordH2ErrMsgs();
+
     /* Initialize log library */
     if (logInit(0/* ignored */, 256) == ERROR) {
         return ERROR;
@@ -60,6 +79,7 @@ osInit(int clkRate)
     if (symLibInit() == ERROR) {
 	return ERROR;
     }
+
     return OK;
 }
     

@@ -35,9 +35,22 @@ __RCSID("$LAAS$");
 #endif
 
 #include "smObjLib.h"
+const H2_ERROR smObjLibH2errMsgs[] = SM_OBJ_LIB_H2_ERR_MSGS;
+
 #include "smMemLib.h"
 
 /*----------------------------------------------------------------------*/
+/*
+ * Record errors messages
+ */
+int
+smObjRecordH2ErrMsgs()
+{
+    return h2recordErrMsgs("smObjRecordH2ErrMsg", "smObjLib", M_smObjLib, 
+			   sizeof(smObjLibH2errMsgs)/sizeof(H2_ERROR), 
+			   smObjLibH2errMsgs);
+}
+
 
 /*
  * Passage d'un identificateur global (offset) a une adresse locale 

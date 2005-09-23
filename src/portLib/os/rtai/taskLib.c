@@ -22,6 +22,8 @@ __RCSID("$LAAS$");
 #include <rtai_schedcore.h>
 
 #include "portLib.h"
+const H2_ERROR portLibH2errMsgs[]  = PORT_LIB_H2_ERR_MSGS;
+
 #include "errnoLib.h"
 #include "sysLib.h"
 #include "wdLib.h"
@@ -84,6 +86,19 @@ static TASK_HOOK_LIST *deleteHooks = NULL;
 
 static STATUS	executeHooks(TASK_HOOK_LIST *list, OS_TCB *tcb);
 static void	taskCleanUp(void *tcb, int dummy);
+
+/*----------------------------------------------------------------------*/
+
+/*
+ * Record errors messages
+ */
+int
+portRecordH2ErrMsgs()
+{
+    return h2recordErrMsgs("portRecordH2ErrMsg", "portLib", M_portLib, 
+			   sizeof(portLibH2errMsgs)/sizeof(H2_ERROR), 
+			   portLibH2errMsgs);
+}
 
 /*----------------------------------------------------------------------*/
 
@@ -771,7 +786,7 @@ taskDeleteHookDelete(FUNCPTR deleteHook)
 
 /* global errno variable for errors that occur outside the context of a
  * portLib task */
-static int globalErrno = S_portLib_OK;
+static int globalErrno = OK;
 
 int
 errnoGet(void)

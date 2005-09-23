@@ -42,6 +42,7 @@ __RCSID("$LAAS$");
 #include "errnoLib.h"
 #include "gcomLib.h"
 #include "csLib.h"
+const H2_ERROR csLibH2errMsgs[] = CS_LIB_H2_ERR_MSGS;
 
 #if defined(__RTAI__) && defined(__KERNEL__)
 # define malloc(x)     kmalloc(x, GFP_KERNEL)
@@ -342,6 +343,11 @@ csMboxInit(char *mboxBaseName, /* Nom de base des boites aux lettres crees */
 	   int rcvMboxSize,    /* Taille de la boite aux lettres de requetes */
 	   int replyMboxSize)  /* Taille de la boite aux lettres de repliques*/
 {
+    /* record error msgs */
+    h2recordErrMsgs("csMboxInit", "csLib", M_csLib, 			
+		    sizeof(csLibH2errMsgs)/sizeof(H2_ERROR), 
+		    csLibH2errMsgs);
+
     /* Initialiser le module gcom */
     return gcomInit(mboxBaseName, rcvMboxSize, replyMboxSize);
 }

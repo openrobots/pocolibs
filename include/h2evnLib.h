@@ -1,6 +1,6 @@
 /* $LAAS$ */
 /*
- * Copyright (c) 1998, 2003 CNRS/LAAS
+ * Copyright (c) 1998, 2003-2005 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -22,10 +22,22 @@
 extern "C" {
 #endif
 
+/* -- ERRORS CODES ----------------------------------------------- */
+
+#include "h2errorLib.h"
 #define   M_h2evnLib                    507
 
-#define  S_h2evnLib_BAD_TASK_ID     ((M_h2evnLib << 16) | 0)
+#define  S_h2evnLib_BAD_TASK_ID     H2_ENCODE_ERR(M_h2evnLib, 0)
 
+#define H2_EVN_LIB_H2_ERR_MSGS { \
+    {"BAD_TASK_ID",     H2_DECODE_ERR(S_h2evnLib_BAD_TASK_ID)},  \
+}
+
+extern const H2_ERROR h2evnLibH2errMsgs[]; /* = H2_EVN_LIB_H2_ERR_MSGS */
+
+/* -- PROTOTYPES ----------------------------------------------- */
+
+extern int h2evnRecordH2ErrMsgs();
 extern void h2evnClear ( void );
 extern STATUS h2evnSignal ( int taskId );
 extern BOOL h2evnSusp ( int timeout );

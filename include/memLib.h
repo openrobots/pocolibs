@@ -18,9 +18,20 @@
 #ifndef _MEMLIB_H
 #define _MEMLIB_H
 
-#define M_memLib        (17 << 16)
+#error "memLib.h to be removed"
 
-#define S_memLib_NOT_ENOUGH_MEMORY              (M_memLib | 1)
- 
+/* -- ERRORS CODES ----------------------------------------------- */
+
+#include "h2errorLib.h"
+#define M_memLib        17
+
+#define S_memLib_NOT_ENOUGH_MEMORY           H2_ENCODE_ERR(M_memLib, 1)
+
+#define MEM_LIB_H2_ERR_MSGS { \
+  {"NOT_ENOUGH_MEMORY",  H2_DECODE_ERR(S_memLib_NOT_ENOUGH_MEMORY)},  \
+}
+
+extern const H2_ERROR memLibH2errMsgs[]; /* = MEM_LIB_H2_ERR_MSGS */
+
 
 #endif

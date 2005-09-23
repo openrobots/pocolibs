@@ -1,6 +1,6 @@
 /* $LAAS$ */
 /*
- * Copyright (c) 1999, 2003 CNRS/LAAS
+ * Copyright (c) 1999, 2003-2005 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -22,13 +22,24 @@
 extern "C" {
 #endif
 
-/* Code du module */
+/* -- ERRORS CODES ----------------------------------------------- */
+
+#include "h2errorLib.h"
 #define M_smObjLib (72)
 
 /* Codes d'erreur */
-#define S_smObjLib_SHMGET_ERROR ((M_smObjLib << 16) | 10)
-#define S_smObjLib_SHMAT_ERROR  ((M_smObjLib << 16) | 11)
+#define S_smObjLib_SHMGET_ERROR H2_ENCODE_ERR(M_smObjLib, 10)
+#define S_smObjLib_SHMAT_ERROR  H2_ENCODE_ERR(M_smObjLib, 11)
 
+#define SM_OBJ_LIB_H2_ERR_MSGS { \
+    {"SHMGET_ERROR", H2_DECODE_ERR(S_smObjLib_SHMGET_ERROR)},  \
+    {"SHMAT_ERROR",  H2_DECODE_ERR(S_smObjLib_SHMAT_ERROR)},  \
+}
+
+extern const H2_ERROR smObjLibH2errMsgs[]; /* = SM_OBJ_LIB_H2_ERR_MSGS */
+
+/* -- PROTOTYPES ----------------------------------------------- */
+int smObjRecordH2ErrMsgs();
 void *smObjGlobalToLocal(void *globalAdrs);
 void *smObjLocalToGlobal(void *localAdrs);
 
@@ -36,4 +47,4 @@ void *smObjLocalToGlobal(void *localAdrs);
 };
 #endif
 
-#endif
+#endif /* _SMOBJLIB_H */

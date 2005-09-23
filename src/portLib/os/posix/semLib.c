@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2003 CNRS/LAAS
+ * Copyright (c) 1999, 2003-2005 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -23,9 +23,10 @@ __RCSID("$LAAS$");
 #include "portLib.h"
 #include "wdLib.h"
 #include "errnoLib.h"
-#include "objLib.h"
 #include "tickLib.h"
+
 #include "semLib.h"
+const H2_ERROR semLibH2errMsgs[]   = SEM_LIB_H2_ERR_MSGS;
 
 #include <semaphore.h>
 
@@ -38,6 +39,16 @@ struct SEM_ID {
    } v;
 };
 
+/*
+ * Record errors messages
+ */
+int
+semRecordH2ErrMsgs()
+{
+    return h2recordErrMsgs("semRecordH2ErrMsg", "semLib", M_semLib, 
+			   sizeof(semLibH2errMsgs)/sizeof(H2_ERROR), 
+			   semLibH2errMsgs);
+}
 
 /*
  * Create and initialize a binary semaphore 
@@ -216,7 +227,7 @@ semTake(SEM_ID semId, int timeout)
 	 }
 	 if (status != 0) {
 	    if (errno == e) {
-		errnoSet(S_objLib_OBJ_TIMEOUT);
+		errnoSet(S_semLib_TIMEOUT);
 		return ERROR;
 	    } else {
 		return ERROR;
@@ -242,7 +253,7 @@ semTake(SEM_ID semId, int timeout)
 	   if (status != 0) {
 		if (errno == EINTR) {
 		    if (tickGet() - ticks > timeout) {
-			errnoSet(S_objLib_OBJ_TIMEOUT);
+			errnoSet(S_semLib_TIMEOUT);
 			wdDelete(timer);
 			return ERROR;
 		    } else {

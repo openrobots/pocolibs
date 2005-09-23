@@ -39,6 +39,8 @@ __RCSID("$LAAS$");
 #include "wdLib.h"
 #include "h2timerLib.h"
 
+const H2_ERROR h2timerLibH2errMsgs[] = H2_TIMER_LIB_H2_ERR_MSGS;
+
 /* #define COMLIB_DEBUG_H2TIMERLIB */
 
 #ifdef COMLIB_DEBUG_H2TIMERLIB
@@ -103,6 +105,12 @@ h2timerInit(void)
     wdStart (timerWd, 1, (FUNCPTR) timerInt, 0);
 
     LOGDBG(("comLib:h2timerLib:h2timerInit: ---end\n"));
+
+
+    /* record errors msg */
+    h2recordErrMsgs("h2timerInit", "h2timerLib", M_h2timerLib, 
+		    sizeof(h2timerLibH2errMsgs)/sizeof(H2_ERROR), 
+		    h2timerLibH2errMsgs);
 
     h2timerInited = TRUE;
     return OK;

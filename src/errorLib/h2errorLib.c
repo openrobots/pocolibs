@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1992, 2003 CNRS/LAAS
+ * Copyright (c) 1992, 2005 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -13,23 +13,10 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-/****************************************************************************/
-/*   LABORATOIRE D'AUTOMATIQUE ET D'ANALYSE DE SYSTEMES - LAAS / CNRS       */
-/*   PROJET HILARE II - BIBLIOTHEQUE DES ERREURS                           */
-/*   FICHIER D'EN-TETE "h2errorLib.c"                                      */
-/****************************************************************************/
- 
-/* VERSION ACTUELLE / HISTORIQUE DES MODIFICATIONS :
-   version 1.1; Dec92; sf; 1ere version;
-*/
- 
-/* DESCRIPTION :
-   Fichier d'en-tete de la bibliotheque de fonctions qui permettent 
-   l'utilisation de l'agent locamotion par les autres agents du systeme,
-   au moyen de messages.
-*/
 
-/*-------------------------- INCLUSIONS ------------------------------------*/
+/* ----------------------- INCLUSIONS ------------------------------- */
+
+#define VERBOSE 0
  
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
@@ -45,227 +32,345 @@ __RCSID("$LAAS$");
 #else
 # include <stdio.h>
 # include <string.h>
+# include <stdlib.h>
 #endif
 
 #include "errnoLib.h"
 #include "h2errorLib.h"
 
-/* Liste des erreurs obtenue par l'executable perl: h2findErrno.pl */
-#include "h2errorList.h"
+/* ---------------------------- STRUCTURES  ----------------------------- */
+/* Description of the errors of one module or lib */
+typedef struct H2_MODULE_ERRORS {
+  char *name;  /* name of the module */
+  int id;         /* id of the module (must be unique) */
+  int nbErrors;   /* number of errors for this module */
+  const H2_ERROR *errorsArray;  /* array of the errors */
+} H2_MODULE_ERRORS;
 
+typedef struct H2_MOD_ERRORS_LIST {
+  H2_MODULE_ERRORS modErrors;
+  struct H2_MOD_ERRORS_LIST *next;
+} H2_MOD_ERRORS_LIST;
 
-/*------------------- PROTOTYPES DES FONCTIONS INTERNES --------------------*/
+/* ------------------------- GLOBAL VARIABLES  -------------------------- */
+/* the list of the recorded errors */
+static H2_MOD_ERRORS_LIST *modErrorsList;
+
+/* ----------------- PROTOTYPES OF INTERNAL FUNCTIONS -------------------- */
  
-static int findSourceId(int source);
-static int findErrorId(int sourceId, int err);
+static const H2_ERROR * findErrorId(const H2_MODULE_ERRORS *modErrors, short error);
+static const H2_MODULE_ERRORS * findSourceId(short source);
+static H2_MOD_ERRORS_LIST * allocModErrorsElt(char *moduleName, int moduleId, 
+					      int nbErrors, 
+					      const H2_ERROR errors[]);
  
-/*------------------------- VARIABLES GLOBALES --------------------------*/
-/* message d'erreur */
-static char h2msgErrno[1024];
+/* -----------------------------------------------------------------
+ *
+ * h2recordErrMsgs - Record a new *H2_MODULE_ERRORS
+ *
+ *
+ * returns : 1 if recorded, or else 0
+ */
+int
+h2recordErrMsgs(char *bywho,
+		char *moduleName, short moduleId, 
+		int nbErrors, const H2_ERROR errors[])
+{
+  H2_MOD_ERRORS_LIST *last=modErrorsList;
+  H2_MOD_ERRORS_LIST *prev;
+  H2_MOD_ERRORS_LIST *smaller=NULL, *tmp;
+  int sameId, sameName;
 
-/*--------------------------------------------------------------------------*/
+  /* create list */
+  if (!modErrorsList) {
+    if (!(modErrorsList=allocModErrorsElt(moduleName, moduleId, 
+					  nbErrors, errors))) {
+      printf ("h2recordErrMsgs by %-20s error: cannot alloc errors\n",
+	      bywho?bywho:"?");
+      return 0;
+    }
+#if VERBOSE > 1
+    printf("h2recordErrMsgs by %-20s: module id  %5d  M_%-16s\n",
+	   bywho?bywho:"?", moduleId, moduleName);
+#endif
+    return 1;
+  }
 
-/*****************************************************************************
+  /* look for last elt */
+  prev = last;
+  do {
+    sameId = last->modErrors.id == moduleId;
+    sameName = strcmp(last->modErrors.name, moduleName) ? 0 : 1;
+
+    /* id already recorded */
+    if (sameId) {
+      if (sameName) {
+#if VERBOSE > 0
+	printf ("h2recordErrMsgs by %-20s info: M_%s (%d) already recorded\n",
+		bywho?bywho:"?", last->modErrors.name, last->modErrors.id);
+#endif
+      }
+      else {
+	printf ("h2recordErrMsgs by %-20s error: %d already recorded for M_%s\n",
+		bywho?bywho:"?", last->modErrors.id, last->modErrors.name);
+      }
+      return 1;
+    }
+
+    /* name already recorded */
+    else if (sameName) {
+      printf ("h2recordErrMsgs by %-20s warning: M_%s already recorded with id %d\n",
+	      bywho?bywho:"?", last->modErrors.name, last->modErrors.id);
+    }
+
+    /* test if number smaller */
+    if (last->modErrors.id < moduleId) {
+      smaller = last;
+    }
+    prev = last;
+    last = last->next;
+  }while (last);
+
+  /* record new elt */
+  if (!(tmp=allocModErrorsElt(moduleName, moduleId, nbErrors, errors)))
+    return 0;
+
+  /* insert in list */
+  if (!smaller) {
+    tmp->next = modErrorsList;
+    modErrorsList = tmp;
+  }
+  else {
+    tmp->next = smaller->next;
+    smaller->next = tmp;
+  }
+
+#if VERBOSE > 1
+  printf("h2recordErrMsgs by %-20s: module id  %5d  M_%-16s\n",
+	 bywho?bywho:"?", moduleId, moduleName);
+#endif
+
+  return 1;
+}
+
+/* -----------------------------------------------------------------
+ *
+ * allocModErrorsElt
+ *
+ */
+static H2_MOD_ERRORS_LIST * 
+allocModErrorsElt(char *moduleName, int moduleId, 
+		  int nbErrors, const H2_ERROR errors[])
+{
+  H2_MOD_ERRORS_LIST *elt;
+
+  if (!(elt=malloc(sizeof(H2_MOD_ERRORS_LIST)))) {
+    printf ("h2recordErrMsgs: cannot alloc errors\n");
+    return NULL;
+  }
+  elt->modErrors.name = strdup(moduleName);
+  elt->modErrors.id = moduleId;
+  elt->modErrors.nbErrors = nbErrors;
+  elt->modErrors.errorsArray = errors;
+  elt->next = NULL;
+  return elt;
+}
+
+/* --------------------------------------------------------------------
  *
  *  h2printErrno - 
  *
- *  Description: Affiche le message d'erreur correspondant au numero d'erreur
+ *  Description: print message corresponding to the error number
  *
- *  Retourne: rien
+ *  Returns: nothing
  */
  
 void 
 h2printErrno(int numErr)
 {
-  logMsg(h2getMsgErrno(numErr));
+  char string[256];
+  logMsg(h2getMsgErrno(numErr, string, 256));
   logMsg("\n");
 }
 
+/* --------------------------------------------------------------------
+ *
+ *  h2perror - like perror for the errors recorded with h2addErrno
+ *
+ *  Returns: nothing
+ */
+ 
+
 void 
-h2perror(char *string)
+h2perror(char *inString)
 {
-  if (string && string[0])
-    logMsg("%s: %s\n", string, h2getMsgErrno(errnoGet()));
+  char outString[256];
+
+  if (inString && inString[0])
+    logMsg("%s: %s\n", inString, h2getMsgErrno(errnoGet(), outString, 256));
   else
-    logMsg("%s\n", h2getMsgErrno(errnoGet()));
+    logMsg("%s\n", h2getMsgErrno(errnoGet(), outString, 256));
 }
 
-/*****************************************************************************
+/* -----------------------------------------------------------------
  *
- *  h2listModules - 
+ *  h2getMsgErrno - fillin string with error msg
  *
- *  Description: Affiche la liste des modules references.
- *
- *  Retourne: rien
+ *  Returns: string 
  */
- 
-void 
-h2listModules(void)
+
+char * h2getMsgErrno(int fullError, char *string, int maxLength)
 {
-  int nbSources = (int) ( sizeof(H2_SOURCE_TAB_FAIL)
-			 /sizeof(H2_SOURCE_FAILED_STRUCT) );
-  int i;
-  int sourceNum;
-  int prev;
+  short numErr, source, srcStd, numStd;
+  const H2_MODULE_ERRORS *modErrors;
+  const H2_MODULE_ERRORS *modStdErrors;
+  const H2_ERROR *error;
 
-  logMsg ("\t -- Number attribution --\n"
-          "\t 0              system\n"
-	  "\t 5??            comLib\n"
-	  "\t 6??            hardLib\n"
-	  "\t 7?? 8?? 9??    modules H2\n"
-	  "\t10??            modules MARTHA\n");
+  /* "OK" */
+  if (fullError == 0) {
+    strncpy(string, "OK", maxLength);
+    return(string);
+  }
 
-  prev = H2_SOURCE_TAB_FAIL[0].sourceNum;
-  for (i=0; i<nbSources; i++) {
-    sourceNum = H2_SOURCE_TAB_FAIL[i].sourceNum;
-    if( sourceNum > 699 && 
-	((sourceNum/10.) - (double)(int)(sourceNum/10) < 0.1000001) &&
-	(int)(sourceNum-prev) != 1) {
-      logMsg("%d  %s\n",   
-	     H2_SOURCE_TAB_FAIL[i].sourceNum, 
-	     H2_SOURCE_TAB_FAIL[i].sourceName);
-      prev = sourceNum;
+  /* decode error */
+  source = h2decodeError(fullError, &numErr, &srcStd, &numStd);
+
+  /* find out module source */
+  if (!(modErrors = findSourceId(source))) {
+    snprintf (string, maxLength, "S_%d_%d", source, numErr);
+    return(string);
+  }
+
+  /* find out standard error */
+  if (numErr<0) {
+
+    /* find out std source */
+    if (!(modStdErrors = findSourceId(srcStd))) {
+      snprintf (string, maxLength, "S_%d_%s_%d", 
+		srcStd, modErrors->name, numStd);
+      return(string);
     }
+    /* find out std err */
+    if(!(error = findErrorId(modStdErrors, numErr))) {
+      snprintf (string, maxLength, "S_%s_%s_%d", 
+		modStdErrors->name, modErrors->name, numStd);
+      return(string);
+    }
+    snprintf (string, maxLength, "S_%s_%s_%s", 
+	      modStdErrors->name, modErrors->name, error->name); 
+    return(string);
   }
-    
+
+  /* Look for error within given source */
+  if (!(error = findErrorId(modErrors, numErr))) {
+    snprintf (string, maxLength, "S_%s_%d", modErrors->name, numErr);
+    return(string);    
+  }
+
+  /* Find out */
+  snprintf (string, maxLength, "S_%s_%s", modErrors->name, error->name);
+  return(string);
 }
 
-/*****************************************************************************
+/* -----------------------------------------------------------------
  *
- *  h2getMsgErrno - Obtention d'un message d'erreur
+ * h2decodeError
  *
- *  Description: Retourne un char* sur la chaine de caractere 
- *               correspondant au numero d'erreur. 
- *
- *  Retourne: rien
  */
- 
-char const * 
-h2getMsgErrno(int numErr)
+short h2decodeError(int error, short *num, 
+		    short *srcStd, short *numStd)
 {
-  int source;         /* Numero tache ou  bibliotheque origine de l'erreur */
-  int erreur;         /* Numero de l'erreur */
-  H2_FAILED_STRUCT_ID tabErr;
-  int sourceId, errorId;
-
-  if (numErr == 0) {
-    sprintf (h2msgErrno, "OK");
-    return(h2msgErrno);
+  short source;
+  source = H2_SOURCE_ERR(error);
+  *num = H2_NUMBER_ERR(error);
+  if (*num<0) {
+    *srcStd = H2_SOURCE_STD_ERR(*num);
+    *numStd = H2_NUMBER_STD_ERR(*num);
   }
-
-  /* Decode */
-  source = H2_SOURCE_ERR(numErr);
-  erreur = H2_NUMBER_ERR(numErr);
-  
-  /* 
-   * Erreurs systeme
-   */
-  /* Erreurs standards (source == 0) */
-  if (H2_SYS_ERR_FLAG(numErr)) {
-#if defined(__RTAI__) && defined(__KERNEL__)
-    sprintf(h2msgErrno, "system error %d", numErr);
-    return(h2msgErrno);
-#else
-    return(strerror(numErr));
-#endif
+  else {
+    *srcStd = 0;
+    *numStd = 0;
   }
+  return source;
+}
 
-  /* Erreurs vxworks (source < 100) */
-#ifdef VXWORKS
-  /* Rem: si on est sur UNIX les erreurs vxworks sont recupere'es 
-     par le tableau d'erreur h2 */
-  if (H2_VX_ERR_FLAG(numErr)) 
-    return(strerror(numErr));
-#endif
+/* -----------------------------------------------------------------
+ *
+ * h2listModules
+ *
+ */
+void h2listModules()
+{
+  H2_MOD_ERRORS_LIST *elt=modErrorsList;
+  while(elt) {
+    printf ("Module id  %5d  M_%-16s  (%2d errors)\n", 
+	    elt->modErrors.id, elt->modErrors.name, elt->modErrors.nbErrors);
+    elt=elt->next;
+  }
+}
 
-      
-  /* 
-   * Autres erreurs (source > 100)
-   */
-  /* Recherche de la source */
-  sourceId = findSourceId(source);
-    
-  /* Source inconnue */
-  if (sourceId == -1) {
-    sprintf(h2msgErrno, "source %d error %d (unknown source)", 
-	    source, erreur);
-    return(h2msgErrno);
+/* -----------------------------------------------------------------
+ *
+ * h2listErrors
+ *
+ */
+void h2listErrors()
+{
+  H2_MOD_ERRORS_LIST *elt=modErrorsList;
+  int i;
+
+  while(elt) {
+    printf ("Module id  %5d  M_%-16s  (%2d errors)\n", 
+	    elt->modErrors.id, elt->modErrors.name, elt->modErrors.nbErrors);
+    for (i=0; i<elt->modErrors.nbErrors; i++) {
+      printf ("    %2d %s \n", 
+	      elt->modErrors.errorsArray[i].num,
+	      elt->modErrors.errorsArray[i].name);
+    }
+    elt=elt->next;
   }
- 
-  /* Recherche de l'indice de l'erreur dans le tableau */
-  errorId = findErrorId(sourceId, erreur);
-  
-  /* Erreur inconnue */
-  if (errorId == -1) {
-    sprintf (h2msgErrno, "%s: unknown error %d", 
-	     H2_SOURCE_TAB_FAIL[sourceId].sourceName, erreur); 
-    return(h2msgErrno);
-  }
-  
-  /* On recupere le tableau d'erreurs */
-  tabErr = H2_SOURCE_TAB_FAIL[sourceId].tabErrors;
-    
-  /* Message trouve */
-  return(tabErr[errorId].errorName);
 }
 
 
 /*--------------------- FONCTIONS INTERNES ---------------------------------*/
 
 
-/******************************************************************************
-*
-*  findSourceId - Recherche de l'indice de la source dans le tableau d'erreur
-*
-*  Description: 
-*
-*  Retourne: Indice de tableau ou -1
-*/
+/* --------------------------------------------------------------------
+ *
+ *  findSourceId - Recherche de l'indice de la source dans le tableau d'erreur
+ *
+ *  Description: 
+ *
+ *  Returns: Indice de tableau ou -1
+ */
  
-static int findSourceId(int source)
+static const H2_MODULE_ERRORS * findSourceId(short source)
 
 {
-  int nbSources = (int) ( sizeof(H2_SOURCE_TAB_FAIL)
-			 /sizeof(H2_SOURCE_FAILED_STRUCT) );
-  int i;
-
-  /* Cherche de l'indice du tableau  correspondante a la source */
-  for(i=0; i<nbSources; i++) 
-    if (H2_SOURCE_TAB_FAIL[i].sourceNum == source) 
-      return(i);
-  
-  return(-1);
-  
+  H2_MOD_ERRORS_LIST *elt=modErrorsList;
+  while(elt) {
+    if (elt->modErrors.id == source)
+      return &elt->modErrors;
+    elt = elt->next;
+  }
+  return NULL;
 }
 
-/******************************************************************************
-*
-*  findErrorId - Recherche de l'indice de l'erreur dans le tableau d'erreur
-*
-*  Description: 
-*
-*  Retourne: Indice de tableau ou -1
-*/
+/* --------------------------------------------------------------------
+ *
+ *  findErrorId - Recherche de l'indice de l'erreur dans le tableau d'erreur
+ *
+ *  Description: 
+ *
+ *  Returns: Indice de tableau ou -1
+ */
  
-static int findErrorId(int sourceId, int error)
-
+static const H2_ERROR * findErrorId(const H2_MODULE_ERRORS *modErrors, short error)
 {
-  int nbErr;
   int i;
-  H2_FAILED_STRUCT_ID tabErr;
-
-  /* Pointeur sur tableau d'erreurs de la source */
-  tabErr = H2_SOURCE_TAB_FAIL[sourceId].tabErrors;
-  nbErr = H2_SOURCE_TAB_FAIL[sourceId].nbErrors;
-
-  /* Cherche l'indice du tableau  correspondant a la source */
-  for(i=0; i<nbErr; i++) 
-    if (tabErr[i].errorNum == error) 
-      return(i);
-  
-  return(-1);
-  
+  for (i=0; i<modErrors->nbErrors; i++) {
+    if (modErrors->errorsArray[i].num == error)
+      return &(modErrors->errorsArray[i]);
+  }
+  return NULL;
 }
-
-
-

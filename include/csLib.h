@@ -1,6 +1,6 @@
 /* $LAAS$ */
 /*
- * Copyright (c) 1991, 2003 CNRS/LAAS
+ * Copyright (c) 1991-2005 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -56,18 +56,33 @@ extern "C" {
 /* Flag d'indication d'initialisation d'un client */
 #define  CS_CLIENT_INIT_FLAG           0x66554433
 
-#define   M_csLib                      (512 << 16)
+/* -- ERRORS CODES ----------------------------------------------- */
+
+#include "h2errorLib.h"
+#define   M_csLib                      512
 
 /* Codes d'erreur */
-#define  S_csLib_NOT_A_SERV            (M_csLib | 0)
-#define  S_csLib_INVALID_RQST_TYPE     (M_csLib | 1)
-#define  S_csLib_TOO_MANY_RQST_IDS     (M_csLib | 2)
-#define  S_csLib_BAD_RQST_ID           (M_csLib | 3)
-#define  S_csLib_BAD_REPLY_BILAN       (M_csLib | 4)
-#define  S_csLib_NOT_A_CLIENT          (M_csLib | 5)
-#define  S_csLib_BAD_INTERMED_FLAG     (M_csLib | 6)
-#define  S_csLib_BAD_BLOCK_TYPE        (M_csLib | 7)
+#define  S_csLib_NOT_A_SERV            H2_ENCODE_ERR(M_csLib, 0)
+#define  S_csLib_INVALID_RQST_TYPE     H2_ENCODE_ERR(M_csLib, 1)
+#define  S_csLib_TOO_MANY_RQST_IDS     H2_ENCODE_ERR(M_csLib, 2)
+#define  S_csLib_BAD_RQST_ID           H2_ENCODE_ERR(M_csLib, 3)
+#define  S_csLib_BAD_REPLY_BILAN       H2_ENCODE_ERR(M_csLib, 4)
+#define  S_csLib_NOT_A_CLIENT          H2_ENCODE_ERR(M_csLib, 5)
+#define  S_csLib_BAD_INTERMED_FLAG     H2_ENCODE_ERR(M_csLib, 6)
+#define  S_csLib_BAD_BLOCK_TYPE        H2_ENCODE_ERR(M_csLib, 7)
 
+#define CS_LIB_H2_ERR_MSGS { \
+   {"NOT_A_SERV",            H2_DECODE_ERR(S_csLib_NOT_A_SERV)},  \
+   {"INVALID_RQST_TYPE",     H2_DECODE_ERR(S_csLib_INVALID_RQST_TYPE)},	\
+   {"TOO_MANY_RQST_IDS",     H2_DECODE_ERR(S_csLib_TOO_MANY_RQST_IDS)},  \
+   {"BAD_RQST_ID",           H2_DECODE_ERR(S_csLib_BAD_RQST_ID)},  \
+   {"BAD_REPLY_BILAN",       H2_DECODE_ERR(S_csLib_BAD_REPLY_BILAN)},  \
+   {"NOT_A_CLIENT",          H2_DECODE_ERR(S_csLib_NOT_A_CLIENT)},  \
+   {"BAD_INTERMED_FLAG",     H2_DECODE_ERR(S_csLib_BAD_INTERMED_FLAG)},  \
+   {"BAD_BLOCK_TYPE",        H2_DECODE_ERR(S_csLib_BAD_BLOCK_TYPE)},  \
+     }
+
+extern const H2_ERROR csLibH2errMsgs[]; /* = CS_LIB_H2_ERR_MSGS */
 
 
 /*------------ Structures de donnees d'un serveur -----------------------*/

@@ -34,6 +34,7 @@ __RCSID("$LAAS$");
 #include "errnoLib.h"
 #include "h2devLib.h"
 #include "gcomLib.h"
+const H2_ERROR gcomLibH2errMsgs[] = GCOM_LIB_H2_ERR_MSGS;
 
 #ifdef COMLIB_DEBUG_GCOMLIB
 # define LOGDBG(x)     logMsg x
@@ -89,6 +90,11 @@ gcomInit(char *procName, int rcvMboxSize, int replyMboxSize)
     char replyMboxName[H2_DEV_MAX_NAME];
     int myTaskNum;
     
+    /* record error msgs */
+    h2recordErrMsgs("gcomInit", "gcomLib", M_gcomLib, 			
+		    sizeof(gcomLibH2errMsgs)/sizeof(H2_ERROR), 
+		    gcomLibH2errMsgs);
+
     /* Appeler la routine d'initialisation des mailboxes */
     if (mboxInit(procName) == ERROR) {
 	return ERROR;

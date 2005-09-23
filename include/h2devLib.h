@@ -18,9 +18,9 @@
 #ifndef _H2DEVLIB_H
 #define _H2DEVLIB_H
 
+#include "h2rngLib.h"
 #include "h2timeLib.h"
 #include "h2semLib.h"
-#include "h2rngLib.h"
 #include "h2endianness.h"
 
 #if defined(__LXRT__)
@@ -127,20 +127,38 @@ typedef struct H2_DEV_STR {
 /* External name for h2 devices */
 #define H2_DEV_NAME ".h2dev"
 
-/* Code for this module */
+/* -- ERRORS CODES ----------------------------------------------- */
+
+#include "h2errorLib.h"
 #define M_h2devLib   505
 
 /* Error codes */
-#define S_h2devLib_BAD_DEVICE_TYPE 		((M_h2devLib << 16) | 0)
-#define S_h2devLib_DUPLICATE_DEVICE_NAME	((M_h2devLib << 16) | 1)
-#define S_h2devLib_TOO_MANY_DEVICES             ((M_h2devLib << 16) | 2)
-#define S_h2devLib_FIND_DEVICE_TIMEOUT          ((M_h2devLib << 16) | 3)
-#define S_h2devLib_NOT_OWNER                    ((M_h2devLib << 16) | 4)
-#define S_h2devLib_NOT_INITIALIZED 		((M_h2devLib << 16) | 5)
-#define S_h2devLib_BAD_HOME_DIR			((M_h2devLib << 16) | 6)
-#define S_h2devLib_FULL				((M_h2devLib << 16) | 7)
-#define S_h2devLib_BAD_PARAMETERS		((M_h2devLib << 16) | 8)
-#define S_h2devLib_NOT_FOUND			((M_h2devLib << 16) | 9)
+#define S_h2devLib_BAD_DEVICE_TYPE 		H2_ENCODE_ERR(M_h2devLib, 0)
+#define S_h2devLib_DUPLICATE_DEVICE_NAME	H2_ENCODE_ERR(M_h2devLib, 1)
+#define S_h2devLib_TOO_MANY_DEVICES             H2_ENCODE_ERR(M_h2devLib, 2)
+#define S_h2devLib_FIND_DEVICE_TIMEOUT          H2_ENCODE_ERR(M_h2devLib, 3)
+#define S_h2devLib_NOT_OWNER                    H2_ENCODE_ERR(M_h2devLib, 4)
+#define S_h2devLib_NOT_INITIALIZED 		H2_ENCODE_ERR(M_h2devLib, 5)
+#define S_h2devLib_BAD_HOME_DIR			H2_ENCODE_ERR(M_h2devLib, 6)
+#define S_h2devLib_FULL				H2_ENCODE_ERR(M_h2devLib, 7)
+#define S_h2devLib_BAD_PARAMETERS		H2_ENCODE_ERR(M_h2devLib, 8)
+#define S_h2devLib_NOT_FOUND			H2_ENCODE_ERR(M_h2devLib, 9)
+
+#define H2_DEV_LIB_H2_ERR_MSGS { \
+  {"BAD_DEVICE_TYPE", 		H2_DECODE_ERR(S_h2devLib_BAD_DEVICE_TYPE)}, \
+  {"DUPLICATE_DEVICE_NAME", 	H2_DECODE_ERR(S_h2devLib_DUPLICATE_DEVICE_NAME)}, \
+  {"TOO_MANY_DEVICES",          H2_DECODE_ERR(S_h2devLib_TOO_MANY_DEVICES)}, \
+  {"FIND_DEVICE_TIMEOUT",       H2_DECODE_ERR(S_h2devLib_FIND_DEVICE_TIMEOUT)}, \
+  {"NOT_OWNER",                 H2_DECODE_ERR(S_h2devLib_NOT_OWNER)}, \
+  {"NOT_INITIALIZED",  		H2_DECODE_ERR(S_h2devLib_NOT_INITIALIZED)}, \
+  {"BAD_HOME_DIR", 		H2_DECODE_ERR(S_h2devLib_BAD_HOME_DIR)}, \
+  {"FULL", 			H2_DECODE_ERR(S_h2devLib_FULL)}, \
+  {"BAD_PARAMETERS", 		H2_DECODE_ERR(S_h2devLib_BAD_PARAMETERS)}, \
+  {"NOT_FOUND", 		H2_DECODE_ERR(S_h2devLib_NOT_FOUND)}, \
+  }
+
+extern const H2_ERROR h2devLibH2errMsgs[]; /* = H2_DEV_LIB_H2_ERR_MSGS */
+
 
 extern H2_DEV_STR *h2Devs;
 
@@ -176,6 +194,7 @@ extern H2_DEV_STR *h2Devs;
 /*
  * Prototypes
  */
+extern int h2devRecordH2ErrMsgs();
 extern int h2devAlloc ( char *name, H2_DEV_TYPE type );
 extern STATUS h2devAttach ( void );
 extern STATUS h2devEnd ( void );

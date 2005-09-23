@@ -22,11 +22,15 @@
 extern "C" {
 #endif
 
+/* -- STRUCTURES ----------------------------------------------- */
+
 typedef void *SYMTAB_ID;
 extern SYMTAB_ID sysSymTbl;
 
 /* Types de symboles */
 typedef int SYM_TYPE;
+
+/* -- CONSTANTS ------------------------------------------------ */
 
 #define SYM_UNDF        0x0     /* undefined */
 #define SYM_LOCAL       0x0     /* local */
@@ -36,13 +40,22 @@ typedef int SYM_TYPE;
 #define SYM_DATA        0x6     /* data */
 #define SYM_BSS         0x8     /* bss */
 
-/* Codes d'erreur */
+/* -- ERRORS CODES ----------------------------------------------- */
 
-#define M_symLib        (28 << 16)
-#define S_symLib_SYMBOL_NOT_FOUND       (M_symLib | 1)
-#define S_symLib_NOT_IMPLEMENTED	(M_symLib | 2)
+#include "h2errorLib.h"
+#define M_symLib        28
+#define S_symLib_SYMBOL_NOT_FOUND       H2_ENCODE_ERR(M_symLib, 1)
+#define S_symLib_NOT_IMPLEMENTED	H2_ENCODE_ERR(M_symLib, 2)
 
-/* Prototypes */
+#define SYM_LIB_H2_ERR_MSGS { \
+    {"SYMBOL_NOT_FOUND",  H2_DECODE_ERR(S_symLib_SYMBOL_NOT_FOUND)},  \
+    {"NOT_IMPLEMENTED",	  H2_DECODE_ERR(S_symLib_NOT_IMPLEMENTED)},  \
+}
+
+extern const H2_ERROR symLibH2errMsgs[]; /* = SYM_LIB_H2_ERR_MSGS */
+
+/* -- PROTOTYPES ----------------------------------------------- */
+int  symRecordH2ErrMsgs();
 STATUS symLibInit(void);
 STATUS symFindByName(SYMTAB_ID symTblId, char *name, char **pValue, 
 		     SYM_TYPE *pType);

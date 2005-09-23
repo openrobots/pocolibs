@@ -28,17 +28,14 @@
 extern "C" {
 #endif
 
+/* -- STRUCTURES ------------------------------------------------- */
+
 /* Flag d'indication d'initialisation de la structure */
 #define  COMMON_STRUCT_INIT_FLAG                  0x11223344
 
 /* Flag d'indication de la direction de copie */
 #define  TO                                       0
 #define  FROM                                     1
-
-#define   M_commonStructLib             (506 << 16)
-
-/* Codes d'erreur */
-#define  S_commonStructLib_ISNT_COMMON_STRUCT     (M_commonStructLib | 0)
 
 /* Definition de type de l'en-tete des structures communes de donnees */
 typedef struct {
@@ -48,8 +45,22 @@ typedef struct {
   int unused;		/* for alignment */
 } COMMON_STRUCT_HDR, *COMMON_STRUCT_ID;
 
+/* -- ERRORS CODES ----------------------------------------------- */
 
-/* prototypes */
+#include "h2errorLib.h"
+#define   M_commonStructLib    506
+
+/* Codes d'erreur */
+#define S_commonStructLib_ISNT_COMMON_STRUCT H2_ENCODE_ERR(M_commonStructLib, 0)
+
+#define COMMON_STRUCT_LIB_H2_ERR_MSGS { \
+ {"ISNT_COMMON_STRUCT", H2_DECODE_ERR(S_commonStructLib_ISNT_COMMON_STRUCT)},  \
+}
+
+extern const H2_ERROR commonStructLibH2errMsgs[]; /* = COMMON_STRUCT_LIB_H2_ERR_MSGS */
+
+/* -- PROTOTYPES ------------------------------------------------- */
+
 extern STATUS commonStructCopy ( void *pCommonStruct, int toFromFlag, 
     void *pBuf );
 extern STATUS commonStructCreate ( int len, void **pStructAdrs );

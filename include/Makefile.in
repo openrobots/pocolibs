@@ -33,7 +33,6 @@ flist=\
 	h2devLib.h		\
 	h2endianness.h		\
 	h2errorLib.h		\
-	h2errorList.h		\
 	h2evnLib.h		\
 	h2initGlob.h		\
 	h2mathLib.h		\

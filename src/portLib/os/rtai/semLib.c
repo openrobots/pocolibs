@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2003-2004 CNRS/LAAS
+ * Copyright (c) 1999, 2003-2005 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -22,7 +22,6 @@ __RCSID("$LAAS$");
 #include "portLib.h"
 #include "wdLib.h"
 #include "errnoLib.h"
-#include "objLib.h"
 #include "tickLib.h"
 #include "semLib.h"
 
@@ -44,6 +43,17 @@ struct SEM_ID {
 };
 
 extern int	sysClkTickDuration(void);
+
+/*
+ * Record errors messages
+ */
+int
+semRecordH2ErrMsgs()
+{
+    return h2recordErrMsgs("semRecordH2ErrMsg", "semLib", M_semLib, 
+			   sizeof(semLibH2errMsgs)/sizeof(H2_ERROR), 
+			   semLibH2errMsgs);
+}
 
 /*
  * Create and initialize a binary semaphore 

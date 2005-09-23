@@ -35,6 +35,10 @@ __RCSID("$LAAS$");
 
 #include "posterLibPriv.h"
 
+const H2_ERROR posterLibH2errMsgs[] = POSTER_LIB_H2_ERR_MSGS;
+const H2_ERROR remotePosterLibH2errMsgs[] = REMOTE_POSTER_LIB_H2_ERR_MSGS;
+
+
 #if defined(__RTAI__) && defined(__KERNEL__)
 # define malloc(x)     kmalloc(x, GFP_KERNEL)
 # define free(x)       kfree(x)
@@ -370,6 +374,17 @@ posterInit(void)
 	if (posterInitDone) {
 		return OK;
 	}
+
+	/* record errors msg */
+	h2recordErrMsgs("posterInit", "posterLib", M_posterLib, 
+			sizeof(posterLibH2errMsgs)/sizeof(H2_ERROR), 
+			posterLibH2errMsgs);
+
+	h2recordErrMsgs("posterInit", "remotePosterLib", M_remotePosterLib, 
+			sizeof(remotePosterLibH2errMsgs)/sizeof(H2_ERROR), 
+			remotePosterLibH2errMsgs);
+
+
 #ifndef POSTERLIB_ONLY_LOCAL
 	/* Remote posters specific init */
 	if (posterRemoteFuncs.init() != OK) {

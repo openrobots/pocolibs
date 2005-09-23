@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2003-2004 CNRS/LAAS
+ * Copyright (c) 1999, 2003-2005 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -68,6 +68,16 @@ extern SEM_ID wdMutex;
 /* not static because it is used in h2semLib */
 long int semLibGetNewName(void);
 
+/*
+ * Record errors messages
+ */
+int
+semRecordH2ErrMsgs()
+{
+    return h2recordErrMsgs("semRecordH2ErrMsg", "semLib", M_semLib, 
+			   sizeof(semLibH2errMsgs)/sizeof(H2_ERROR), 
+			   semLibH2errMsgs);
+}
 
 /*
  * Create and initialize a binary semaphore 

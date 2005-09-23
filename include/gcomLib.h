@@ -36,6 +36,8 @@
 extern "C" {
 #endif
 
+/* -- CONSTANTS ----------------------------------------------- */
+
 /* Flag d'initialisation */
 #define   GCOM_FLAG_INIT                  0x12348765
 
@@ -43,7 +45,6 @@ extern "C" {
 #define   MAX_LETTER                      617 /* 15 modules *
 					       (2*CLIENT_NMAX_RQST_ID + 1) + 2
 					       letters !! */
-
 /* Nombre max de sends paralelles */
 #define   MAX_SEND                        80
 
@@ -68,20 +69,42 @@ extern "C" {
 #define   INTERMED_REPLY                  1
 #define   FINAL_REPLY                     2
 
-#define   M_gcomLib                     (511 << 16)
+
+/* -- ERRORS CODES ----------------------------------------------- */
+
+#include "h2errorLib.h"
+#define   M_gcomLib                     (511)
 
 /* Erreurs */
-#define   S_gcomLib_ERR_MBOX_MASK         (M_gcomLib | 1)
-#define   S_gcomLib_NOT_A_LETTER          (M_gcomLib | 2)
-#define   S_gcomLib_SMALL_LETTER          (M_gcomLib | 3)
-#define   S_gcomLib_SMALL_DATA_STR        (M_gcomLib | 4)
-#define   S_gcomLib_TOO_MANY_SENDS        (M_gcomLib | 5)
-#define   S_gcomLib_ERR_SEND_ID           (M_gcomLib | 6)
-#define   S_gcomLib_TOO_MANY_LETTERS      (M_gcomLib | 7)
-#define   S_gcomLib_LETTER_NOT_OWNER      (M_gcomLib | 8)
-#define   S_gcomLib_INVALID_BLOCK_MODE    (M_gcomLib | 9)
-#define   S_gcomLib_REPLY_LETTER_TYPE     (M_gcomLib | 10)
-#define   S_gcomLib_MALLOC_FAILED         (M_gcomLib | 11)
+#define   S_gcomLib_ERR_MBOX_MASK         H2_ENCODE_ERR(M_gcomLib,  1)
+#define   S_gcomLib_NOT_A_LETTER          H2_ENCODE_ERR(M_gcomLib,  2)
+#define   S_gcomLib_SMALL_LETTER          H2_ENCODE_ERR(M_gcomLib,  3)
+#define   S_gcomLib_SMALL_DATA_STR        H2_ENCODE_ERR(M_gcomLib,  4)
+#define   S_gcomLib_TOO_MANY_SENDS        H2_ENCODE_ERR(M_gcomLib,  5)
+#define   S_gcomLib_ERR_SEND_ID           H2_ENCODE_ERR(M_gcomLib,  6)
+#define   S_gcomLib_TOO_MANY_LETTERS      H2_ENCODE_ERR(M_gcomLib,  7)
+#define   S_gcomLib_LETTER_NOT_OWNER      H2_ENCODE_ERR(M_gcomLib,  8)
+#define   S_gcomLib_INVALID_BLOCK_MODE    H2_ENCODE_ERR(M_gcomLib,  9)
+#define   S_gcomLib_REPLY_LETTER_TYPE     H2_ENCODE_ERR(M_gcomLib,  10)
+#define   S_gcomLib_MALLOC_FAILED         H2_ENCODE_ERR(M_gcomLib,  11)
+
+#define GCOM_LIB_H2_ERR_MSGS { \
+   {"ERR_MBOX_MASK",         H2_DECODE_ERR(S_gcomLib_ERR_MBOX_MASK)},  \
+   {"NOT_A_LETTER",          H2_DECODE_ERR(S_gcomLib_NOT_A_LETTER)},	\
+   {"SMALL_LETTER",          H2_DECODE_ERR(S_gcomLib_SMALL_LETTER)},	\
+   {"SMALL_DATA_STR",        H2_DECODE_ERR(S_gcomLib_SMALL_DATA_STR)},  \
+   {"TOO_MANY_SENDS",        H2_DECODE_ERR(S_gcomLib_TOO_MANY_SENDS)},  \
+   {"ERR_SEND_ID",           H2_DECODE_ERR(S_gcomLib_ERR_SEND_ID)},  \
+   {"TOO_MANY_LETTERS",      H2_DECODE_ERR(S_gcomLib_TOO_MANY_LETTERS)},  \
+   {"LETTER_NOT_OWNER",      H2_DECODE_ERR(S_gcomLib_LETTER_NOT_OWNER)},  \
+   {"INVALID_BLOCK_MODE",    H2_DECODE_ERR(S_gcomLib_INVALID_BLOCK_MODE)},  \
+   {"REPLY_LETTER_TYPE",     H2_DECODE_ERR(S_gcomLib_REPLY_LETTER_TYPE)},  \
+   {"MALLOC_FAILED",         H2_DECODE_ERR(S_gcomLib_MALLOC_FAILED)},  \
+  }
+
+extern const H2_ERROR gcomLibH2errMsgs[]; /* = GCOM_LIB_H2_ERR_MSGS */
+
+/* -- STRUCTURES ----------------------------------------------- */
 
 /* En-tete d'une lettre */
 typedef struct {
@@ -109,7 +132,8 @@ typedef struct {
 } SEND;
 
 
-/* Prototypes */
+/* -- PROTOTYPES ----------------------------------------------- */
+
 BOOL gcomLetterRcv (LETTER_ID letter, MBOX_ID *pOrigMboxId, int *pSendId, 
     int timeout);
 STATUS gcomEnd (void);

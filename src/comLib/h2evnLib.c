@@ -29,6 +29,8 @@ __RCSID("$LAAS$");
 #include "h2devLib.h"
 #include "mboxLib.h"
 #include "h2evnLib.h"
+const H2_ERROR h2evnLibH2errMsgs[] = H2_EVN_LIB_H2_ERR_MSGS;
+
 #include "errnoLib.h"
 
 #ifdef DEBUG
@@ -42,6 +44,19 @@ __RCSID("$LAAS$");
 #else
 # define LOGDBG(x)
 #endif
+
+/******************************************************************************
+ *
+ * h2evnRecordH2ErrMsgs - Record errors messages
+ *
+ */
+int
+h2evnRecordH2ErrMsgs()
+{
+    return h2recordErrMsgs("h2evnRecordH2ErrMsg", "h2evnLib", M_h2evnLib,
+			   sizeof(h2evnLibH2errMsgs)/sizeof(H2_ERROR), 
+			   h2evnLibH2errMsgs);
+}
 
 /******************************************************************************
 *

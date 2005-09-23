@@ -31,6 +31,7 @@ __RCSID("$LAAS$");
 
 #include "h2devLib.h"
 #include "h2semLib.h"		/* include semLib.h */
+const H2_ERROR h2semLibH2errMsgs[] = H2_SEM_LIB_H2_ERR_MSGS;
 
 #define COMLIB_DEBUG_H2SEMLIB
 

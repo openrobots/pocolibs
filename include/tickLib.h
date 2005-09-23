@@ -22,7 +22,7 @@
 extern "C" {
 #endif
 
-#define M_tickLib       (60 << 16)
+#define M_tickLib       60
 
 extern unsigned long long vxTicks;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2003-2004 CNRS/LAAS
+ * Copyright (c) 1999-2005 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -22,10 +22,9 @@ __RCSID("$LAAS$");
 #include "portLib.h"
 
 #include "errnoLib.h"
-#include "memLib.h"
-#include "objLib.h"
 #include "semLib.h"
 #include "wdLib.h"
+const H2_ERROR wdLibH2errMsgs[] = WD_LIB_H2_ERR_MSGS;
 
 WDOG_ID wdList = NULL;
 SEM_ID wdMutex;
@@ -33,6 +32,11 @@ SEM_ID wdMutex;
 STATUS
 wdLibInit(void)
 {
+    /* record error msgs */
+    h2recordErrMsgs("wdLibInit", "wdLib", M_wdLib, 			
+		    sizeof(wdLibH2errMsgs)/sizeof(H2_ERROR), 
+		    wdLibH2errMsgs);
+
    wdMutex = semMCreate(0);
    if (!wdMutex) return ERROR;
 
@@ -46,12 +50,12 @@ wdCreate(void)
 
     wd = kmalloc(sizeof(struct wdog), GFP_KERNEL);
     if (wd == NULL) {
-       errnoSet(S_memLib_NOT_ENOUGH_MEMORY);
+       errnoSet(S_wdLib_NOT_ENOUGH_MEMORY);
        return NULL;
     }
     wd->delay = -1;
     wd->pRoutine = NULL;
-    wd->magic = M_wdLib;
+    wd->magic = WDLIB_MAGIC;
 
     /* Insert into wdList */
     semTake(wdMutex, WAIT_FOREVER);
@@ -67,8 +71,8 @@ wdDelete(WDOG_ID wdId)
 {
     WDOG_ID wd;
 
-    if (wdId == NULL || wdId->magic != M_wdLib) {
-	errnoSet(S_objLib_OBJ_ID_ERROR);
+    if (wdId == NULL || wdId->magic != WDLIB_MAGIC) {
+	errnoSet(S_wdLib_ID_ERROR);
 	return ERROR;
     }
 
@@ -93,8 +97,8 @@ wdDelete(WDOG_ID wdId)
 STATUS
 wdStart(WDOG_ID wdId, int delay, FUNCPTR pRoutine, long parameter)
 {
-    if (wdId == NULL || wdId->magic != M_wdLib) {
-	errnoSet(S_objLib_OBJ_ID_ERROR);
+    if (wdId == NULL || wdId->magic != WDLIB_MAGIC) {
+	errnoSet(S_wdLib_ID_ERROR);
 	return ERROR;
     }
 
@@ -110,8 +114,8 @@ wdStart(WDOG_ID wdId, int delay, FUNCPTR pRoutine, long parameter)
 STATUS
 wdCancel(WDOG_ID wdId)
 {
-    if (wdId == NULL || wdId->magic != M_wdLib) {
-	errnoSet(S_objLib_OBJ_ID_ERROR);
+    if (wdId == NULL || wdId->magic != WDLIB_MAGIC) {
+	errnoSet(S_wdLib_ID_ERROR);
 	return ERROR;
     }
 

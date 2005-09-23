@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2004 
+ * Copyright (c) 2004-2005
  *      Autonomous Systems Lab, Swiss Federal Institute of Technology.
- * Copyright (c) 1990, 2003-2004 CNRS/LAAS
+ * Copyright (c) 1990, 2003-2005 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -37,6 +37,8 @@ __RCSID("$LAAS$");
 #include "mboxLib.h"
 #include "h2errorLib.h"
 #include "h2devLib.h"
+const H2_ERROR h2devLibH2errMsgs[] = H2_DEV_LIB_H2_ERR_MSGS;
+
 #include "smMemLib.h"
 #include "smObjLib.h"
 
@@ -54,6 +56,17 @@ __RCSID("$LAAS$");
 static int h2devFindAux(const char *name, H2_DEV_TYPE type);
 
 /*----------------------------------------------------------------------*/
+
+/**
+ ** Record errors messages
+ **/
+int
+h2devRecordH2ErrMsgs()
+{
+    return h2recordErrMsgs("h2devRecordH2ErrMsg", "h2devLib", M_h2devLib, 
+			   sizeof(h2devLibH2errMsgs)/sizeof(H2_ERROR), 
+			   h2devLibH2errMsgs);
+}
 
 /**
  ** Allocation d'un device h2

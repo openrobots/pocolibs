@@ -34,20 +34,34 @@ typedef int MBOX_ID;
 /* Indication de "tous les mailboxes " */
 #define   ALL_MBOX                      0
 
-/* Codes d'erreur */
+/* -- ERRORS CODES ----------------------------------------------- */
+
+#include "h2errorLib.h"
 #define M_mboxLib 508
 
-#define   S_mboxLib_MBOX_CLOSED         ((M_mboxLib << 16) | 0)
-#define   S_mboxLib_NOT_OWNER           ((M_mboxLib << 16) | 1)
-#define   S_mboxLib_BAD_IOCTL_CODE      ((M_mboxLib << 16) | 2)
-#define   S_mboxLib_MBOX_FULL           ((M_mboxLib << 16) | 3)
-#define   S_mboxLib_NAME_IN_USE         ((M_mboxLib << 16) | 4)
-#define   S_mboxLib_TOO_BIG             ((M_mboxLib << 16) | 5)
-#define   S_mboxLib_SMALL_BLOCK         ((M_mboxLib << 16) | 6)
-#define   S_mboxLib_SHORT_MESSAGE       ((M_mboxLib << 16) | 7)
+#define   S_mboxLib_MBOX_CLOSED         H2_ENCODE_ERR(M_mboxLib, 0)
+#define   S_mboxLib_NOT_OWNER           H2_ENCODE_ERR(M_mboxLib, 1)
+#define   S_mboxLib_BAD_IOCTL_CODE      H2_ENCODE_ERR(M_mboxLib, 2)
+#define   S_mboxLib_MBOX_FULL           H2_ENCODE_ERR(M_mboxLib, 3)
+#define   S_mboxLib_NAME_IN_USE         H2_ENCODE_ERR(M_mboxLib, 4)
+#define   S_mboxLib_TOO_BIG             H2_ENCODE_ERR(M_mboxLib, 5)
+#define   S_mboxLib_SMALL_BLOCK         H2_ENCODE_ERR(M_mboxLib, 6)
+#define   S_mboxLib_SHORT_MESSAGE       H2_ENCODE_ERR(M_mboxLib, 7)
 
+#define MBOX_LIB_H2_ERR_MSGS { \
+   {"MBOX_CLOSED",         H2_DECODE_ERR(S_mboxLib_MBOX_CLOSED)},  \
+   {"NOT_OWNER",           H2_DECODE_ERR(S_mboxLib_NOT_OWNER)},  \
+   {"BAD_IOCTL_CODE",      H2_DECODE_ERR(S_mboxLib_BAD_IOCTL_CODE)},  \
+   {"MBOX_FULL",           H2_DECODE_ERR(S_mboxLib_MBOX_FULL)},  \
+   {"NAME_IN_USE",         H2_DECODE_ERR(S_mboxLib_NAME_IN_USE)},  \
+   {"TOO_BIG",             H2_DECODE_ERR(S_mboxLib_TOO_BIG)},  \
+   {"SMALL_BLOCK",         H2_DECODE_ERR(S_mboxLib_SMALL_BLOCK)},  \
+   {"SHORT_MESSAGE",       H2_DECODE_ERR(S_mboxLib_SHORT_MESSAGE)},  \
+  }
 
-/* Prototypes */
+extern const H2_ERROR mboxLibH2errMsgs[]; /* = MBOX_LIB_H2_ERR_MSGS */
+
+/* -- PROTOTYPES ----------------------------------------------- */
 extern STATUS mboxCreate ( char *name, int len, MBOX_ID *pMboxId );
 extern STATUS mboxDelete ( MBOX_ID mboxId );
 extern STATUS mboxEnd ( int taskId );

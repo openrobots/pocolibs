@@ -22,7 +22,24 @@
 extern "C" {
 #endif
 
-#define M_wdLib         (34 << 16)
+/* -- ERRORS CODES ----------------------------------------------- */
+
+#include "h2errorLib.h"
+#define M_wdLib          34
+
+#define S_wdLib_ID_ERROR            H2_ENCODE_ERR(M_wdLib, 1)
+#define S_wdLib_NOT_ENOUGH_MEMORY   H2_ENCODE_ERR(M_wdLib, 2)
+
+#define WD_LIB_H2_ERR_MSGS { \
+    {"ID_ERROR",          H2_DECODE_ERR(S_wdLib_ID_ERROR)},	\
+    {"NOT_ENOUGH_MEMORY", H2_DECODE_ERR(S_wdLib_NOT_ENOUGH_MEMORY)},	\
+}
+extern const H2_ERROR wdLibH2errMsgs[];   /* = WD_LIB_H2_ERR_MSGS */ 
+
+
+/* -- STRUCTURES ----------------------------------------------- */
+
+#define WDLIB_MAGIC     (M_wdLib << 16)
 
 typedef struct wdog *WDOG_ID;
 
@@ -33,6 +50,8 @@ struct wdog {
     int delay;
     WDOG_ID next;
 };
+
+/* -- PROTOTYPES ----------------------------------------------- */
 
 extern STATUS wdLibInit ( void );
 extern WDOG_ID wdCreate ( void );

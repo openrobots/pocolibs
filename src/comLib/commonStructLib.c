@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003-2004 CNRS/LAAS
+ * Copyright (c) 1990, 2003-2005 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -39,7 +39,9 @@ __RCSID("$LAAS$");
 #endif
 
 #include "errnoLib.h"
+
 #include "commonStructLib.h"
+const H2_ERROR commonStructLibH2errMsgs[] = COMMON_STRUCT_LIB_H2_ERR_MSGS;
 
 #if defined(__RTAI__) && defined(__KERNEL__)
 # define malloc(x)	kmalloc(x, GFP_KERNEL)
@@ -137,6 +139,7 @@ __RCSID("$LAAS$");
                              * (retournee par commonStructCreate) *
 */
 
+
 /******************************************************************************
 *
 *   commonStructCreate - Creer une structure de donnees commune
@@ -157,6 +160,11 @@ commonStructCreate(int len,		/* Taille de la structure commune
     char *pStrPool;	/* memory pool address */
     int poolSize;	/* memory pool size */
     SEM_ID semId;	/* mutex semaphore */
+
+    /* record errors msg */
+    h2recordErrMsgs("commonStructCreate", "commonStructLib", M_commonStructLib, 
+		    sizeof(commonStructLibH2errMsgs)/sizeof(H2_ERROR), 
+		    commonStructLibH2errMsgs);
 
     /* Obtenir la taille du pool de memoire */
     poolSize = sizeof (COMMON_STRUCT_HDR) + len;

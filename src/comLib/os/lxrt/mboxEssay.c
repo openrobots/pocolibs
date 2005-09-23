@@ -32,7 +32,6 @@ __RCSID("$LAAS$");
 
 #ifdef VXWORKS
 #include <vxWorks.h>
-#include <memLib.h>
 #else
 #include "portLib.h"
 #endif

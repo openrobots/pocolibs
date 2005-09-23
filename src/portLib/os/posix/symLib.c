@@ -26,10 +26,21 @@ __RCSID("$LAAS$");
 #include "portLib.h"
 #include "errnoLib.h"
 #include "symLib.h"
+const H2_ERROR symLibH2errMsgs[]   = SYM_LIB_H2_ERR_MSGS;
 
 SYMTAB_ID sysSymTbl = NULL;
 
 /*----------------------------------------------------------------------*/
+/*
+ * Record errors messages
+ */
+int
+symRecordH2ErrMsgs()
+{
+    return h2recordErrMsgs("symRecordH2ErrMsg", "symLib", M_symLib, 
+			   sizeof(symLibH2errMsgs)/sizeof(H2_ERROR), 
+			   symLibH2errMsgs);
+}
 
 STATUS
 symLibInit(void)

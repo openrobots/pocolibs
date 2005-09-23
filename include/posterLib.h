@@ -1,6 +1,6 @@
 /* $LAAS$ */
 /*
- * Copyright (c) 1998, 2003 CNRS/LAAS
+ * Copyright (c) 1998, 2005 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -25,6 +25,7 @@
 extern "C" {
 #endif
 
+/* -- STRUCTURES ------------------------------------------ */
 
 /* type of operation in posterTake() */
 typedef enum {
@@ -51,44 +52,8 @@ typedef void *POSTER_ID;
 
 #define POSTER_MAGIC 0x89012345
 
-/* Module codes */
-#define M_posterLib  				510
-#define M_remotePosterLib			516
 
-/* Error codes */
-#define S_posterLib_POSTER_CLOSED (M_posterLib << 16 | 0)
-#define S_posterLib_NOT_OWNER     (M_posterLib << 16 | 1)
-#define S_posterLib_EMPTY_POSTER   (M_posterLib << 16 | 3)
-#define S_posterLib_BAD_IOCTL_CODE (M_posterLib << 16 | 4)
-#define S_posterLib_BAD_OP           (M_posterLib << 16 | 5)
-#define S_posterLib_DLOPEN		(M_posterLib << 16 | 6)
-#define S_posterLib_DLSYM		(M_posterLib << 16 | 7)
-
-#define S_posterLib_DUPLICATE_POSTER (M_posterLib << 16 | 10)
-#define S_posterLib_INVALID_PATH   (M_posterLib << 16 | 11)
-#define S_posterLib_MALLOC_ERROR  (M_posterLib << 16 | 12)
-#define S_posterLib_SHMGET_ERROR   (M_posterLib << 16 | 13)
-#define S_posterLib_SHMAT_ERROR   (M_posterLib << 16 | 14)
-#define S_posterLib_SEMGET_ERROR  (M_posterLib << 16 | 15)
-#define S_posterLib_SEMOP_ERROR   (M_posterLib << 16 | 16)
-
-/* Remote posters error codes  */
-#define S_remotePosterLib_POSTER_CLOSED        (M_remotePosterLib << 16 | 0)
-#define S_remotePosterLib_NOT_OWNER            (M_remotePosterLib << 16 | 1)
-#define S_remotePosterLib_ERR_TIME_READ        (M_remotePosterLib << 16 | 2)
-#define S_remotePosterLib_EMPTY_POSTER         (M_remotePosterLib << 16 | 3)
-#define S_remotePosterLib_BAD_IOCTL_CODE       (M_remotePosterLib << 16 | 4)
-#define S_remotePosterLib_BAD_OP               (M_remotePosterLib << 16 | 5)
-
-#define S_remotePosterLib_BAD_RPC              (M_remotePosterLib << 16 | 10)
-#define S_remotePosterLib_BAD_ALLOC            (M_remotePosterLib << 16 | 11)
-#define S_remotePosterLib_CORRUPT_DATA         (M_remotePosterLib << 16 | 12)
-#define S_remotePosterLib_BAD_PARAMS           (M_remotePosterLib << 16 | 13)
-#define S_remotePosterLib_POSTER_HOST_NOT_DEFINED (M_remotePosterLib << 16| 14)
-
-/*
- * Prototypes
- */
+/* -- PROTOTYPES ------------------------------------------ */
 
 extern STATUS posterCreate ( char *name, int size, POSTER_ID *pPosterId );
 extern STATUS posterMemCreate ( char *name, int busSpace, void *pPool, int size, POSTER_ID *pPosterId );
@@ -106,8 +71,86 @@ extern char* posterName(POSTER_ID posterId);
 /* for posterServ only ! */
 extern STATUS posterSetEndianness(POSTER_ID posterId, H2_ENDIANNESS endianness);
 
+
+/* -- ERRORS CODES ----------------------------------------------- */
+
+#include "h2errorLib.h"
+
+/* Module codes */
+#define M_posterLib  				510
+#define M_remotePosterLib			516
+
+/* Error codes */
+#define S_posterLib_POSTER_CLOSED   H2_ENCODE_ERR(M_posterLib, 0)
+#define S_posterLib_NOT_OWNER       H2_ENCODE_ERR(M_posterLib, 1)
+#define S_posterLib_EMPTY_POSTER    H2_ENCODE_ERR(M_posterLib, 3)
+#define S_posterLib_BAD_IOCTL_CODE  H2_ENCODE_ERR(M_posterLib, 4)
+#define S_posterLib_BAD_OP          H2_ENCODE_ERR(M_posterLib, 5)
+#define S_posterLib_DLOPEN	    H2_ENCODE_ERR(M_posterLib, 6)
+#define S_posterLib_DLSYM	    H2_ENCODE_ERR(M_posterLib, 7)
+
+#define S_posterLib_DUPLICATE_POSTER H2_ENCODE_ERR(M_posterLib, 10)
+#define S_posterLib_INVALID_PATH     H2_ENCODE_ERR(M_posterLib, 11)
+#define S_posterLib_MALLOC_ERROR     H2_ENCODE_ERR(M_posterLib, 12)
+#define S_posterLib_SHMGET_ERROR     H2_ENCODE_ERR(M_posterLib, 13)
+#define S_posterLib_SHMAT_ERROR      H2_ENCODE_ERR(M_posterLib, 14)
+#define S_posterLib_SEMGET_ERROR     H2_ENCODE_ERR(M_posterLib, 15)
+#define S_posterLib_SEMOP_ERROR      H2_ENCODE_ERR(M_posterLib, 16)
+#define S_posterLib_BAD_FORMAT       H2_ENCODE_ERR(M_posterLib, 17)
+
+#define POSTER_LIB_H2_ERR_MSGS { \
+    {"POSTER_CLOSED",   H2_DECODE_ERR(S_posterLib_POSTER_CLOSED)},  \
+    {"NOT_OWNER",       H2_DECODE_ERR(S_posterLib_NOT_OWNER)},      \
+    {"EMPTY_POSTER",    H2_DECODE_ERR(S_posterLib_EMPTY_POSTER)},   \
+    {"BAD_IOCTL_CODE",  H2_DECODE_ERR(S_posterLib_BAD_IOCTL_CODE)}, \
+    {"BAD_OP",          H2_DECODE_ERR(S_posterLib_BAD_OP)},	    \
+    {"DLOPEN",          H2_DECODE_ERR(S_posterLib_DLOPEN)},	    \
+    {"DLSYM",           H2_DECODE_ERR(S_posterLib_DLSYM)},	    \
+    {"DUPLICATE_POSTER", H2_DECODE_ERR(S_posterLib_DUPLICATE_POSTER)},  \
+    {"INVALID_PATH",     H2_DECODE_ERR(S_posterLib_INVALID_PATH)},  \
+    {"MALLOC_ERROR",     H2_DECODE_ERR(S_posterLib_MALLOC_ERROR)},  \
+    {"SHMGET_ERROR",     H2_DECODE_ERR(S_posterLib_SHMGET_ERROR)},  \
+    {"SHMAT_ERROR",      H2_DECODE_ERR(S_posterLib_SHMAT_ERROR)},   \
+    {"SEMGET_ERROR",     H2_DECODE_ERR(S_posterLib_SEMGET_ERROR)},  \
+    {"SEMOP_ERROR",      H2_DECODE_ERR(S_posterLib_SEMOP_ERROR)}, \
+    {"BAD_FORMAT",       H2_DECODE_ERR(S_posterLib_BAD_FORMAT)}   \
+  }
+
+extern const H2_ERROR posterLibH2errMsgs[]; /* = POSTER_LIB_H2_ERR_MSGS */
+
+/* Remote posters error codes  */
+#define S_remotePosterLib_POSTER_CLOSED    H2_ENCODE_ERR(M_remotePosterLib, 0)
+#define S_remotePosterLib_NOT_OWNER        H2_ENCODE_ERR(M_remotePosterLib, 1)
+#define S_remotePosterLib_ERR_TIME_READ    H2_ENCODE_ERR(M_remotePosterLib, 2)
+#define S_remotePosterLib_EMPTY_POSTER     H2_ENCODE_ERR(M_remotePosterLib, 3)
+#define S_remotePosterLib_BAD_IOCTL_CODE   H2_ENCODE_ERR(M_remotePosterLib, 4)
+#define S_remotePosterLib_BAD_OP           H2_ENCODE_ERR(M_remotePosterLib, 5)
+
+#define S_remotePosterLib_BAD_RPC          H2_ENCODE_ERR(M_remotePosterLib, 10)
+#define S_remotePosterLib_BAD_ALLOC        H2_ENCODE_ERR(M_remotePosterLib, 11)
+#define S_remotePosterLib_CORRUPT_DATA     H2_ENCODE_ERR(M_remotePosterLib, 12)
+#define S_remotePosterLib_BAD_PARAMS       H2_ENCODE_ERR(M_remotePosterLib, 13)
+#define S_remotePosterLib_POSTER_HOST_NOT_DEFINED H2_ENCODE_ERR(M_remotePosterLib,14)
+
+#define REMOTE_POSTER_LIB_H2_ERR_MSGS { \
+    {"POSTER_CLOSED",    H2_DECODE_ERR(S_remotePosterLib_POSTER_CLOSED)},  \
+    {"NOT_OWNER",        H2_DECODE_ERR(S_remotePosterLib_NOT_OWNER)},  \
+    {"ERR_TIME_READ",    H2_DECODE_ERR(S_remotePosterLib_ERR_TIME_READ)}, \
+    {"EMPTY_POSTER",     H2_DECODE_ERR(S_remotePosterLib_EMPTY_POSTER)},  \
+    {"BAD_IOCTL_CODE",   H2_DECODE_ERR(S_remotePosterLib_BAD_IOCTL_CODE)},  \
+    {"BAD_OP",           H2_DECODE_ERR(S_remotePosterLib_BAD_OP)},  \
+\
+    {"BAD_RPC",          H2_DECODE_ERR(S_remotePosterLib_BAD_RPC)},  \
+    {"BAD_ALLOC",        H2_DECODE_ERR(S_remotePosterLib_BAD_ALLOC)},  \
+    {"CORRUPT_DATA",     H2_DECODE_ERR(S_remotePosterLib_CORRUPT_DATA)},  \
+    {"BAD_PARAMS",       H2_DECODE_ERR(S_remotePosterLib_BAD_PARAMS)},  \
+    {"POSTER_HOST_NOT_DEFINED", H2_DECODE_ERR(S_remotePosterLib_POSTER_HOST_NOT_DEFINED)},  \
+      }
+
+extern const H2_ERROR remotePosterLibH2errMsgs[]; /* = REMOTE_POSTER_LIB_H2_ERR_MSGS */
+
 #ifdef __cplusplus
 };
 #endif
 
-#endif
+#endif /* _POSTERLIB_H */
