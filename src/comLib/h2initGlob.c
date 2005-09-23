@@ -41,9 +41,23 @@ __RCSID("$LAAS$");
  ** should be called once, before any other comLib/posterLib function
  **/
 
+/* for error msg declarations */
+#include "h2semLib.h"
+#include "h2devLib.h"
+#include "h2evnLib.h"
+#include "smObjLib.h"
+
+
 STATUS
 h2initGlob(int ticksPerSec)
 {
+
+    /* init all error msgs */
+    h2evnRecordH2ErrMsgs();
+    h2devRecordH2ErrMsgs();
+    h2semRecordH2ErrMsgs();
+    smObjRecordH2ErrMsgs();
+
     /* OS level initialization */
     if (osInit(ticksPerSec) == ERROR) {
 	return ERROR;
