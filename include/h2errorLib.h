@@ -25,7 +25,7 @@
  *                . Functions to record {error-code/error-string} couples :
  *                      h2recordErrMsgs();
  *                . Functions to get the string of a given error code :
- *                      h2perror(), h2getMsgErrno()
+ *                      h2perror(), h2getErrMsg()
  *
  * 1/ Errors encoding : 
  * --------------------
@@ -63,11 +63,10 @@
  *        {"NOT_OWNER",       H2_DECODE_ERR(S_posterLib_NOT_OWNER)},       \
  *      }
  *
- *      extern const H2_ERROR posterLibH2errMsgs[]; 
  *
  * with the array initialisation in the library source code :
  *
- *      const H2_ERROR posterLibH2errMsgs[] = POSTER_LIB_H2_ERR_MSGS;
+ *   static const H2_ERROR const posterLibH2errMsgs[] = POSTER_LIB_H2_ERR_MSGS;
  *
  *
  * Then the array must be recorded within h2errorLib by the user of the 
@@ -95,7 +94,7 @@
  *
  * 3/ Utilisation
  * --------------
- * Just call h2perror() or h2getMsgErrno()
+ * Just call h2perror() or h2getErrMsg()
  *
  *
  * 4/ "Standard" errors
@@ -113,7 +112,6 @@
  *    #define M_stdGenom 100
  *    #define S_stdGenom_ACTIVITY_FAILED      H2_ENCODE_STD_ERR(M_stdGenom, 3)
  *    [...]
- *    extern const H2_ERROR genomH2errMsgs[];
 
  * Then the module that wants to used a standard error just has to declare
  * it as following : 
@@ -199,7 +197,8 @@ int h2recordErrMsgs(char *bywho, char *moduleName, short moduleId,
 		    int nbErrors, const H2_ERROR errMsgs[]);
 void h2printErrno(int numErr);
 void h2perror(char *string);
-char * h2getMsgErrno(int fullError, char *string, int maxLength);
+char * h2getMsgErrno(int fullError); /* OBSOLET */
+char * h2getErrMsg(int fullError, char *string, int maxLength);
 short h2decodeError(int error, short *num, 
 		    short *srcStd, short *numStd);
 void h2listModules();

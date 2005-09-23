@@ -189,7 +189,7 @@ void
 h2printErrno(int numErr)
 {
   char string[256];
-  logMsg(h2getMsgErrno(numErr, string, 256));
+  logMsg(h2getErrMsg(numErr, string, 256));
   logMsg("\n");
 }
 
@@ -207,19 +207,37 @@ h2perror(char *inString)
   char outString[256];
 
   if (inString && inString[0])
-    logMsg("%s: %s\n", inString, h2getMsgErrno(errnoGet(), outString, 256));
+    logMsg("%s: %s\n", inString, h2getErrMsg(errnoGet(), outString, 256));
   else
-    logMsg("%s\n", h2getMsgErrno(errnoGet(), outString, 256));
+    logMsg("%s\n", h2getErrMsg(errnoGet(), outString, 256));
 }
 
 /* -----------------------------------------------------------------
  *
  *  h2getMsgErrno - fillin string with error msg
  *
+ *  OBSOLET and NON-REENTRANT !!
+ *  Please, now use h2getErrMsg().
+ *
+ *  Returns: string
+ */
+
+char * h2getMsgErrno(int fullError)
+{
+  static char msg[256];
+
+  h2getErrMsg(fullError, msg, 256);
+  return msg;
+}
+
+/* -----------------------------------------------------------------
+ *
+ *  h2getErrMsg - fillin string with error msg
+ *
  *  Returns: string 
  */
 
-char * h2getMsgErrno(int fullError, char *string, int maxLength)
+char * h2getErrMsg(int fullError, char *string, int maxLength)
 {
   short numErr, source, srcStd, numStd;
   const H2_MODULE_ERRORS *modErrors;
