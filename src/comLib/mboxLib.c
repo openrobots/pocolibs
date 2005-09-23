@@ -74,6 +74,11 @@ mboxInit(char *procName)		/* unused parameter procName */
 
     /* If not found, create one */
     if (dev == ERROR) {
+ 
+        /* reset error */
+        errnoSet(0);
+
+	/* alloc dev */
 	dev = h2devAlloc((char *)tName, H2_DEV_TYPE_TASK);
 	if (dev == ERROR) {
 	    return(ERROR);
