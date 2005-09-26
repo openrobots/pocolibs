@@ -337,7 +337,6 @@ AC_OUTPUT(Init.make
 	include/Makefile
 	src/portLib/Makefile
 	src/errorLib/Makefile
-	src/errorLib/h2addErrno
 	src/comLib/Makefile
 	src/posterLib/Makefile
 	src/posterLib/posterServ/Makefile
