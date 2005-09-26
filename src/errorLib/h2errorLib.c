@@ -317,7 +317,7 @@ short h2decodeError(int error, short *num,
  * h2listModules
  *
  */
-void h2listModules()
+void h2listModules(void)
 {
   H2_MOD_ERRORS_LIST *elt=modErrorsList;
   while(elt) {
@@ -332,7 +332,7 @@ void h2listModules()
  * h2listErrors
  *
  */
-void h2listErrors()
+void h2listErrors(void)
 {
   H2_MOD_ERRORS_LIST *elt=modErrorsList;
   int i;

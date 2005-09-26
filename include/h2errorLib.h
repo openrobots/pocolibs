@@ -201,8 +201,8 @@ char * h2getMsgErrno(int fullError); /* OBSOLET */
 char * h2getErrMsg(int fullError, char *string, int maxLength);
 short h2decodeError(int error, short *num, 
 		    short *srcStd, short *numStd);
-void h2listModules();
-void h2listErrors();
+void h2listModules(void);
+void h2listErrors(void);
 
 #ifdef __cplusplus
 };
