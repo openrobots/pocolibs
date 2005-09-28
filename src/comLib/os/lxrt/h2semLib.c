@@ -31,7 +31,7 @@ __RCSID("$LAAS$");
 
 #include "h2devLib.h"
 #include "h2semLib.h"		/* include semLib.h */
-const H2_ERROR h2semLibH2errMsgs[] = H2_SEM_LIB_H2_ERR_MSGS;
+static const H2_ERROR h2semLibH2errMsgs[] = H2_SEM_LIB_H2_ERR_MSGS;
 
 #define COMLIB_DEBUG_H2SEMLIB
 
@@ -48,6 +48,17 @@ extern long int semLibGetNewName(void);
 
 /* for h2semTake timeout */
 extern int	sysClkTickDuration(void);
+
+/**
+ ** Record errors messages
+ **/
+int
+h2semRecordH2ErrMsgs(void)
+{
+    return h2recordErrMsgs("h2semRecordH2ErrMsg", "h2semLib", M_h2semLib,
+			   sizeof(h2semLibH2errMsgs)/sizeof(H2_ERROR), 
+			   h2semLibH2errMsgs);
+}
 
 /*----------------------------------------------------------------------*/
 
