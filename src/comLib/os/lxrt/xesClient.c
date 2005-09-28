@@ -40,31 +40,17 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
-#ifndef VXWORKS
-#    include <stdio.h>
-#    include <errno.h>
-#    include <sys/types.h>
-#    include <sys/time.h>
-#    include <sys/socket.h>
-#    include <netinet/in.h>
-#    include <arpa/inet.h>
-#    include <netdb.h>
-#    include <ctype.h>
-#    include <string.h>
-#    include <unistd.h>
-#else
-#    include <vxWorks.h>
-#    include <socket.h>
-#    include <in.h>
-#    include <ctype.h>
-#    include <stdioLib.h>
-#    include <hostLib.h>
-#    include <sockLib.h>
-#    include <errnoLib.h>
-#    include <string.h>
-#    include <inetLib.h>
-#    include <ioLib.h>
-#endif
+#include <stdio.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <ctype.h>
+#include <string.h>
+#include <unistd.h>
 #include <stdarg.h>
 #include <stdlib.h>
 
@@ -89,21 +75,12 @@ static char *xes_host = "localhost";	/* le nom du serveur xes */
  ** Please distribute widely, but leave my name here.
  **/
 
-#ifndef VXWORKS
-extern int errno;
-#endif
-
-static int clientsock(host, port)
-     char *host;
-     int port;
+static int 
+clientsock(char *host, int port)
 {
     int	sock;
     struct sockaddr_in server;
-#ifndef VXWORKS    
-    struct hostent *hp, *gethostbyname();
-#else
-    int hp;
-#endif
+    struct hostent *hp;
     
     memset((char *)&server, sizeof(server), 0);
 
@@ -113,38 +90,18 @@ static int clientsock(host, port)
     if (isdigit(host[0]))
 	server.sin_addr.s_addr = inet_addr(host);
     else {
-#ifdef VXWORKS
-	hp = hostGetByName(host);
-	if (hp == ERROR)
-	    return -9999;
-	server.sin_addr.s_addr = (u_long) hp;
-#else
 	hp = gethostbyname(host);
 	if (hp == NULL)
 	    return -9999;
 	memcpy(&server.sin_addr, hp->h_addr, hp->h_length);
-#endif	/* VXWORKS */
-
     }
-#ifndef VXWORKS
     sock = socket(AF_INET, SOCK_STREAM, 0);
-#else
-    sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-#endif
     if (sock < 0)
-#ifndef VXWORKS	
 	return -errno;
-#else
-        return -errnoGet();
-#endif
     
     if (connect(sock, (struct sockaddr *)&server, sizeof(server)) < 0) {
 	close(sock);
-#ifndef VXWORKS
 	return -errno;
-#else
-	return -errnoGet();
-#endif
     }
     
     return sock;
@@ -155,24 +112,15 @@ static int clientsock(host, port)
 /**
  ** La fonction pour definir la machine hote de xes
  **/
-int xes_set_host(host)
-     char *host;
+int 
+xes_set_host(char *host)
 {
-#ifndef VXWORKS    
-    struct hostent *gethostbyname(), *hp = gethostbyname(host);
+    struct hostent *hp = gethostbyname(host);
 
     if (hp == NULL) {
 	xes_host = NULL;
 	return(-1);
     }
-#else
-    int hp = hostGetByName(host);
-
-    if (hp == ERROR) {
-	xes_host = NULL;
-	return(-1);
-    }
-#endif
     xes_host = (char *)malloc(strlen(host) + 1);
     if (xes_host == NULL) {
       return(-1);
@@ -205,8 +153,8 @@ xes_get_host(void)
  **                  serveur par defaut.
  ** retourne le file descriptor du socket ou -1 si erreur
  **/
-int xes_init(host)
-     char *host;
+int 
+xes_init(char *host)
 {
     int fd;
 
@@ -265,18 +213,10 @@ xes_set_title(char  *fmt, ...)
 
 #ifdef TEST
 
-#ifndef VXWORKS
-main(argc, argv)
-     int argc;
-     char *argv[];
-#else
-xes_essai(host)
-     char *host;
-#endif
+main(int argc, char *argv[])
 {
     static char buf[80];
 
-#ifndef VXWORKS
     char *host;
 
     if (argc > 1)
@@ -285,14 +225,9 @@ xes_essai(host)
 	fprintf(stderr, "syntaxe: %s <host>\n", argv[0]);
 	exit(1);
     }
-#endif /* NOT VXWORKS */
     
     if (xes_init(host) < 0) {
-#ifndef VXWORKS
 	exit (1);
-#else
-	return(-1);
-#endif	
     }
     while (1) {
 	setbuf(stdout, NULL);
@@ -304,10 +239,6 @@ xes_essai(host)
 	printf("-> %s\n", buf);
     }
 
-#ifndef VXWORKS
     exit(0);
-#else
-    return(0);
-#endif /* NOT VXWORKS */
 }
 #endif /* TEST */
