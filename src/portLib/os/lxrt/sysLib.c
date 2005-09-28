@@ -49,7 +49,7 @@ static int sysClkTickCount = 100;
 static volatile int sysClkConnected = FALSE;
 static volatile int sysClkRunning = FALSE;
 
-static int sysClkThread();
+static int sysClkThread(void);
 static long sysClkThreadId;
 
 
@@ -161,7 +161,7 @@ sysClkRateGet(void)
  * Get ticks length in internal count units
  */
 int
-sysClkTickDuration()
+sysClkTickDuration(void)
 {
    return sysClkTickCount;
 }
@@ -172,7 +172,7 @@ sysClkTickDuration()
  * run in lxrt real time mode
  */
 static int
-sysClkThread()
+sysClkThread(void)
 {
   /* to get the Id of the RT Task */
   struct rt_task_struct_t {

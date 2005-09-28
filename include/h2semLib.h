@@ -66,12 +66,12 @@ typedef int H2SEM_ID;
 
 /* -- PROTOTYPES ----------------------------------------------- */
 
+extern int h2semRecordH2ErrMsgs(void);
 /** Creates a new H2 semaphore of the given type
  * @return ERROR on error, the semaphore id on success
  * In case of an error, errnoGet() returns the according 
  * error code
  */
-extern int h2semRecordH2ErrMsgs();
 extern H2SEM_ID h2semAlloc (int type );
 extern STATUS h2semCreate0 ( int semId, int value );
 extern STATUS h2semDelete ( H2SEM_ID sem );

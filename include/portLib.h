@@ -109,7 +109,7 @@ extern "C" {
   }
 
 /* -- PROTOTYPES ----------------------------------------------- */
-int portRecordH2ErrMsgs();
+int portRecordH2ErrMsgs(void);
 extern STATUS osInit(int);
 extern void   osExit(void);
 

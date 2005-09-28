@@ -192,7 +192,7 @@ extern H2_DEV_STR *h2Devs;
 /*
  * Prototypes
  */
-extern int h2devRecordH2ErrMsgs();
+extern int h2devRecordH2ErrMsgs(void);
 extern int h2devAlloc ( char *name, H2_DEV_TYPE type );
 extern STATUS h2devAttach ( void );
 extern STATUS h2devEnd ( void );

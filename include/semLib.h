@@ -52,7 +52,7 @@ typedef struct SEM_ID_STR *SEM_ID;
 /** Record error messages
  * @return 1 or 0 if problem
  */
-int semRecordH2ErrMsgs();
+int semRecordH2ErrMsgs(void);
 
 /** Creates and initializes a binary semaphore
  * @arg options semaphore options, unused on Posix systems

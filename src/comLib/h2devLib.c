@@ -61,7 +61,7 @@ static int h2devFindAux(const char *name, H2_DEV_TYPE type);
  ** Record errors messages
  **/
 int
-h2devRecordH2ErrMsgs()
+h2devRecordH2ErrMsgs(void)
 {
     return h2recordErrMsgs("h2devRecordH2ErrMsg", "h2devLib", M_h2devLib, 
 			   sizeof(h2devLibH2errMsgs)/sizeof(H2_ERROR), 

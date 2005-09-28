@@ -51,7 +51,7 @@ static const H2_ERROR const h2evnLibH2errMsgs[] = H2_EVN_LIB_H2_ERR_MSGS;
  *
  */
 int
-h2evnRecordH2ErrMsgs()
+h2evnRecordH2ErrMsgs(void)
 {
     return h2recordErrMsgs("h2evnRecordH2ErrMsg", "h2evnLib", M_h2evnLib,
 			   sizeof(h2evnLibH2errMsgs)/sizeof(H2_ERROR), 

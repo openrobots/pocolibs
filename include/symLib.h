@@ -53,7 +53,7 @@ typedef int SYM_TYPE;
 }
 
 /* -- PROTOTYPES ----------------------------------------------- */
-int  symRecordH2ErrMsgs();
+int  symRecordH2ErrMsgs(void);
 STATUS symLibInit(void);
 STATUS symFindByName(SYMTAB_ID symTblId, char *name, char **pValue, 
 		     SYM_TYPE *pType);

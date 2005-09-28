@@ -44,7 +44,7 @@ static const H2_ERROR const smObjLibH2errMsgs[] = SM_OBJ_LIB_H2_ERR_MSGS;
  * Record errors messages
  */
 int
-smObjRecordH2ErrMsgs()
+smObjRecordH2ErrMsgs(void)
 {
     return h2recordErrMsgs("smObjRecordH2ErrMsg", "smObjLib", M_smObjLib, 
 			   sizeof(smObjLibH2errMsgs)/sizeof(H2_ERROR), 

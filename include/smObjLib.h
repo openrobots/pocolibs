@@ -37,7 +37,7 @@ extern "C" {
 }
 
 /* -- PROTOTYPES ----------------------------------------------- */
-int smObjRecordH2ErrMsgs();
+int smObjRecordH2ErrMsgs(void);
 void *smObjGlobalToLocal(void *globalAdrs);
 void *smObjLocalToGlobal(void *localAdrs);
 

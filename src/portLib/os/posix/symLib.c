@@ -35,7 +35,7 @@ SYMTAB_ID sysSymTbl = NULL;
  * Record errors messages
  */
 int
-symRecordH2ErrMsgs()
+symRecordH2ErrMsgs(void)
 {
     return h2recordErrMsgs("symRecordH2ErrMsg", "symLib", M_symLib, 
 			   sizeof(symLibH2errMsgs)/sizeof(H2_ERROR), 

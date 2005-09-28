@@ -105,7 +105,7 @@ static STATUS executeHooks(TASK_HOOK_LIST *list, OS_TCB *tcb);
  * Record errors messages
  */
 int
-portRecordH2ErrMsgs()
+portRecordH2ErrMsgs(void)
 {
     return h2recordErrMsgs("portRecordH2ErrMsg", "portLib", M_portLib, 
 			   sizeof(portLibH2errMsgs)/sizeof(H2_ERROR), 

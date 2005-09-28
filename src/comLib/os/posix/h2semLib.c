@@ -62,7 +62,7 @@ void h2semHandler(int sig)
  ** Record errors messages
  **/
 int
-h2semRecordH2ErrMsgs()
+h2semRecordH2ErrMsgs(void)
 {
     return h2recordErrMsgs("h2semRecordH2ErrMsg", "h2semLib", M_h2semLib,
 			   sizeof(h2semLibH2errMsgs)/sizeof(H2_ERROR), 

@@ -39,6 +39,7 @@ __RCSID("$LAAS$");
 #include "portLib.h"
 #include "errnoLib.h"
 #include "semLib.h"
+static const H2_ERROR const semLibH2errMsgs[]   = SEM_LIB_H2_ERR_MSGS;
 
 #define NAME_FIRST_SEM 0
 
@@ -72,7 +73,7 @@ long int semLibGetNewName(void);
  * Record errors messages
  */
 int
-semRecordH2ErrMsgs()
+semRecordH2ErrMsgs(void)
 {
     return h2recordErrMsgs("semRecordH2ErrMsg", "semLib", M_semLib, 
 			   sizeof(semLibH2errMsgs)/sizeof(H2_ERROR), 

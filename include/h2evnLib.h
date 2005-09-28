@@ -35,7 +35,7 @@ extern "C" {
 
 /* -- PROTOTYPES ----------------------------------------------- */
 
-extern int h2evnRecordH2ErrMsgs();
+extern int h2evnRecordH2ErrMsgs(void);
 extern void h2evnClear ( void );
 extern STATUS h2evnSignal ( int taskId );
 extern BOOL h2evnSusp ( int timeout );
