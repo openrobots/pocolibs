@@ -173,7 +173,9 @@ h2devInit(int smMemSize)
     key_t key;
     int i;
     int fd; 
+#if 0
     char buf[16];
+#endif
     int savedError;
 
     LOGDBG(("comLib:h2devInit: begin initialisation\n"));
