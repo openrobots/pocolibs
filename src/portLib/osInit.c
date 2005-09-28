@@ -79,7 +79,7 @@ osInit(int clkRate)
  **/
 
 void
-osExit()
+osExit(void)
 {
    sysClkDisable();
    logEnd();
