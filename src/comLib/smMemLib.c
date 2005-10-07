@@ -397,5 +397,3 @@ smMemShow(BOOL option)
 	   allocBytes/allocBlocks, "-");
 #endif
 }
-
-
