@@ -96,6 +96,9 @@ h2devInit(int smMemSize)
        errnoSet(EEXIST);
        return ERROR;
     }
+
+    h2devRecordH2ErrMsgs();
+
     key = h2devGetKey(H2_DEV_TYPE_H2DEV, 0, TRUE, NULL);
 
     h2Devs = rtai_kmalloc(key, sizeof(H2_DEV_STR)*H2_DEV_MAX);
@@ -164,6 +167,8 @@ h2devInit(int smMemSize)
 STATUS 
 h2devAttach(void)
 {
+
+   h2devRecordH2ErrMsgs();
    if (!h2Devs) errnoSet(S_h2devLib_NOT_INITIALIZED);
    return h2Devs?OK:ERROR;
 }

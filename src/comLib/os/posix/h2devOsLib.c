@@ -162,6 +162,8 @@ h2devInit(int smMemSize)
     char buf[16];
     int savedError;
     
+    h2devRecordH2ErrMsgs();
+
     key = h2devGetKey(H2_DEV_TYPE_H2DEV, 0, TRUE, &fd);
     if (key == ERROR) {
 	return ERROR;
@@ -253,6 +255,8 @@ h2devAttach(void)
     key_t key;
     int fd, n;
     char buf[16];
+
+    h2devRecordH2ErrMsgs();
 
     pthread_mutex_lock(&h2devMutex);
     if (h2Devs != NULL) {

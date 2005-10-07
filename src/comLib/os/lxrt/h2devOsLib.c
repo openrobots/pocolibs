@@ -180,6 +180,8 @@ h2devInit(int smMemSize)
 
     LOGDBG(("comLib:h2devInit: begin initialisation\n"));
 
+    h2devRecordH2ErrMsgs();
+
     key = h2devGetKey(H2_DEV_TYPE_H2DEV, 0, TRUE, &fd);
     if (key == ERROR) {
       fprintf(stderr, "h2devGetKey error\n");
@@ -310,6 +312,8 @@ h2devAttach(void)
 
    LOGDBG(("h2devLib:h2devAttach: begin (task \"%s\")\n", 
 	   taskName(taskIdSelf())));
+
+    h2devRecordH2ErrMsgs();
 
     if (h2devMutex == NULL)
       get_h2devMutex();

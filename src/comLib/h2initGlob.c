@@ -52,9 +52,8 @@ STATUS
 h2initGlob(int ticksPerSec)
 {
 
-    /* init all error msgs */
+    /* init error msgs for sub-libraries without specific init functions */
     h2evnRecordH2ErrMsgs();
-    h2devRecordH2ErrMsgs();
     h2semRecordH2ErrMsgs();
     smObjRecordH2ErrMsgs();
 
