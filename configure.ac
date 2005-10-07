@@ -260,7 +260,7 @@ AC_ARG_ENABLE(valgrind,
             [valgrind=$enableval], [valgrind=no])
 if test "x$valgrind" = "xyes"; then
     PKG_CHECK_MODULES(VALGRIND, valgrind >= 1.1, 
-        [ AC_DEFINE(VALGRIND_SUPPORT) ], [ AC_ERROR(Valgrind not present and Valgrind support requested) ])
+        [ AC_DEFINE(VALGRIND_SUPPORT) ], [ AC_MSG_ERROR(Valgrind not present and Valgrind support requested) ])
 fi
 
 AC_ARG_ENABLE(debug,
