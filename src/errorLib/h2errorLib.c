@@ -255,7 +255,7 @@ char * h2getErrMsg(int fullError, char *string, int maxLength)
 
   /* find out module source */
   if (!(modErrors = findSourceId(source))) {
-    snprintf (string, maxLength, "S_%d_%d", source, numErr);
+    snprintf (string, maxLength, "S_%d_%d", source, (numErr&0x7fff));
     return(string);
   }
 
