@@ -9,7 +9,7 @@ dnl
 dnl $LAAS$
 dnl
 AC_REVISION($LAAS$)
-AC_INIT([pocolibs],[2.1beta1],[openrobots@laas.fr])
+AC_INIT([pocolibs],[2.1],[openrobots@laas.fr])
 AC_PREREQ(2.59)
 
 AC_CANONICAL_HOST
