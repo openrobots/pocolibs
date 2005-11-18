@@ -1,3 +1,8 @@
+Version 2.1, 11 November 2005
+ 62. Some basic support for kbuild for RTAI 3.1 kernel modules 
+     (not working).
+ 61. Rework error messages handling. No more central h2errorList.
+ 60. More ANSI C prototypes in header files.
  59. Add a autogen.sh script to generate the configure script and garbage 
      collect unneeded files.
  58. Merge missing parts of lxrt support in existing files.
