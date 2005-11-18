@@ -239,7 +239,10 @@ char * h2getMsgErrno(int fullError)
 
 char * h2getErrMsg(int fullError, char *string, int maxLength)
 {
-  short numErr, source, srcStd, numStd;
+  short numErr;     /* err code (if not std) */
+  short source;     /* lib or module that has emit the err */
+  short srcStd;     /* lib or module that has defined the std err (or 0) */
+  short errStd;     /* stdErr (or 0) */
   const H2_MODULE_ERRORS *modErrors;
   const H2_MODULE_ERRORS *modStdErrors;
   const H2_ERROR *error;
@@ -251,11 +254,14 @@ char * h2getErrMsg(int fullError, char *string, int maxLength)
   }
 
   /* decode error */
-  source = h2decodeError(fullError, &numErr, &srcStd, &numStd);
+  source = h2decodeError(fullError, &numErr, &srcStd, &errStd);
 
   /* find out module source */
   if (!(modErrors = findSourceId(source))) {
-    snprintf (string, maxLength, "S_%d_%d", source, (numErr&0x7fff));
+    if (numErr<0)
+      snprintf (string, maxLength, "S_%d_std%d_%d", source, srcStd, errStd);
+    else
+      snprintf (string, maxLength, "S_%d_%d", source, numErr);
     return(string);
   }
 
@@ -264,18 +270,18 @@ char * h2getErrMsg(int fullError, char *string, int maxLength)
 
     /* find out std source */
     if (!(modStdErrors = findSourceId(srcStd))) {
-      snprintf (string, maxLength, "S_%d_%s_%d", 
-		srcStd, modErrors->name, numStd);
+      snprintf (string, maxLength, "S_%s_std%d_%d", 
+		modErrors->name, srcStd, errStd);
       return(string);
     }
     /* find out std err */
     if(!(error = findErrorId(modStdErrors, numErr))) {
       snprintf (string, maxLength, "S_%s_%s_%d", 
-		modStdErrors->name, modErrors->name, numStd);
+		modErrors->name, modStdErrors->name, errStd);
       return(string);
     }
     snprintf (string, maxLength, "S_%s_%s_%s", 
-	      modStdErrors->name, modErrors->name, error->name); 
+	      modErrors->name, modStdErrors->name, error->name); 
     return(string);
   }
 
@@ -292,24 +298,30 @@ char * h2getErrMsg(int fullError, char *string, int maxLength)
 
 /* -----------------------------------------------------------------
  *
- * h2decodeError
- *
+ * h2decodeError  -  
+ *     returns M_lib or M_stdLib, the lib that has emit the error
+ *     *err is the error code or the still composed std error
+ *     *srcStd is the lib or module that has defined the std err (or 0) 
+ *     *errStd is the emited std err (if any)
+ *     
  */
-short h2decodeError(int error, short *num, 
-		    short *srcStd, short *numStd)
+short h2decodeError(int fullError, 
+		    short *err, 
+		    short *srcStd, 
+		    short *errStd)
 {
-  short source;
-  source = H2_SOURCE_ERR(error);
-  *num = H2_NUMBER_ERR(error);
-  if (*num<0) {
-    *srcStd = H2_SOURCE_STD_ERR(*num);
-    *numStd = H2_NUMBER_STD_ERR(*num);
+  short srcEmit;
+  srcEmit = H2_SOURCE_ERR(fullError);
+  *err = H2_NUMBER_ERR(fullError);
+  if (*err<0) {
+    *srcStd = H2_SOURCE_STD_ERR(*err);
+    *errStd = H2_NUMBER_STD_ERR(*err);
   }
   else {
     *srcStd = 0;
-    *numStd = 0;
+    *errStd = 0;
   }
-  return source;
+  return srcEmit;
 }
 
 /* -----------------------------------------------------------------
