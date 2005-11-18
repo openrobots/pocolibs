@@ -29,11 +29,13 @@
  *
  * 1/ Errors encoding : 
  * --------------------
- * Every error code must be unique. For that the strategy follows the
- * vxworks like strategy : a unique M_lib number (short) must be 
- * attributed to the library or module that exports errors, and then 
- * each error value err (short) is coded as following : 
+ * Every error code must be unique. For that we follow the vxworks like 
+ * strategy : 
+ * - a unique M_lib number (short) must be attributed to the library 
+ *   or module that exports errors,
+ * - each error value err (short) is then coded as following : 
  *               S_lib_error = (M_lib << 16 | err)
+ *
  * We recommend  to use the H2_ENCODE_ERR macro to encode the error.
  *
  * Example :
@@ -48,7 +50,7 @@
  * The error code is not very readable for a human, that's why it is nice 
  * to have a string associated to each error including the name of the  
  * library and the name of the error (eg: "S_posterLib_NOT_OWNER" instead
- * of 33423361 (or even 510,1)).
+ * of 33423361 (or even (510,1)).
  *
  * The function h2recordErrMsgs() allows to record all the couples 
  * {error-code/error-string}. 
@@ -99,8 +101,8 @@
  *
  * 4/ "Standard" errors
  * --------------------
- * They may be several error types that are common to several libraries or 
- * modules. For instance, all GenoM modules can raise errors like 
+ * They may be several error types that are common to several libraries 
+ * or modules. For instance, all GenoM modules can raise errors like 
  * "ACTIVITY_FAILED" or "POSTER_CLOSED". Instead of defining one such
  * error for each module (eg, S_m1_ACTIVITY_FAILED, S_m2_ACTIVITY_FAILED)
  * one library can define "standard" errors that will be shared.
@@ -115,12 +117,17 @@
 
  * Then the module that wants to used a standard error just has to declare
  * it as following : 
- *    #define S_stdGenom_demo_ACTIVITY_FAILED \
+ *    #define S_demo_stdGenom_ACTIVITY_FAILED \
  *            H2_ENCODE_ERR(M_mod, H2_DECODE_ERR(S_stdGenom_ACTIVITY_FAILED))
  * 
  * IT DOES NOT HAVE TO RECORDED IT WITH h2recordErrMsgs(). Thus do not put
  * it in the const H2_ERROR array of the errrors of the module.
  *
+ * How it works ? To be identified std err are encoded as following :
+ *        M_lib << 16 | - M_stdLib << 8 | err
+ * thus M_lib    is encoded on a 'short' 
+ *      M_stdLib is encoded on 'half signed short'
+ *      err      is encoded on 'half short'
  * ---------------------------------------------------------------------- */
 
 
@@ -134,11 +141,16 @@ extern "C" {
 
 /* -- ERRORS ENCODING -------------------------------------------------- */
 
-/* M_id and err are encoded on 'signed short' (ie, < 2^15 = 32768) and 'short' */
+/* M_id and err are encoded on 'signed short' (ie, < 2^15 = 32768) and 'short' 
+ *               S_lib_error = (M_lib << 16 | err)
+ */
 #define H2_ENCODE_ERR(M_id,err)   (M_id << 16 | (err&0xffff))
 
-/* M_id and err are encoded on 'half signed short' (ie, < 2^7 = 128) */
-#define H2_ENCODE_STD_ERR(M_id,err) ((M_id&0xff80) || (err&0xff00) ? 0 : ((M_id&0x7f)|0x80) << 8 | (err&0xff))
+/* M_id and err are encoded on 'half signed short' (ie, < 2^7 = 128) *
+            S_lib_std_err = (M_lib << 16 | - M_stdLib << 8 | err) 
+*/
+#define H2_ENCODE_STD_ERR(M_id,err) ((M_id&0xff80) || (err&0xff00) ? 0 : \
+				     ((M_id&0x7f)|0x80) << 8 | (err&0xff))
 
 #define H2_TEST_STD_ERR(err) ((err) & 0x8000)
 #define H2_SOURCE_STD_ERR(numErr) ((numErr&0x7f00)>>8)
@@ -147,7 +159,6 @@ extern "C" {
 /* -- ERRORS DECODING ------------------------------------------------ 
  * according to VxWorks policy
  */
-
 
 #define H2_SOURCE_ERR(numErr)      (numErr>>16)
 #define H2_NUMBER_ERR(numErr)      (numErr&0xffff)
