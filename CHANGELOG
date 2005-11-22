@@ -1,4 +1,11 @@
+Version 2.2, xx xxx xxxx 
+
+ 65. Fix build problems on Darwin.
+ 64. Provide a correct day of week in H2TIME structure. 
+ 63. Fix h2timeShow() that was broken in multiple ways. 
+
 Version 2.1, 11 November 2005
+
  62. Some basic support for kbuild for RTAI 3.1 kernel modules 
      (not working).
  61. Rework error messages handling. No more central h2errorList.
