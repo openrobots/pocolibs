@@ -109,7 +109,7 @@ static int days_in_year[] =
 void
 h2timeFromTimeval(H2TIME* pTimeStr, const struct timeval* tv)
 {
-    long sec, day, month, year;
+    long sec, day, dow, month, year;
     static int day_per_month[] = 
         { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
@@ -118,6 +118,7 @@ h2timeFromTimeval(H2TIME* pTimeStr, const struct timeval* tv)
 
     sec = tv -> tv_sec;
     day  = sec / (3600 * 24); // day since 1970
+    dow = (day + 4) % 7;		/* the 1/1/70 was a Thurday */
     year = (day / 365 + 1970);        // We'll have one year difference each 4*365 years (roughly)
     day  -= days_since_epoch(year);  // day in the year
 
@@ -133,7 +134,7 @@ h2timeFromTimeval(H2TIME* pTimeStr, const struct timeval* tv)
     pTimeStr->sec    = sec % 60;
     pTimeStr->minute = (sec / 60) % 60;
     pTimeStr->hour   = (sec / 3600) % 24;
-    pTimeStr->day   = 1;
+    pTimeStr->day   = dow;
     pTimeStr->date  = day + 1;
     pTimeStr->month = month + 1;
     pTimeStr->year  = year - 1900;
@@ -201,20 +202,23 @@ h2timeShow(void)
 {
     H2TIME strTime;
     static char *dayStr [] = {
-	"lundi", "mardi", "mercredi", "jeudi",
-	"vendredi", "samedi", "dimanche"};
+	    "sunday", "monday", "tuesday", "wednesday", "thursday",
+	    "friday", "saturday"};
+    char buf[50];
 
     /* Demander la lecture de la date */
     if (h2timeGet (&strTime) != OK) {
-	logMsg ("Probleme de lecture de la date!\n");
+	logMsg ("Problem reading date/time!\n");
 	return;
     }
     
     /* Envoyer la date vers la console */
-    logMsg ("\nDate: %02d-%02d-%02d, %s, %02dh:%02dmin:%02ds\n\n", 
-	    strTime.date, strTime.month, strTime.year, 
-	    dayStr[strTime.day - 1], strTime.hour, strTime.minute, 
-	    strTime.sec);
+    snprintf(buf, sizeof(buf), 
+	"\nDate: %02u-%02u-%02u, %s, %02uh:%02umin:%02us\n\n", 
+	strTime.month, strTime.date, strTime.year + 1900, 
+	dayStr[strTime.day], strTime.hour, strTime.minute, 
+	strTime.sec);
+    logMsg(buf);
 } /* h2timeShow */
 
 /*----------------------------------------------------------------------*/
