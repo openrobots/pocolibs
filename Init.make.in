@@ -32,6 +32,7 @@
 
 prefix=         @prefix@
 exec_prefix=    @exec_prefix@
+abs_top_builddir=	@abs_top_builddir@
 
 host_cpu=	@host_cpu@
 
@@ -64,10 +65,10 @@ OSAPI=		@OSAPI@
 # Base directory of the software
 ROOTROBOTS ?= 	@prefix@
 
-PORTLIB=	-L$(top_builddir)/src/portLib   -lportLib
-COMLIB=		-L$(top_builddir)/src/comLib    -lcomLib
-POSTERLIB=	-L$(top_builddir)/src/posterLib -lposterLib
-ERRORLIB=	-L$(top_builddir)/src/errorLib  -lerrorLib
+PORTLIB=	$(abs_top_builddir)/src/portLib/libportLib.la
+COMLIB=		$(abs_top_builddir)/src/comLib/libcomLib.la
+POSTERLIB=	$(abs_top_builddir)/src/posterLib/libposterLib.la
+ERRORLIB=	$(abs_top_builddir)/src/errorLib/liberrorLib.la
 
 VALGRIND_CFLAGS= @VALGRIND_CFLAGS@
 VALGRIND_LIBS=   @VALGRIND_LIBS@
