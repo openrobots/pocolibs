@@ -43,7 +43,7 @@ all: all-os $(LIB)
 
 $(LIB): $(OBJS)
 	$(LTLD) -o $@ $(OBJS) -rpath $(LIBDIR) -R$(LIBDIR)	\
-	$(COMLIB) $(ERRORLIB) $(PORTLIB)					\
+	$(COMLIB) $(ERRORLIB) $(PORTLIB)			\
 	-version-info $(SHLIB_CURRENT):$(SHLIB_REVISION):$(SHLIB_AGE)
 
 #----------------------------------------------------------------------
