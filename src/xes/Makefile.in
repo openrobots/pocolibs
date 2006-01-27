@@ -55,7 +55,7 @@ distclean: clean
 	rm -f Makefile DEPENDANCES
 
 install:
-	$(MKINSTALLDIRS) $(BINDIR)
+	$(MKINSTALLDIRS) ${DESTDIR}$(BINDIR)
 	$(LIBTOOL) --mode=install $(INSTALL) $(PROG) ${DESTDIR}$(BINDIR)
 
 ifeq ($(findstring clean,$(MAKECMDGOALS)),)
