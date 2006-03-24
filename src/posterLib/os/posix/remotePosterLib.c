@@ -33,7 +33,7 @@ __RCSID("$LAAS$");
 #include "remotePosterLibPriv.h"
 
 /* Global variables */
-static char *posterHost;
+static const char *posterHost;
 
 static STATUS remotePosterInit(void);
 static STATUS remotePosterCreate(char *name, int size, 
@@ -111,6 +111,7 @@ remotePosterCreate(char *name,		/* Name of the device to create */
 	POSTER_CREATE_RESULT *res;
 	REMOTE_POSTER_ID remPosterId;
 	CLIENT *client;
+	pthread_key_t key;
 	
 	param.name = name;
 	param.length = size;
@@ -120,12 +121,17 @@ remotePosterCreate(char *name,		/* Name of the device to create */
 		errnoSet(S_remotePosterLib_POSTER_HOST_NOT_DEFINED);
 		return ERROR;
 	}
-	
-	client = clnt_create(posterHost, POSTER_SERV, POSTER_VERSION, "tcp");
+	/* look for thread-specific client connexion */
+	if (clientKeyFind(posterHost, &key) == -1) {
+		return(ERROR);
+	}
+	client = clientCreate(key, posterHost);
 	if (client == NULL) {
+		errnoSet(S_remotePosterLib_BAD_RPC);
 		clnt_pcreateerror("remotePosterLib/cnt_create");
 		return(ERROR);
 	}
+
 	res = poster_create_1(&param, client);
 	if (res == NULL) {
 		clnt_perror(client, "poster_create_1");
@@ -146,7 +152,8 @@ remotePosterCreate(char *name,		/* Name of the device to create */
 	}
 	
 	remPosterId->vxPosterId = (void *)res->id;
-	remPosterId->client = client;
+	remPosterId->hostname = posterHost;
+	remPosterId->key = key;
 	remPosterId->pid = getpid();
 	remPosterId->endianness = H2_LOCAL_ENDIANNESS;
 	
@@ -192,10 +199,15 @@ remotePosterWrite (POSTER_ID posterId,	/* Id of the poster */
 	POSTER_WRITE_PAR param;
 	int *res;
 	REMOTE_POSTER_ID remPosterId = (REMOTE_POSTER_ID)posterId;
+	CLIENT *client = clientCreate(remPosterId->key, remPosterId->hostname);
 	
 	if (remPosterId->pid != getpid()) {
 		errnoSet(S_remotePosterLib_NOT_OWNER);
 		return(ERROR);
+	}
+	if (client == NULL) {
+		errnoSet(S_remotePosterLib_BAD_RPC);
+		return ERROR;
 	}
 	param.id = (int)(long)remPosterId->vxPosterId;
 	param.offset = offset;
@@ -203,10 +215,10 @@ remotePosterWrite (POSTER_ID posterId,	/* Id of the poster */
 	param.data.data_val = buf;
 	param.data.data_len = nbytes;
 	
-	res = poster_write_1(&param, remPosterId->client);
+	res = poster_write_1(&param, client);
 	
 	if (res == NULL) {
-		clnt_perror(remPosterId->client, "remotePosterWrite");
+		clnt_perror(client, "remotePosterWrite");
 		return(ERROR);
 	}
 	if (*res != nbytes) {
@@ -237,6 +249,7 @@ posterFindPath(char *posterName, REMOTE_POSTER_ID *pPosterId)
 	CLIENT *client;
 	char *pp, *tmp;
 	char *posterPath = getenv("POSTER_PATH");
+	pthread_key_t key;
 	
 	if (posterPath == NULL || *posterPath == '\0') {
 		errnoSet(S_h2devLib_NOT_FOUND);
@@ -245,10 +258,16 @@ posterFindPath(char *posterName, REMOTE_POSTER_ID *pPosterId)
 	pp = strdup(posterPath);
 	for (host = strtok_r(pp, ":", &tmp); host != NULL; 
 	     host = strtok_r(NULL, ":", &tmp)) {
-		client = clnt_create(host, POSTER_SERV, POSTER_VERSION, "tcp");
 #ifdef DEBUG
 		fprintf(stderr, "posterFind: searching on %s\n", host);
 #endif
+		if (clientKeyFind(host, &key) == -1) {
+			fprintf(stderr, 
+			    "posterFindPath: %s: clientKeyFind failed\n", 
+			    host);
+			continue;
+		}
+		client = clientCreate(key, host);
 		if (client != NULL) {
 			res = poster_find_1(&posterName, client);
 			if (res != NULL && res->status == POSTER_OK) {
@@ -259,7 +278,8 @@ posterFindPath(char *posterName, REMOTE_POSTER_ID *pPosterId)
 					return(ERROR);
 				}
 				(*pPosterId)->vxPosterId = (void *)(long)(res->id);
-				(*pPosterId)->client = client;
+				(*pPosterId)->key = key;
+				(*pPosterId)->hostname = host;
 				(*pPosterId)->dataSize = res->length;
 				(*pPosterId)->dataCache = malloc(res->length);
 				/* record endianness in REMOTE_POSTER_STR */
@@ -289,15 +309,17 @@ remotePosterFind (char *posterName, POSTER_ID *pPosterId)
 {
 	POSTER_FIND_RESULT *res;
 	REMOTE_POSTER_ID remPosterId;
-	CLIENT *client=NULL;
+	CLIENT *client = NULL;
+	pthread_key_t key;
 	
 	if (posterHost != NULL) {
-		client = clnt_create(posterHost, POSTER_SERV, 
-		    POSTER_VERSION, "tcp");
-		if (client == NULL) {
-			clnt_pcreateerror("remotePosterLib/cnt_create");
+		if (clientKeyFind(posterHost, &key) == -1) {
+			fprintf(stderr,
+			    "remotePosterFind: %s: clientKeyFind failed\n",
+			    posterHost);
 			return ERROR;
 		}
+		client = clientCreate(key, posterHost);
 		res = poster_find_1(&posterName, client);
 	} else {
 		res = NULL;
@@ -305,8 +327,6 @@ remotePosterFind (char *posterName, POSTER_ID *pPosterId)
 	
 	/* search along POSTER_PATH */
 	if (res == NULL) {
-		if (client !=  NULL)
-			clnt_destroy(client);
 		if (posterFindPath(posterName, &remPosterId) == ERROR) {
 			return ERROR;
 		}
@@ -317,7 +337,7 @@ remotePosterFind (char *posterName, POSTER_ID *pPosterId)
 	if (res->status != OK) {
 		errnoSet(res->status);
 		xdr_free((xdrproc_t)xdr_POSTER_FIND_RESULT, (char *)res);
-		clnt_destroy(client);
+		clientRemove(key);
 		return ERROR;
 	}
 	/* res->status == OK */
@@ -325,7 +345,8 @@ remotePosterFind (char *posterName, POSTER_ID *pPosterId)
 	if (remPosterId == NULL)
 		return(ERROR);
 	remPosterId->vxPosterId = (void *)(long)(res->id);
-	remPosterId->client = client;
+	remPosterId->key = key;
+	remPosterId->hostname = posterHost;
 	/* record endianness in REMOTE_POSTER_STR */
 	remPosterId->endianness = res->endianness;
 	/* the found poster cannot be written */
@@ -356,21 +377,31 @@ remotePosterRead(POSTER_ID posterId,   /* Id of the poster to read */
     int nbytes)			       /* number of bytes to read */	
 {
 	POSTER_READ_RESULT *res;
-	static POSTER_READ_PAR param;
+	POSTER_READ_PAR param;
 	REMOTE_POSTER_ID remPosterId = (REMOTE_POSTER_ID)posterId;
+	CLIENT *client = clientCreate(remPosterId->key, remPosterId->hostname);
 	
-	
+	if (client == NULL) {
+		errnoSet(S_remotePosterLib_BAD_RPC);
+		return ERROR;
+	}
 	param.id = (int)(long)(remPosterId->vxPosterId);
 	param.length = nbytes;
 	param.offset = offset;
 	
-	res = poster_read_1(&param, remPosterId->client);
+	res = poster_read_1(&param, client);
     
 	if (res == NULL)
 		return(ERROR);
 
 	if (res->status != POSTER_OK) {
 		errnoSet(res->status);
+		xdr_free((xdrproc_t)xdr_POSTER_READ_RESULT, (char *)res);
+		return(ERROR);
+	}
+	if (res->data.data_val == NULL) {
+		fprintf(stderr, "remotePosterRead: returning NULL data_val\n");
+		errnoSet(S_remotePosterLib_BAD_RPC);
 		xdr_free((xdrproc_t)xdr_POSTER_READ_RESULT, (char *)res);
 		return(ERROR);
 	}
@@ -393,9 +424,14 @@ static STATUS
 remotePosterTake(POSTER_ID posterId, POSTER_OP op)
 {
 	POSTER_READ_RESULT *res;
-	static POSTER_READ_PAR param;
+	POSTER_READ_PAR param;
 	REMOTE_POSTER_ID remPosterId = (REMOTE_POSTER_ID)posterId;
+	CLIENT *client = clientCreate(remPosterId->key, remPosterId->hostname);
 	
+	if (client == NULL) {
+		errnoSet(S_remotePosterLib_BAD_RPC);
+		return ERROR;
+	}
 	switch(op) {
 	case POSTER_READ:
 	case POSTER_IOCTL:
@@ -415,7 +451,7 @@ remotePosterTake(POSTER_ID posterId, POSTER_OP op)
 	param.length = remPosterId->dataSize;
 	param.offset = 0;
 	
-	res = poster_read_1(&param, remPosterId->client);
+	res = poster_read_1(&param, client);
 	
 	if (res == NULL)
 		return(ERROR);
@@ -464,9 +500,14 @@ remotePosterGive(POSTER_ID posterId)
 	POSTER_WRITE_PAR param;
 	int *res;
 	REMOTE_POSTER_ID remPosterId = (REMOTE_POSTER_ID)posterId;
+	CLIENT *client = clientCreate(remPosterId->key, remPosterId->hostname);
 	
 	
 	if (remPosterId->op == POSTER_WRITE) {
+		if (client == NULL) {
+			errnoSet(S_remotePosterLib_BAD_RPC);
+			return ERROR;
+		}
 		/* copy local cache back to the server */
 		param.id = (int)(long)remPosterId->vxPosterId;
 		param.offset = 0;
@@ -474,10 +515,10 @@ remotePosterGive(POSTER_ID posterId)
 		param.data.data_val = remPosterId->dataCache;
 		param.data.data_len = remPosterId->dataSize;
 		
-		res = poster_write_1(&param, remPosterId->client);
+		res = poster_write_1(&param, client);
 		
 		if (res == NULL) {
-			clnt_perror(remPosterId->client, "remotePosterGive");
+			clnt_perror(client, "remotePosterGive");
 			return(ERROR);
 		}
 		if (*res != remPosterId->dataSize) {
@@ -537,9 +578,9 @@ static STATUS
 remotePosterDelete(POSTER_ID posterId)
 {
 	REMOTE_POSTER_ID remPosterId = (REMOTE_POSTER_ID)posterId;
+	CLIENT *client = clientCreate(remPosterId->key, remPosterId->hostname);
 	
-	int *pres = poster_delete_1((int *)&(remPosterId->vxPosterId), 
-	    remPosterId->client);
+	int *pres = poster_delete_1((int *)&(remPosterId->vxPosterId), client);
 	
 	if (pres != NULL) {
 		return(*pres);
@@ -569,10 +610,13 @@ remotePosterIoctl(POSTER_ID posterId,	/* poster Id */
 	
 	POSTER_IOCTL_PAR param;
 	POSTER_IOCTL_RESULT *res;
+	CLIENT *client = clientCreate(remPosterId->key, remPosterId->hostname);
+	
 	
 	param.id = (int)(long)remPosterId->vxPosterId;
 	param.cmd = code;
-	res = poster_ioctl_1(&param, remPosterId->client);
+	
+	res = poster_ioctl_1(&param, client);
 	if (res == NULL) {
 		return ERROR;
 	}
