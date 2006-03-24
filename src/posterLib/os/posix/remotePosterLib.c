@@ -307,7 +307,7 @@ posterFindPath(char *posterName, REMOTE_POSTER_ID *pPosterId)
 static STATUS 
 remotePosterFind (char *posterName, POSTER_ID *pPosterId)
 {
-	POSTER_FIND_RESULT *res;
+	POSTER_FIND_RESULT *res = NULL;
 	REMOTE_POSTER_ID remPosterId;
 	CLIENT *client = NULL;
 	pthread_key_t key;
@@ -320,11 +320,10 @@ remotePosterFind (char *posterName, POSTER_ID *pPosterId)
 			return ERROR;
 		}
 		client = clientCreate(key, posterHost);
-		res = poster_find_1(&posterName, client);
-	} else {
-		res = NULL;
+		if (client != NULL) {
+			res = poster_find_1(&posterName, client);
+		}
 	}
-	
 	/* search along POSTER_PATH */
 	if (res == NULL) {
 		if (posterFindPath(posterName, &remPosterId) == ERROR) {
