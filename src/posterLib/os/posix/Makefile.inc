@@ -1,4 +1,4 @@
-#
+# -*- makefile -*-
 # Copyright (c) 2004 
 #      Autonomous Systems Lab, Swiss Federal Institute of Technology.
 #
@@ -21,6 +21,7 @@
 # --- posix-specific configuration --------------------------------------
 
 SRCS= \
+	hostclient.c		\
 	posterLib.c 		\
 	localPosterLib.c	\
 	remotePosterLib.c
