@@ -59,6 +59,7 @@ clientKeyFind(const char *hostname, pthread_key_t *key)
 		pthread_mutex_unlock(&clientKeyMutex);
 		return -1;
 	}
+	hc->hostname = hostname;
 	hc->next = hostClientList;
 	hostClientList = hc;
 	pthread_mutex_unlock(&clientKeyMutex);
@@ -84,6 +85,7 @@ clientCreate(pthread_key_t key, const char *hostname)
 		return client;
 	}
 	if (client == NULL) {
+		clnt_pcreateerror(hostname);
 		return(NULL);
 	}
 	pthread_setspecific(key, client);
