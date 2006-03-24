@@ -22,7 +22,8 @@
 /* Structure of remote posters */
 typedef  struct {
     void *vxPosterId;		/* Id of the remote poster (hist. vxWorks) */
-    CLIENT *client;		/* RPC client to talk to posterServ */
+    const char *hostname;	/* host of the poster */
+    pthread_key_t key;		/* key to thread-specific client ID */
     unsigned int dataSize;	/* Size of the poster (for local cache) */
     void *dataCache;		/* local data cache
 				   (for posterTake/Give and Addr) */
@@ -31,4 +32,14 @@ typedef  struct {
     H2_ENDIANNESS endianness;
 } *REMOTE_POSTER_ID, REMOTE_POSTER_STR;
 
+/* Structure to cache per host client keys to thread-specific data */
+typedef struct HOST_CLIENT_KEY {
+	const char *hostname;
+	pthread_key_t key;
+	struct HOST_CLIENT_KEY *next;
+} HOST_CLIENT_KEY;
+
+extern int clientKeyFind(const char *, pthread_key_t *);
+extern CLIENT *clientCreate(pthread_key_t, const char *);
+extern void clientRemove(pthread_key_t);
 #endif
