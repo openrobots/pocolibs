@@ -91,7 +91,7 @@ h2timerInit(void)
 	/* Initialiser le semaphore */
 	timerTab[nTimer].semSync = semBCreate(SEM_Q_PRIORITY, SEM_EMPTY);
 	if (timerTab[nTimer].semSync == NULL) {
-	    logMsg("h2timerInit: erreur semBCreate\n");
+	    logMsg("h2timerInit: error semBCreate %d\n", nTimer);
 	    return ERROR;
 	}
     }
