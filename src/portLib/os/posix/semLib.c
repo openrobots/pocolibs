@@ -66,6 +66,7 @@ semBCreate(int options, SEM_B_STATE initialState)
     sem->type = SEM_T_BIN;
     status = sem_init(&sem->v.sem, 0, initialState);
     if (status != 0) {
+	perror("semBCreate: sem_init");
         free(sem);
 	errnoSet(errno);
 	return NULL;
