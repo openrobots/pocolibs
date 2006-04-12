@@ -582,6 +582,8 @@ remotePosterDelete(POSTER_ID posterId)
 	int *pres = poster_delete_1((int *)&(remPosterId->vxPosterId), client);
 	
 	if (pres != NULL) {
+		/* Mark remote poster Id as deleted */
+		remPosterId->dataSize = 0;
 		return(*pres);
 	} else {
 		return(ERROR);
@@ -611,6 +613,11 @@ remotePosterIoctl(POSTER_ID posterId,	/* poster Id */
 	POSTER_IOCTL_RESULT *res;
 	CLIENT *client = clientCreate(remPosterId->key, remPosterId->hostname);
 	
+	/* This can be handled locally */
+	if (code == FIO_GETSIZE) {
+		*(u_long *)parg = (u_long)remPosterId->dataSize;
+		return OK;
+	}
 	
 	param.id = (int)(long)remPosterId->vxPosterId;
 	param.cmd = code;
@@ -630,6 +637,9 @@ remotePosterIoctl(POSTER_ID posterId,	/* poster Id */
 	case FIO_NMSEC:
 		*(u_long *)parg = res->ntick;
 		break;
+	default:
+		errnoSet(S_posterLib_BAD_IOCTL_CODE);
+		return ERROR;
 	}
 	return OK;
 }
