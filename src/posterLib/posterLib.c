@@ -153,6 +153,7 @@ posterFind(char *name, POSTER_ID *pPosterId)
 {
     POSTER_STR *p;
     POSTER_ID id;
+    unsigned int size;
 
     POSTER_INIT;
 
@@ -163,10 +164,14 @@ posterFind(char *name, POSTER_ID *pPosterId)
     /* Look in already known posters first */
     for (p = allPosters; p != NULL; p = p->next) {
 	if (strcmp(p->name, name) == 0) {
-	    /* found */
+		/* found - check that it wasn't destroyed */
+		if (posterIoctl(p, FIO_GETSIZE, &size) == ERROR) 
+			return ERROR;
+		if (size == 0) 
+			continue;
+		/* now we're sure that the poster is good */
 		*pPosterId = (POSTER_ID)p;
-
-	    return OK;
+		return OK;
 	}
     }
 
