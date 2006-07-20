@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003-2004 CNRS/LAAS
+ * Copyright (c) 1990, 2003-2006 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -15,8 +15,8 @@
  */
 
 /* DESCRIPTION :
-   This is the library providing timers, used for task scheduling, 
-   with programmable time slices. 
+   This is the library providing timers, used for task scheduling,
+   with programmable time slices.
 */
 
 #include "pocolibs-config.h"
@@ -39,7 +39,7 @@ __RCSID("$LAAS$");
 
 static const H2_ERROR const h2timerLibH2errMsgs[] = H2_TIMER_LIB_H2_ERR_MSGS;
 
-#define COMLIB_DEBUG_H2TIMERLIB 
+#define COMLIB_DEBUG_H2TIMERLIB
 
 #ifdef COMLIB_DEBUG_H2TIMERLIB
 # define LOGDBG(x)     logMsg x
@@ -53,95 +53,96 @@ static WDOG_ID timerWd;			/* timer watchdog */
 static H2TIMER timerTab[NMAX_TIMERS];	/* array of timers */
 static BOOL h2timerInited = FALSE;
 
-static void timerInt(int arg); /* timer handler procedure */ 
+static void timerInt(int arg); /* timer handler procedure */
 
 /******************************************************************************
 *
-*   h2timerInit  -  Initializes the timer library
+*   h2timerInit	 -  Initializes the timer library
 *
 *   Description:
 *   Initializes the timer library, starts the watchdog that genrate time
 *   slices interrupts.
-* 
+*
 *   Returns: OK or ERROR
 */
-STATUS 
+STATUS
 h2timerInit(void)
 {
-    int nTimer;
-    
-    LOGDBG(("comLib:h2timerLib:h2timerInit: ---beginning\n"));
+	int nTimer;
 
-    /* Create watchdog and mutex semaphore */
-    timerMutex = semMCreate(0);
-    semTake(timerMutex, WAIT_FOREVER);
+	LOGDBG(("comLib:h2timerLib:h2timerInit: ---beginning\n"));
 
-    if ((timerWd = wdCreate ()) == NULL) {
-	semGive(timerMutex);
-	return ERROR;
-    }
+	/* Create watchdog and mutex semaphore */
+	timerMutex = semMCreate(0);
+	semTake(timerMutex, WAIT_FOREVER);
 
-    /* Reset timer array */
-    memset (timerTab, 0, sizeof(timerTab));
-
-    /* allocate a synchronisation variable for each timer */
-    for (nTimer = 0; nTimer < NMAX_TIMERS; nTimer++) {
-	timerTab[nTimer].semSync = semBCreate(SEM_Q_PRIORITY, SEM_EMPTY);
-	if (timerTab[nTimer].semSync == NULL) {
-	    logMsg("h2timerInit: error semBCreate %d\n", nTimer);
-	    return ERROR;
+	if ((timerWd = wdCreate ()) == NULL) {
+		semGive(timerMutex);
+		return ERROR;
 	}
-    }
-    /* reset global delay counter */
-    delayCount = 0;
-    
-    /* done with shared data */
-    semGive(timerMutex);
-    
-    /* Start the watchdog */
-    wdStart (timerWd, 1, (FUNCPTR) timerInt, 0);
 
-    LOGDBG(("comLib:h2timerLib:h2timerInit: ---end\n"));
+	/* Reset timer array */
+	memset (timerTab, 0, sizeof(timerTab));
+
+	/* allocate a synchronisation variable for each timer */
+	for (nTimer = 0; nTimer < NMAX_TIMERS; nTimer++) {
+		timerTab[nTimer].semSync = semBCreate(SEM_Q_PRIORITY,
+		    SEM_EMPTY);
+		if (timerTab[nTimer].semSync == NULL) {
+			logMsg("h2timerInit: error semBCreate %d\n", nTimer);
+			return ERROR;
+		}
+	}
+	/* reset global delay counter */
+	delayCount = 0;
+
+	/* done with shared data */
+	semGive(timerMutex);
+
+	/* Start the watchdog */
+	wdStart (timerWd, 1, (FUNCPTR) timerInt, 0);
+
+	LOGDBG(("comLib:h2timerLib:h2timerInit: ---end\n"));
 
 
-    /* record errors msg */
-    h2recordErrMsgs("h2timerInit", "h2timerLib", M_h2timerLib, 
-		    sizeof(h2timerLibH2errMsgs)/sizeof(H2_ERROR), 
-		    h2timerLibH2errMsgs);
+	/* record errors msg */
+	h2recordErrMsgs("h2timerInit", "h2timerLib", M_h2timerLib,
+	    sizeof(h2timerLibH2errMsgs)/sizeof(H2_ERROR),
+	    h2timerLibH2errMsgs);
 
-    h2timerInited = TRUE;
-    return OK;
+	h2timerInited = TRUE;
+	return OK;
 }
 
 
 /******************************************************************************
 *
-*   h2timerEnd  -  Cleanup timers
+*   h2timerEnd	-  Cleanup timers
 *
 *   Returns: OK or ERROR
 */
-STATUS 
+STATUS
 h2timerEnd(void)
 {
-    int nTimer;
+	int nTimer;
 
-    if (h2timerInited != TRUE) return OK;
-    
-    /* Stop global watch dog */
-    wdDelete (timerWd);
+	if (h2timerInited != TRUE) return OK;
 
-    semTake(timerMutex, WAIT_FOREVER);
-    for (nTimer = 0; nTimer < NMAX_TIMERS; nTimer++) {
-       semDelete(timerTab[nTimer].semSync);
-       timerTab[nTimer].semSync = NULL;
-    }
-    semGive(timerMutex);
-    
-    /* Free global semaphore */
-    semDelete(timerMutex);
-    
-    h2timerInited = FALSE;
-    return OK;
+	/* Stop global watch dog */
+	wdDelete (timerWd);
+
+	semTake(timerMutex, WAIT_FOREVER);
+	for (nTimer = 0; nTimer < NMAX_TIMERS; nTimer++) {
+		semDelete(timerTab[nTimer].semSync);
+		timerTab[nTimer].semSync = NULL;
+	}
+	semGive(timerMutex);
+
+	/* Free global semaphore */
+	semDelete(timerMutex);
+
+	h2timerInited = FALSE;
+	return OK;
 }
 
 
@@ -155,42 +156,42 @@ h2timerEnd(void)
 *   Returns: the new timer id or NULL
 */
 
-H2TIMER_ID 
+H2TIMER_ID
 h2timerAlloc(void)
 {
-    int nTimer;                     /* index of the allocted timer */
-    H2TIMER_ID timerId;             /* Timer identifier */
-  
-    if (h2timerInited != TRUE) {
-       errnoSet(S_h2timerLib_TIMER_NOT_INIT);
-       return NULL;
-    }
+	int nTimer;			/* index of the allocted timer */
+	H2TIMER_ID timerId;		/* Timer identifier */
 
-    /* Start manipulating shared data */
-    semTake(timerMutex, WAIT_FOREVER);
-
-    timerId = timerTab;
-
-    /* Find a free timer */
-    for (nTimer = 0; timerId->flagInit == H2TIMER_FLG_INIT; nTimer++) {
-	/* No free timer : error */
-	if (nTimer == NMAX_TIMERS) {
-	    errnoSet (S_h2timerLib_TOO_MUCH_TIMERS);
-	    semGive(timerMutex);
-	    return (NULL);
+	if (h2timerInited != TRUE) {
+		errnoSet(S_h2timerLib_TIMER_NOT_INIT);
+		return NULL;
 	}
-	timerId = (H2TIMER_ID) timerId + 1;
-    } /* for */
 
-    /* Fill the new structure */
-    timerId->status = STOPPED_TIMER;
-    timerId->flagInit = H2TIMER_FLG_INIT;
+	/* Start manipulating shared data */
+	semTake(timerMutex, WAIT_FOREVER);
 
-    /* Done with shared data */
-    semGive(timerMutex);
+	timerId = timerTab;
 
-    LOGDBG(("comLib:h2timerLib:h2timerAlloc: alloc %#x\n", timerId));
-    return (timerId);
+	/* Find a free timer */
+	for (nTimer = 0; timerId->flagInit == H2TIMER_FLG_INIT; nTimer++) {
+		/* No free timer : error */
+		if (nTimer == NMAX_TIMERS) {
+			errnoSet (S_h2timerLib_TOO_MUCH_TIMERS);
+			semGive(timerMutex);
+			return (NULL);
+		}
+		timerId = (H2TIMER_ID) timerId + 1;
+	} /* for */
+
+	/* Fill the new structure */
+	timerId->status = STOPPED_TIMER;
+	timerId->flagInit = H2TIMER_FLG_INIT;
+
+	/* Done with shared data */
+	semGive(timerMutex);
+
+	LOGDBG(("comLib:h2timerLib:h2timerAlloc: alloc %#x\n", timerId));
+	return (timerId);
 }
 
 /******************************************************************************
@@ -199,53 +200,53 @@ h2timerAlloc(void)
 *
 *   Description:
 *   Starts a timer with a given delay
-*   Warning: the period should be a multiple or a divisor of the 
-*            maximum delay DELAY_MAX
+*   Warning: the period should be a multiple or a divisor of the
+*	     maximum delay DELAY_MAX
 *
 *   Retourns: OK or ERROR
 */
-STATUS 
+STATUS
 h2timerStart(H2TIMER_ID timerId,
-	     int period,
-	     int delay)
+    int period,
+    int delay)
 {
-    /* Check if the timer is initialized */
-    if (timerId->flagInit != H2TIMER_FLG_INIT) {
-	errnoSet (S_h2timerLib_TIMER_NOT_INIT);
-	return (ERROR);
-    }
-    
-    /* You can only start a stopped timer */
-    if (timerId->status != STOPPED_TIMER) {
-	errnoSet (S_h2timerLib_NOT_STOPPED_TIMER);
-	return (ERROR);
-    }
-    
-    /* Check period's validity XXX */
-    if ((period <= 0) || 
-	((period > MAX_DELAY) && ((period%MAX_DELAY) != 0)) ||
-	((period < MAX_DELAY) && ((MAX_DELAY%period) != 0))) {
-        logMsg ("h2timerStart: "
-		"period (%d) must be a multiple or a divisor of %d\n", 
-		period, MAX_DELAY);
-	errnoSet (S_h2timerLib_BAD_PERIOD);
-	return (ERROR);
-    }
-    
-    /* Check delay */
-    if (delay < 0 || delay >= MAX_DELAY) {
-	errnoSet (S_h2timerLib_BAD_DELAY);
-	return (ERROR);
-    }
-    
-    /* Fill the timer structure */
-    timerId->period = period;
-    timerId->delay = delay;
-    timerId->count = 0;
-    timerId->status = WAIT_DELAY;
+	/* Check if the timer is initialized */
+	if (timerId->flagInit != H2TIMER_FLG_INIT) {
+		errnoSet (S_h2timerLib_TIMER_NOT_INIT);
+		return (ERROR);
+	}
 
-    LOGDBG(("h2timerStart %d %d\n", period, delay));
-    return (OK);
+	/* You can only start a stopped timer */
+	if (timerId->status != STOPPED_TIMER) {
+		errnoSet (S_h2timerLib_NOT_STOPPED_TIMER);
+		return (ERROR);
+	}
+
+	/* Check period's validity XXX */
+	if ((period <= 0) ||
+	    ((period > MAX_DELAY) && ((period%MAX_DELAY) != 0)) ||
+	    ((period < MAX_DELAY) && ((MAX_DELAY%period) != 0))) {
+		logMsg ("h2timerStart: "
+		    "period (%d) must be a multiple or a divisor of %d\n",
+		    period, MAX_DELAY);
+		errnoSet (S_h2timerLib_BAD_PERIOD);
+		return (ERROR);
+	}
+
+	/* Check delay */
+	if (delay < 0 || delay >= MAX_DELAY) {
+		errnoSet (S_h2timerLib_BAD_DELAY);
+		return (ERROR);
+	}
+
+	/* Fill the timer structure */
+	timerId->period = period;
+	timerId->delay = delay;
+	timerId->count = 0;
+	timerId->status = WAIT_DELAY;
+
+	LOGDBG(("h2timerStart %d %d\n", period, delay));
+	return (OK);
 }
 
 /******************************************************************************
@@ -260,25 +261,25 @@ h2timerStart(H2TIMER_ID timerId,
 STATUS
 h2timerPause(H2TIMER_ID timerId)
 {
-    /* Check for timer initialization */
-    if (timerId->flagInit != H2TIMER_FLG_INIT) {
-	errnoSet (S_h2timerLib_TIMER_NOT_INIT);
-	return (ERROR);
-    }
+	/* Check for timer initialization */
+	if (timerId->flagInit != H2TIMER_FLG_INIT) {
+		errnoSet (S_h2timerLib_TIMER_NOT_INIT);
+		return (ERROR);
+	}
 
-    /* Wait until the semaphore is released */
-    LOGDBG(("h2timerPause: got lock\n"));
-    semTake(timerId->semSync, WAIT_FOREVER);
+	/* Wait until the semaphore is released */
+	LOGDBG(("h2timerPause: got lock\n"));
+	semTake(timerId->semSync, WAIT_FOREVER);
 
-    /*
-     * XXXX
-     * Flush the semaphore to make sure next call will block 
-     */
-    while (semTake(timerId->semSync, NO_WAIT) == OK) 
-	;
-    /* Reset timer */
-    timerId->count = 0;
-    return (OK);
+	/*
+	 * XXXX
+	 * Flush the semaphore to make sure next call will block
+	 */
+	while (semTake(timerId->semSync, NO_WAIT) == OK)
+		;
+	/* Reset timer */
+	timerId->count = 0;
+	return (OK);
 
 }
 
@@ -292,25 +293,25 @@ h2timerPause(H2TIMER_ID timerId)
 *
 *   Returns: OK or ERROR
 */
-STATUS 
+STATUS
 h2timerPauseReset(H2TIMER_ID timerId)
 {
-  /*  Check timer initialisation */
-    if (timerId->flagInit != H2TIMER_FLG_INIT) {
-	errnoSet (S_h2timerLib_TIMER_NOT_INIT);
-	return (ERROR);
-    }
-    
-    /* Wair until the semaphore is release */
-    semTake (timerId->semSync, WAIT_FOREVER);
+	/*  Check timer initialisation */
+	if (timerId->flagInit != H2TIMER_FLG_INIT) {
+		errnoSet (S_h2timerLib_TIMER_NOT_INIT);
+		return (ERROR);
+	}
 
-    timerId->count = 0;
-    return (OK);
+	/* Wait until the semaphore is release */
+	semTake (timerId->semSync, WAIT_FOREVER);
+
+	timerId->count = 0;
+	return (OK);
 }
 
 /******************************************************************************
 *
-*   h2timerStop  -  Stop a timer
+*   h2timerStop	 -  Stop a timer
 *
 *
 *   Returns: OK or ERROR
@@ -319,20 +320,20 @@ h2timerPauseReset(H2TIMER_ID timerId)
 STATUS
 h2timerStop(H2TIMER_ID timerId)
 {
-    /* Check timer initialization */
-    if (timerId->flagInit != H2TIMER_FLG_INIT) {
-	errnoSet (S_h2timerLib_TIMER_NOT_INIT);
-	return (ERROR);
-    }
-    
-    /* Move to stopped state */
-    timerId->status = STOPPED_TIMER;
-    return (OK);
+	/* Check timer initialization */
+	if (timerId->flagInit != H2TIMER_FLG_INIT) {
+		errnoSet (S_h2timerLib_TIMER_NOT_INIT);
+		return (ERROR);
+	}
+
+	/* Move to stopped state */
+	timerId->status = STOPPED_TIMER;
+	return (OK);
 }
 
 /******************************************************************************
 *
-*   h2timerChangePeriod  -  Change the period of a timer
+*   h2timerChangePeriod	 -  Change the period of a timer
 *
 *
 *   Returns: OK or ERROR
@@ -340,108 +341,111 @@ h2timerStop(H2TIMER_ID timerId)
 STATUS
 h2timerChangePeriod(H2TIMER_ID timerId, int period)
 {
-    /* Check timer initialization */
-    if (timerId->flagInit != H2TIMER_FLG_INIT) {
-	errnoSet (S_h2timerLib_TIMER_NOT_INIT);
-	return (ERROR);
-    }
-    
-    /* Check that the timer is running */
-    if (timerId->status == STOPPED_TIMER) {
-	errnoSet (S_h2timerLib_STOPPED_TIMER);
-	return (ERROR);
-    }
-    
-    /* Change period */
-    timerId->period = period;
-    /* Adjust current count if needed */
-    timerId->count = timerId->count % period;
-    return (OK);
+	/* Check timer initialization */
+	if (timerId->flagInit != H2TIMER_FLG_INIT) {
+		errnoSet (S_h2timerLib_TIMER_NOT_INIT);
+		return (ERROR);
+	}
+
+	/* Check that the timer is running */
+	if (timerId->status == STOPPED_TIMER) {
+		errnoSet (S_h2timerLib_STOPPED_TIMER);
+		return (ERROR);
+	}
+
+	/* Change period */
+	timerId->period = period;
+	/* Adjust current count if needed */
+	timerId->count = timerId->count % period;
+	return (OK);
 }
 
 /******************************************************************************
 *
-*   h2timerFree  -  Free a timer structure
+*   h2timerFree	 -  Free a timer structure
 *
 *   Retourns: OK or ERROR
 */
 
-STATUS 
+STATUS
 h2timerFree(H2TIMER_ID timerId)
 {
-    /* Check that the timer is initialized */
-    if (timerId->flagInit != H2TIMER_FLG_INIT) {
-	errnoSet (S_h2timerLib_TIMER_NOT_INIT);
-	return (ERROR);
-    }
-    
-    /* Stop the timer and mark it not initialized */
-    timerId->status = STOPPED_TIMER;
-    timerId->flagInit = FALSE;
-    return (OK);
+	/* Check that the timer is initialized */
+	if (timerId->flagInit != H2TIMER_FLG_INIT) {
+		errnoSet (S_h2timerLib_TIMER_NOT_INIT);
+		return (ERROR);
+	}
+
+	/* Stop the timer and mark it not initialized */
+	timerId->status = STOPPED_TIMER;
+	timerId->flagInit = FALSE;
+	return (OK);
 }
 
 /*****************************************************************************
 *
-*   timerInt  -  Handler of the watchdog interrupt
+*   timerInt  -	 Handler of the watchdog interrupt
 *
 *   Description:
-*   Check for expired timers, release their synchronisation semaphores 
+*   Check for expired timers, release their synchronisation semaphores
 *
 *   Return: Nothing
 */
 static void
 timerInt(int arg)
 {
-    int nTimer;               /* timer index */
-    H2TIMER_ID timerId;       /* Timer array pointer */
-    
-    LOGDBG(("comLib:h2timerLib:timerInt: delayCount %d\n", delayCount));
+	int nTimer;		  /* timer index */
+	H2TIMER_ID timerId;	  /* Timer array pointer */
 
-    /* Bump delay counter */
-    if (++delayCount >= MAX_DELAY)
-	delayCount = 0;
-    
-    /* Restart the watchdog */
-    wdStart (timerWd, 1, (FUNCPTR) timerInt, 0);
+	LOGDBG(("comLib:h2timerLib:timerInt: delayCount %d\n", delayCount));
 
-    /* Loop on all timers */
-    timerId = timerTab;
-    for (nTimer = 0; nTimer < NMAX_TIMERS; nTimer++) {
-	/* Only check initialized timers */
-	if (timerId->flagInit == H2TIMER_FLG_INIT) {
-	    /* Timer running */
-	    if (timerId->status == RUNNING_TIMER) {
-	        LOGDBG((" -- count(%d) = %d\n", nTimer, timerId->count));
+	/* Bump delay counter */
+	if (++delayCount >= MAX_DELAY)
+		delayCount = 0;
 
-		/* bump counter */
-		if (++timerId->count >= timerId->period) {
-		    /* reset it */
-		    timerId->count = 0;
-		    LOGDBG((" -- timer %d triggered\n", nTimer));
+	/* Restart the watchdog */
+	wdStart (timerWd, 1, (FUNCPTR) timerInt, 0);
 
-		    /* Release the semaphore */
-		    semGive (timerId->semSync);
-		    
+	/* Loop on all timers */
+	timerId = timerTab;
+	for (nTimer = 0; nTimer < NMAX_TIMERS; nTimer++) {
+		/* Only check initialized timers */
+		if (timerId->flagInit == H2TIMER_FLG_INIT) {
+			/* Timer running */
+			if (timerId->status == RUNNING_TIMER) {
+				LOGDBG((" -- count(%d) = %d\n", nTimer,
+					timerId->count));
+
+				/* bump counter */
+				if (++timerId->count >= timerId->period) {
+					/* reset it */
+					timerId->count = 0;
+					LOGDBG((" -- timer %d triggered\n",
+						nTimer));
+
+					/* Release the semaphore */
+					semGive (timerId->semSync);
+
+				}
+			} else if (timerId->status >= WAIT_DELAY) {
+
+				/* Waiting initial delay */
+
+				/* If delay is reached */
+				if (delayCount == timerId->delay) {
+					/* reset the counter */
+					timerId->count = 0;
+
+					/* Start running */
+					LOGDBG((" -- timer %d starting\n",
+						nTimer));
+					timerId->status = RUNNING_TIMER;
+					semGive (timerId->semSync);
+				}
+			}
 		}
-	    } else if (timerId->status >= WAIT_DELAY) {
-		
-		/* Waiting initial delay */
 
-		/* If delay is reached */
-		if (delayCount == timerId->delay) {
-		    /* reset the counter */
-		    timerId->count = 0;
-		    
-		    /* Start running */
-		    LOGDBG((" -- timer %d starting\n", nTimer));
-		    timerId->status = RUNNING_TIMER;
-		    semGive (timerId->semSync);
-		}
-	    }
+		/* next */
+		timerId++;
 	}
-	
-	/* next */
-	timerId++;
-    }
 }
