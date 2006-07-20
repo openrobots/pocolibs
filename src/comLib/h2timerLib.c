@@ -41,7 +41,7 @@ __RCSID("$LAAS$");
 
 static const H2_ERROR const h2timerLibH2errMsgs[] = H2_TIMER_LIB_H2_ERR_MSGS;
 
-/* #define COMLIB_DEBUG_H2TIMERLIB */
+#define COMLIB_DEBUG_H2TIMERLIB 
 
 #ifdef COMLIB_DEBUG_H2TIMERLIB
 # define LOGDBG(x)     logMsg x
@@ -247,7 +247,7 @@ h2timerStart(H2TIMER_ID timerId,
     }
     
     /* Remplir la structure du timer */
-    timerId->periode = periode;
+    timerId->period = periode;
     timerId->delay = delay;
     timerId->count = 0;
     timerId->status = WAIT_DELAY;
@@ -286,6 +286,8 @@ h2timerPause(H2TIMER_ID timerId)
      */
     while (semTake(timerId->semSync, NO_WAIT) == OK) 
 	;
+    /* Reset timer */
+    timerId->count = 0;
     return (OK);
 
 }
@@ -365,7 +367,7 @@ h2timerChangePeriod(H2TIMER_ID timerId, int periode)
     }
     
     /* Modification de la periode */
-    timerId->periode = periode;
+    timerId->period = periode;
     timerId->count = timerId->count % periode;
     return (OK);
 }
@@ -431,7 +433,7 @@ timerInt(int arg)
 	        LOGDBG((" -- count(%d) = %d\n", nTimer, timerId->count));
 
 		/* Incrementer le compteur */
-		if (++timerId->count == timerId->periode) {
+		if (++timerId->count >= timerId->period) {
 		    /* Reseter le compteur */
 		    timerId->count = 0;
 		    LOGDBG((" -- timer %d triggered\n", nTimer));
@@ -440,7 +442,7 @@ timerInt(int arg)
 		    semGive (timerId->semSync);
 		    
 		}
-	    } else if (timerId->status == WAIT_DELAY) {
+	    } else if (timerId->status >= WAIT_DELAY) {
 		
 		/* Verifier si attend delay */
 
