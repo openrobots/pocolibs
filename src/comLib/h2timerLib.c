@@ -39,7 +39,7 @@ __RCSID("$LAAS$");
 
 static const H2_ERROR const h2timerLibH2errMsgs[] = H2_TIMER_LIB_H2_ERR_MSGS;
 
-#define COMLIB_DEBUG_H2TIMERLIB
+/* #define COMLIB_DEBUG_H2TIMERLIB */
 
 #ifdef COMLIB_DEBUG_H2TIMERLIB
 # define LOGDBG(x)     logMsg x

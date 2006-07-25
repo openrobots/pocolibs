@@ -293,19 +293,18 @@ else
 fi
 
 AC_ARG_WITH(debug-output,
-           AC_HELP_STRING([--with-debug-output=all task sys h2dev smmem h2evn mbox gcom],
+           AC_HELP_STRING([--with-debug-output=all task sys h2dev smmem h2evn mbox gcom h2timer],
            [print debugging information at run-time (comma separated list)]),
            [opt_debug_output=$withval],[opt_debug_output=])
 
 if test "x$opt_debug" = "xall"; then
-   opt_debug="task,sys,h2dev,smmem,h2evn,mbox,gcom"
+   opt_debug="task,sys,h2dev,smmem,h2evn,mbox,gcom,h2timer"
 fi
 
 ac_save_ifs=$IFS; IFS=","
 for dopt in $opt_debug_output; do 
 	test -z "$dopt" && break
 
-	AC_MSG_RESULT([debugging $dopt])
 	case "$dopt" in
 	   task)	AC_DEFINE(PORTLIB_DEBUG_TASKLIB) ;;
 	   sys)		AC_DEFINE(PORTLIB_DEBUG_SYSLIB) ;;
@@ -315,8 +314,14 @@ for dopt in $opt_debug_output; do
 	   h2evn)	AC_DEFINE(COMLIB_DEBUG_H2EVNLIB) ;;
 	   mbox)	AC_DEFINE(COMLIB_DEBUG_MBOXLIB) ;;
 	   gcom)	AC_DEFINE(COMLIB_DEBUG_GCOMLIB) ;;
-
+	   h2timer)	AC_DEFINE(COMLIB_DEBUG_H2TIMERLIB) ;;
+	   
+	   *)		
+	    IFS=$ac_save_ifs
+	    AC_MSG_ERROR([Invalid debug output mode "$dopt"]) ;;
 	esac
+
+	AC_MSG_RESULT([debugging output in $dopt])
 done
 IFS=$ac_save_ifs
 

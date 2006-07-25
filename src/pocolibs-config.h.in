@@ -104,6 +104,9 @@
 /* debug comLib:gcomLib  */
 #undef COMLIB_DEBUG_GCOMLIB
 
+/* debug comLib:timerlib  */
+#undef COMLIB_DEBUG_H2TIMERLIB
+
 /* use valgrind hints */
 #undef VALGRIND_SUPPORT
 
