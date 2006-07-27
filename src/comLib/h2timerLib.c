@@ -277,8 +277,6 @@ h2timerPause(H2TIMER_ID timerId)
 	 */
 	while (semTake(timerId->semSync, NO_WAIT) == OK)
 		;
-	/* Reset timer */
-	timerId->count = 0;
 	return (OK);
 
 }
@@ -413,8 +411,8 @@ timerInt(int arg)
 		if (timerId->flagInit == H2TIMER_FLG_INIT) {
 			/* Timer running */
 			if (timerId->status == RUNNING_TIMER) {
-				LOGDBG((" -- count(%d) = %d\n", nTimer,
-					timerId->count));
+				LOGDBG((" -- count(%d) = %d (period = %d)\n", nTimer,
+					timerId->count, timerId->period));
 
 				/* bump counter */
 				if (++timerId->count >= timerId->period) {
