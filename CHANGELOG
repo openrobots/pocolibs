@@ -1,5 +1,10 @@
 Version 2.2, xx xxx xxxx 
-
+ 
+ 69. Preliminary support for building Xenomai 2.x enabled libs, using the 
+     POSIX skin.
+ 68. Remove RTAI/LXRT support in configure scripts
+ 67. Remove use of X11 events in xes_server.
+ 66. Remove double clear of h2timer counters (Sylvain Joyeux).
  65. Fix build problems on Darwin.
  64. Provide a correct day of week in H2TIME structure. 
  63. Fix h2timeShow() that was broken in multiple ways. 
