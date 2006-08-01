@@ -1,4 +1,4 @@
-#
+# -*- Makefile -*-
 # Copyright (c) 2004 CNRS/LAAS
 # Copyright (c) 2004 EPFL
 #
