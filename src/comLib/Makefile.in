@@ -46,8 +46,6 @@ LIB=		lib$(BASENAME).la
 
 all: all-os $(LIB)
 
-test: echo $(OSAPI)
-
 $(LIB): $(OBJS)
 	$(LTLD) -o $@ $(OBJS) -rpath $(LIBDIR) -R$(LIBDIR) \
 		 $(ERRORLIB) $(PORTLIB) $(OS_LIBS) \
