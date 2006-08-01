@@ -119,17 +119,13 @@ main(int argc, char *argv[])
     struct rlimit rl;
 #endif
 
-    /*
-     * Test if the lock file (tmp/xes-pid) exists
-     */
+    /* Test if the lock file (tmp/xes-pid) exists */
     if (access(PID_FILE, F_OK | R_OK) == 0) {
 	fprintf(stderr, "xes: %s exists\nUse kill_xes\n", PID_FILE);
 	exit(1);
     }
     
-    /*
-     * Put into background
-     */
+    /* Put in background */
     if ((pid = fork()) != 0) {
 	printf("xes_server version %s.%s\n"
 	       "Copyright (C) LAAS/CNRS 1991-2005\n",
@@ -145,22 +141,16 @@ main(int argc, char *argv[])
 	fclose(pid_file);
 	exit(0);
     }
-    /* 
-     * Detach the server from its controlling terminal
-     */
+    /* Detach the server from its controlling terminal */
     setsid();
 
-    /*
-     * Install signal handlers for a clean shutdown
-     */
+    /* Install signal handlers for a clean shutdown */
     signal(SIGHUP, SIG_IGN);
     signal(SIGINT, sigHandler);
     signal(SIGQUIT, sigHandler);
     signal(SIGTERM, sigHandler);
 
-    /*
-     * Create the service
-     */
+    /* Create the service */
     serv_socket_fd = serversock(PORT);
     if (serv_socket_fd < 0) {
 	exit(-1);
