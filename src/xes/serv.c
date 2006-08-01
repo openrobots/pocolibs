@@ -148,15 +148,7 @@ main(int argc, char *argv[])
     /* 
      * Detach the server from its controlling terminal
      */
-#if !defined(SVR4) && !defined(__linux__)
-    i = open("/dev/tty", 2);
-    if (i >= 0) {
-	(void) ioctl(i, TIOCNOTTY, (char *) 0);
-	(void) close(i);
-    }
-#else
     setsid();
-#endif
 
     /*
      * Install signal handlers for a clean shutdown
