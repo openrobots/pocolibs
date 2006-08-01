@@ -20,46 +20,38 @@ if test "x${GCC}" = "xyes"; then
 fi
 
 
-AC_LIBTOOL_DLOPEN
-AC_PROG_LIBTOOL
-
 dnl --- OS flavour checks -----------------------------------------------
 
-dnl RTAI support
 
-# configure options
-AC_ARG_WITH(rtai,
-           AC_HELP_STRING([--with-rtai=yes|no|lxrt],
-               [configure to use RTAI]),
-           [opt_rtai=$withval],[opt_rtai=no])
-AC_ARG_WITH(rtai-includes,
-           AC_HELP_STRING([--with-rtai-includes=DIR],
-               [RTAI headers are in DIR]),
-           [opt_rtai_includes=$withval])
-AC_ARG_WITH(linux-kernel-includes,
-           AC_HELP_STRING([--with-linux-kernel-includes=DIR],
-               [linux kernel headers are in DIR]),
-           [opt_lnxkern_includes=$withval])
+AC_ARG_WITH(xenomai,
+	AC_HELP_STRING([--with-xenomai=yes|no], [configure to use Xenomai]),
+	[opt_xenomai=$withval],[opt_xenomai=no])
+AC_ARG_VAR([XENO_CONFIG], [Path to the xeno-config command for xenomai])
 
-# make related stuff
-if test "x$opt_rtai" = "xyes"; then
-   OSAPI=rtai
-   AC_CHECK_RTAI
-   AC_MSG_RESULT([Configuring to use RTAI])
-elif test "x$opt_rtai" = "xlxrt"; then
-   OSAPI=lxrt
-   AC_DEFINE(__LXRT__)
-   AC_CHECK_RTAI  
-   AC_MSG_RESULT([Configuring to use LXRT])
-elif test "x$opt_rtai" = "xno"; then :
-   OSAPI=posix
-   AC_MSG_RESULT([Configuring to use POSIX])
-else
-   AC_MSG_ERROR([invalid option --with-rtai=$opt_rtai], 2)
+if test "x$opt_xenomai" = "xyes"; then
+	AC_PATH_PROG([XENO_CONFIG], [xeno-config], [no],
+		[/usr/xenomai/bin:${PATH}])
+	if test "x$XENO_CONFIG" = "xno" ; then
+		AC_MSG_FAILURE([--with-xenomai=yes specified, but xeno-config not found])
+		opt_xenomai=no
+	else
+		AC_MSG_RESULT([Configuring to use Xenomai])
+	fi
 fi
+OSAPI=posix
 AC_SUBST(OSAPI)
 
+XENO_CFLAGS=`${XENO_CONFIG} --posix-cflags`
+XENO_LDFLAGS=`${XENO_CONFIG} --posix-ldflags`
+
+CFLAGS="${CFLAGS} ${XENO_CFLAGS}"
+LDFLAGS="${LDFLAGS} ${XENO_LDFLAGS}"
+
+
 dnl --- end of OS flavour checks ----------------------------------------
+
+AC_LIBTOOL_DLOPEN
+AC_PROG_LIBTOOL
 
 dnl add -ldl if needed 
 if test -n "$lt_cv_dlopen_libs" ; then
@@ -99,7 +91,7 @@ AC_TYPE_SIGNAL
 
 
 dnl --- check for pthread -----------------------------------------------
-
+if test "x$opt_xenomai" != "xyes" ; then
 # AC_CHECK_PTHREADS(action if ok, action if not ok, action if cross-compiling)
 AC_DEFUN([AC_CHECK_PTHREADS],
 	AC_LANG_SAVE
@@ -175,7 +167,7 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
 	])], [xopen=no], [CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE=500"; xopen=yes])
 AC_MSG_RESULT([$xopen])
 
-
+fi 
 dnl --- end of checks for pthread ---------------------------------------
 
 
@@ -184,12 +176,14 @@ AC_SEARCH_LIBS([atan], [m])
 
 AC_SEARCH_LIBS([timer_create], [rt])
 
+if test "x$opt_xenomai" != "xyes" ; then
 case `uname -r` in
 	*-adeos)
 		enable_posix_timers=no
 		AC_MSG_WARN([Running adeos, disabling posix timers])
 		;;
 esac
+fi
 
 AC_ARG_ENABLE([posix-timers], 
 	AC_HELP_STRING([--disable-posix-timers Force use of setitimer(2)],
@@ -333,14 +327,3 @@ AC_OUTPUT(Init.make
 	src/regress/Makefile
 )
 
-if test "x$opt_rtai" = "xyes"; then
-AC_OUTPUT(
-	src/errorLib/os/rtai/Kbuild
-	src/errorLib/os/rtai/Makefile
-	src/portLib/os/rtai/Kbuild
-	src/portLib/os/rtai/Makefile
-	src/comLib/os/rtai/Kbuild
-	src/comLib/os/rtai/Makefile
-	src/posterLib/os/rtai/Kbuild
-	src/posterLib/os/rtai/Makefile)
-fi

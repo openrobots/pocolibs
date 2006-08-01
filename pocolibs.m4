@@ -20,7 +20,7 @@ dnl ----------------------------------------------------------------------
 dnl
 dnl tests if rpcgen supports -C 
 dnl
-define(AC_RPCGEN_C,
+AC_DEFUN([AC_RPCGEN_C],
   [AC_MSG_CHECKING(for rpcgen -C)
   AC_CACHE_VAL(poco_cv_prog_RPCGEN_C,
   [if $RPCGEN -C -c </dev/null >/dev/null 2>/dev/null
@@ -40,7 +40,7 @@ dnl ----------------------------------------------------------------------
 dnl
 dnl test for POSIX timers usability
 dnl
-define(AC_POSIX_TIMERS_WORKS,
+AC_DEFUN([AC_POSIX_TIMERS_WORKS],
 [AC_MSG_CHECKING([for usable posix timers])
 AC_TRY_RUN([
 #include <sys/time.h>
@@ -114,14 +114,4 @@ main(int argc, char *argv[])
  	[AC_DEFINE(HAVE_POSIX_TIMERS)],
 	[AC_MSG_RESULT([no])]
 )])dnl
-
-dnl --- look for rtai installation -------------------------------------
-AC_DEFUN([AC_CHECK_RTAI],
-[
-	AC_CHECK_PROG(RTAI_CONFIG, rtai-config, rtai-config)
-	if test "x$RTAI_CONFIG" = "x"; then
-		AC_MSG_ERROR([rtai-config not found. Please make sure you have included the directory where RTAI is installed to your PATH]);
-	fi
-	AC_SUBST(RTAI_CONFIG)
-])
 
