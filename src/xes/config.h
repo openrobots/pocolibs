@@ -25,7 +25,7 @@
 /*
  * Portability defines
  */
-#if defined(sun) && defined(SVR4)
+#if defined(sun) && defined(__SVR4)
 
 #define USE_SYSV_PTY
 #define USE_STREAMS
@@ -34,7 +34,7 @@
 
 #endif /* Solaris 2.x */
 
-#if defined(sun) && !defined(SVR4)
+#if defined(sun) && !defined(__SVR4)
 
 #undef USE_SYSV_PTY
 #undef USE_STREAMS
