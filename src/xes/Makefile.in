@@ -23,11 +23,6 @@ INSTALL=	@INSTALL@
 
 include $(top_builddir)/Init.make
 
-ifeq (yes,$(HAS_X))
-CPPFLAGS += -DUSE_X
-XLIB = -lX11
-endif
-
 vpath %.c ${srcdir}
 
 SRCS = \
@@ -42,11 +37,11 @@ PROG = xes_server
 all: $(PROG)
 
 $(PROG): $(OBJS)
-	$(LIBTOOL) --mode=link $(CC) -o $(PROG) $(CFLAGS) $(XLDFLAGS) \
+	$(LIBTOOL) --mode=link $(CC) -o $(PROG) $(CFLAGS) \
 	$(LDFLAGS) $(OBJS)  $(XLIB) $(OS_LIBS)
 
 %.lo: %.c
-	$(LTCC) -c $(CPPFLAGS) $(XCPPFLAGS) $(CFLAGS) $<
+	$(LTCC) -c $(CPPFLAGS) $(CFLAGS) $<
 
 clean:
 	$(LIBTOOL) --mode=clean rm -f $(OBJS) $(PROG)
@@ -60,7 +55,7 @@ install:
 
 ifeq ($(findstring clean,$(MAKECMDGOALS)),)
 depend DEPENDANCES: $(SRCS)
-	$(MKDEP) -c$(CC) -t.lo -oDEPENDANCES $(CPPFLAGS) $(XCPPFLAGS) $?
+	$(MKDEP) -c$(CC) -t.lo -oDEPENDANCES $(CPPFLAGS) $?
 
 include DEPENDANCES
 endif

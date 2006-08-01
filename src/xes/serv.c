@@ -47,9 +47,6 @@
 #include <sys/stream.h>
 #include <sys/stropts.h>
 #endif
-#ifdef USE_X
-#include <X11/Xlib.h>
-#endif
 
 #include "xes.h"
 #include "rngLib.h"
@@ -121,21 +118,7 @@ main(int argc, char *argv[])
 #ifdef USE_RLIMIT
     struct rlimit rl;
 #endif
-#ifdef USE_X
-    Display *dpy;
-    XEvent event;
-#endif
 
-#ifdef USE_X
-    /* 
-     * Connect to the X server
-     */
-    dpy = XOpenDisplay(NULL);
-    if (dpy == NULL) {
-	fprintf(stderr, "xes: cannot open display\n");
-	exit(1);
-    }
-#endif
     /*
      * Test if the lock file (tmp/xes-pid) exists
      */
@@ -246,11 +229,6 @@ main(int argc, char *argv[])
 	FD_SET(serv_socket_fd, &ibits);
 	FD_SET(serv_socket_fd, &ebits);
 
-#ifdef USE_X
-	/* Handle X events */
-	FD_SET(ConnectionNumber(dpy), &ebits);
-	FD_SET(ConnectionNumber(dpy), &ibits);
-#endif
 
 	timeout.tv_sec = 0;
 	timeout.tv_usec = 100000;
@@ -280,28 +258,6 @@ main(int argc, char *argv[])
 	    continue;
 	}
 	
-#ifdef USE_X
-	/*
-	 * X events
-	 */
-	if (FD_ISSET(ConnectionNumber(dpy), &ibits)) {
-	    /* closed connection */
-	    if (QLength(dpy) == 0) {
-		unlink(PID_FILE);
-		exit(0);
-	    }
-	    /* Handle events (?) */
-	    for (i = 0; i < QLength(dpy); i++) {
-		XNextEvent(dpy, &event);
-		fprintf(stderr, "xes: XEvent: %d\n", event.type);
-	    }
-	}
-	if (FD_ISSET(ConnectionNumber(dpy), &ebits)) {
-	    fprintf(stderr, "X connection error\n");
-	    unlink(PID_FILE);
-	    exit (0);
-	}
-#endif    
 	/*
 	 * Connection request
 	 */

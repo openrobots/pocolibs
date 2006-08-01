@@ -98,27 +98,6 @@ dnl
 AC_TYPE_SIGNAL
 
 
-dnl --- check for X -----------------------------------------------------
-
-AC_PATH_X
-if test "x$no_x" = "xyes"; then
-   HAS_X=no
-   XCPPFLAGS=
-   XLDFLAGS=
-else
-   HAS_X=yes
-   if test "x$x_includes" != "x"; then
-      XCPPFLAGS=-I$x_includes
-   fi
-   if test "x$x_libraries" != "x"; then
-      XLDFLAGS=-L$x_libraries
-   fi
-fi
-AC_SUBST(HAS_X XCPPFLAGS XLDFLAGS)
-
-dnl --- end of checks for X ---------------------------------------------
-
-
 dnl --- check for pthread -----------------------------------------------
 
 # AC_CHECK_PTHREADS(action if ok, action if not ok, action if cross-compiling)
