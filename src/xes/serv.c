@@ -523,11 +523,7 @@ create_window(int *win_fd, int *win_pid)
 
     if((pid = fork()) == 0) {
 
-#if !defined(SVR4) && !defined(__linux__)
-	setpgrp(0, getpid());
-#else
-	setsid();
-#endif
+ 	setsid();
 	signal(SIGPIPE, pipeHandler);
 	execlp("xterm", "xterm(xes)", buf, (char *)0);
 	fprintf(stderr, "xterm exec failed\n");
