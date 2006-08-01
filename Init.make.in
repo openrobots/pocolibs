@@ -56,9 +56,6 @@ LDFLAGS=	@LDFLAGS@
 
 RTAI_CONFIG=	@RTAI_CONFIG@
 
-XCPPFLAGS=	@XCPPFLAGS@
-XLDFLAGS=	@XLDFLAGS@
-
 OSAPI=		@OSAPI@
 
 # Base directory of the software
