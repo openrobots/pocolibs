@@ -151,7 +151,7 @@ posterDelete(POSTER_ID posterId)
 STATUS
 posterFind(char *name, POSTER_ID *pPosterId)
 {
-    POSTER_STR *p;
+    POSTER_STR *p, *old_p;
     POSTER_ID id;
     unsigned int size;
 
@@ -162,13 +162,25 @@ posterFind(char *name, POSTER_ID *pPosterId)
     }
 
     /* Look in already known posters first */
-    for (p = allPosters; p != NULL; p = p->next) {
+    for (old_p = NULL, p = allPosters; p != NULL; old_p = p, p = p->next) {
 	if (strcmp(p->name, name) == 0) {
 		/* found - check that it wasn't destroyed */
-		if (posterIoctl(p, FIO_GETSIZE, &size) == ERROR) 
-			return ERROR;
-		if (size == 0) 
-			continue;
+		if (posterIoctl(p, FIO_GETSIZE, &size) == ERROR || size == 0) 
+		{
+		    /* remove from allPosters. An attentive reader could see that
+		     * allPosters elements are never destroyed
+		     *
+		     * DO NOT free(p): the client may hold a POSTER_ID on it 
+		     * and free-ing the associated POSTER_STR would make the 
+		     * program crash
+		     */
+		    if (old_p)
+			old_p->next = p->next;
+		    else
+			allPosters = p->next;
+		    continue;
+		}
+
 		/* now we're sure that the poster is good */
 		*pPosterId = (POSTER_ID)p;
 		return OK;
