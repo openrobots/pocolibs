@@ -43,7 +43,6 @@ flist=\
 	logLib.h		\
 	mboxLib.h		\
 	memLib.h		\
-	objLib.h		\
 	portLib.h		\
 	posterLib.h		\
 	semLib.h		\
