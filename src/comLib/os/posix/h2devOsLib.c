@@ -94,7 +94,8 @@ h2devGetKey(int type, int dev, BOOL create, int *pFd)
 	    amode = R_OK|X_OK;
 	}
 	if (access(home, amode) < 0) {
-	    home = NULL;
+	    errnoSet(S_h2devLib_BAD_HOME_DIR);
+	    return ERROR;
 	}
     }
 	
