@@ -323,7 +323,6 @@ AC_OUTPUT(Init.make
 	src/posterLib/test/delete/Makefile
 	src/h2/Makefile
 	src/shell/Makefile
-	src/xes/Makefile
 	src/regress/Makefile
 )
 

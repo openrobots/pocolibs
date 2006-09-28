@@ -35,6 +35,7 @@ __RCSID("$LAAS$");
 #else
 #include "portLib.h"
 #endif
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <errnoLib.h>
@@ -46,8 +47,23 @@ __RCSID("$LAAS$");
 #endif
 
 #include "mboxLib.h"
-#include "xes.h"
 
+/*----------------------------------------------------------------------*/
+
+static int 
+h2scanf(const char *fmt, void *addr)
+{
+    static char buf[1024];
+    int n;
+
+    while (fgets(buf, sizeof(buf), stdin) == NULL) {
+	if (errno != EINTR) {
+	    return ERROR;
+	}
+    } /* while */
+    n = sscanf(buf, fmt, addr);
+    return(n < 0 ? 0 : n);
+}
 
 /******************************************************************************
 *
@@ -97,13 +113,9 @@ FONCTIONS DISPONIBLES:\
 \n\n\
 TAPEZ LE NUMERO DE LA FONCTION DESIREE : ";
 
-  xes_init(NULL);
-
   /* Demander le nom a donner a ce processus */
   do printf ("\nDEFINISSEZ LE NOM DE CE PROCESSUS: ");
   while (h2scanf ("%s", name1) != 1);
-
-  xes_set_title("mboxEssay - %s", name1);
 
   /* Initialiser les routines de mailbox et allouer de la memoire*/
   if (mboxInit (name1) != OK ||

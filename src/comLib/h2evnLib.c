@@ -36,7 +36,6 @@ static const H2_ERROR const h2evnLibH2errMsgs[] = H2_EVN_LIB_H2_ERR_MSGS;
 #ifdef DEBUG
 #include <stdio.h>
 #include <stdarg.h>
-#include "xes.h"
 #endif
 
 #ifdef COMLIB_DEBUG_H2EVNLIB

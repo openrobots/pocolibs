@@ -34,7 +34,6 @@ __RCSID("$LAAS$");
 #include "h2timerLib.h"
 #include "smMemLib.h"
 #include "h2initGlob.h"
-#include "xes.h"
 
 /**
  ** ComLib initialisation procedure for Unix processes 
@@ -61,10 +60,9 @@ h2initGlob(int ticksPerSec)
     if (osInit(ticksPerSec) == ERROR) {
 	return ERROR;
     }
-    /* I/O redirections  */
-    if (xesStdioInit() == ERROR) {
-        return ERROR;
-    }
+    setvbuf(stdout, (char *)NULL, _IOLBF, 0);
+    setvbuf(stderr, (char *)NULL, _IOLBF, 0);
+
     /* attach to h2 devices */
     if (h2devAttach() == ERROR) {
 	printf("Error: could not find h2 devices\n"

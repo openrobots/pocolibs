@@ -32,7 +32,6 @@ __RCSID("$LAAS$");
 #include "portLib.h"
 #include "h2initGlob.h"
 #include "shellLib.h"
-#include "xes.h"
 
 static char *prompt = "h2> ";
 

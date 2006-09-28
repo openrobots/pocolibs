@@ -31,8 +31,7 @@ SUBDIRS=\
 	src/posterLib			\
 	src/posterLib/posterServ	\
 	src/h2				\
-	src/shell			\
-	src/xes
+	src/shell
 
 TEST_SUBDIRS = \
 	src/regress \
