@@ -41,5 +41,4 @@ SRCS+= \
 	mboxEssay.c             \
 	smMemLib.c		\
 	smMemOsLib.c		\
-	smObjLib.c		\
-	vfscanf.c
+	smObjLib.c
