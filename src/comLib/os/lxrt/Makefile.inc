@@ -42,6 +42,4 @@ SRCS+= \
 	smMemLib.c		\
 	smMemOsLib.c		\
 	smObjLib.c		\
-	vfscanf.c               \
-	xesClient.c             \
-	xesStdio.c
+	vfscanf.c
