@@ -21,7 +21,7 @@ includedir=	@includedir@
 INSTALL=	@INSTALL@
 INSTALL_DATA=	$(INSTALL) -m 644
 
-include $(top_builddir)Init.make
+include $(top_builddir)/Init.make
 
 # -----------------------------------------------------------------------
 

@@ -24,7 +24,7 @@ top_srcdir=	@top_srcdir@
 srcdir=		@srcdir@
 INSTALL=	@INSTALL@
 
-include $(top_builddir)Init.make
+include $(top_builddir)/Init.make
 -include $(srcdir)/os/$(OSAPI)/Makefile.inc
 
 SRCS+= \

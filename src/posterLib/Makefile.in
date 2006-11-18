@@ -23,7 +23,7 @@ srcdir=		@srcdir@
 builddir= @builddir@
 abs_builddir= @abs_builddir@
 
-include ../../Init.make
+include $(top_builddir)/Init.make
 -include $(srcdir)/os/$(OSAPI)/Makefile.inc
 
 INSTALL=	@INSTALL@

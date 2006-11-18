@@ -16,8 +16,11 @@
 # $LAAS$
 
 top_srcdir=	@top_srcdir@
+# WARNING: @top_builddir@ is sometimes broken for toplevel files
+# (like this one). Use @builddir@ on TOP LEVEL FILES
+top_builddir=	@builddir@
 
-include Init.make
+include $(top_builddir)/Init.make
 
 INSTALL=	@INSTALL@
 

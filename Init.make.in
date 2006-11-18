@@ -49,7 +49,7 @@ LIBTOOL=	@LIBTOOL@
 LTCC=           $(LIBTOOL) --mode=compile $(CC)
 LTLD=           $(LIBTOOL) --mode=link $(CC)
 
-CPPFLAGS=	-I$(top_srcdir)/include -I$(top_builddir)src
+CPPFLAGS=	-I$(top_srcdir)/include -I$(top_builddir)/src
 CPPFLAGS+=	-I$(top_srcdir)/include/os/$(OSAPI) @CPPFLAGS@
 CFLAGS=		@CFLAGS@
 LDFLAGS=	@LDFLAGS@

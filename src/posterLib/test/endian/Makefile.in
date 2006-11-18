@@ -20,7 +20,7 @@ top_builddir=	@top_builddir@
 srcdir=		@srcdir@
 INSTALL=	@INSTALL@
 
-include ../../../../Init.make
+include $(top_builddir)/Init.make
 -include $(srcdir)/os/$(OSAPI)/Makefile.inc
 
 vpath %.c @srcdir@

@@ -19,7 +19,7 @@ top_builddir=	@top_builddir@
 top_srcdir=	@top_srcdir@
 srcdir=		@srcdir@
 
-include $(top_builddir)Init.make
+include $(top_builddir)/Init.make
 
 vpath %.c	@srcdir@
 
