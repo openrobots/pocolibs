@@ -83,10 +83,10 @@ DISTFILES = $(DIST_COMMON) $(DIST_SUBDIRS)
 
 dist:
 	-mkdir $(DISTNAME)
-	(cd @srcdir@ ; gnutar cf - --exclude=CVS --exclude=.#* \
+	(cd @srcdir@ ; $(TAR) cf - --exclude=CVS --exclude=.#* \
 		--exclude=*~ $(DISTFILES)) | \
-	( cd $(DISTNAME) ; tar xpf - )
-	tar cf - $(DISTNAME) | gzip -c -9 > $(DISTNAME).tar.gz
+	( cd $(DISTNAME) ; $(TAR) xpf - )
+	$(TAR) cf - $(DISTNAME) | gzip -c -9 > $(DISTNAME).tar.gz
 
 sign:
 	gpg -a --detach-sign $(DISTNAME).tar.gz

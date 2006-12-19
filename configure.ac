@@ -9,7 +9,7 @@ dnl
 dnl $LAAS$
 dnl
 AC_REVISION($LAAS$)
-AC_INIT([pocolibs],[2.1],[openrobots@laas.fr])
+AC_INIT([pocolibs],[2.2],[openrobots@laas.fr])
 AC_PREREQ(2.59)
 
 AC_CANONICAL_HOST
@@ -298,12 +298,19 @@ for dopt in $opt_debug_output; do
 done
 IFS=$ac_save_ifs
 
-dnl --- Check perl path ----------------------------------------------------
+dnl --- Check perl path -------------------------------------------------
 dnl Check for perl
 AC_ARG_VAR(PERL, full path of Perl interpreter)
 AC_PATH_PROG(PERL, perl, no)
 if test "x$PERL" = "xno"; then
     AC_MSG_ERROR(Cannot find the perl executable)
+fi
+
+dnl --- GNU tar (for make dist only) ------------------------------------
+AC_ARG_VAR(TAR, [GNU tar command])
+AC_CHECK_PROGS(TAR, [gtar gnutar gnu-tar tar], [no])
+if test "x$TAR" = "xno"; then
+	AC_MSG_ERROR([Cannot find a tar program])
 fi
 
 dnl --- Make makefiles --------------------------------------------------

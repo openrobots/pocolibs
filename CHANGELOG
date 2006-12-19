@@ -1,5 +1,6 @@
-Version 2.2, xx xxx xxxx 
+Version 2.2, 19 December 2006
  
+ 71. Let configure find the gnu tar program for make dist.
  70. Remove the xes subsystem, which is no longer used. 
  69. Preliminary support for building Xenomai 2.x enabled libs, using the 
      POSIX skin.

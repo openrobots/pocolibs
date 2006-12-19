@@ -79,3 +79,4 @@ MKINSTALLDIRS=	$(top_srcdir)/mkinstalldirs
 RPCGEN=		@RPCGEN@ @RPCGEN_C@
 
 LN=		ln -s
+TAR=		@TAR@
