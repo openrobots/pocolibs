@@ -41,8 +41,10 @@ fi
 OSAPI=posix
 AC_SUBST(OSAPI)
 
-XENO_CFLAGS=`${XENO_CONFIG} --posix-cflags`
-XENO_LDFLAGS=`${XENO_CONFIG} --posix-ldflags`
+if test "$OSAPI" = "xenomai"; then
+	XENO_CFLAGS=`${XENO_CONFIG} --posix-cflags`
+	XENO_LDFLAGS=`${XENO_CONFIG} --posix-ldflags`
+fi
 
 CFLAGS="${CFLAGS} ${XENO_CFLAGS}"
 LDFLAGS="${LDFLAGS} ${XENO_LDFLAGS}"
