@@ -1,4 +1,5 @@
- 72. Remove RTAI/LXRT parts.
+ 73. Fix build of posterLib tests programs.
+ 72. Remove VxWorks/RTAI/LXRT parts.
 
 Version 2.2, 19 December 2006
  
