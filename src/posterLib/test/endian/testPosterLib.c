@@ -17,15 +17,11 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
-#ifndef VXWORKS
-#include "portLib.h"
-#else
-#include <vxWorks.h>
-#endif
 #include <stdio.h>
 
+#include <portLib.h>
 #include "testPosterLib.h"
-#include "h2endian.h"
+#include "h2endianness.h"
 
 void printTestStr(char *who, TESTPOST_STR *test)
 {

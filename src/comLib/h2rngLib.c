@@ -30,22 +30,11 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
-#ifdef VXWORKS
-#include <vxWorks.h>
-#else
+#include <sys/types.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include <portLib.h>
-#endif
-
-#if defined(__RTAI__) && defined(__KERNEL__)
-# include <linux/kernel.h>
-# include <linux/sched.h>
-# include <asm/uaccess.h>
-#else
-# include <sys/types.h>
-# include <stdlib.h>
-# include <string.h>
-#endif
-
 #include <taskLib.h>
 #include <errnoLib.h>
 #include <smMemLib.h>

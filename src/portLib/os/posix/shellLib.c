@@ -83,19 +83,6 @@ executeCmd(char *cmdbuf,		/* client command line */
 					 * function */
 	int i, val = 0;			/* miscellaneous temporary variables */
 	
-#ifdef VXWORKS
-	if (recur == 0) {
-		/* save original std out */
-		oldStdOut = ioGlobalStdGet(STD_OUT); 
-		/* set std out for execute() */
-		ioGlobalStdSet(STD_OUT, clientSock);
-	
-		/* save original std out */
-		oldStdErr = ioGlobalStdGet(STD_ERR);
-		 /* set std out for execute() */
-		ioGlobalStdSet(STD_ERR, clientError);
-	}
-#endif
 	fflush(stdout);
 	fflush(stderr);
 #ifdef RSHD_DEBUG
@@ -250,14 +237,6 @@ executeCmd(char *cmdbuf,		/* client command line */
 		
 	} /* at least 1 argument */
  returnLabel:
-#ifdef VXWORKS
-	if (recur == 0) {
-		/* restore original std err and out */
-		ioGlobalStdSet(STD_ERR, oldStdErr); 
-		ioGlobalStdSet(STD_OUT, oldStdOut); 
-		close(clientSock);
-	}
-#endif
 	return (statusReturn);
 	
 } /* executeCmd() */

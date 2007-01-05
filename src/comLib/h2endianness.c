@@ -17,18 +17,10 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
-#ifndef VXWORKS
+
+#include <stdio.h>
+
 #include "portLib.h"
-#else
-#include "vxWorks.h"
-#endif
-
-#if defined(__RTAI__) && defined(__KERNEL__)
-# include <linux/kernel.h>
-#else
-# include <stdio.h>
-#endif
-
 #include "h2endianness.h"
 
 H2_ENDIANNESS h2localEndianness (void)

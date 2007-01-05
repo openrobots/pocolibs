@@ -30,11 +30,7 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
-#ifdef VXWORKS
-#include <vxWorks.h>
-#else
-#include "portLib.h"
-#endif
+
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -42,10 +38,7 @@ __RCSID("$LAAS$");
 #include <string.h>
 #include <stdarg.h>
 
-#ifdef VXWORKS
-#include "h2sysLib.h"
-#endif
-
+#include "portLib.h"
 #include "mboxLib.h"
 
 /*----------------------------------------------------------------------*/

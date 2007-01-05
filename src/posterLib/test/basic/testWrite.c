@@ -19,11 +19,7 @@ __RCSID("$LAAS$");
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef VXWORKS
-#include <vxWorks.h>
-#else
 #include <portLib.h>
-#endif
 
 #include "posterLib.h"
 #include <errnoLib.h>

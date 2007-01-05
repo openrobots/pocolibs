@@ -31,28 +31,16 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
-#ifdef VXWORKS
-#include <vxWorks.h>
-#else
-#include "portLib.h"
-#endif
-
-#if defined(__RTAI__) && defined(__KERNEL__)
-# include <linux/kernel.h>
-#else
 # include <stdio.h>
 # include <math.h>
-#endif
 
+#include "portLib.h"
 
 #include "h2mathTab.c"
 #include "h2mathLib.h"
 
 /*----------------------- VARIABLES LOCALES --------------------------------*/
 
-#ifdef VXWORKS
-static long randx = 1;          /* Utilisee par generateur pseudo-aleatoire */
-#endif
 
 static double tabCosFresnel [] = {
   0.00000,     0.20000E-1,  0.40000E-1,  0.60000E-1,  0.79999E-1,
@@ -350,49 +338,4 @@ double integSinFresnel (double theta)
   return (signe*sinF);
 } 
 
-#ifdef UNIX
-double 
-infinity(void)
-{
-    return HUGE_VAL;
-}
-#endif
-
-#ifdef VXWORKS
-/******************************************************************************
-*
-*  srand - Set du nombre de base du generateur pseudo-aleatoire
-*
-*  Description:
-*  Set du nombre de base du generateur pseudo-aleatoire
-* 
-*  Retourne: Neant
-*/
-
-void srand (x)
-     unsigned x;
-{
-  randx = x;
-}
-
-
-
-/******************************************************************************
-*
-*  rand  -  Generateur de nombres pseudo-aleatoires
-*
-*  Description:
-*  Generateur de nombres pseudo-aleatoires
-*
-*  Retourne: nombre pseudo-aleatoire
-*/
-
-long rand ()
-{
-  register int r;
-  r = randx * 1103515245;
-  return (randx = (((r&0x3fffffff) + 12345) ^ (r&0x40000000)));
-}
-
-#endif
 

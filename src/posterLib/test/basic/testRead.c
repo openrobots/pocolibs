@@ -21,11 +21,7 @@ __RCSID("$LAAS$");
 #include <unistd.h>
 #include <stdlib.h>
 
-#ifdef VXWORKS
-#include <vxWorks.h>
-#else
 #include <portLib.h>
-#endif
 #include "posterLib.h"
 #include "errnoLib.h"
 #include "h2errorLib.h"
@@ -55,18 +51,14 @@ main(int ac, char **av)
 	    exit(0);
 	}
 	printf("Using posterRead: %d\n", i);
-#ifdef UNIX
 	sleep(1);
-#endif
 	if (posterTake(id, POSTER_READ) != OK) {
 	    printf("Poster closed\n");
 	    exit(0);
 	}
 	printf("Using posterTake/posterAddr: %d\n", *(int *)posterAddr(id));
 	posterGive(id);
-#ifdef UNIX
 	sleep(1);
-#endif
     }
     return 0;
 }

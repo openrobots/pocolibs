@@ -23,26 +23,19 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
-#ifndef VXWORKS
 #include <sys/types.h>
-#endif
 #define PORTMAP
 #include <rpc/rpc.h>
 #include <rpc/pmap_clnt.h>
 
-#ifdef VXWORKS
-#include <vxWorks.h>
-#include <rpcLib.h>
-#else
-#include <portLib.h>
-#include <unistd.h>
-#include <h2initGlob.h>
-#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
 #include <string.h>
+#include <unistd.h>
 
+#include <portLib.h>
+#include <h2initGlob.h>
 #include <errnoLib.h>
 #include <h2errorLib.h>
 #include <posterLib.h>
@@ -75,11 +68,7 @@ posterServ(void)
 {
     SVCXPRT *transp;
  
-#ifdef VXWORKS    
-    rpcTaskInit();
-#else
     h2initGlob(0);
-#endif
  
     (void) pmap_unset(POSTER_SERV, POSTER_VERSION);
     
@@ -252,8 +241,6 @@ SVC(poster_ioctl_1)(POSTER_IOCTL_PAR *param, struct svc_req *clnt)
     
 /*----------------------------------------------------------------------*/
 
-#ifndef VXWORKS
-
 static RETSIGTYPE
 sighandler(int sig)
 {
@@ -315,4 +302,3 @@ main(int argc, char *argv[])
     }
     return 0;
 }
-#endif /* ! VXWORKS */

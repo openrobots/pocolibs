@@ -17,13 +17,9 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
-#ifndef VXWORKS
-#include "portLib.h"
-#else
-#include <vxWorks.h>
-#endif
 #include <stdio.h>
 
+#include "portLib.h"
 #include "testPosterLib.h"
 
 static int testEnd(POSTER_ID posterId)
@@ -31,11 +27,7 @@ static int testEnd(POSTER_ID posterId)
   return 1;
 }
 
-#ifndef VXWORKS
-int main()
-#else
-int testPosterRead ()
-#endif
+int main(int argc, char *argv[])
 {
   POSTER_ID posterIdF;
   TESTPOST_STR testOut;
