@@ -22,16 +22,9 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
+#include <string.h>
+
 #include "portLib.h"
-
-#if defined(__RTAI__) && defined(__KERNEL__)
-# include <linux/kernel.h>
-# include <linux/sched.h>
-#else
-# include <stdio.h>
-# include <string.h>
-#endif
-
 #include "errnoLib.h"
 #include "semLib.h"
 #include "wdLib.h"

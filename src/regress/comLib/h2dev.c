@@ -17,12 +17,7 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
-#ifdef __RTAI__
-# include <rtai_sched.h>
-# define printf printk
-#else
-# include <stdio.h>
-#endif
+#include <stdio.h>
 
 #include "portLib.h"
 #include "h2devLib.h"

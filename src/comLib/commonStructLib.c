@@ -29,24 +29,15 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
-#include "portLib.h"
-
-#if defined(__RTAI__) && defined(__KERNEL__)
-# include <linux/slab.h>
-#else
 # include <stdlib.h>
 # include <string.h>
-#endif
 
+#include "portLib.h"
 #include "errnoLib.h"
 
 #include "commonStructLib.h"
 static const H2_ERROR const commonStructLibH2errMsgs[] = COMMON_STRUCT_LIB_H2_ERR_MSGS;
 
-#if defined(__RTAI__) && defined(__KERNEL__)
-# define malloc(x)	kmalloc(x, GFP_KERNEL)
-# define free(x)	kfree(x)
-#endif
 
 /* ROUTINES DISPONIBLES A L'UTILISATEUR : */
  

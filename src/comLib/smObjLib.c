@@ -26,15 +26,10 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
+#include <stddef.h>
 #include "portLib.h"
-
-#if defined(__RTAI__) && defined(__KERNEL__)
-# include <linux/kernel.h>
-#else
-# include <stdio.h>
-#endif
-
 #include "smObjLib.h"
+
 static const H2_ERROR const smObjLibH2errMsgs[] = SM_OBJ_LIB_H2_ERR_MSGS;
 
 #include "smMemLib.h"

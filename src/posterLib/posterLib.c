@@ -17,18 +17,13 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
-#include <portLib.h>
-
-#if defined(__RTAI__) && defined(__KERNEL__)
-# include <linux/slab.h>
-#else
 # include <stdio.h>
 # include <stdlib.h>
 # include <string.h>
 # include <sys/types.h>
 # include <inttypes.h>
-#endif
 
+#include <portLib.h>
 #include <h2devLib.h>
 #include <posterLib.h>
 #include <errnoLib.h>
@@ -38,11 +33,6 @@ __RCSID("$LAAS$");
 static const H2_ERROR const posterLibH2errMsgs[] = POSTER_LIB_H2_ERR_MSGS;
 static const H2_ERROR const remotePosterLibH2errMsgs[] = REMOTE_POSTER_LIB_H2_ERR_MSGS;
 
-
-#if defined(__RTAI__) && defined(__KERNEL__)
-# define malloc(x)     kmalloc(x, GFP_KERNEL)
-# define free(x)       kfree(x)
-#endif
 
 static STATUS posterInit(void);
 #define POSTER_INIT if (posterInit() == ERROR) return ERROR

@@ -21,17 +21,11 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
+#include <stdio.h>
+#include <string.h>
+#include <assert.h>
+
 #include <portLib.h>
-
-#if defined(__RTAI__) && defined(__KERNEL__)
-# include <linux/kernel.h>
-# include <linux/sched.h>
-#else
-# include <stdio.h>
-# include <string.h>
-# include <assert.h>
-#endif
-
 #include <errnoLib.h>
 #include <smMemLib.h>
 #include <smObjLib.h>
@@ -46,14 +40,6 @@ __RCSID("$LAAS$");
 # define LOGDBG(x)     logMsg x
 #else
 # define LOGDBG(x)
-#endif
-
-#if defined(__RTAI__) && defined(__KERNEL__)
-# ifdef NDEBUG
-#  define assert(x)
-# else
-#  define assert(x) if (!(x)) logMsg("assert failed " #x)
-# endif
 #endif
 
 /**

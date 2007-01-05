@@ -24,10 +24,6 @@ __RCSID("$LAAS$");
 #include <errno.h>
 #include <fnmatch.h>
 
-#ifdef __LXRT__
-#include <rtai_lxrt.h>
-#endif
-
 #include "portLib.h"
 #include "errnoLib.h"
 #include "h2errorLib.h"
@@ -138,13 +134,6 @@ h2init(int smMemSize)
 	} /* switch */
     } 
     printf("OK\n");
-#ifdef __LXRT__
-    while (1) {
-      /* if removed... freeze, I don't know why */
-      rt_sleep(nano2count(2000000000));
-      sleep(1);
-    }
-#endif
     return OK;
 } /* h2init */
 

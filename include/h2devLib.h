@@ -23,10 +23,6 @@
 #include "h2semLib.h"
 #include "h2endianness.h"
 
-#if defined(__LXRT__)
-#include "rtai_sem.h"
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -41,12 +37,8 @@ extern "C" {
 
 /* Semaphore */
 typedef struct H2_SEM_STR {
-#ifndef __LXRT__
     int semId;
     int semNum;
-#else /* LXRT */
-    SEM *semId[MAX_SEM];	/* LXRT sem ID */
-#endif
 } H2_SEM_STR;
 
 /*

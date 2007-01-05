@@ -96,7 +96,6 @@ extern STATUS semFlush ( SEM_ID semId );
 #define S_semLib_NOT_A_SEM     H2_ENCODE_ERR(M_semLib, 3)
 #define S_semLib_TIMEOUT       H2_ENCODE_ERR(M_semLib, 4)
 #define S_semLib_RESOURCE_BUSY H2_ENCODE_ERR(M_semLib, 5)
-#define S_semLib_LXRT_ERROR    H2_ENCODE_ERR(M_semLib, 6)
  
 #define SEM_LIB_H2_ERR_MSGS { \
     {"TOO_MANY_SEM",  H2_DECODE_ERR(S_semLib_TOO_MANY_SEM)},  \
@@ -104,7 +103,6 @@ extern STATUS semFlush ( SEM_ID semId );
     {"NOT_A_SEM",     H2_DECODE_ERR(S_semLib_NOT_A_SEM)},    \
     {"TIMEOUT",       H2_DECODE_ERR(S_semLib_TIMEOUT)},  \
     {"RESOURCE_BUSY", H2_DECODE_ERR(S_semLib_RESOURCE_BUSY)},  \
-    {"LXRT_ERROR",    H2_DECODE_ERR(S_semLib_LXRT_ERROR)},  \
   }
 
 #ifdef __cplusplus

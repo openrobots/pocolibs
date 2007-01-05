@@ -17,14 +17,9 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
+#include <stdio.h>
+
 #include <portLib.h>
-
-#ifdef __RTAI__
-# include <rtai_sched.h>
-#else
-# include <stdio.h>
-#endif
-
 #include <semLib.h>
 #include <wdLib.h>
 #include <tickLib.h>

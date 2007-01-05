@@ -17,13 +17,10 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
-#include <portLib.h>
-#ifdef __RTAI__
-# include <rtai_sched.h>
-#else
-# include <stdio.h>
-#endif
 #include <sys/time.h>
+#include <stdio.h>
+
+#include <portLib.h>
 #include <tickLib.h>
 
 /**
@@ -47,20 +44,12 @@ int pocoregress_init()
 	long t1, t2;
 	struct timeval tp1, tp2;
 	
-#if defined(__RTAI__) && defined(__KERNEL__)
-	do_gettimeofday(&tp1);
-#else
 	gettimeofday(&tp1, NULL);
-#endif
 	t1 = tickGet();
 	do {
 		t2 = tickGet();
 	} while (t2 - t1 < 100);
-#if defined(__RTAI__) && defined(__KERNEL__)
-	do_gettimeofday(&tp2);
-#else
 	gettimeofday(&tp2, NULL);
-#endif
 	logMsg("100 ticks lasted %d us - should be %d\n",
 	    time_difference(&tp2, &tp1), 1000000000/sysClkRateGet());
 }

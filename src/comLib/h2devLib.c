@@ -18,17 +18,13 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
-#include "portLib.h"
 
-#if defined(__RTAI__) && defined(__KERNEL__)
-# include <linux/kernel.h>
-# include <linux/sched.h>
-#else
-# include <sys/types.h>
-# include <stdio.h>
-# include <string.h>
-# include <unistd.h>
-#endif
+#include <sys/types.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+
+#include "portLib.h"
 
 #include <fnmatch.h>
 
@@ -42,9 +38,6 @@ static const H2_ERROR const h2devLibH2errMsgs[] = H2_DEV_LIB_H2_ERR_MSGS;
 #include "smMemLib.h"
 #include "smObjLib.h"
 
-#if defined(__RTAI__) && defined(__KERNEL__)
-# define getuid()      0
-#endif
 
 #ifdef COMLIB_DEBUG_H2DEVLIB
 # define LOGDBG(x)	logMsg x

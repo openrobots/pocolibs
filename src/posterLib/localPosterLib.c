@@ -21,17 +21,11 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
+#include <sys/types.h>
+#include <string.h>
+#include <unistd.h>
+
 #include "portLib.h"
-
-#if defined(__RTAI__) && defined(__KERNEL__)
-# include <linux/sched.h>
-#else
-# include <sys/types.h>
-# include <stdio.h>
-# include <string.h>
-# include <unistd.h>
-#endif
-
 #include "taskLib.h"
 #include "smMemLib.h"
 #include "smObjLib.h"
@@ -44,11 +38,6 @@ __RCSID("$LAAS$");
 
 #ifdef VALGRIND_SUPPORT
 #include <valgrind/memcheck.h>
-#endif
-
-#if defined(__RTAI__) && defined(__KERNEL__)
-# define getpid		taskIdSelf
-# define getuid()	0
 #endif
 
 static STATUS localPosterCreate ( char *name, int size, POSTER_ID *pPosterId );

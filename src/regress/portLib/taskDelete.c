@@ -17,14 +17,10 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
+#include <stdio.h>
+
 #include <portLib.h>
 #include <taskLib.h>
-
-#if defined(__RTAI__) && defined(__KERNEL__)
-# include <rtai_sched.h>
-#else
-# include <stdio.h>
-#endif
 
 int
 pocoregress_init()

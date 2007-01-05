@@ -17,22 +17,18 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
+#include <sys/types.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
 #include "portLib.h"
-
-#if defined(__RTAI__) && defined(__KERNEL__)
-# include <linux/slab.h>
-#else
-# include <sys/types.h>
-# include <stdio.h>
-# include <string.h>
-# include <stdlib.h>
-#endif
-
 #include "taskLib.h"
 #include "tickLib.h"
 #include "h2semLib.h"
 #include "errnoLib.h"
 #include "h2devLib.h"
+
 #include "gcomLib.h"
 static const H2_ERROR const gcomLibH2errMsgs[] = GCOM_LIB_H2_ERR_MSGS;
 
@@ -42,20 +38,6 @@ static const H2_ERROR const gcomLibH2errMsgs[] = GCOM_LIB_H2_ERR_MSGS;
 # define LOGDBG(x)
 #endif
 
-/* Memory allocation routine - allocates 0'ed buffers */
-#if defined(__RTAI__) && defined(__KERNEL__)
-
-static inline void *calloc(int x, size_t y) 
-{
-   register size_t s = x*y;
-   void *m;
-
-   if ((m = kmalloc(s, GFP_KERNEL))) memset(m, 0, s);
-   return m;
-}
-# define free(x)		kfree(x)
-
-#endif
 
 /**
  ** Variables statiques

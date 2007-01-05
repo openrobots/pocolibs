@@ -28,7 +28,6 @@ extern "C" {
  * Flags for tasks
  */
 #define VX_FP_TASK		0x0008 /* f-point coprocessor support */
-#define PORTLIB_UNPRIVILEGED	0x8000 /* INTERNAL: comLib/rtai only */
 
 /*
  * Opaque task descriptor
@@ -47,9 +46,6 @@ extern long taskSpawn ( char *name, int priority, int options, int stackSize,
 #else
 extern long taskSpawn ( char *name, int priority, int options, 
 		       int stackSize, FUNCPTR entryPt, ... );
-#endif
-#ifdef __LXRT__
-extern STATUS taskJoin(long tid, void **val_return);
 #endif
 extern STATUS taskDelete ( long tid );
 extern const char *taskName ( long tid );

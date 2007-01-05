@@ -17,18 +17,12 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
+#include <sys/types.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+
 #include "portLib.h"
-
-#if defined(__RTAI__) && defined(__KERNEL__)
-# include <linux/kernel.h>
-# include <linux/sched.h>
-#else
-# include <sys/types.h>
-# include <stdio.h>
-# include <string.h>
-# include <unistd.h>
-#endif
-
 #include "taskLib.h"
 #include "errnoLib.h"
 #include "h2devLib.h"
@@ -46,11 +40,6 @@ static const H2_ERROR const h2rngLibH2errMsgs[] = H2_RNG_LIB_H2_ERR_MSGS;
 #else
 # define LOGDBG(x)
 #endif
-
-#if defined(__RTAI__) && defined(__KERNEL__)
-# define getuid()      0
-#endif
-
 
 /*----------------------------------------------------------------------*/
 
@@ -463,8 +452,6 @@ mboxSkip(MBOX_ID mboxId)
 }
 
 
-#if !defined(__RTAI__) || defined(__KERNEL__)
-
 /*----------------------------------------------------------------------*/
 
 /**
@@ -525,5 +512,3 @@ mboxSend(MBOX_ID toId, MBOX_ID fromId, char *buf, int nbytes)
     return (OK);
 
 }
-
-#endif /* !__RTAI__ || __KERNEL__ */

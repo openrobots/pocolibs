@@ -17,16 +17,11 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
+# include <stdio.h>
+
 #include <portLib.h>
 #include <taskLib.h>
 #include <commonStructLib.h>
-
-#ifdef __RTAI__
-# include <rtai_sched.h>
-# define printf printk
-#else
-# include <stdio.h>
-#endif
 
 struct csTest {
    int v1, v2;

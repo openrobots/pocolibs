@@ -17,17 +17,13 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
+
+#include <stdio.h>
+#include <time.h>
+#include <sys/time.h>
+#include <sys/types.h>
+
 #include "portLib.h"
-
-#if defined(__RTAI__) && defined(__KERNEL__)
-# include <linux/time.h>
-#else
-# include <stdio.h>
-# include <time.h>
-# include <sys/time.h>
-# include <sys/types.h>
-#endif
-
 #include "h2timeLib.h"
 
 /*----------------------------------------------------------------------*/
@@ -47,11 +43,7 @@ h2timeGet(H2TIME *pTimeStr)
 {
     struct timeval tv;
 
-#if defined(__RTAI__) && defined(__KERNEL__)
-    do_gettimeofday(&tv);
-#else
     gettimeofday(&tv, NULL);
-#endif
 
     h2timeFromTimeval(pTimeStr, &tv);
     /* free(tmp); */
@@ -73,11 +65,7 @@ h2GetTimeSpec(H2TIMESPEC *pTs)
 #else
 	struct timeval tv;
 
-#if defined(__RTAI__) && defined(__KERNEL__)
-	do_gettimeofday(&tv);
-#else
 	gettimeofday(&tv, NULL);
-#endif
 	if (pTs != NULL) {
 		pTs->tv_sec = tv.tv_sec;
 		pTs->tv_nsec = tv.tv_usec * 1000;

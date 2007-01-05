@@ -17,15 +17,11 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
+#include <sys/time.h>
+#include <stdio.h>
+
 #include <portLib.h>
 #include <taskLib.h>
-
-#if defined(__RTAI__) && defined(__KERNEL__)
-# include <rtai_sched.h>
-#else
-# include <sys/time.h>
-# include <stdio.h>
-#endif
 
 /**
  ** time_difference - compute a difference in milliseconds between
@@ -53,19 +49,11 @@ pocoregress_init()
    int i;
 
    for (i = 0; i < 50; i++) {
-#if defined(__RTAI__) && defined(__KERNEL__)
-      do_gettimeofday(&tp1);
-#else
       gettimeofday(&tp1, NULL);
-#endif
 
       taskDelay(i);
 
-#if defined(__RTAI__) && defined(__KERNEL__)
-      do_gettimeofday(&tp2);
-#else
       gettimeofday(&tp2, NULL);
-#endif
       logMsg("taskDelay lasted %d us - should be %d\n",
 	     time_difference(&tp2, &tp1), i * 1000000/sysClkRateGet());
    } /* for */

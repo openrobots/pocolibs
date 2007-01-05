@@ -40,14 +40,8 @@ __RCSID("$LAAS$");
  * Compares a filename or pathname to a pattern.
  */
 
-#if defined(__RTAI__) && defined(__KERNEL__)
-# include <linux/string.h>
-#else
 #include <string.h>
-#endif
-
 #include <fnmatch.h>
-
 
 #define	EOS	'\0'
 
