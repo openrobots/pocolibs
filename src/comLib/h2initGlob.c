@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990-2006 CNRS/LAAS
+ * Copyright (c) 1990-2007 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -82,7 +82,7 @@ h2initGlob(int ticksPerSec)
 	}
     }
     printf("%s execution environment version %s\n"
-	"Copyright (c) 1999-2006 CNRS-LAAS\n", 
+	"Copyright (c) 1999-2007 CNRS-LAAS\n", 
 	PACKAGE_NAME, PACKAGE_VERSION);
 
     return OK;
