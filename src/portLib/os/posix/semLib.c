@@ -16,9 +16,11 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
+#include <errno.h>
 #include <pthread.h>
 #include <stdlib.h>
-#include <errno.h>
+#include <string.h>
+#include <unistd.h>
 
 #include "portLib.h"
 #include "wdLib.h"
@@ -30,13 +32,22 @@ const H2_ERROR semLibH2errMsgs[]   = SEM_LIB_H2_ERR_MSGS;
 
 #include <semaphore.h>
 
+#ifdef USE_SEM_OPEN
+#define TEMPLATE "/tmp/semaphoreXXXXXXXXXX"
+#endif
+
 /* semaphore structure */
 struct SEM_ID {
    enum { SEM_T_BIN, SEM_T_CNT, SEM_T_MTX } type;
    union {
-      sem_t sem;
+      sem_t *sem;
       pthread_mutex_t mtx;
    } v;
+#ifndef USE_SEM_OPEN
+   sem_t sem_storage;
+#else
+   char name[32]; /* /semaphoreXXXXXXXXXX */
+#endif
 };
 
 /*
@@ -49,6 +60,27 @@ semRecordH2ErrMsgs()
 			   sizeof(semLibH2errMsgs)/sizeof(H2_ERROR), 
 			   semLibH2errMsgs);
 }
+
+#ifdef USE_SEM_OPEN
+static int
+_sem_init(SEM_ID sem, unsigned int value)
+{ 
+	int fd;
+
+	strlcpy(sem->name, TEMPLATE, sizeof(sem->name));
+	fd = mkstemp(sem->name);
+	if (fd == -1)
+		return -1;
+	
+	close(fd);
+	sem->v.sem = sem_open(sem->name, O_CREAT|O_EXCL, 0700, value);
+	if (sem->v.sem == (sem_t *)SEM_FAILED) {
+		unlink(sem->name);
+		return -1;
+	}
+	return 0;
+}
+#endif
 
 /*
  * Create and initialize a binary semaphore 
@@ -64,9 +96,13 @@ semBCreate(int options, SEM_B_STATE initialState)
 	return NULL;
     }
     sem->type = SEM_T_BIN;
-    status = sem_init(&sem->v.sem, 0, initialState);
+#ifndef USE_SEM_OPEN
+    sem->v.sem = &sem->sem_storage;
+    status = sem_init(sem->v.sem, 0, initialState);
+#else
+    status = _sem_init(sem, initialState);
+#endif
     if (status != 0) {
-	perror("semBCreate: sem_init");
         free(sem);
 	errnoSet(errno);
 	return NULL;
@@ -88,7 +124,12 @@ semCCreate(int options, int initialCount)
 	return NULL;
     }
     sem->type = SEM_T_CNT;
-    status = sem_init(&sem->v.sem, 0, initialCount);
+#ifndef USE_SEM_OPEN
+    sem->v.sem = &sem->sem_storage;
+    status = sem_init(sem->v.sem, 0, initialCount);
+#else
+    status = _sem_init(sem, initialCount);
+#endif
     if (status != 0) {
         free(sem);
 	errnoSet(errno);
@@ -135,7 +176,12 @@ semDelete(SEM_ID semId)
          break;
 
        default:
-         status = sem_destroy(&semId->v.sem);
+#ifndef USE_SEM_OPEN
+         status = sem_destroy(semId->v.sem);
+#else
+	 status = sem_unlink(semId->name);
+	 unlink(semId->name);
+#endif
          break;
     }
 
@@ -161,7 +207,7 @@ semGive(SEM_ID semId)
          break;
 
        default:          
-         status = sem_post(&semId->v.sem);
+	 status = sem_post(semId->v.sem);
          break;
     }
     if (status != 0) {
@@ -198,7 +244,7 @@ semTake(SEM_ID semId, int timeout)
 		 break;
 
 	      default:
-		 status = sem_wait(&semId->v.sem);
+		 status = sem_wait(semId->v.sem);
 		 break;
 	   }
 	   if (status != 0) {
@@ -223,7 +269,7 @@ semTake(SEM_ID semId, int timeout)
 
 	    default:
 	       e = EAGAIN;
-	       status = sem_trywait(&semId->v.sem);
+	       status = sem_trywait(semId->v.sem);
 	       break;
 	 }
 	 if (status != 0) {
@@ -248,7 +294,7 @@ semTake(SEM_ID semId, int timeout)
 		 break;
 
 	      default:
-		 status = sem_wait(&semId->v.sem);
+		 status = sem_wait(semId->v.sem);
 		 break;
 	   }
 	   if (status != 0) {
@@ -287,10 +333,10 @@ semFlush(SEM_ID semId)
 	 break;
 
       default:
-	 while (sem_trywait(&semId->v.sem) < 0 && errno == EAGAIN) {
-	    sem_post(&semId->v.sem);
+	 while (sem_trywait(semId->v.sem) < 0 && errno == EAGAIN) {
+	    sem_post(semId->v.sem);
 	 }
-	 if (sem_post(&semId->v.sem) != 0) {
+	 if (sem_post(semId->v.sem) != 0) {
 	    return ERROR;
 	 }
 	 return OK;
