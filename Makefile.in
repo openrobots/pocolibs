@@ -74,7 +74,7 @@ distclean: clean
 	rm -f Makefile libtool config.log config.status src/pocolibs-config.h Init.make \
 		pocolibs.pc
 
-DIST_COMMON = BUGS CHANGELOG Init.make.in Init.make.posix Init.make.rtai \
+DIST_COMMON = BUGS CHANGELOG Init.make.in Init.make.posix \
 	Makefile.in pocolibs.pc.in README pocolibs.m4 config.guess \
 	config.sub configure configure.ac ltmain.sh install-sh mkinstalldirs
 DIST_SUBDIRS = doc include man src compat

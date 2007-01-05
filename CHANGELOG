@@ -1,3 +1,5 @@
+ 72. Remove RTAI/LXRT parts.
+
 Version 2.2, 19 December 2006
  
  71. Let configure find the gnu tar program for make dist.
