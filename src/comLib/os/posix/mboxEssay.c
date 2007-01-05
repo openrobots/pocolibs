@@ -60,10 +60,10 @@ h2scanf(const char *fmt, void *addr)
 
 /******************************************************************************
 *
-*   mboxEssay   -  Routine d'essai des mailboxes
+*   mboxEssay  -  test routine for mailboxes
 *
 *   Description : 
-*   Execute des fonctions d'essai des mailboxes
+*   Interactive function to test mailbox functionnalities
 *
 *   Retourne : OK ou ERROR
 */
@@ -84,37 +84,37 @@ mboxEssay (void)
   MBOX_ID mboxId1, mboxId2;         /* Identificateurs de mailbox */
 
   char *menu = "\n\
-FONCTIONS DISPONIBLES:\
+Available functions:\
 \n\n\
-1 - CREER UN MAILBOX;\
+1 - Create a mailbox;\
 \n\
-2 - ENVOYER UN MESSAGE A UN MAILBOX;\
+2 - Send a message to a mailbox;\
 \n\
-3 - EPIER UN MAILBOX;\
+3 - Spy a mailbox;\
 \n\
-4 - LIRE UN MESSAGE D'UN MAILBOX;\
+4 - Read a message from a mailbox;\
 \n\
-5 - SAUTER UN MESSAGE;\
+5 - Skip a message;\
 \n\
-6 - DELETER UN MAILBOX;\
+6 - Delete a mailbox;\
 \n\
-7 - ATTENDRE UN MESSAGE;\
+7 - Wait for a message;\
 \n\
-8 - IMPRIMER L'ETAT DE TOUS LES MAILBOXES;\
+8 - Display the status of all mailboxes;\
 \n\
-9 - FIN;\
+9 - End;\
 \n\n\
-TAPEZ LE NUMERO DE LA FONCTION DESIREE : ";
+Enter number of desired function : ";
 
   /* Demander le nom a donner a ce processus */
-  do printf ("\nDEFINISSEZ LE NOM DE CE PROCESSUS: ");
+  do printf ("\nDefine the name of this process: ");
   while (h2scanf ("%s", name1) != 1);
 
   /* Initialiser les routines de mailbox et allouer de la memoire*/
   if (mboxInit (name1) != OK ||
       (bufMes = malloc (1000)) == NULL)
     {
-      (void) printf ("Erreur d'initialisation! Bye!\n");
+      (void) printf ("Initialization error! Bye!\n");
       return (ERROR);
     }
 
@@ -136,11 +136,11 @@ TAPEZ LE NUMERO DE LA FONCTION DESIREE : ";
 	case 1:                    
 
 	  /* Demander le nom du mailbox a creer */
-	  do printf ("\nNOM DU MAILBOX A CREER: ");
+	  do printf ("\nName of the mailbox to create: ");
 	  while (h2scanf ("%s", name1) != 1);
 
 	  /* Demander la taille du mailbox a creer */
-	  do printf ("TAILLE DU MAILBOX: ");
+	  do printf ("Size of the mailbox: ");
 	  while (h2scanf ("%d", &size) != 1);
 
 	  /* Creer effectivement le mailbox */
@@ -151,52 +151,52 @@ TAPEZ LE NUMERO DE LA FONCTION DESIREE : ";
 	case 2:
 
 	  /* Demander le nom du mailbox de destination */
-	  do printf ("\nNOM DU MAILBOX DE DESTINATION: ");
+	  do printf ("\nName of the destination mailbox: ");
 	  while (h2scanf ("%s", name1) != 1);
 
 	  /* Demander le nom du mailbox d'origine */
-	  do printf ("NOM DU MAILBOX D'ORIGINE: ");
+	  do printf ("Name of the sender mailbox: ");
 	  while (h2scanf ("%s", name2) != 1);
 	  
 	  /* Demander le message a envoyer */
-	  do printf ("MESSAGE: ");
+	  do printf ("Message: ");
 	  while (h2scanf ("%s", bufMes) != 1);
 
 	  /* Chercher l'identificateur du mailbox de destination */
 	  if (mboxFind (name1, &mboxId1) != OK)
 	    {
-	      (void) printf ("Erreur pendant find de %s\n", name1);
+	      (void) printf ("Error looking for %s\n", name1);
 	      break;
 	    }
 
 	  /* Chercher l'identificateur du mailbox d'origine */
 	  if (mboxFind (name2, &mboxId2) != OK)
 	    {
-	      (void) printf ("Erreur pendant find de %s\n", name2);
+	      (void) printf ("Error looking for %s\n", name2);
 	      break;
 	    }
 
 	  /* Envoyer le message vers le destinataire */
 	  if ((bilan = mboxSend (mboxId1, mboxId2, bufMes, strlen (bufMes)))
 	      != OK)
-	    (void) printf ("Erreur pendant l'envoi du message!\n");
+	    (void) printf ("Error while sending message message!\n");
 	  break;
 
 	/* Epier un mailbox */
 	case 3:
 
 	  /* Demander le nom du mailbox a epier */
-	  do printf ("\nNOM DU MAILBOX A EPIER: ");
+	  do printf ("\nName of the mailbox to spy: ");
 	  while (h2scanf ("%s", name1) != 1);
 
 	  /* Demander le nombre de bytes a echantillonner */
-	  do printf ("NOMBRE DE BYTES A ECHANTILLONNER: ");
+	  do printf ("Number of bytes to watch: ");
 	  while (h2scanf ("%d", &nbytes) != 1);
 
 	  /* Chercher l'identificateur du mailbox a epier */
 	  if (mboxFind (name1, &mboxId1) != OK)
 	    {
-	      (void) printf ("Erreur pendant find de %s\n", name1);
+	      (void) printf ("Error while looking for %s\n", name1);
 	      break;
 	    }
 
@@ -204,14 +204,14 @@ TAPEZ LE NUMERO DE LA FONCTION DESIREE : ";
 	  if ((nbytes = mboxSpy (mboxId1, &mboxId2, &nt, bufMes, nbytes))
 	      == ERROR)
 	    {
-	      (void) printf ("Erreur pendant espionnage de %s\n", name1);
+	      (void) printf ("Error wfile spying  %s\n", name1);
 	      break;
 	    }
 	  
 	  /* S'il n'y a pas de message */
 	  if (nbytes == 0)
 	    {
-	      (void) printf ("IL N'Y A PAS DE MESSAGE SUR LE MAILBOX!\n");
+	      (void) printf ("There are no messages in the mailbox!\n");
 	      continue;
 	    }
 
@@ -221,32 +221,32 @@ TAPEZ LE NUMERO DE LA FONCTION DESIREE : ";
 	  /* Determiner le nom de l'originateur du message */
 	  if (mboxIoctl (mboxId2, FIO_GETNAME, name2) != OK)
 	    {
-	      (void) printf ("Erreur durant identif. nom de l'originateur!\n");
+	      (void) printf ("Error while finding the sender!\n");
 	      break;
 	    }
 
 	  /* Imprimer le message recu et le nom de l'originateur */
-	  (void) printf ("NOMBRE TOTAL DE BYTES DU MESSAGE: %d\n", nt);
-	  (void) printf ("ORIGINATEUR DU MESSAGE: %s\n", name2);
-	  (void) printf ("NOMBRE DE BYTES DE L'ECHANTILLON: %d\n", nbytes);
-	  (void) printf ("ECHANTILLON DU MESSAGE: %s\n", bufMes);
+	  (void) printf ("Total number of bytes of message: %d\n", nt);
+	  (void) printf ("Sender of the message: %s\n", name2);
+	  (void) printf ("Number of bytes sampled: %d\n", nbytes);
+	  (void) printf ("Contents of the message: %s\n", bufMes);
 	  continue;
 
 	/* Lire un mailbox */
 	case 4:
 
 	  /* Demander le nom du mailbox a lire */
-	  do printf ("\nNOM DU MAILBOX A LIRE: ");
+	  do printf ("\nName of the mailbox to read: ");
 	  while (h2scanf ("%s", name1) != 1);
 
 	  /* Demander le timeout d'attente de message */
-          do printf ("TIMEOUT: ");
+          do printf ("Timeout: ");
 	  while (h2scanf ("%d", &tout) != 1);
 
 	  /* Chercher l'identificateur du mailbox a lire */
 	  if (mboxFind (name1, &mboxId1) != OK)
 	    {
-	      (void) printf ("Erreur pendant find de %s\n", name1);
+	      (void) printf ("Error while looking for %s\n", name1);
 	      break;
 	    }
 
@@ -256,7 +256,7 @@ TAPEZ LE NUMERO DE LA FONCTION DESIREE : ";
 				 tout * NTICKS_PER_SEC))
 	      == ERROR)
 	    {
-	      (void) printf ("Erreur pendant lecture de %s\n", name1);
+	      (void) printf ("Error reading %s\n", name1);
 	      break;
 	    }
 	  
@@ -273,26 +273,26 @@ TAPEZ LE NUMERO DE LA FONCTION DESIREE : ";
 	  /* Determiner le nom de l'originateur du message */
 	  if (mboxIoctl (mboxId2, FIO_GETNAME, name2) != OK)
 	    {
-	      (void) printf ("Erreur durant identif. nom de l'originateur!\n");
+	      (void) printf ("Error identifying the sender!\n");
 	      break;
 	    }
 
 	  /* Imprimer le message recu et le nom de l'originateur */
-	  (void) printf ("ORIGINATEUR DU MESSAGE: %s\n", name2);
-	  (void) printf ("MESSAGE: %s\n", bufMes);
+	  (void) printf ("Sender of the message: %s\n", name2);
+	  (void) printf ("Message: %s\n", bufMes);
 	  continue;
 
 	/* Sauter un message */
 	case 5:
 
 	  /* Demander le nom du mailbox */
-	  do printf ("\nNOM DU MAILBOX A MANIPULER: ");
+	  do printf ("\nName of the mailbox to work on: ");
 	  while (h2scanf ("%s", name1) != 1);
 	  
 	  /* Chercher l'identificateur du mailbox par son nom */
 	  if (mboxFind (name1, &mboxId1) != OK)
 	    {
-	      (void) printf ("Erreur pendant find de %s\n", name1);
+	      (void) printf ("Error finding %s\n", name1);
 	      break;
 	    }
 
@@ -304,13 +304,13 @@ TAPEZ LE NUMERO DE LA FONCTION DESIREE : ";
 	case 6:
 
 	  /* Demander le nom du mailbox a deleter */
-	  do printf ("\nNOM DU MAILBOX A DELETER: ");
+	  do printf ("\nName of the mailbox to delete: ");
 	  while (h2scanf ("%s", name1) != OK);
 
 	  /* Chercher l'identificateur du mailbox par son nom */
 	  if (mboxFind (name1, &mboxId1) != OK)
 	    {
-	      (void) printf ("Erreur pendant find de %s\n", name1);
+	      (void) printf ("Error finding %s\n", name1);
 	      break;
 	    }
 
@@ -322,11 +322,11 @@ TAPEZ LE NUMERO DE LA FONCTION DESIREE : ";
 	case 7:
 
 	  /* Demander le temps max. d'attente */
-	  do printf ("\nTEMPS D'ATTENTE: ");
+	  do printf ("\nWaiting time  (ticks): ");
 	  while (h2scanf ("%d", &tout) != 1);
 
 	  /* Demander sur type d'attente */
-	  do printf ("ATTENDRE SUR TOUS LES MBOX? (y/n) : ");
+	  do printf ("Wait for all mailboxes? (y/n) : ");
 	  while (h2scanf ("%c", &yesCar) != 1 || 
 		 (yesCar != 'y' && yesCar != 'n'));
 	  
@@ -346,13 +346,13 @@ TAPEZ LE NUMERO DE LA FONCTION DESIREE : ";
 	    }
 
 	  /* Demander le nom du mailbox */
-	  do printf ("NOM DU MAILBOX OU` ATTENDRE: ");
+	  do printf ("Name of the mailbox to wait for: ");
 	  while (h2scanf ("%s", name1) != 1);
 
 	  /* Chercher l'identificateur du mailbox par son nom */
 	  if (mboxFind (name1, &mboxId1) != OK)
 	    {
-	      (void) printf ("Erreur pendant find de %s\n", name1);
+	      (void) printf ("Error finding %s\n", name1);
 	      break;
 	    }
 	  
@@ -373,15 +373,15 @@ TAPEZ LE NUMERO DE LA FONCTION DESIREE : ";
 	case 9:
 	  bilan = mboxEnd (0);
 	  free (bufMes);
-	  (void) printf ("BILAN = %d, ERRNO = %d\n", bilan, errnoGet ());
+	  (void) printf ("Status = %d, ERRNO = %d\n", bilan, errnoGet ());
 	  (void) printf ("CIAO!\n");
 	  return (OK);
 
 	default:
-	  (void) printf ("FONCTION INCONNUE!!!\7\n");
+	  (void) printf ("Unknown function!!!\7\n");
 	}
       
       /* Printer le bilan de la commande */
-      (void) printf ("BILAN = %d, ERRNO = %d\n", bilan, errnoGet ());
+      (void) printf ("status = %d, ERRNO = %d\n", bilan, errnoGet ());
     }
 }
