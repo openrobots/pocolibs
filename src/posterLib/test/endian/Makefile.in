@@ -18,10 +18,10 @@
 #
 top_builddir=	@top_builddir@
 srcdir=		@srcdir@
+top_srcdir=	@top_srcdir@
 INSTALL=	@INSTALL@
 
 include $(top_builddir)/Init.make
--include $(srcdir)/os/$(OSAPI)/Makefile.inc
 
 vpath %.c @srcdir@
 
@@ -32,24 +32,18 @@ TEST_W = testPosterWrite
 TEST_R = testPosterRead
 TEST_LIB = testPosterLib.lo
 
-DIRGENOM = $(ROOTROBOTS)/genom
-LIBGENOM = $(LIBDIR)/genomLib.so
-
-CPPFLAGS += -I$(DIRGENOM)/include -I../../..
+GENOM_LIBS = ${shell pkg-config --libs genom}
+CFLAGS = ${shell pkg-config --cflags genom}
 
 all: $(TEST_W) $(TEST_R)
 
 $(TEST_W): testPosterWrite.lo $(TEST_LIB)
 	$(LTLD) -o $@ $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) \
-	testPosterWrite.lo $(TEST_LIB) \
-	-L../../../portLib -L../../../errorLib -L../../../comLib \
-	-L../.. $(LIBS) -lm  $(LIBGENOM)
+	testPosterWrite.lo $(TEST_LIB) $(GENOM_LIBS)
 
 $(TEST_R): testPosterRead.lo $(TEST_LIB)
 	$(LTLD) -o $@ $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) \
-	testPosterRead.lo $(TEST_LIB) \
-	-L../../../portLib -L../../../errorLib -L../../../comLib \
-	-L../.. $(LIBS) -lm  $(LIBGENOM)
+	testPosterRead.lo $(TEST_LIB) $(GENOM_LIBS)
 
 # Regles standard 
 %.lo: %.c
