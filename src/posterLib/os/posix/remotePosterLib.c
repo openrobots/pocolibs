@@ -280,7 +280,7 @@ posterFindPath(char *posterName, REMOTE_POSTER_ID *pPosterId)
 				}
 				(*pPosterId)->vxPosterId = (void *)(long)(res->id);
 				(*pPosterId)->key = key;
-				(*pPosterId)->hostname = host;
+				(*pPosterId)->hostname = strdup(host);
 				(*pPosterId)->dataSize = res->length;
 				(*pPosterId)->dataCache = malloc(res->length);
 				/* record endianness in REMOTE_POSTER_STR */
