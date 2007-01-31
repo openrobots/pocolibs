@@ -54,7 +54,6 @@ flist=\
 	taskHookLib.h		\
 	taskLib.h		\
 	tickLib.h		\
-	tw_sem.h		\
 	wdLib.h
 
 # -----------------------------------------------------------------------
