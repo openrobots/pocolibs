@@ -216,12 +216,9 @@ h2timerStart(H2TIMER_ID timerId,
 	}
 
 	/* Check period's validity XXX */
-	if ((period <= 0) ||
-	    ((period > MAX_DELAY) && ((period%MAX_DELAY) != 0)) ||
-	    ((period < MAX_DELAY) && ((MAX_DELAY%period) != 0))) {
-		logMsg ("h2timerStart: "
-		    "period (%d) must be a multiple or a divisor of %d\n",
-		    period, MAX_DELAY);
+	if ((period <= 0)) {
+		logMsg ("h2timerStart: period (%d) must be positive\n", 
+		    period);
 		errnoSet (S_h2timerLib_BAD_PERIOD);
 		return (ERROR);
 	}
