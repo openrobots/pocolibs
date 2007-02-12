@@ -248,7 +248,7 @@ posterFindPath(char *posterName, REMOTE_POSTER_ID *pPosterId)
 	POSTER_FIND_RESULT *res = NULL;
 	char *host;
 	CLIENT *client;
-	char *pp, *tmp;
+	char *pp, *tmp, *h, *n;
 	char *posterPath = getenv("POSTER_PATH");
 	pthread_key_t key;
 	
@@ -268,9 +268,11 @@ posterFindPath(char *posterName, REMOTE_POSTER_ID *pPosterId)
 			    host);
 			continue;
 		}
-		client = clientCreate(key, host);
+		h = strdup(host);
+		n = strdup(posterName);
+		client = clientCreate(key, h);
 		if (client != NULL) {
-			res = poster_find_1(&posterName, client);
+			res = poster_find_1(&n, client);
 			if (res != NULL && res->status == POSTER_OK) {
 				/* Allocate a cache stucture  */
 				*pPosterId = (REMOTE_POSTER_ID)
@@ -280,20 +282,22 @@ posterFindPath(char *posterName, REMOTE_POSTER_ID *pPosterId)
 				}
 				(*pPosterId)->vxPosterId = (void *)(long)(res->id);
 				(*pPosterId)->key = key;
-				(*pPosterId)->hostname = strdup(host);
+				(*pPosterId)->hostname = h;
 				(*pPosterId)->dataSize = res->length;
 				(*pPosterId)->dataCache = malloc(res->length);
 				/* record endianness in REMOTE_POSTER_STR */
 				(*pPosterId)->endianness = res->endianness;
 				(*pPosterId)->pid = -1;
-				free(pp);
+				/* free(pp); XXX */
 				xdr_free((xdrproc_t)xdr_POSTER_FIND_RESULT, 
 				    (char *)res);
 				return(OK);
 			} else {
-				clnt_destroy(client);
+			  /* clnt_destroy(client); XXX */
 			}
 		}
+		free(h);
+		free(n);
 	} /* for */
 	free(pp);
 	if (res != NULL) 

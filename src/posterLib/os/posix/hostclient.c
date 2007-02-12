@@ -59,7 +59,7 @@ clientKeyFind(const char *hostname, pthread_key_t *key)
 		pthread_mutex_unlock(&clientKeyMutex);
 		return -1;
 	}
-	hc->hostname = hostname;
+	hc->hostname = strdup(hostname);
 	hc->next = hostClientList;
 	hostClientList = hc;
 	pthread_mutex_unlock(&clientKeyMutex);
