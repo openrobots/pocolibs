@@ -17,6 +17,7 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -44,7 +45,7 @@ void
 usage(void)
 {
     fprintf(stderr, 
-	    "Usage: %s init [SM_MEM_SIZE]\n"
+	    "Usage: %s init [-p][SM_MEM_SIZE]\n"
 	    "       %s end\n"
 	    "       %s info\n"
 	    "       %s listModules\n"
@@ -95,13 +96,13 @@ getyesno(int def)
 /*
  * Creation des devices h2
  */
-int 
-h2init(int smMemSize)
+static int 
+h2init(int smMemSize, int posterServFlag)
 {
     printf("Initializing %s devices: ", PACKAGE_NAME);
     fflush(stdout);
     /* Creation du tableau des devices h2 */
-    if (h2devInit(smMemSize) == ERROR) {
+    if (h2devInit(smMemSize, posterServFlag) == ERROR) {
 	/* Essai recuperation erreur */
 	switch (errnoGet()) {
 	  case EEXIST:
@@ -111,7 +112,7 @@ h2init(int smMemSize)
 	    if (getyesno(0)) { 
 		/* Try to remove the devices first */
 		h2devEnd();
-		if (h2devInit(smMemSize) == ERROR) {
+		if (h2devInit(smMemSize, posterServFlag) == ERROR) {
 		    printf("Sorry, h2devInit failed again.\n"
 			   "Please remove shared memory segments "
 			   "and semaphores manually with ipcrm\n");
@@ -187,38 +188,52 @@ int
 main(int argc, char *argv[])
 {
     int status = ERROR;
+    int posterServFlag = 0;
+    int c;
 
     progname = argv[0];
+    
+    while ((c = getopt(argc, argv, "p")) != -1) {
+	    switch (c) {
+	    case 'p':
+		    posterServFlag++;
+		    break;
+	    default: 
+		    usage();
+	    }
+    }
+    argc -= optind;
+    argv += optind;
 
     /* Initialisation du systeme temps-reel, sans horloge */
     osInit(0);
     
     switch (argc) {
-      case 2: 
-	if (strcmp(argv[1], "init") == 0) {
+      case 1: 
+	if (strcmp(argv[0], "init") == 0) {
 	    /* Initialisation des devices h2 */
-	    status = h2init(SM_MEM_SIZE);
-	} else if (strcmp(argv[1], "end") == 0) {
+		status = h2init(SM_MEM_SIZE, posterServFlag);
+	} else if (strcmp(argv[0], "end") == 0) {
 	    /* Destruction des devices h2 */
 	    status =  h2end();
-	} else if (strcmp(argv[1], "info") == 0) {
+	} else if (strcmp(argv[0], "info") == 0) {
 	    /* Affichage des devices h2 */
 	    status = h2info();
-	} else if (strcmp(argv[1], "listModules") == 0) {
+	} else if (strcmp(argv[0], "listModules") == 0) {
 	    h2listModules();
 	    status = OK;
 	} else {
 	    usage();
 	}
 	break;
-      case 3:
-	if (strcmp(argv[1], "init") == 0) {
-	    status = h2init(atoi(argv[2]));
-	} else if (strcmp(argv[1], "printErrno") == 0) {
-	    h2printErrno (strtol(argv[2],(char **)NULL, 0));
+      case 2:
+	if (strcmp(argv[0], "init") == 0) {
+	    status = h2init(atoi(argv[1]), posterServFlag);
+	} else if (strcmp(argv[0], "printErrno") == 0) {
+	    h2printErrno (strtol(argv[1],(char **)NULL, 0));
 	    status = OK;
-	} else if (strcmp(argv[1], "clean") == 0) {
-	    status = cleanDevs(argv[2]);
+	} else if (strcmp(argv[0], "clean") == 0) {
+	    status = cleanDevs(argv[1]);
 	} else {
 	    usage();
 	}

@@ -155,7 +155,7 @@ h2devGetKey(int type, int dev, BOOL create, int *pFd)
  ** Initialisation
  **/
 STATUS
-h2devInit(int smMemSize)
+h2devInit(int smMemSize, int posterServFlag)
 {
     key_t key;
     int i;
@@ -214,7 +214,7 @@ h2devInit(int smMemSize)
         return ERROR;
     }
     /* Demarrage du serveur de posters */
-    if (getenv("POSTER_HOST") == NULL) {
+    if (getenv("POSTER_HOST") == NULL && posterServFlag == TRUE) {
 	posterServPid = fork();
 	if (posterServPid == 0) {
 	    /* Processus fils */

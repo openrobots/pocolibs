@@ -1,3 +1,7 @@
+ 76. Relax constraint on h2timer periods.
+ 75. h2 init no longer starts posterServ by default. Use h2 init -p. 
+ 74. Add a flag to h2devInit() to control the launch of posterServ. 
+     Bump portLib major. 
  73. Fix build of posterLib tests programs.
  72. Remove VxWorks/RTAI/LXRT parts.
 
