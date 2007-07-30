@@ -32,7 +32,7 @@ main(void)
    int status;
 
    osInit(100);
-   if (h2devInit(1<<10) == ERROR) {
+   if (h2devInit(1<<10, FALSE) == ERROR) {
       printf("cannot create h2 devices\n");
       exit(2);
    }
