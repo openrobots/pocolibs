@@ -24,30 +24,30 @@ __RCSID("$LAAS$");
 #include "h2devLib.h"
 #include "h2timerLib.h"
 
-extern int pocoregress_init();
+extern int pocoregress_init(void);
 
 int
-main(void)
+main(int argc, char *argv[])
 {
-   int status;
-
-   osInit(100);
-   if (h2devInit(1<<10, FALSE) == ERROR) {
-      printf("cannot create h2 devices\n");
-      exit(2);
-   }
-
-   if (h2timerInit() == ERROR) {
-      printf("cannot not initialize h2 timers\n");
-      h2devEnd();
-      exit(2);
-   }
-
-   printf("--- pocolibs regression test -------------------\n");
-   status = pocoregress_init();
-
-   h2timerEnd();
-   h2devEnd();
-   osExit();
-   return status;
+	int status;
+	
+	osInit(100);
+	if (h2devInit(1<<10, FALSE) == ERROR) {
+		printf("cannot create h2 devices\n");
+		exit(2);
+	}
+	
+	if (h2timerInit() == ERROR) {
+		printf("cannot not initialize h2 timers\n");
+		h2devEnd();
+		exit(2);
+	}
+	
+	printf("--- pocolibs regression test -------------------\n");
+	status = pocoregress_init();
+	
+	h2timerEnd();
+	h2devEnd();
+	osExit();
+	return status;
 }
