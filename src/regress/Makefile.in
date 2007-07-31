@@ -31,6 +31,7 @@ SRCS=\
 	portLib/semaphore.c	\
 	portLib/wd.c		\
 	portLib/taskDelete.c	\
+	portLib/taskDeleteHook.c \
 	portLib/taskDelay.c	\
 	portLib/tick.c		\
 				\
