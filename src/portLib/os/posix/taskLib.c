@@ -209,8 +209,22 @@ void
 taskCleanUp(void *data)
 {
     OS_TCB *tcb = (OS_TCB *)data;
+    OS_TCB *t;
 
     executeHooks(deleteHooks, tcb);
+
+    /* Remove from task List */
+    if (tcb == taskList) {
+	taskList = taskList->next;
+    } else {
+	for (t = taskList; t->next != NULL; t = t->next) {
+	    if (t->next == tcb) {
+		t->next = tcb->next;
+		break;
+	    }
+	}/* for */
+    }
+    free(tcb);
 }
 
 /*----------------------------------------------------------------------*/
@@ -403,7 +417,6 @@ STATUS
 taskDelete(long tid)
 {
     OS_TCB *tcb = (OS_TCB *)tid;
-    OS_TCB *t;
     int status;
 
     if (tid == 0) {
@@ -417,24 +430,12 @@ taskDelete(long tid)
     }
 
     status = pthread_cancel(tcb->tid);
-    if ( status != 0) {
+    if (status != 0) {
 	errnoSet(status);
 	return ERROR;
-    }
-
-    /* Remove from task List */
-    if (tcb == taskList) {
-	taskList = taskList->next;
-    } else {
-	for (t = taskList; t->next != NULL; t = t->next) {
-	    if (t->next == tcb) {
-		t->next = tcb->next;
-		break;
-	    }
-	}/* for */
-    }
-    free(tcb);
-    
+    }    
+    /* Removing the task from the tasklist 
+       is done in the thread cleanup handler */
     return OK;
 }
 
