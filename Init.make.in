@@ -69,10 +69,8 @@ ERRORLIB=	$(abs_top_builddir)/src/errorLib/liberrorLib.la
 VALGRIND_CFLAGS= @VALGRIND_CFLAGS@
 VALGRIND_LIBS=   @VALGRIND_LIBS@
 
-LIB_H2_UNIX=	$(COMLIB) $(POSTERLIB) $(ERRORLIB)
-
 OS_LIBS=	@LIBS@
-LIBS=		$(LIB_H2_UNIX) $(OS_LIBS)
+LIBS=		$(COMLIB) $(POSTERLIB) $(ERRORLIB) $(OS_LIBS)
 
 MKINSTALLDIRS=	$(top_srcdir)/mkinstalldirs
 
