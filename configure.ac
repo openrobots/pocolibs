@@ -91,6 +91,7 @@ AC_C_BIGENDIAN
 dnl
 AC_TYPE_SIGNAL
 
+AC_CHECK_HEADERS([getopt.h])
 
 dnl --- check for pthread -----------------------------------------------
 if test "x$opt_xenomai" != "xyes" ; then
