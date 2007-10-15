@@ -51,5 +51,6 @@ int pocoregress_init()
 	} while (t2 - t1 < 100);
 	gettimeofday(&tp2, NULL);
 	logMsg("100 ticks lasted %d us - should be %d\n",
-	    time_difference(&tp2, &tp1), 1000000000/sysClkRateGet());
+	    time_difference(&tp2, &tp1), 100000000/sysClkRateGet());
+	return 0;
 }
