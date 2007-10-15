@@ -33,7 +33,7 @@ __RCSID("$LAAS$");
 #include "mboxLib.h"
 #include "h2errorLib.h"
 #include "h2devLib.h"
-static const H2_ERROR const h2devLibH2errMsgs[] = H2_DEV_LIB_H2_ERR_MSGS;
+static const H2_ERROR h2devLibH2errMsgs[] = H2_DEV_LIB_H2_ERR_MSGS;
 
 #include "smMemLib.h"
 #include "smObjLib.h"

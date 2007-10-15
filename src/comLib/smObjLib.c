@@ -30,7 +30,7 @@ __RCSID("$LAAS$");
 #include "portLib.h"
 #include "smObjLib.h"
 
-static const H2_ERROR const smObjLibH2errMsgs[] = SM_OBJ_LIB_H2_ERR_MSGS;
+static const H2_ERROR smObjLibH2errMsgs[] = SM_OBJ_LIB_H2_ERR_MSGS;
 
 #include "smMemLib.h"
 

@@ -68,7 +68,7 @@
  *
  * with the array initialisation in the library source code :
  *
- *   static const H2_ERROR const posterLibH2errMsgs[] = POSTER_LIB_H2_ERR_MSGS;
+ *   static const H2_ERROR posterLibH2errMsgs[] = POSTER_LIB_H2_ERR_MSGS;
  *
  *
  * Then the array must be recorded within h2errorLib by the user of the 

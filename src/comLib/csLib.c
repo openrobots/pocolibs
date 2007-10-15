@@ -37,7 +37,7 @@ __RCSID("$LAAS$");
 #include "errnoLib.h"
 #include "gcomLib.h"
 #include "csLib.h"
-static const H2_ERROR const csLibH2errMsgs[] = CS_LIB_H2_ERR_MSGS;
+static const H2_ERROR csLibH2errMsgs[] = CS_LIB_H2_ERR_MSGS;
 
 
 /*---------- ROUTINES DISPONIBLES A L'UTILISATEUR ---------------------------*/

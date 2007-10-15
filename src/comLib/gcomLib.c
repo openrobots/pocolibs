@@ -30,7 +30,7 @@ __RCSID("$LAAS$");
 #include "h2devLib.h"
 
 #include "gcomLib.h"
-static const H2_ERROR const gcomLibH2errMsgs[] = GCOM_LIB_H2_ERR_MSGS;
+static const H2_ERROR gcomLibH2errMsgs[] = GCOM_LIB_H2_ERR_MSGS;
 
 #ifdef COMLIB_DEBUG_GCOMLIB
 # define LOGDBG(x)     logMsg x

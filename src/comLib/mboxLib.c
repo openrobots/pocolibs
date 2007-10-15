@@ -32,8 +32,8 @@ __RCSID("$LAAS$");
 #include "mboxLib.h"
 #include "smObjLib.h"
 
-static const H2_ERROR const mboxLibH2errMsgs[] = MBOX_LIB_H2_ERR_MSGS;
-static const H2_ERROR const h2rngLibH2errMsgs[] = H2_RNG_LIB_H2_ERR_MSGS;
+static const H2_ERROR mboxLibH2errMsgs[] = MBOX_LIB_H2_ERR_MSGS;
+static const H2_ERROR h2rngLibH2errMsgs[] = H2_RNG_LIB_H2_ERR_MSGS;
 
 #ifdef COMLIB_DEBUG_MBOXLIB
 # define LOGDBG(x)     logMsg x
