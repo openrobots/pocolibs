@@ -116,7 +116,8 @@ h2devGetKey(int type, int dev, BOOL create, int *pFd)
 	errnoSet(S_h2devLib_BAD_HOME_DIR);
 	return ERROR;
     }
-    sprintf(h2devFileName, "%s/%s-%s", home, H2_DEV_NAME, uts.nodename);
+    snprintf(h2devFileName, sizeof(h2devFileName), "%s/%s-%s", 
+	home, H2_DEV_NAME, uts.nodename);
     
     if (create) {
 	/* Creation du fichier */

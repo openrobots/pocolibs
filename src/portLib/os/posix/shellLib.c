@@ -255,7 +255,8 @@ findSymbol(char *name, char **value)
 					   * command */
 	
 	if (symFindByName(sysSymTbl, name, &pAdrs, &symType) != OK) {
-		sprintf(underscoreBuf, "_%s", name); /* add '_' to arg */
+		snprintf(underscoreBuf, sizeof(underscoreBuf), 
+		    "_%s", name); /* add '_' to arg */
 		if (symFindByName(sysSymTbl, underscoreBuf, &pAdrs, 
 			&symType) != OK) {
 			return(ERROR);
