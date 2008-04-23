@@ -71,6 +71,7 @@ struct OS_TCB {
     TASK_PARAMS params;			/* parameters */
     struct OS_TCB *next;		/* next tcb in list */
     unsigned int magic;			/* magic */
+    pthread_mutex_t *starter;		/* guard tcb during task startup */
 };
 
 #define TASK_MAGIC  0x5441534b
@@ -211,6 +212,9 @@ taskCleanUp(void *data)
     OS_TCB *tcb = (OS_TCB *)data;
     OS_TCB *t;
 
+#ifdef DEBUG
+    printf("taskCleanUp \"%s\" %p\n", tcb->name, tcb);
+#endif
     executeHooks(deleteHooks, tcb);
 
     /* Remove from task List */
@@ -224,6 +228,8 @@ taskCleanUp(void *data)
 	    }
 	}/* for */
     }
+    pthread_mutex_unlock(tcb->starter);
+    pthread_mutex_destroy(tcb->starter);
     free(tcb);
 }
 
@@ -240,6 +246,7 @@ taskStarter(void *data)
     TASK_PARAMS *p = (TASK_PARAMS *)&(tcb->params);
     static int result;
     
+    pthread_mutex_lock(tcb->starter); 	/* released in taskCleanUp() */
     tcb->pid = getpid();
 
     /* Register the TCB pointer in a thread-specific key */
@@ -251,6 +258,10 @@ taskStarter(void *data)
 
     /* Execute create hooks */
     executeHooks(createHooks, tcb);
+
+#ifdef DEBUG
+    printf("taskStart \"%s\" %p\n", tcb->name, tcb);
+#endif
 
     result = (*(tcb->entry))(p->arg1, p->arg2, p->arg3, p->arg4, p->arg5, 
 				p->arg6, p->arg7, p->arg8, p->arg9, p->arg10);
@@ -289,6 +300,15 @@ taskSpawn(char *name, int priority, int options, int stackSize,
 	errnoSet(S_portLib_NO_MEMORY);
 	return ERROR;
     }
+    tcb->starter = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t));
+    if (tcb->starter == NULL) {
+	    errnoSet(S_portLib_NO_MEMORY);
+	    free(tcb);
+	    return ERROR;
+    }
+    /* Startup mutex - guaranties the the tcb isn't destroyed early */
+    pthread_mutex_init(tcb->starter, NULL);
+    pthread_mutex_lock(tcb->starter);
     tcb->magic = TASK_MAGIC;
     if (name != NULL) {
 	tcb->name = strdup(name);
@@ -296,6 +316,9 @@ taskSpawn(char *name, int priority, int options, int stackSize,
 	snprintf(bufName, sizeof(bufName), "t%d", ++numTask);
 	tcb->name = strdup(bufName);
     }
+#ifdef DEBUG
+    printf("taskSpawn \"%s\" %p\n", tcb->name, tcb);
+#endif
     tcb->options = options;
     tcb->entry = entryPt;
     tcb->errorStatus = 0;
@@ -314,6 +337,7 @@ taskSpawn(char *name, int priority, int options, int stackSize,
 					 PTHREAD_CREATE_DETACHED);
     if (status != 0) {
 	errnoSet(status);
+	pthread_mutex_unlock(tcb->starter);
 	return ERROR;
     }
 #ifdef notyet
@@ -330,6 +354,7 @@ taskSpawn(char *name, int priority, int options, int stackSize,
     status = pthread_attr_setstacksize(&thread_attr, stackSize);
     if (status != 0) {
 	errnoSet(status);
+	pthread_mutex_unlock(tcb->starter);
 	return ERROR;
     }
 #endif    
@@ -348,6 +373,7 @@ taskSpawn(char *name, int priority, int options, int stackSize,
 							&thread_param);
 		    if (status != 0) {
 			    errnoSet(status);
+			    pthread_mutex_unlock(tcb->starter);
 			    return ERROR;
 		    }
 		    break;
@@ -364,6 +390,7 @@ taskSpawn(char *name, int priority, int options, int stackSize,
 		    
 	    default :
 		    errnoSet(status);
+		    pthread_mutex_unlock(tcb->starter);
 		    return ERROR;
 	    } /* switch */
 #endif /* __linux__ */
@@ -384,6 +411,7 @@ taskSpawn(char *name, int priority, int options, int stackSize,
     status = pthread_create(&thread_id, &thread_attr, taskStarter, tcb);
     if (status != 0) {
 	errnoSet(status);
+	pthread_mutex_unlock(tcb->starter);
 	return ERROR;
     }
 #ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
@@ -404,7 +432,7 @@ taskSpawn(char *name, int priority, int options, int stackSize,
      */
     tcb->next = taskList;
     taskList = tcb;
-
+    pthread_mutex_unlock(tcb->starter);
     return (long)tcb;
 }
 
@@ -474,7 +502,7 @@ taskSuspend(long tid)
 	errnoSet(S_portLib_INVALID_TASKID);
 	return ERROR;
     }
-    printf("*** suspending task %lx\n", tid);
+    fprintf(stderr, "*** suspending task %lx\n", tid);
     abort();
     /*NOTREACHED*/
     return ERROR;
