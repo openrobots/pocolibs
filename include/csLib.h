@@ -35,6 +35,8 @@
    "serveur/client".
 */
 
+#include "gcomLib.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
