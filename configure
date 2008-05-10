@@ -20075,11 +20075,12 @@ else
   { echo "$as_me:$LINENO: checking for usable posix timers" >&5
 echo $ECHO_N "checking for usable posix timers... $ECHO_C" >&6; }
 if test "$cross_compiling" = yes; then
-  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling
-See \`config.log' for more details." >&5
-echo "$as_me: error: cannot run test program while cross compiling
-See \`config.log' for more details." >&2;}
-   { (exit 1); exit 1; }; }
+  { echo "$as_me:$LINENO: result: assuming yes for cross-compilation" >&5
+echo "${ECHO_T}assuming yes for cross-compilation" >&6; }
+	cat >>confdefs.h <<\_ACEOF
+#define HAVE_POSIX_TIMERS 1
+_ACEOF
+
 else
   cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
@@ -20181,6 +20182,7 @@ echo "${ECHO_T}yes" >&6; }
  	cat >>confdefs.h <<\_ACEOF
 #define HAVE_POSIX_TIMERS 1
 _ACEOF
+
 
 else
   echo "$as_me: program exited with status $ac_status" >&5
