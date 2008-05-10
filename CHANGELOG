@@ -1,3 +1,12 @@
+Version 2.4, xx xxx 2008
+
+ 83. Assume that target systems have posix timers when cross-compiling
+ 82. Let autoheader generate pocolibs-config.h.in
+ 81. Switch repository to git
+ 80. Fix a race in change #77.
+ 79. Eliminate more uses of sprintf().
+ 78. Fix tickLib regression test.
+
 Version 2.3, 31 July 2007
 
  77. Fix taskDelete hooks handling.

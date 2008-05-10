@@ -111,7 +111,11 @@ main(int argc, char *argv[])
 }
 ],
 	[AC_MSG_RESULT([yes])]
- 	[AC_DEFINE(HAVE_POSIX_TIMERS)],
+ 	[AC_DEFINE(HAVE_POSIX_TIMERS)]
+,
 	[AC_MSG_RESULT([no])]
+,
+	AC_MSG_RESULT([assuming yes for cross-compilation])
+	AC_DEFINE(HAVE_POSIX_TIMERS),
 )])dnl
 
