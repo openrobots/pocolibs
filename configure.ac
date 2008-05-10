@@ -20,6 +20,16 @@ if test "x${GCC}" = "xyes"; then
 fi
 
 
+AH_VERBATIM(__RCSID,[
+#ifndef __RCSID
+#ifdef __GNUC__
+#define __RCSID(id) static const char rcsid[] __attribute__((__unused__)) = id
+#else
+#define __RCSID(id) static const char rcsid[] = id
+#endif /* __GNUC__ */
+#endif
+])
+
 dnl --- OS flavour checks -----------------------------------------------
 
 
@@ -193,7 +203,7 @@ AC_ARG_ENABLE([posix-timers],
 			[instead of timer_create(3p)]),
 	[ if test "$enable_posix_timers" = "yes"; then
 		AC_MSG_NOTICE([forcing use of POSIX timers])
-		AC_DEFINE(HAVE_POSIX_TIMERS)
+		AC_DEFINE([HAVE_POSIX_TIMERS], 1, [timer_*() functions])
 	else
 		AC_MSG_NOTICE([disabling use of POSIX timers])
 	fi ],
@@ -207,7 +217,8 @@ AC_MSG_CHECKING([for pthread_attr_setschedpolicy])
 AC_TRY_LINK([#include <pthread.h>], 
 	[pthread_attr_setschedpolicy(NULL, SCHED_RR);],
 	[AC_MSG_RESULT([yes])]
-	[AC_DEFINE(HAVE_SETSCHEDPOLICY)],
+	[AC_DEFINE(HAVE_SETSCHEDPOLICY, 1, 
+		[posix threads scheduling policies])],
 	[AC_MSG_RESULT([no])]
 )
 
@@ -220,7 +231,7 @@ AC_MSG_CHECKING([for vfscanf])
 AC_TRY_LINK([#include <stdio.h>],
 	[vfscanf(NULL, NULL, NULL);],
 	[AC_MSG_RESULT([yes])]
-	[AC_DEFINE(HAVE_VFSCANF)],
+	[AC_DEFINE([HAVE_VFSCANF], 1, [vfscanf()])],
 	[AC_MSG_RESULT([no])]
 )
 
@@ -236,7 +247,9 @@ AC_ARG_ENABLE(valgrind,
             [valgrind=$enableval], [valgrind=no])
 if test "x$valgrind" = "xyes"; then
     PKG_CHECK_MODULES(VALGRIND, valgrind >= 1.1, 
-        [ AC_DEFINE(VALGRIND_SUPPORT) ], [ AC_MSG_ERROR(Valgrind not present and Valgrind support requested) ])
+        [ AC_DEFINE([VALGRIND_SUPPORT], 1, 
+		[Support for running under valgrind])], 
+	[ AC_MSG_ERROR(Valgrind not present and Valgrind support requested) ])
 fi
 
 AC_ARG_ENABLE(debug,
@@ -282,16 +295,39 @@ for dopt in $opt_debug_output; do
 	test -z "$dopt" && break
 
 	case "$dopt" in
-	   task)	AC_DEFINE(PORTLIB_DEBUG_TASKLIB) ;;
-	   sys)		AC_DEFINE(PORTLIB_DEBUG_SYSLIB) ;;
+	   task)	
+		AC_DEFINE([PORTLIB_DEBUG_TASKLIB], 1,
+			 [Enable debug in taskLib]) 
+		;;
+	   sys)		
+		AC_DEFINE([PORTLIB_DEBUG_SYSLIB], 1,
+			[Enable debug in sysLib])
+		;;
 
-	   h2dev)	AC_DEFINE(COMLIB_DEBUG_H2DEVLIB) ;;
-	   smmem)	AC_DEFINE(COMLIB_DEBUG_SMMEMLIB) ;;
-	   h2evn)	AC_DEFINE(COMLIB_DEBUG_H2EVNLIB) ;;
-	   mbox)	AC_DEFINE(COMLIB_DEBUG_MBOXLIB) ;;
-	   gcom)	AC_DEFINE(COMLIB_DEBUG_GCOMLIB) ;;
-	   h2timer)	AC_DEFINE(COMLIB_DEBUG_H2TIMERLIB) ;;
-	   
+	   h2dev)	
+		AC_DEFINE([COMLIB_DEBUG_H2DEVLIB], 1,
+			[Enable debug in h2devLib])
+		;;
+	   smmem)	
+		AC_DEFINE([COMLIB_DEBUG_SMMEMLIB], 1,
+			[Enable debug in smMemLib])
+		;;
+	   h2evn)	
+		AC_DEFINE([COMLIB_DEBUG_H2EVNLIB], 1,
+			[Enable debug in h2evnLib])
+		;;
+	   mbox)	
+		AC_DEFINE([COMLIB_DEBUG_MBOXLIB], 1, 
+			[Enable debug in mboxLib])
+		;;
+	   gcom)
+		AC_DEFINE([COMLIB_DEBUG_GCOMLIB], 1,
+			[Enable debug in gcomLib])
+		;;
+	   h2timer)
+		AC_DEFINE([COMLIB_DEBUG_H2TIMERLIB], 1,
+			[Enable debug in h2timerLib])
+		;;
 	   *)		
 	    IFS=$ac_save_ifs
 	    AC_MSG_ERROR([Invalid debug output mode "$dopt"]) ;;

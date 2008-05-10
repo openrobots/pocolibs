@@ -34,7 +34,7 @@ AC_DEFUN([AC_RPCGEN_C],
     RPCGEN_C=-C
   fi
   AC_SUBST(RPCGEN_C)
-  test -n "$RPCGEN_C" && AC_DEFINE(HAVE_RPCGEN_C)
+  test -n "$RPCGEN_C" && AC_DEFINE([HAVE_RPCGEN_C], 1, [define if rpcgen supports the -C option])
 ])dnl
 dnl ----------------------------------------------------------------------
 dnl
