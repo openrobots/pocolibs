@@ -1,37 +1,117 @@
-/*  
- * Copyright (c) 1999-2007 LAAS/CNRS 
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- *    - Redistributions of source code must retain the above copyright
- *      notice, this list of conditions and the following disclaimer.
- *    - Redistributions in binary form must reproduce the above
- *      copyright notice, this list of conditions and the following
- *      disclaimer in the documentation and/or other materials provided
- *      with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- */
+/* src/pocolibs-config.h.in.  Generated from configure.ac by autoheader.  */
 
-/* Do we have the BSD sys/cdefs.h ? */
-#undef HAVE_SYS_CDEFS_H
+/* Enable debug in gcomLib */
+#undef COMLIB_DEBUG_GCOMLIB
 
-#ifdef HAVE_SYS_CDEFS_H
-#include <sys/cdefs.h>
-#endif
+/* Enable debug in h2devLib */
+#undef COMLIB_DEBUG_H2DEVLIB
+
+/* Enable debug in h2evnLib */
+#undef COMLIB_DEBUG_H2EVNLIB
+
+/* Enable debug in h2timerLib */
+#undef COMLIB_DEBUG_H2TIMERLIB
+
+/* Enable debug in mboxLib */
+#undef COMLIB_DEBUG_MBOXLIB
+
+/* Enable debug in smMemLib */
+#undef COMLIB_DEBUG_SMMEMLIB
+
+/* Define to 1 if you have the `clock_gettime' function. */
+#undef HAVE_CLOCK_GETTIME
+
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#undef HAVE_DLFCN_H
+
+/* Define to 1 if you have the `fnmatch' function. */
+#undef HAVE_FNMATCH
+
+/* Define to 1 if you have the `gethostbyname' function. */
+#undef HAVE_GETHOSTBYNAME
+
+/* Define to 1 if you have the <getopt.h> header file. */
+#undef HAVE_GETOPT_H
+
+/* Define to 1 if you have the <inttypes.h> header file. */
+#undef HAVE_INTTYPES_H
+
+/* Define to 1 if you have the `nsl' library (-lnsl). */
+#undef HAVE_LIBNSL
+
+/* Define to 1 if you have the `socket' library (-lsocket). */
+#undef HAVE_LIBSOCKET
+
+/* Define to 1 if you have the <memory.h> header file. */
+#undef HAVE_MEMORY_H
+
+/* timer_*() functions */
+#undef HAVE_POSIX_TIMERS
+
+/* define if rpcgen supports the -C option */
+#undef HAVE_RPCGEN_C
+
+/* posix threads scheduling policies */
+#undef HAVE_SETSCHEDPOLICY
+
+/* Define to 1 if you have the <stdint.h> header file. */
+#undef HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdlib.h> header file. */
+#undef HAVE_STDLIB_H
+
+/* Define to 1 if you have the <strings.h> header file. */
+#undef HAVE_STRINGS_H
+
+/* Define to 1 if you have the <string.h> header file. */
+#undef HAVE_STRING_H
+
+/* Define to 1 if you have the <sys/stat.h> header file. */
+#undef HAVE_SYS_STAT_H
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#undef HAVE_SYS_TYPES_H
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#undef HAVE_UNISTD_H
+
+/* vfscanf() */
+#undef HAVE_VFSCANF
+
+/* Define to the address where bug reports for this package should be sent. */
+#undef PACKAGE_BUGREPORT
+
+/* Define to the full name of this package. */
+#undef PACKAGE_NAME
+
+/* Define to the full name and version of this package. */
+#undef PACKAGE_STRING
+
+/* Define to the one symbol short name of this package. */
+#undef PACKAGE_TARNAME
+
+/* Define to the version of this package. */
+#undef PACKAGE_VERSION
+
+/* Enable debug in sysLib */
+#undef PORTLIB_DEBUG_SYSLIB
+
+/* Enable debug in taskLib */
+#undef PORTLIB_DEBUG_TASKLIB
+
+/* Define as the return type of signal handlers (`int' or `void'). */
+#undef RETSIGTYPE
+
+/* Define to 1 if you have the ANSI C header files. */
+#undef STDC_HEADERS
+
+/* Support for running under valgrind */
+#undef VALGRIND_SUPPORT
+
+/* Define to 1 if your processor stores words with the most significant byte
+   first (like Motorola and SPARC, unlike Intel and VAX). */
+#undef WORDS_BIGENDIAN
+
 
 #ifndef __RCSID
 #ifdef __GNUC__
@@ -41,79 +121,3 @@
 #endif /* __GNUC__ */
 #endif
 
-/* Define as the return type of signal handlers (int or void).  */
-#undef RETSIGTYPE
-
-/* vfscanf */
-#undef HAVE_VFSCANF
-
-/* fnmatch */
-#undef HAVE_FNMATCH
-
-/* Use timer_* functions ? */
-#undef HAVE_POSIX_TIMERS
-
-/* Use clock_gettime ? */
-#undef HAVE_CLOCK_GETTIME
-
-/* Use a separate thread for sysClk? */
-#undef USE_CLK_THREAD
-
-/* Are these symbols defined ? */
-#undef HAVE_PTHREAD_MIN_MAX_PRIORITY
-
-/* posix thread_getschedparam */
-#undef HAVE_PTHREAD_GETSCHEDPARAM
-
-/* posix threads stack size handling */
-#undef HAVE_PTHREAD_ATTR_STACKSIZE
-
-/* posix threads scheduling policies */
-#undef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
-
-/* malloc(0) */
-#undef MALLOC_ZERO_RETURNS_NULL
-
-/* snprintf */
-#undef HAVE_SNPRINTF
-
-/* getopt.h */
-#undef HAVE_GETOPT_H
-
-/* Endianness */
-#undef WORDS_BIGENDIAN
-
-/* rpcgen -C generates _svc() prototypes */
-#undef HAVE_RPCGEN_C
-
-/* debug portLib:taskLib  */
-#undef PORTLIB_DEBUG_TASKLIB
-
-/* debug portLib:sysLib  */
-#undef PORTLIB_DEBUG_SYSLIB
-
-/* debug comLib:h2devLib  */
-#undef COMLIB_DEBUG_H2DEVLIB
-
-/* debug comLib:smMemLib  */
-#undef COMLIB_DEBUG_SMMEMLIB
-
-/* debug comLib:h2evnLib  */
-#undef COMLIB_DEBUG_H2EVNLIB
-
-/* debug comLib:mboxLib  */
-#undef COMLIB_DEBUG_MBOXLIB
-
-/* debug comLib:gcomLib  */
-#undef COMLIB_DEBUG_GCOMLIB
-
-/* debug comLib:timerlib  */
-#undef COMLIB_DEBUG_H2TIMERLIB
-
-/* use valgrind hints */
-#undef VALGRIND_SUPPORT
-
-/* package name and version */
-#undef PACKAGE_VERSION
-#undef PACKAGE_NAME
-#undef PACKAGE_TARNAME
