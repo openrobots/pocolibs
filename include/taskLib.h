@@ -63,6 +63,7 @@ extern unsigned long taskGetUserData ( long tid );
 extern STATUS taskOptionsGet ( long tid, int *pOptions );
 extern STATUS taskOptionsSet ( long tid, int mask, int newOptions );
 extern long taskNameToId(char *name);
+extern long taskFromThread( char *name );
 
 #ifdef __cplusplus
 };

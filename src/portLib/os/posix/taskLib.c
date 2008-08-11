@@ -88,6 +88,11 @@ TASK_HOOK_LIST *createHooks = NULL;
 TASK_HOOK_LIST *deleteHooks = NULL;
 
 static STATUS executeHooks(TASK_HOOK_LIST *list, OS_TCB *tcb);
+static long internTaskStart(char *name, int priority, int options, int stackSize,
+			    FUNCPTR entryPt, int arg1, int arg2, int arg3, int arg4, int arg5,
+			    int arg6, int arg7, int arg8, int arg9, int arg10);
+static long registerTcb(OS_TCB *tcb);
+
 /*----------------------------------------------------------------------*/
 
 
@@ -102,6 +107,25 @@ portRecordH2ErrMsgs(void)
 			   portLibH2errMsgs);
 }
 /*----------------------------------------------------------------------*/
+
+/*
+ * Register the TCB data structure in a specific memory of the thread
+ */
+static long
+registerTcb(OS_TCB *tcb)
+{
+	/* Register the TCB pointer in the thread-specific key */
+#ifdef DEBUG
+	fprintf(stderr, "registering task specific value %lu %lu\n",
+	    (unsigned long)tcb, (unsigned long)pthread_self());
+#endif
+	if (pthread_setspecific(taskControlBlock, (void *)tcb) != 0) {
+		errnoSet(errno);
+		pthread_mutex_unlock(tcb->starter);
+		return ERROR;
+	}
+	return OK;
+}
 
 /*
  * Two functions to map a VxWorks-like  priority to a Posix priority
@@ -185,13 +209,7 @@ taskLibInit(void)
     /* Mark the TCB */
     tcb->magic = TASK_MAGIC;
 
-    /* Register the TCB pointer in the thread-specific key */
-#ifdef DEBUG
-    fprintf(stderr, "registering task specific value %lu %lu\n",
-	(unsigned long)tcb, (unsigned long)pthread_self());
-#endif
-    if (pthread_setspecific(taskControlBlock, (void *)tcb) != 0) {
-	errnoSet(errno);
+    if (registerTcb(tcb) == ERROR) {
 	return ERROR;
     }
 
@@ -249,10 +267,10 @@ taskStarter(void *data)
     pthread_mutex_lock(tcb->starter); 	/* released in taskCleanUp() */
     tcb->pid = getpid();
 
-    /* Register the TCB pointer in a thread-specific key */
-    if (pthread_setspecific(taskControlBlock, (void *)tcb) != 0) {
+    if (registerTcb(tcb) == ERROR) {
 	return NULL;
     }
+
     /* Register a cleanup function */
     pthread_cleanup_push(taskCleanUp, data);
 
@@ -279,6 +297,30 @@ taskStarter(void *data)
  */
 long
 taskSpawn(char *name, int priority, int options, int stackSize,
+	  FUNCPTR entryPt, int arg1, int arg2, int arg3, int arg4, int arg5,
+	  int arg6, int arg7, int arg8, int arg9, int arg10)
+{
+    if (!entryPt) {
+	return ERROR;
+    }
+    return internTaskStart(name, priority, options, stackSize, entryPt, arg1,
+			   arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
+}
+
+/*
+ * Create a new task from an existing thread
+ */
+long
+taskFromThread(char *name)
+{
+	return internTaskStart(name, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+}
+
+/*
+ * Static method to create a task and/or a new thread for the new task
+ */
+static long
+internTaskStart(char *name, int priority, int options, int stackSize,
 	  FUNCPTR entryPt, int arg1, int arg2, int arg3, int arg4, int arg5,
 	  int arg6, int arg7, int arg8, int arg9, int arg10)
 {
@@ -325,6 +367,7 @@ taskSpawn(char *name, int priority, int options, int stackSize,
     tcb->pid = getpid();
     tcb->userData = 0; /* XXX */
     
+    if (entryPt) {
     /* 
      * Initialize thread attributes 
      */
@@ -414,6 +457,7 @@ taskSpawn(char *name, int priority, int options, int stackSize,
 	pthread_mutex_unlock(tcb->starter);
 	return ERROR;
     }
+    }
 #ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
     /* Read back the scheduler parameters of the created thread */
     pthread_getschedparam(thread_id, &policy, &thread_param);
@@ -427,6 +471,12 @@ taskSpawn(char *name, int priority, int options, int stackSize,
     /* Register thread id in TCB */
     tcb->tid = thread_id;
 
+    if (!entryPt) {
+	if (registerTcb(tcb) == ERROR) {
+	    return ERROR;
+	}
+    }
+
     /*
      * add new task in task list
      */
@@ -435,6 +485,7 @@ taskSpawn(char *name, int priority, int options, int stackSize,
     pthread_mutex_unlock(tcb->starter);
     return (long)tcb;
 }
+
 
 /*----------------------------------------------------------------------*/
 
