@@ -1,5 +1,6 @@
-Version 2.4, xx xxx 2008
+Version 2.4, 11 August 2008
 
+ 83. Add a 'taskFromThread(char *name)' function. (Matthieu Gallien).
  83. Assume that target systems have posix timers when cross-compiling
  82. Let autoheader generate pocolibs-config.h.in
  81. Switch repository to git
