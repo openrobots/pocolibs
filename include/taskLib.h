@@ -1,6 +1,5 @@
-/* $LAAS$ */
 /*
- * Copyright (c) 1999, 2003-2004 CNRS/LAAS
+ * Copyright (c) 1999, 2003-2008 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -39,31 +38,30 @@ typedef struct OS_TCB OS_TCB, WIND_TCB;
  */
 extern STATUS taskLibInit(void);
 #ifdef TASKLIB_C
-extern long taskSpawn ( char *name, int priority, int options, int stackSize, 
-		       FUNCPTR entryPt, int arg1, int arg2, int arg3, 
-		       int arg4, int arg5, int arg6, int arg7, int arg8, 
-		       int arg9, int arg10  );
+extern long taskSpawn(char *, int, int, int, FUNCPTR, int, int, int, 
+		       int, int, int, int, int, int, int);
 #else
-extern long taskSpawn ( char *name, int priority, int options, 
-		       int stackSize, FUNCPTR entryPt, ... );
+/* Awful hack */
+extern long taskSpawn(char *name, int priority, int options, 
+    int stackSize, FUNCPTR entryPt, ... );
 #endif
-extern STATUS taskDelete ( long tid );
-extern const char *taskName ( long tid );
-extern STATUS taskSuspend ( long tid );
-extern STATUS taskResume ( long tid );
-extern STATUS taskPrioritySet ( long tid, int newPriority );
-extern STATUS taskPriorityGet ( long tid, int *pPriority );
-extern STATUS taskLock ( void );
-extern STATUS taskUnlock ( void );
-extern STATUS taskDelay ( int ticks );
-extern long taskIdSelf ( void );
-extern OS_TCB *taskTcb ( long tid );
-extern STATUS taskSetUserData ( long tid, unsigned long data );
-extern unsigned long taskGetUserData ( long tid );
-extern STATUS taskOptionsGet ( long tid, int *pOptions );
-extern STATUS taskOptionsSet ( long tid, int mask, int newOptions );
-extern long taskNameToId(char *name);
-extern long taskFromThread( char *name );
+extern STATUS taskDelete(long);
+extern const char *taskName(long);
+extern STATUS taskSuspend(long);
+extern STATUS taskResume(long);
+extern STATUS taskPrioritySet(long, int);
+extern STATUS taskPriorityGet(long, int *);
+extern STATUS taskLock(void);
+extern STATUS taskUnlock(void);
+extern STATUS taskDelay(int);
+extern long taskIdSelf(void);
+extern OS_TCB *taskTcb(long);
+extern STATUS taskSetUserData(long, unsigned long);
+extern unsigned long taskGetUserData(long);
+extern STATUS taskOptionsGet(long, int *);
+extern STATUS taskOptionsSet(long, int, int);
+extern long taskNameToId(char *);
+extern long taskFromThread(char *);
 
 #ifdef __cplusplus
 };
