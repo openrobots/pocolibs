@@ -88,11 +88,6 @@ TASK_HOOK_LIST *createHooks = NULL;
 TASK_HOOK_LIST *deleteHooks = NULL;
 
 static STATUS executeHooks(TASK_HOOK_LIST *list, OS_TCB *tcb);
-static long internTaskStart(char *name, int priority, int options, int stackSize,
-			    FUNCPTR entryPt, int arg1, int arg2, int arg3, int arg4, int arg5,
-			    int arg6, int arg7, int arg8, int arg9, int arg10);
-static long registerTcb(OS_TCB *tcb);
-
 /*----------------------------------------------------------------------*/
 
 
@@ -107,25 +102,6 @@ portRecordH2ErrMsgs(void)
 			   portLibH2errMsgs);
 }
 /*----------------------------------------------------------------------*/
-
-/*
- * Register the TCB data structure in a specific memory of the thread
- */
-static long
-registerTcb(OS_TCB *tcb)
-{
-	/* Register the TCB pointer in the thread-specific key */
-#ifdef DEBUG
-	fprintf(stderr, "registering task specific value %lu %lu\n",
-	    (unsigned long)tcb, (unsigned long)pthread_self());
-#endif
-	if (pthread_setspecific(taskControlBlock, (void *)tcb) != 0) {
-		errnoSet(errno);
-		pthread_mutex_unlock(tcb->starter);
-		return ERROR;
-	}
-	return OK;
-}
 
 /*
  * Two functions to map a VxWorks-like  priority to a Posix priority
@@ -209,7 +185,13 @@ taskLibInit(void)
     /* Mark the TCB */
     tcb->magic = TASK_MAGIC;
 
-    if (registerTcb(tcb) == ERROR) {
+    /* Register the TCB pointer in the thread-specific key */
+#ifdef DEBUG
+    fprintf(stderr, "registering task specific value %lu %lu\n",
+	(unsigned long)tcb, (unsigned long)pthread_self());
+#endif
+    if (pthread_setspecific(taskControlBlock, (void *)tcb) != 0) {
+	errnoSet(errno);
 	return ERROR;
     }
 
@@ -246,8 +228,10 @@ taskCleanUp(void *data)
 	    }
 	}/* for */
     }
-    pthread_mutex_unlock(tcb->starter);
-    pthread_mutex_destroy(tcb->starter);
+    if (tcb->starter != NULL) {
+	    pthread_mutex_unlock(tcb->starter);
+	    pthread_mutex_destroy(tcb->starter);
+    }
     free(tcb);
 }
 
@@ -267,10 +251,10 @@ taskStarter(void *data)
     pthread_mutex_lock(tcb->starter); 	/* released in taskCleanUp() */
     tcb->pid = getpid();
 
-    if (registerTcb(tcb) == ERROR) {
+    /* Register the TCB pointer in a thread-specific key */
+    if (pthread_setspecific(taskControlBlock, (void *)tcb) != 0) {
 	return NULL;
     }
-
     /* Register a cleanup function */
     pthread_cleanup_push(taskCleanUp, data);
 
@@ -297,30 +281,6 @@ taskStarter(void *data)
  */
 long
 taskSpawn(char *name, int priority, int options, int stackSize,
-	  FUNCPTR entryPt, int arg1, int arg2, int arg3, int arg4, int arg5,
-	  int arg6, int arg7, int arg8, int arg9, int arg10)
-{
-    if (!entryPt) {
-	return ERROR;
-    }
-    return internTaskStart(name, priority, options, stackSize, entryPt, arg1,
-			   arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
-}
-
-/*
- * Create a new task from an existing thread
- */
-long
-taskFromThread(char *name)
-{
-	return internTaskStart(name, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-}
-
-/*
- * Static method to create a task and/or a new thread for the new task
- */
-static long
-internTaskStart(char *name, int priority, int options, int stackSize,
 	  FUNCPTR entryPt, int arg1, int arg2, int arg3, int arg4, int arg5,
 	  int arg6, int arg7, int arg8, int arg9, int arg10)
 {
@@ -367,7 +327,6 @@ internTaskStart(char *name, int priority, int options, int stackSize,
     tcb->pid = getpid();
     tcb->userData = 0; /* XXX */
     
-    if (entryPt) {
     /* 
      * Initialize thread attributes 
      */
@@ -457,7 +416,6 @@ internTaskStart(char *name, int priority, int options, int stackSize,
 	pthread_mutex_unlock(tcb->starter);
 	return ERROR;
     }
-    }
 #ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
     /* Read back the scheduler parameters of the created thread */
     pthread_getschedparam(thread_id, &policy, &thread_param);
@@ -471,12 +429,6 @@ internTaskStart(char *name, int priority, int options, int stackSize,
     /* Register thread id in TCB */
     tcb->tid = thread_id;
 
-    if (!entryPt) {
-	if (registerTcb(tcb) == ERROR) {
-	    return ERROR;
-	}
-    }
-
     /*
      * add new task in task list
      */
@@ -486,7 +438,75 @@ internTaskStart(char *name, int priority, int options, int stackSize,
     return (long)tcb;
 }
 
+/*----------------------------------------------------------------------*/
 
+long
+taskFromThread(char *name)
+{
+    struct sched_param thread_param;
+    OS_TCB *tcb;
+    char bufName[12];
+
+    /*
+     * Allocate a TCB 
+     */
+    tcb = (OS_TCB *)malloc(sizeof(OS_TCB));
+    if (tcb == NULL) {
+	errnoSet(S_portLib_NO_MEMORY);
+	return ERROR;
+    }
+    tcb->magic = TASK_MAGIC;
+    if (name != NULL) {
+	tcb->name = strdup(name);
+    } else {
+	snprintf(bufName, sizeof(bufName), "t%d", ++numTask);
+	tcb->name = strdup(bufName);
+    }
+#ifdef DEBUG
+    printf("taskFromThread \"%s\" %p\n", tcb->name, tcb);
+#endif
+    tcb->entry = NULL;
+    tcb->errorStatus = 0;
+    tcb->pid = getpid();
+    tcb->userData = 0; /* XXX */
+
+    tcb->params.arg1 = 0;
+    tcb->params.arg2 = 0;
+    tcb->params.arg3 = 0;
+    tcb->params.arg4 = 0;
+    tcb->params.arg5 = 0;
+    tcb->params.arg6 = 0;
+    tcb->params.arg7 = 0;
+    tcb->params.arg8 = 0;
+    tcb->params.arg9 = 0;
+    tcb->params.arg10 = 0;
+
+#ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
+    /* Read back the scheduler parameters of the current thread */
+    pthread_getschedparam(pthread_self(), &policy, &thread_param);
+    tcb->policy = policy;
+#else
+    tcb->policy = 0;
+    thread_param.sched_priority = rr_min_priority;
+#endif /* HAVE_PTHREAD_ATTR_SETSCHEDPOLICY */
+    tcb->priority = priorityPosixToVx(thread_param.sched_priority);
+
+    /* Register thread id in TCB */
+    tcb->tid = pthread_self();
+
+    /* Register the TCB pointer in a thread-specific key */
+    if (pthread_setspecific(taskControlBlock, (void *)tcb) != 0) {
+	errnoSet(errno);
+	return ERROR;
+    }
+    /*
+     * add new task in task list
+     */
+    tcb->next = taskList;
+    taskList = tcb;
+
+    return (long)tcb;
+}
 /*----------------------------------------------------------------------*/
 
 /*
