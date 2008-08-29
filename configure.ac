@@ -253,32 +253,13 @@ if test "x$valgrind" = "xyes"; then
 fi
 
 AC_ARG_ENABLE(debug,
-           [AC_HELP_STRING([--enable-debug=full yes no], [compile with debug info])],
-                [opt_debug=$enableval],[opt_debug=no])
-if test "$GCC" = yes; then
-    if test "x$opt_debug" = "xfull"; then
-    	CFLAGS="${CFLAGS} -g3 -O0 -DDEBUG"
-    	CXXFLAGS="${CFLAGS}"
-    	AC_MSG_RESULT([building with full debug info: -g3 -O0])
-    elif test "x$opt_debug" = "xyes"; then
-    	CFLAGS="${CFLAGS} -g -O1 -DDEBUG"
-    	CXXFLAGS="${CFLAGS}"
-    	AC_MSG_RESULT([building with debug info: -g -O1])
-    elif test "x$opt_debug" = "xno"; then
-    	CFLAGS="${CFLAGS} -O3 -DNDEBUG"
-    	CXXFLAGS="${CFLAGS} -finline-functions"
-    	AC_MSG_RESULT([building without debug mode: -O3])
-    fi
-else
-    dnl not gcc
-    if test "x$opt_debug" = "x" -o "x$opt_debug" = "xno"; then
-	CFLAGS="${CFLAGS} -O -DNDEBUG"
-	AC_MSG_RESULT([building without debug info: -O])
-    else
-	CFLAGS="${CFLAGS} -g -DDEBUG"
-	AC_MSG_RESULT([building with debug info: -g])
-    fi
-    CXXFLAGS="${CFLAGS}"
+           [AC_HELP_STRING([--enable-debug], [compile with DEBUG defined])],
+                [debug=$enableval],[debug=no])
+if test "x$debug" = "xyes"; then
+    	CFLAGS="${CFLAGS} -DDEBUG"
+    	AC_MSG_RESULT([enabling -DDEBUG])
+elif test "x$opt_debug" = "xno"; then
+    	CFLAGS="${CFLAGS} -DNDEBUG"
 fi
 
 AC_ARG_WITH(debug-output,
