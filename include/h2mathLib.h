@@ -84,7 +84,6 @@ double h2cos (double angle);
 double h2sin (double angle);
 double integCosFresnel (double theta);
 double integSinFresnel (double theta);
-double infinity(void);
 #else
 double angleLimit ();
 double angleDegLimit ();
@@ -96,7 +95,6 @@ double h2sin ();
 double integCosFresnel ();
 double integSinFresnel ();
 #endif
-
 
 #ifdef __cplusplus
 };
