@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003 CNRS/LAAS
+ * Copyright (c) 1990, 2003,2008 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -285,14 +285,20 @@ h2devAttach(void)
 	return ERROR;
     }
     /* Lecture pid du serveur de posters */
-    n = read(fd, buf, sizeof(buf));
+    n = read(fd, buf, sizeof(buf) - 1);
     if (n < 0) {
 	errnoSet(errno);
 	pthread_mutex_unlock(&h2devMutex);
 	close(fd);
 	return ERROR;
     }
-    sscanf(buf, "%d", &posterServPid);
+    buf[n] = 0;
+    if (sscanf(buf, "%d", &posterServPid) != 1) {
+	errnoSet(EINVAL);
+        pthread_mutex_unlock(&h2devMutex);
+	close(fd);
+	return ERROR;
+    }
     close(fd);
 
     pthread_mutex_unlock(&h2devMutex);
