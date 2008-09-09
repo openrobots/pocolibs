@@ -213,6 +213,8 @@ AC_ARG_ENABLE([posix-timers],
 AC_SEARCH_LIBS(clock_gettime, [rt posix4])
 AC_CHECK_FUNCS(clock_gettime)
 
+AC_SEARCH_LIBS(sched_get_priority_min, [rt])
+
 AC_MSG_CHECKING([for pthread_attr_setschedpolicy])
 AC_TRY_LINK([#include <pthread.h>], 
 	[pthread_attr_setschedpolicy(NULL, SCHED_RR);],
