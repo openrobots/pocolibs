@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003 CNRS/LAAS
+ * Copyright (c) 1990, 2003,2008 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -69,7 +69,7 @@ static char const posterServPath[] = POSTER_SERV_PATH;
  **
  ** type  : type de device
  ** dev   : numero du device
- ** create: TRUE si la cle doit etre cree, 
+ ** create: TRUE si la cle doit etre cree,
  **         FALSE si elle doit deja exister
  **/
 long
@@ -80,9 +80,9 @@ h2devGetKey(int type, int dev, BOOL create, int *pFd)
     struct utsname uts;
     int fd;
     int amode;
-    
+
     /*
-     * Recherche du fichier de cles 
+     * Recherche du fichier de cles
      */
     /* Essaye d'abord H2DEV_DIR */
     home = getenv("H2DEV_DIR");
@@ -98,7 +98,7 @@ h2devGetKey(int type, int dev, BOOL create, int *pFd)
 	    return ERROR;
 	}
     }
-	
+
     if (home == NULL) {
 	/* Sinon, essaye HOME */
 	home = getenv("HOME");
@@ -116,9 +116,9 @@ h2devGetKey(int type, int dev, BOOL create, int *pFd)
 	errnoSet(S_h2devLib_BAD_HOME_DIR);
 	return ERROR;
     }
-    snprintf(h2devFileName, sizeof(h2devFileName), "%s/%s-%s", 
+    snprintf(h2devFileName, sizeof(h2devFileName), "%s/%s-%s",
 	home, H2_DEV_NAME, uts.nodename);
-    
+
     if (create) {
 	/* Creation du fichier */
 	fd = open(h2devFileName, O_WRONLY | O_CREAT | O_EXCL, PORTLIB_MODE);
@@ -128,7 +128,7 @@ h2devGetKey(int type, int dev, BOOL create, int *pFd)
 	}
     } else {
 	/* teste l'existence */
-	fd = open(h2devFileName, O_RDONLY, 0); 
+	fd = open(h2devFileName, O_RDONLY, 0);
 	if (fd == -1) {
 	    errnoSet(S_h2devLib_NOT_INITIALIZED);
 	    return ERROR;
@@ -160,10 +160,10 @@ h2devInit(int smMemSize, int posterServFlag)
 {
     key_t key;
     int i;
-    int fd; 
+    int fd;
     char buf[16];
     int savedError;
-    
+
     h2devRecordH2ErrMsgs();
 
     key = h2devGetKey(H2_DEV_TYPE_H2DEV, 0, TRUE, &fd);
@@ -245,13 +245,13 @@ h2devInit(int smMemSize, int posterServFlag)
     }
     return OK;
 }
-    
+
 /*----------------------------------------------------------------------*/
 
 /*
  * Retrouve le pointeur sur la structure partagee H2_DEV
  */
-STATUS 
+STATUS
 h2devAttach(void)
 {
     key_t key;
@@ -285,14 +285,20 @@ h2devAttach(void)
 	return ERROR;
     }
     /* Lecture pid du serveur de posters */
-    n = read(fd, buf, sizeof(buf));
+    n = read(fd, buf, sizeof(buf) - 1);
     if (n < 0) {
 	errnoSet(errno);
 	pthread_mutex_unlock(&h2devMutex);
 	close(fd);
 	return ERROR;
     }
-    sscanf(buf, "%d", &posterServPid);
+    buf[n] = 0;
+    if (sscanf(buf, "%d", &posterServPid) != 1) {
+	errnoSet(EINVAL);
+        pthread_mutex_unlock(&h2devMutex);
+	close(fd);
+	return ERROR;
+    }
     close(fd);
 
     pthread_mutex_unlock(&h2devMutex);
@@ -301,14 +307,14 @@ h2devAttach(void)
 #ifdef VALGRIND_SUPPORT
     VALGRIND_MAKE_READABLE(h2Devs, sizeof(H2_DEV_STR) * H2_DEV_MAX);
 #endif
-    
+
     return OK;
 }
 
 /*----------------------------------------------------------------------*/
 
 /**
- ** Destruction des h2 devices 
+ ** Destruction des h2 devices
  **/
 STATUS
 h2devEnd(void)
@@ -368,7 +374,7 @@ h2devEnd(void)
 	goto fail;
     }
     if (shmctl(shmid, IPC_RMID, NULL) < 0) {
-	fprintf(stderr, "h2devEnd: shmctl(IPC_RMID) error %s\n", 
+	fprintf(stderr, "h2devEnd: shmctl(IPC_RMID) error %s\n",
 		strerror(errno));
 	rv = ERROR;
 	goto fail;
@@ -403,7 +409,7 @@ STATUS
 h2devShow(void)
 {
     int i;
-    
+
     if (h2devAttach() == ERROR) {
 	return ERROR;
     }
@@ -413,7 +419,7 @@ h2devShow(void)
 	pthread_mutex_lock(&h2devMutex);
 	if (H2DEV_TYPE(i) != H2_DEV_TYPE_NONE) {
 	    printf("%2d %6s %5ld %s\n", i,
-		   h2devTypeName[H2DEV_TYPE(i)],  H2DEV_UID(i), 
+		   h2devTypeName[H2DEV_TYPE(i)],  H2DEV_UID(i),
 		   H2DEV_NAME(i));
 	}
 	pthread_mutex_unlock(&h2devMutex);
