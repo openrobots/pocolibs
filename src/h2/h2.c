@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003 CNRS/LAAS
+ * Copyright (c) 1990, 2003, 2009 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -26,6 +26,7 @@ __RCSID("$LAAS$");
 #include <ctype.h>
 #include <errno.h>
 #include <fnmatch.h>
+#include <unistd.h>
 
 #include "portLib.h"
 #include "errnoLib.h"
@@ -50,10 +51,12 @@ usage(void)
 	    "Usage: %s init [-p][SM_MEM_SIZE]\n"
 	    "       %s end\n"
 	    "       %s info\n"
+	    "       %s posterStats [INTERVAL]\n"
 	    "       %s listModules\n"
 	    "       %s printErrno CODE\n"
-	    "       %s clean PATTERN\n", 
-	    progname, progname, progname, progname, progname, progname);
+	    "       %s clean PATTERN\n",
+	    progname, progname, progname, progname, progname, 
+	    progname, progname);
     exit(1);
 }
 
@@ -184,6 +187,19 @@ h2info(void)
     return OK;
 }
 
+int
+h2posterStats(int interval)
+{
+    int done = 0;
+
+    while (!done) {
+	putchar('\n');
+	posterStats();
+	sleep(interval);
+    }
+    return OK;
+}
+
 /*----------------------------------------------------------------------*/
 
 int
@@ -224,6 +240,9 @@ main(int argc, char *argv[])
 	} else if (strcmp(argv[0], "listModules") == 0) {
 	    h2listModules();
 	    status = OK;
+	} else if (strcmp(argv[0], "posterStats") == 0) {
+	    h2posterStats(10);
+	    status = OK;
 	} else {
 	    usage();
 	}
@@ -236,6 +255,8 @@ main(int argc, char *argv[])
 	    status = OK;
 	} else if (strcmp(argv[0], "clean") == 0) {
 	    status = cleanDevs(argv[1]);
+	} else if (strcmp(argv[0], "posterStats") == 0) {
+	    status = h2posterStats(atoi(argv[1]));
 	} else {
 	    usage();
 	}
