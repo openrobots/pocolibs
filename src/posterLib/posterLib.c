@@ -338,37 +338,6 @@ posterShow(void)
 }
 
 /*----------------------------------------------------------------------*/
-#if 0
-/*
- * Chargement et initialiasation d'une bibliotheque 
- */
-static POSTER_FUNCS *
-loadAndInitPosterLib(char *libname)
-{
-    void *posterLibHandle; 
-    POSTER_FUNCS *f;
-
-    posterLibHandle = dlopen(libname, RTLD_LAZY);
-    if (posterLibHandle == NULL) {
-	fprintf(stderr, "loadAndInitPosterLib: %s\n", dlerror());
-	errnoSet(S_posterLib_DLOPEN);
-	return NULL;
-    }
-    f = (POSTER_FUNCS *)dlsym(posterLibHandle, POSTER_FUNC_NAME);
-    if (f == NULL) {
-	fprintf(stderr, "loadAndInitPosterLib: %s\n", dlerror());
-	errnoSet(S_posterLib_DLSYM);
-	return NULL;
-    }
-    if (f->init != NULL) {
-	if ((*f->init)() != OK) {
-	    dlclose(posterLibHandle);
-	    return NULL;
-	}
-    }
-    return f;
-}
-#endif
 
 /*
  * Global initialisation of the poster library
