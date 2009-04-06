@@ -32,9 +32,9 @@ CPPFLAGS+=	-I$(srcdir) -I$(abs_builddir)
 
 OBJS=		$(SRCS:%.c=%.lo) $(SRCS_RPC:%.c=%.lo)
 
-SHLIB_CURRENT=	4
-SHLIB_REVISION=	1
-SHLIB_AGE=	1
+SHLIB_CURRENT=	5
+SHLIB_REVISION=	0
+SHLIB_AGE=	2
 
 BASENAME= 	posterLib
 LIB=		lib$(BASENAME).la
