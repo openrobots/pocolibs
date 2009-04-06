@@ -6,7 +6,6 @@ dnl Copyright (c) 2003-2004 CNRS/LAAS
 dnl
 dnl GPL, since some parts were copied from other configure.in
 dnl 
-dnl $LAAS$
 dnl
 AC_REVISION($LAAS$)
 AC_INIT([pocolibs],[2.4.1],[openrobots@laas.fr])
