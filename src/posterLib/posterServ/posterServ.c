@@ -70,8 +70,8 @@ posterServ(void)
  
     h2initGlob(0);
  
-    (void) pmap_unset(POSTER_SERV, POSTER_VERSION);
-    
+    svc_unregister(POSTER_SERV, POSTER_VERSION);
+
     transp = svctcp_create(RPC_ANYSOCK, 0, 0);
     if (transp == NULL) {
         fprintf(stderr, "cannot create tcp service.");
@@ -248,7 +248,7 @@ sighandler(int sig)
 
       case SIGINT:
       case SIGTERM:
-	(void) pmap_unset(POSTER_SERV, POSTER_VERSION);
+	(void) svc_unregister(POSTER_SERV, POSTER_VERSION);
         exit(0);
     }
 }
