@@ -248,7 +248,7 @@ posterFindPath(char *posterName, REMOTE_POSTER_ID *pPosterId)
 	POSTER_FIND_RESULT *res = NULL;
 	char *host;
 	CLIENT *client;
-	char *pp, *tmp, *h, *n;
+	char *pp, *tmp = NULL, *h, *n;
 	char *posterPath = getenv("POSTER_PATH");
 	pthread_key_t key;
 	
