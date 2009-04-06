@@ -34,6 +34,7 @@ typedef struct POSTER_FUNCS {
     STATUS (* show)(void);
     STATUS (* setEndianness)(POSTER_ID, H2_ENDIANNESS);
     STATUS (* getEndianness)(POSTER_ID, H2_ENDIANNESS *);
+    STATUS (* stats)(void);
 } POSTER_FUNCS;
 
 

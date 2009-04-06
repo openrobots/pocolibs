@@ -55,6 +55,14 @@ typedef struct H2_MBOX_STR {
     H2RNG_ID rngId;			/* global Id of the ring buffer */
 } H2_MBOX_STR;
 
+/* Poster statistics */
+typedef struct H2_POSTER_STAT_STR {
+	unsigned int read_ops;
+	unsigned int write_ops;
+	unsigned int read_bytes;
+	unsigned int write_bytes;
+} H2_POSTER_STAT_STR;
+		
 /* Poster */
 typedef struct H2_POSTER_STR {
     int taskId;				/* Unix pid */
@@ -65,6 +73,7 @@ typedef struct H2_POSTER_STR {
     int size;				/* poster size */
     int op;				/* current operation */
     H2_ENDIANNESS endianness;
+    H2_POSTER_STAT_STR stats;		/* statistics */
 } H2_POSTER_STR;
 
 /* Task */
@@ -173,6 +182,12 @@ extern H2_DEV_STR *h2Devs;
 #define H2DEV_POSTER_SIZE(dev) h2Devs[dev].data.poster.size
 #define H2DEV_POSTER_OP(dev) h2Devs[dev].data.poster.op
 #define H2DEV_POSTER_ENDIANNESS(dev) h2Devs[dev].data.poster.endianness
+
+#define H2DEV_POSTER_STATS(dev) h2Devs[dev].data.poster.stats
+#define H2DEV_POSTER_READ_OPS(dev) h2Devs[dev].data.poster.stats.read_ops
+#define H2DEV_POSTER_WRITE_OPS(dev) h2Devs[dev].data.poster.stats.write_ops
+#define H2DEV_POSTER_READ_BYTES(dev) h2Devs[dev].data.poster.stats.read_bytes
+#define H2DEV_POSTER_WRITE_BYTES(dev) h2Devs[dev].data.poster.stats.write_bytes
 
 #define H2DEV_TASK_TID(dev) h2Devs[dev].data.task.taskId
 #define H2DEV_TASK_PID(dev) h2Devs[dev].data.task.pid

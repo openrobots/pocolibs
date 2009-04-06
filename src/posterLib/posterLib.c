@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 2003-2004 CNRS/LAAS
+ * Copyright (c) 1996, 2003-2004,2009 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -335,6 +335,15 @@ posterShow(void)
     }
     /* For now, no way to list remote posters, sigh */
     return OK;
+}
+
+/*----------------------------------------------------------------------*/
+
+STATUS
+posterStats(void)
+{
+    POSTER_INIT;
+    return posterLocalFuncs.stats();
 }
 
 /*----------------------------------------------------------------------*/

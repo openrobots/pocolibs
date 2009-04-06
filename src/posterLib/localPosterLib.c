@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 2003-2004 CNRS/LAAS
+ * Copyright (c) 1996, 2003-2004,2009 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -58,6 +58,7 @@ static STATUS localPosterSetEndianness(POSTER_ID posterId,
 				       H2_ENDIANNESS endianness);
 static STATUS localPosterGetEndianness(POSTER_ID posterId, 
 				       H2_ENDIANNESS *endianness);
+static STATUS localPosterStats(void);
 
 const POSTER_FUNCS posterLocalFuncs = {
     NULL,
@@ -73,7 +74,8 @@ const POSTER_FUNCS posterLocalFuncs = {
     localPosterIoctl,
     localPosterShow,
     localPosterSetEndianness,
-    localPosterGetEndianness
+    localPosterGetEndianness,
+    localPosterStats
 };
 
 /*----------------------------------------------------------------------*/
@@ -120,6 +122,11 @@ localPosterCreate(char *name, int size, POSTER_ID *pPosterId)
     /* Init endianness of the data of the poster to local value
        (will be changed in remote create procedure if necessary) */
     H2DEV_POSTER_ENDIANNESS(dev) = H2_LOCAL_ENDIANNESS;
+
+    H2DEV_POSTER_READ_OPS(dev) = 0;
+    H2DEV_POSTER_WRITE_OPS(dev) = 0;
+    H2DEV_POSTER_READ_BYTES(dev) = 0;
+    H2DEV_POSTER_WRITE_BYTES(dev) = 0;
 
 
     if (pPosterId != NULL) {
@@ -207,6 +214,8 @@ localPosterFind(char *name, POSTER_ID *pPosterId)
 static int
 localPosterWrite(POSTER_ID posterId, int offset, void *buf, int nbytes)
 {
+    long dev = (long)posterId;
+
     /* Prise du semaphore d'exclusion mutuelle */
     if (localPosterTake(posterId, POSTER_WRITE) == ERROR) {
 	return(ERROR);
@@ -214,6 +223,10 @@ localPosterWrite(POSTER_ID posterId, int offset, void *buf, int nbytes)
 
     /* Ecrire les donnees dans le poster */
     memcpy((char *)localPosterAddr(posterId) + offset, buf, nbytes);
+    
+    /* Store statistics */
+    H2DEV_POSTER_WRITE_OPS(dev)++;
+    H2DEV_POSTER_WRITE_BYTES(dev) += nbytes;    
 
     /* liberer le semaphore d'exclusion mutuelle */
     localPosterGive(posterId);
@@ -242,6 +255,10 @@ localPosterRead(POSTER_ID posterId, int offset, void *buf, int nbytes)
     }
     /* Copier les donnees */
     memcpy(buf, (char *)localPosterAddr(posterId) + offset, nbytes);
+
+    /* statistics */
+    H2DEV_POSTER_READ_OPS(dev)++;
+    H2DEV_POSTER_READ_BYTES(dev) += nbytes;
 
     /* Liberer le semaphore */
     localPosterGive(posterId);
@@ -413,6 +430,16 @@ localPosterIoctl(POSTER_ID posterId, int code, void *parg)
 	*(size_t *)parg = H2DEV_POSTER_SIZE(dev);
 	break;
 
+      case FIO_GETSTATS:
+	/* statistics */
+	memcpy(parg, (char *)&(H2DEV_POSTER_STATS(dev)),
+	       sizeof(H2_POSTER_STAT_STR));
+	H2DEV_POSTER_READ_OPS(dev) = 0;
+	H2DEV_POSTER_READ_BYTES(dev) = 0;
+	H2DEV_POSTER_WRITE_OPS(dev) = 0;
+	H2DEV_POSTER_WRITE_BYTES(dev) = 0;
+	break;
+
       default:
 	errnoSet(S_posterLib_BAD_IOCTL_CODE);
 	retval = ERROR;
@@ -451,3 +478,33 @@ localPosterShow(void)
     logMsg("\n");
     return OK;
 }
+/*----------------------------------------------------------------------*/
+
+static STATUS
+localPosterStats(void)
+{
+    int i;
+
+    if (h2devAttach() == ERROR) {
+	return ERROR;
+    }
+    logMsg("\n");
+    logMsg("NAME                                ReadOps   WriteOps  ReadBytes WriteBytes\n");
+    logMsg("-------------------------------- ---------- ---------- ---------- ----------\n");
+    for (i = 0; i < H2_DEV_MAX; i++) {
+	if (H2DEV_TYPE(i) == H2_DEV_TYPE_POSTER) {
+	    logMsg("%-32s %10d %10d %10d %10d\n", H2DEV_NAME(i),
+		   H2DEV_POSTER_READ_OPS(i),
+		   H2DEV_POSTER_WRITE_OPS(i),
+		   H2DEV_POSTER_READ_BYTES(i),
+		   H2DEV_POSTER_WRITE_BYTES(i));
+	    H2DEV_POSTER_READ_OPS(i) = 0;
+	    H2DEV_POSTER_WRITE_OPS(i) = 0;
+	    H2DEV_POSTER_READ_BYTES(i) = 0;
+	    H2DEV_POSTER_WRITE_BYTES(i) = 0;
+	}
+    } /* for */
+    logMsg("\n");
+    return OK;
+}
+/*----------------------------------------------------------------------*/

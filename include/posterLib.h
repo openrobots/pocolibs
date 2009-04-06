@@ -1,6 +1,5 @@
-/* $LAAS$ */
 /*
- * Copyright (c) 1998, 2005 CNRS/LAAS
+ * Copyright (c) 1998, 2005,2009 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -38,7 +37,8 @@ typedef enum {
 #define   FIO_GETDATE                            1
 #define   FIO_NMSEC                              2
 #define   FIO_GETSIZE				 3
-#define   FIO_FRESH                  4
+#define   FIO_FRESH                  		 4
+#define	  FIO_GETSTATS				 5
 
 /* bus address space for poster storage */
 #define POSTER_LOCAL_MEM   0		/* local memory of one process
@@ -67,6 +67,8 @@ extern void * posterAddr ( POSTER_ID posterId );
 extern STATUS posterIoctl(POSTER_ID posterId, int code, void *parg);
 extern STATUS posterEndianness(POSTER_ID posterId, H2_ENDIANNESS *endianness);
 extern char* posterName(POSTER_ID posterId);
+extern STATUS posterShow(void);
+extern STATUS posterStats(void);
 
 /* for posterServ only ! */
 extern STATUS posterSetEndianness(POSTER_ID posterId, H2_ENDIANNESS endianness);
