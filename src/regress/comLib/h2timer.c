@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 CNRS/LAAS
+ * Copyright (c) 2004,2009 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -17,7 +17,8 @@
 #include "pocolibs-config.h"
 __RCSID("$LAAS$");
 
-# include <stdio.h>
+#include <stdio.h>
+#include <sys/time.h>
 
 #include "portLib.h"
 #include "semLib.h"
@@ -30,6 +31,7 @@ __RCSID("$LAAS$");
 int
 pocoregress_init()
 {
+   struct timeval start, end;
    unsigned long t1, t2;
    H2TIMER_ID t;
    int i;
@@ -45,10 +47,14 @@ pocoregress_init()
    h2timerStart(t, 10, 3);
 
    for(i=0; i<3; i++) {
+      (void)gettimeofday(&start, NULL);
       t1 = tickGet();
       h2timerPause(t);
       t2 = tickGet();
-      logMsg("timer pause took %d ticks\n", t2-t1);
+      (void)gettimeofday(&end, NULL);
+      logMsg("timer pause took %d ticks (%f ms)\n", t2-t1,
+	     (end.tv_sec*1000. + end.tv_usec/1000.) -
+	     (start.tv_sec*1000. + start.tv_usec/1000.));
    }
 
    h2timerStop(t);
@@ -56,10 +62,14 @@ pocoregress_init()
    h2timerStart(t, 5, 12);
 
    for(i=0; i<3; i++) {
+      (void)gettimeofday(&start, NULL);
       t1 = tickGet();
       h2timerPause(t);
       t2 = tickGet();
-      logMsg("timer pause took %d ticks\n", t2-t1);
+      (void)gettimeofday(&end, NULL);
+      logMsg("timer pause took %d ticks (%f ms)\n", t2-t1,
+	     (end.tv_sec*1000. + end.tv_usec/1000.) -
+	     (start.tv_sec*1000. + start.tv_usec/1000.));
    }
 
    h2timerStop(t);
