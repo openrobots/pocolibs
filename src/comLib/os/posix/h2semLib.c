@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003 CNRS/LAAS
+ * Copyright (c) 1990, 2003,2009 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -355,19 +355,7 @@ h2semTake(H2SEM_ID sem, int timeout)
 STATUS
 h2semGive(H2SEM_ID sem)
 {
-    struct  sembuf op;
-    int dev;
-
-    dev = sem / MAX_SEM;
-    sem = sem % MAX_SEM;
-
-    op.sem_num = sem;
-    op.sem_op = 1;
-    op.sem_flg = 0;
-    if (semop(H2DEV_SEM_SEM_ID(dev), &op, 1) < 0) {
-	return(ERROR);
-    }
-    return(OK);
+    return h2semSet(sem, 1);
 }
 
 /*----------------------------------------------------------------------*/
