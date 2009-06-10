@@ -1,12 +1,15 @@
+ 89. Add regression tests for h2 semaphores.
+ 88. Change h2 semaphores to mutexes instead of counting semaphores.
+
 Version 2.5, 6 April 2009
- 
+
  87. Update shipped autotools files to the version provided by Fedora 10.
  86. Implement poster access statistics.
  85. posterServ: use svc_unregister() instead of pmap_unset().
 
-Version 2.4.1, 9 September 2008 
+Version 2.4.1, 9 September 2008
 
- 84. Fix a stack corruption bug introduced by change 83. 
+ 84. Fix a stack corruption bug introduced by change 83.
 
 Version 2.4, 11 August 2008
 
@@ -22,43 +25,43 @@ Version 2.3, 31 July 2007
 
  77. Fix taskDelete hooks handling.
  76. Relax constraint on h2timer periods.
- 75. h2 init no longer starts posterServ by default. Use h2 init -p. 
- 74. Add a flag to h2devInit() to control the launch of posterServ. 
-     Bump portLib major. 
+ 75. h2 init no longer starts posterServ by default. Use h2 init -p.
+ 74. Add a flag to h2devInit() to control the launch of posterServ.
+     Bump portLib major.
  73. Fix build of posterLib tests programs.
  72. Remove VxWorks/RTAI/LXRT parts.
 
 Version 2.2, 19 December 2006
- 
+
  71. Let configure find the gnu tar program for make dist.
- 70. Remove the xes subsystem, which is no longer used. 
- 69. Preliminary support for building Xenomai 2.x enabled libs, using the 
+ 70. Remove the xes subsystem, which is no longer used.
+ 69. Preliminary support for building Xenomai 2.x enabled libs, using the
      POSIX skin.
  68. Remove RTAI/LXRT support in configure scripts
  67. Remove use of X11 events in xes_server.
  66. Remove double clear of h2timer counters (Sylvain Joyeux).
  65. Fix build problems on Darwin.
- 64. Provide a correct day of week in H2TIME structure. 
- 63. Fix h2timeShow() that was broken in multiple ways. 
+ 64. Provide a correct day of week in H2TIME structure.
+ 63. Fix h2timeShow() that was broken in multiple ways.
 
 Version 2.1, 11 November 2005
 
- 62. Some basic support for kbuild for RTAI 3.1 kernel modules 
+ 62. Some basic support for kbuild for RTAI 3.1 kernel modules
      (not working).
  61. Rework error messages handling. No more central h2errorList.
  60. More ANSI C prototypes in header files.
- 59. Add a autogen.sh script to generate the configure script and garbage 
+ 59. Add a autogen.sh script to generate the configure script and garbage
      collect unneeded files.
  58. Merge missing parts of lxrt support in existing files.
  57. Add missing files for lxrt support.
 
 Version 2.1beta1, 26 August 2005
 
- 56. Use vpath <pattern> instead of VPATH in Makefiles to minimize trouble 
+ 56. Use vpath <pattern> instead of VPATH in Makefiles to minimize trouble
      when builddir != srcdir and srcdir has been configured already.
  55. Add a man page for h2time functions.
  54. Add a h2GetTimeSpec() function that returs a timespec-like structure.
-     This should be used instead of calling clock_gettime() directly. 
+     This should be used instead of calling clock_gettime() directly.
  53. Check for clock_gettime in configure scripts
  52. Add regression tests.
  51. Packaging fixes.
@@ -71,11 +74,11 @@ Version 2.1beta1, 26 August 2005
  44. Makefiles cleanups (Sylvain Joyeux, Matthieu Herrb).
  43. Add a h2semSet() function to force the value of a semaphore (Sylvain
      Joyeux).
- 42. Add a posterName() function and a FIO_FRESH ioctl to posterLib (Sylvain 
+ 42. Add a posterName() function and a FIO_FRESH ioctl to posterLib (Sylvain
      Joyeux).
  41. Valgrind support (Sylvain Joyeux).
- 40. Remove some unused files. 
- 39. Make headers C++ compatible (Sylvain Joyeux). 
+ 40. Remove some unused files.
+ 39. Make headers C++ compatible (Sylvain Joyeux).
  38. Add --{disable,enable}-posix-timer option to configure, to be able
      to force the timer type that is used by tickLib, as the auto-detection
      of useable POSIX timer is not always reliable enough.
@@ -83,14 +86,14 @@ Version 2.1beta1, 26 August 2005
      linux kernel headers when compiling for RTAI.
  36. Revert the change that made the posterId in posterServ an uint64_t.
  35. Autotoolize the build of the poster test programs.
- 34. Start over with libtool style shared libraries version numbers. 
+ 34. Start over with libtool style shared libraries version numbers.
      Bump all major revisions to make sure nothing bad happens.
- 33. Add a configure test for usabilility of POSIX timers for a 
+ 33. Add a configure test for usabilility of POSIX timers for a
      100Hz sysClk.
- 32. Add a 'tick' regress test to check the accuracy of sysClk. 
+ 32. Add a 'tick' regress test to check the accuracy of sysClk.
      (Linux 2.4 POSIX timers are known to be unable to set a clock
      at 100Hz).
- 31. Some cleanups in header files: avoid nested includes. 
+ 31. Some cleanups in header files: avoid nested includes.
  30. Fix posterLib LP64 issues.
  29. Implemented a real-time logging library for RTAI. Added logInit and
      logEnd. Bumped portLib minor.
@@ -113,7 +116,7 @@ Version 2.1beta1, 26 August 2005
      for user space communication under RTAI. Bumped portLib minor.
  20. Reworked makefiles and configure scripts in order to be able to
      compile both kernel modules and userspace libraries with the same
-     configure; make; make install step under RTAI. 
+     configure; make; make install step under RTAI.
  19. Added RTAI support.
  18. Added regression tests.
  17. Split h2devLib and smMemLib into os-independant and os-specific parts.
@@ -141,9 +144,9 @@ Version 2.1beta1, 26 August 2005
   9. Get rid of the remaining ifdef __DARWIN__ checks. They are not
      needed with Mac OS X 10.3.3 anymore, and I don't intend to support
      earlier versions.
-  8. Add support for rpcgen -C in posterServ. Removes one of the 
+  8. Add support for rpcgen -C in posterServ. Removes one of the
      last #ifdef <system>, and makes this stuff build on MacOS X.
-  7. Split aclocal.m4. 
+  7. Split aclocal.m4.
   6. Effectively handle the possibility to disable X11 (xes).
   5. Look for rpcgen instead of blindly using `rpcgen' (useful for
      cross-compiling).
