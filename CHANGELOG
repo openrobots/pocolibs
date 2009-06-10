@@ -1,3 +1,9 @@
+Version 2.5, 6 April 2009
+ 
+ 87. Update shipped autotools files to the version provided by Fedora 10.
+ 86. Implement poster access statistics.
+ 85. posterServ: use svc_unregister() instead of pmap_unset().
+
 Version 2.4.1, 9 September 2008 
 
  84. Fix a stack corruption bug introduced by change 83. 
