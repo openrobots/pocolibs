@@ -50,7 +50,7 @@
 #endif
 
 /**
- ** Variables globales
+ ** Global variables
  **/
 
 H2_DEV_STR *h2Devs = NULL;
@@ -64,12 +64,12 @@ static char const posterServPath[] = POSTER_SERV_PATH;
 /*----------------------------------------------------------------------*/
 
 /**
- ** Determine la clef IPC correspondant a un device h2
+ ** Find the IPC key corresponding to a h2 device
  **
- ** type  : type de device
- ** dev   : numero du device
- ** create: TRUE si la cle doit etre cree,
- **         FALSE si elle doit deja exister
+ ** type  : device type
+ ** dev   : device number
+ ** create: TRUE if the key should be created
+ **         FALSE if the key should already exist
  **/
 long
 h2devGetKey(int type, int dev, BOOL create, int *pFd)
@@ -81,12 +81,12 @@ h2devGetKey(int type, int dev, BOOL create, int *pFd)
     int amode;
 
     /*
-     * Recherche du fichier de cles
+     * Look for the key's  pathname
      */
-    /* Essaye d'abord H2DEV_DIR */
+    /* try H2DEV_DIR first */
     home = getenv("H2DEV_DIR");
     if (home != NULL) {
-	/* Verifie l'existence et le droit d'ecriture */
+	/* Check for existence and write access */
 	if (create) {
 	    amode = R_OK|W_OK|X_OK;
 	} else {
@@ -99,7 +99,7 @@ h2devGetKey(int type, int dev, BOOL create, int *pFd)
     }
 
     if (home == NULL) {
-	/* Sinon, essaye HOME */
+	/* otherwise try HOME */
 	home = getenv("HOME");
     }
     if (home == NULL) {
@@ -110,7 +110,7 @@ h2devGetKey(int type, int dev, BOOL create, int *pFd)
 	errnoSet(errno);
 	return ERROR;
     }
-    /* Test sur la longueur de la chaine */
+    /* Check the lenght of the string */
     if (strlen(home)+strlen(uts.nodename)+strlen(H2_DEV_NAME)+3 > MAXPATHLEN) {
 	errnoSet(S_h2devLib_BAD_HOME_DIR);
 	return ERROR;
@@ -119,27 +119,27 @@ h2devGetKey(int type, int dev, BOOL create, int *pFd)
 	home, H2_DEV_NAME, uts.nodename);
 
     if (create) {
-	/* Creation du fichier */
+	/* Create the file */
 	fd = open(h2devFileName, O_WRONLY | O_CREAT | O_EXCL, PORTLIB_MODE);
 	if (fd < 0) {
 	    errnoSet(errno);
 	    return ERROR;
 	}
     } else {
-	/* teste l'existence */
+	/* Check for existence */
 	fd = open(h2devFileName, O_RDONLY, 0);
 	if (fd == -1) {
 	    errnoSet(S_h2devLib_NOT_INITIALIZED);
 	    return ERROR;
 	}
     }
-    /* Retourne eventuellement le file descriptor */
+    /* Return the file descriptor */
     if (pFd != NULL) {
 	*pFd = fd;
     } else {
 	close(fd);
     }
-    /* Calcul de l'id de la clef en fonction du type et du numero de device */
+    /* compute the key id depending on the device type and number */
     key = ftok(h2devFileName, dev*H2DEV_MAX_TYPES + type);
     if (key == -1) {
 	errnoSet(errno);
@@ -152,7 +152,7 @@ h2devGetKey(int type, int dev, BOOL create, int *pFd)
 /*----------------------------------------------------------------------*/
 
 /**
- ** Initialisation
+ ** Initialization
  **/
 STATUS
 h2devInit(int smMemSize, int posterServFlag)
@@ -184,7 +184,7 @@ h2devInit(int smMemSize, int posterServFlag)
 	close(fd);
 	return(ERROR);
     }
-    /* Creation semaphores */
+    /* Create semaphores */
     h2Devs[0].type = H2_DEV_TYPE_SEM;
     h2Devs[0].uid = getuid();
     strcpy(h2Devs[0].name, "h2semLib");
@@ -193,27 +193,27 @@ h2devInit(int smMemSize, int posterServFlag)
 	close(fd);
 	return ERROR;
     }
-    /* Allocation a la main du premier semaphore */
+    /* Manually allocate the first semaphore */
     h2semCreate0(H2DEV_SEM_SEM_ID(0), SEM_EMPTY);
 
-    /* Initialisation */
+    /* Initialization */
     for (i = 1; i < H2_DEV_MAX; i++) {
-	/* marque tous les devices libres */
+	/* mark all devices as free */
 	h2Devs[i].type = H2_DEV_TYPE_NONE;
     }
     h2semGive(0);
     pthread_mutex_unlock(&h2devMutex);
 
-    /* Creation de la memoire partagee */
+    /* Create shared memory segment */
     if (smMemInit(smMemSize) == ERROR) {
-	/* Memorise le code d'erreur car h2devEnd() l'ecrase */
+	/* Store the error code, that gets clobbered by h2devEnd() */
 	savedError = errnoGet();
-	/* Detruit tout ce qui a deja ete cree */
+	/* Destroy already created devices*/
 	h2devEnd();
-	errnoSet(savedError);		/* restore l'erreur de smMemInit */
+	errnoSet(savedError);		/* restore smMemInit() status */
         return ERROR;
     }
-    /* Demarrage du serveur de posters */
+    /* Start poster server */
     if (getenv("POSTER_HOST") == NULL && posterServFlag == TRUE) {
 	posterServPid = fork();
 	if (posterServPid == 0) {
@@ -223,7 +223,7 @@ h2devInit(int smMemSize, int posterServFlag)
 		exit(-1);
 	    }
 	} else {
-	    /* Ecrit le pid dans le lock */
+	    /* Store the pid in the lock file */
 	    i = snprintf(buf, sizeof(buf), "%d\n", posterServPid);
 	    if (write(fd, buf, i) < 0) {
 		errnoSet(errno);
@@ -233,7 +233,7 @@ h2devInit(int smMemSize, int posterServFlag)
 	    close(fd);
 	}
     } else {
-	/* Ecrit -1 dans le lock */
+	/* Store  -1 in the lock file if no posterServ was started */
 	i = snprintf(buf, sizeof(buf), "-1\n");
 	if (write(fd, buf, i) < 0) {
 	    errnoSet(errno);
@@ -248,7 +248,7 @@ h2devInit(int smMemSize, int posterServFlag)
 /*----------------------------------------------------------------------*/
 
 /*
- * Retrouve le pointeur sur la structure partagee H2_DEV
+ * Look for the pointer to the shared H2_DEV structure
  */
 STATUS
 h2devAttach(void)
@@ -283,7 +283,7 @@ h2devAttach(void)
 	close(fd);
 	return ERROR;
     }
-    /* Lecture pid du serveur de posters */
+    /* get the process id of the poster server */
     n = read(fd, buf, sizeof(buf) - 1);
     if (n < 0) {
 	errnoSet(errno);
@@ -313,7 +313,7 @@ h2devAttach(void)
 /*----------------------------------------------------------------------*/
 
 /**
- ** Destruction des h2 devices
+ ** Destroy h2 devices
  **/
 STATUS
 h2devEnd(void)
@@ -322,18 +322,18 @@ h2devEnd(void)
     POSTER_ID p;
 
     if (h2devAttach() == ERROR) {
-	/* Detruit le fichier de verrou a tout hasard */
-	/* XXX C'est pas genial cote securite */
+	/* Unlink the lock file, just in case */
+	/* XXX Not very clean from security point of vue */
 	rv = ERROR;
 	goto fail;
     }
-    /* Verifie qu'on est le proprietaire des IPC et du fichier */
+    /* Check that we own the IPC and the lock file */
     if (H2DEV_UID(0) != getuid()) {
 	errnoSet(S_h2devLib_NOT_OWNER);
 	rv =  ERROR;
 	goto fail;
     }
-    /* Destruction des devices restants */
+    /* Destroy remaining devices */
     for (i = 0; i < H2_DEV_MAX; i++) {
 	switch (H2DEV_TYPE(i)) {
 	  case H2_DEV_TYPE_MBOX:
@@ -345,7 +345,7 @@ h2devEnd(void)
 	    }
 	    break;
 	  case H2_DEV_TYPE_SEM:
-	    /* Rien a faire, les semaphores sont liberes plus loin */
+	    /* Nothing to do, semaphores are cleaned further down */
 	    break;
 	  case H2_DEV_TYPE_TASK:
 	    break;
@@ -357,16 +357,16 @@ h2devEnd(void)
 	} /* switch */
     } /* for */
 
-    /* Tue le serveur de posters */
+    /* Kill the poster server */
     if (posterServPid != -1) {
 	kill(posterServPid, SIGTERM);
     }
 
-    /* Libere les semaphores */
+    /* Clean  semaphores */
     h2semEnd();
-    /* Libere la memoire partagee smMem */
+    /* Free shared memory */
     smMemEnd();
-    /* Libere la structure memoire partagee des devices h2 */
+    /* Free the shared memory segment holding h2 devices */
     if (shmdt((char *)h2Devs) < 0) {
 	fprintf(stderr, "h2devEnd: shmdt error %s\n", strerror(errno));
 	rv = ERROR;
@@ -379,9 +379,9 @@ h2devEnd(void)
 	goto fail;
     }
 fail:
-    /* detruit le fichier .h2devs */
+    /* remove the .h2devs lock file */
     unlink(h2devFileName);
-    /* marque le pointeur h2Devs comme invalide */
+    /* and mark the global pointer as invalid */
     h2Devs = NULL;
     return rv;
 }
@@ -392,7 +392,7 @@ fail:
 
 
 /**
- ** Affichage info sur les devices h2
+ ** Display information about h2 devices
  **/
 static char *h2devTypeName[] = {
     "NONE",
