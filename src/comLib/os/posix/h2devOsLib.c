@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003,2008 CNRS/LAAS
+ * Copyright (c) 1990, 2003,2008,2009 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,7 +14,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 #include "pocolibs-config.h"
-__RCSID("$LAAS$");
 
 #include <sys/param.h>
 #include <sys/types.h>
@@ -45,9 +44,9 @@ __RCSID("$LAAS$");
 #include <valgrind/memcheck.h>
 #endif
 
-/* Paths pour le lancement de posterServ */
+/* Path of posterServ */
 #ifndef POSTER_SERV_PATH
-#define POSTER_SERV_PATH "/usr/local/robots/bin/posterServ"
+#error "POSTER_SERV_PATH should be set"
 #endif
 
 /**
