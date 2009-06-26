@@ -1,6 +1,6 @@
 /* $LAAS$ */
 /*
- * Copyright (c) 1998, 2005 CNRS/LAAS
+ * Copyright (c) 1998, 2005,2009 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -62,6 +62,8 @@ typedef int H2SEM_ID;
 
 /* -- PROTOTYPES ----------------------------------------------- */
 
+#include "h2devLib.h"	/* for USE_*_SEMAPHORES */
+
 extern int h2semRecordH2ErrMsgs(void);
 /** Creates a new H2 semaphore of the given type
  * @return ERROR on error, the semaphore id on success
@@ -69,12 +71,20 @@ extern int h2semRecordH2ErrMsgs(void);
  * error code
  */
 extern H2SEM_ID h2semAlloc (int type );
+#if USE_POSIX_SEMAPHORES
+extern STATUS h2semCreate0 ( sem_t *semId, int value );
+#else
 extern STATUS h2semCreate0 ( int semId, int value );
+#endif
 extern STATUS h2semDelete ( H2SEM_ID sem );
 extern void h2semEnd ( void );
 extern BOOL h2semFlush ( H2SEM_ID sem );
 extern STATUS h2semGive ( H2SEM_ID sem );
+#if USE_POSIX_SEMAPHORES
+extern STATUS h2semInit ( int num );
+#else
 extern STATUS h2semInit ( int num, int *pSemId );
+#endif
 extern STATUS h2semShow ( H2SEM_ID sem );
 extern BOOL h2semTake ( H2SEM_ID sem, int timeout );
 extern STATUS h2semSet ( H2SEM_ID sem, int value );

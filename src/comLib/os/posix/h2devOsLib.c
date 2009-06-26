@@ -188,13 +188,21 @@ h2devInit(int smMemSize, int posterServFlag)
     h2Devs[0].type = H2_DEV_TYPE_SEM;
     h2Devs[0].uid = getuid();
     strcpy(h2Devs[0].name, "h2semLib");
-    if (h2semInit(0, &(H2DEV_SEM_SEM_ID(0))) == ERROR) {
+    if (h2semInit(0
+#if USE_SVR4_SEMAPHORES
+		  , &(H2DEV_SEM_SEM_ID(0))
+#endif
+	  ) == ERROR) {
 	pthread_mutex_unlock(&h2devMutex);
 	close(fd);
 	return ERROR;
     }
     /* Manually allocate the first semaphore */
+#if USE_POSIX_SEMAPHORES
+    h2semCreate0(H2DEV_SEM_SEM_PTR(0), SEM_EMPTY);
+#else
     h2semCreate0(H2DEV_SEM_SEM_ID(0), SEM_EMPTY);
+#endif
 
     /* Initialization */
     for (i = 1; i < H2_DEV_MAX; i++) {

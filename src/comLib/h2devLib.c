@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2004-2005
  *      Autonomous Systems Lab, Swiss Federal Institute of Technology.
- * Copyright (c) 1990, 2003-2005 CNRS/LAAS
+ * Copyright (c) 1990, 2003-2005,2009 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -228,15 +228,31 @@ h2devFind(const char *name, H2_DEV_TYPE type)
 /**
  ** Retourne le semId des semaphores
  **/
+#if USE_POSIX_SEMAPHORES
+sem_t *
+#else
 int
+#endif
 h2devGetSemId(void)
 {
     if (h2devAttach() == ERROR) {
+#if USE_POSIX_SEMAPHORES
+	return NULL;
+#else
 	return ERROR;
+#endif
     }
     if (h2Devs[0].type != H2_DEV_TYPE_SEM) {
 	errnoSet(S_h2devLib_BAD_DEVICE_TYPE);
+#if USE_POSIX_SEMAPHORES
+	return NULL;
+#else
 	return ERROR;
+#endif
     }
+#if USE_POSIX_SEMAPHORES
+    return h2Devs[0].data.sem.sem;
+#else
     return h2Devs[0].data.sem.semId;
+#endif
 }

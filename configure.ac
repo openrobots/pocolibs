@@ -241,6 +241,50 @@ AC_ARG_ENABLE([posix-timers],
 	AC_POSIX_TIMERS_WORKS
 )
 
+AC_ARG_ENABLE([svr4-semaphores],
+	AC_HELP_STRING([--enable-posix-semaphores],
+		[Use SVr4 semaphores (default)]),
+	[ if test "$enable_svr4_semaphores" = "yes"; then
+		AC_MSG_NOTICE([forcing use of SVr4 semaphores])
+	else
+		AC_MSG_NOTICE([disabling use of SVr4 semaphores])
+	fi ],
+	[ AC_CHECK_FUNC([semop],
+		[enable_svr4_semaphores=yes], [enable_svr4_semaphores=no])
+	]
+)
+
+AC_ARG_ENABLE([posix-semaphores],
+	AC_HELP_STRING([--enable-posix-semaphores], [Use POSIX semaphores]),
+	[ if test "$enable_posix_semaphores" = "yes"; then
+		enable_svr4_semaphores=no
+		AC_MSG_NOTICE([forcing use of POSIX semaphores])
+	else
+		AC_MSG_NOTICE([disabling use of POSIX semaphores])
+	fi ],
+	[ if test "$enable_svr4_semaphores" = "no"; then
+		AC_CHECK_FUNC([sem_init],
+			[enable_posix_semaphores=yes], [enable_posix_semaphores=no])
+	else
+		enable_posix_semaphores=no
+	fi ]
+)
+
+if test "$enable_svr4_semaphores" = "yes"; then
+	AC_SUBST([SEMAPHORE_TYPE], ["
+#define USE_SVR4_SEMAPHORES	1
+#undef USE_POSIX_SEMAPHORES
+"])
+elif test "$enable_posix_semaphores" = "yes"; then
+	AC_SUBST([SEMAPHORE_TYPE], ["
+#define USE_POSIX_SEMAPHORES	1
+#undef USE_SVR4_SEMAPHORES
+"])
+else
+	AC_MSG_FAILURE([no usable semaphores])
+	AC_SUBST([SEMAPHORE_TYPE], "")
+fi
+
 AC_SEARCH_LIBS(clock_gettime, [rt posix4])
 AC_CHECK_FUNCS(clock_gettime)
 
@@ -375,6 +419,7 @@ AC_OUTPUT(Init.make
 	Makefile
 	pocolibs.pc
 	include/Makefile
+	include/h2devLib.h
 	src/portLib/Makefile
 	src/errorLib/Makefile
 	src/comLib/Makefile
@@ -393,6 +438,8 @@ Summary of build options:
 
 Operating system flavour:	$OSAPI
 Use POSIX timers:		$enable_posix_timers
+Use POSIX semaphores:		$enable_posix_semaphores
+Use SVr4 semaphores:		$enable_svr4_semaphores
 
 Valgrind support:		$valgrind
 Run-time debug output:		$debug_output

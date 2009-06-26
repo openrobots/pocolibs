@@ -53,7 +53,7 @@ union semun {
 };
 #endif
 
-static 
+static
 void h2semHandler(int sig)
 {
 }
@@ -65,7 +65,7 @@ int
 h2semRecordH2ErrMsgs(void)
 {
     return h2recordErrMsgs("h2semRecordH2ErrMsg", "h2semLib", M_h2semLib,
-			   sizeof(h2semLibH2errMsgs)/sizeof(H2_ERROR), 
+			   sizeof(h2semLibH2errMsgs)/sizeof(H2_ERROR),
 			   h2semLibH2errMsgs);
 }
 
@@ -75,15 +75,27 @@ h2semRecordH2ErrMsgs(void)
  ** Allocation d'un tableau de semaphores
  **/
 STATUS
+#if USE_POSIX_SEMAPHORES
+h2semInit(int num)
+#else
 h2semInit(int num, int *pSemId)
+#endif
 {
+#if USE_POSIX_SEMAPHORES
+    int i;
+
+    /* initialize all semaphores to empty */
+    for (i = 0; i < MAX_SEM; i++) {
+      H2DEV_SEM_EMPTY(num)[i] = 1;
+    }
+#else
     key_t key;
     int i;
-    union semun semun;    
+    union semun semun;
     unsigned short tabval[MAX_SEM];
     int semId;
     struct semid_ds ds;
-   
+
     /* Cree le tableau de semaphores */
     key = h2devGetKey(H2_DEV_TYPE_SEM, num, FALSE, NULL);
     if (key == ERROR) {
@@ -94,7 +106,7 @@ h2semInit(int num, int *pSemId)
 	return(ERROR);
     }
 
-    /* (re)Definit son proprietaire 
+    /* (re)Definit son proprietaire
      * Pour que tous les tableaux appartiennent a celui qui a fait le
      * h2 init */
     semun.buf = &ds;
@@ -119,6 +131,7 @@ h2semInit(int num, int *pSemId)
 	return(ERROR);
     }
     *pSemId = semId;
+#endif
     return OK;
 }
 
@@ -128,17 +141,32 @@ h2semInit(int num, int *pSemId)
 void
 h2semEnd(void)
 {
+#if USE_POSIX_SEMAPHORES
+    int i, j;
+
+    /* make sure not to clean device #0, sem #0 */
+    for (i = 0; i < H2_DEV_MAX; i++) {
+      if (H2DEV_TYPE(i) == H2_DEV_TYPE_SEM) {
+	if (i>0) h2devFree(i);
+
+	/* destroy all allocated semaphores */
+	for(j=(i>0?0:1); j<MAX_SEM; j++) if (!H2DEV_SEM_EMPTY(i)[j])
+	    sem_destroy(&H2DEV_SEM_SEM_PTR(i)[j]);
+      }
+    }
+#else
     union semun semun;
     int i;
-    
+
     for (i = 0; i < H2_DEV_MAX; i++) {
 	if (H2DEV_TYPE(i) == H2_DEV_TYPE_SEM) {
 	    /* Libere le tableau de semaphores */
 	    semun.val = 0;
 	    semctl(H2DEV_SEM_SEM_ID(i), 0, IPC_RMID, semun);
 	    h2devFree(i);
-	} 
+	}
     } /* for */
+#endif
 }
 
 /*----------------------------------------------------------------------*/
@@ -147,9 +175,19 @@ h2semEnd(void)
  ** allocation du semaphore 0 d'un tableau
  **/
 STATUS
+#if USE_POSIX_SEMAPHORES
+h2semCreate0(sem_t *semId, int value)
+#else
 h2semCreate0(int semId, int value)
+#endif
 {
-    union semun semun;    
+#if USE_POSIX_SEMAPHORES
+    if (sem_init(semId, 1, value) == -1) {
+      errnoSet(errno);
+      return ERROR;
+    }
+#else
+    union semun semun;
 
     /* reset le semaphore */
     semun.val = value;
@@ -157,10 +195,11 @@ h2semCreate0(int semId, int value)
 	errnoSet(errno);
 	return ERROR;
     }
+#endif
     return OK;
 }
 
-    
+
 /*----------------------------------------------------------------------*/
 
 /**
@@ -170,8 +209,10 @@ H2SEM_ID
 h2semAlloc(int type)
 {
     int i, j, dev;
-    union semun semun;    
+#if USE_SVR4_SEMAPHORES
+    union semun semun;
     unsigned short tabval[MAX_SEM];
+#endif
 #ifdef VALGRIND_SUPPORT
     VALGRIND_MAKE_READABLE(tabval, MAX_SEM * sizeof(unsigned short));
 #endif
@@ -190,6 +231,14 @@ h2semAlloc(int type)
     for (i = 0; i < H2_DEV_MAX; i++) {
 	if (H2DEV_TYPE(i) == H2_DEV_TYPE_SEM) {
 	    /* Allocation d'un semaphore dans le tableau */
+#if USE_POSIX_SEMAPHORES
+	    for (j = 0; j < MAX_SEM; j++) {
+	      if (H2DEV_SEM_EMPTY(i)[j]) {
+		trouve = TRUE;
+		break;
+	      }
+	    }
+#else
 	    semun.array = tabval;
 	    if (semctl(H2DEV_SEM_SEM_ID(i), 0, GETALL, semun) == -1) {
 		errnoSet(errno);
@@ -197,13 +246,14 @@ h2semAlloc(int type)
 		return ERROR;
 	    }
 
-           
+
 	    for (j = 0; j < MAX_SEM; j++) {
 		if (tabval[j] == SEM_UNALLOCATED) {
 		    trouve = TRUE;
 		    break;
 		}
 	    } /* for */
+#endif
 	    if (trouve) {
 		break;
 	    }
@@ -212,12 +262,21 @@ h2semAlloc(int type)
 
     if (trouve) {
 	/* initialise le semaphore */
+#if USE_POSIX_SEMAPHORES
+	if (type == H2SEM_SYNC) {
+	  sem_init(&H2DEV_SEM_SEM_PTR(i)[j], 1, 0);
+	} else {
+	  sem_init(&H2DEV_SEM_SEM_PTR(i)[j], 1, 1);
+	}
+	H2DEV_SEM_EMPTY(i)[j] = 0;
+#else
 	semun.val = type == H2SEM_SYNC ? SEM_EMPTY : SEM_FULL;
 	semctl(H2DEV_SEM_SEM_ID(i), j, SETVAL, semun);
+#endif
 	h2semGive(0);
 	return(i*MAX_SEM+j);
     }
-    
+
     h2semGive(0);
     /* plus de semaphores libre, allocation d'un nouveau tableau */
     /* allocation d'un nouveau device */
@@ -227,12 +286,23 @@ h2semAlloc(int type)
     }
     h2semTake(0, WAIT_FOREVER);
     /* Allocation d'un nouveau tableau */
-    if (h2semInit(dev, &(H2DEV_SEM_SEM_ID(dev))) == ERROR) {
+    if (
+      h2semInit(dev
+#if USE_SVR4_SEMAPHORES
+		, &(H2DEV_SEM_SEM_ID(dev))
+#endif
+	) == ERROR
+      ) {
 	h2semGive(0);
 	return ERROR;
     }
-    if (h2semCreate0(H2DEV_SEM_SEM_ID(dev), 
-		     type == H2SEM_SYNC ? SEM_EMPTY : SEM_FULL) == ERROR) {
+    if (h2semCreate0(
+#if USE_POSIX_SEMAPHORES
+	  H2DEV_SEM_SEM_PTR(dev)
+#else
+	  H2DEV_SEM_SEM_ID(dev)
+#endif
+	  , type == H2SEM_SYNC ? SEM_EMPTY : SEM_FULL) == ERROR) {
 	h2semGive(0);
 	return ERROR;
     }
@@ -245,19 +315,26 @@ h2semAlloc(int type)
 /**
  ** Destruction d'un semaphore
  **/
-STATUS 
+STATUS
 h2semDelete(H2SEM_ID sem)
 {
+#if USE_SVR4_SEMAPHORES
     union semun semun;
+#endif
     int dev;
-    
+
     /* Calcul du device */
     dev = sem / MAX_SEM;
     sem = sem % MAX_SEM;
     /* reset le semaphore */
+#if USE_POSIX_SEMAPHORES
+    sem_destroy(&H2DEV_SEM_SEM_PTR(dev)[sem]);
+    H2DEV_SEM_EMPTY(dev)[sem] = 1;
+#else
     semun.val = SEM_UNALLOCATED;
     semctl(H2DEV_SEM_SEM_ID(dev), sem, SETVAL, semun);
-    
+#endif
+
     return(OK);
 }
 
@@ -280,14 +357,20 @@ h2semTake(H2SEM_ID sem, int timeout)
     op.sem_num = sem;
     op.sem_op = -1;
     /* Dans comLib timeout = 0 signifie bloquant */
-    if (timeout == 0) 
+    if (timeout == 0)
 	timeout = WAIT_FOREVER;
 
     switch (timeout) {
       case WAIT_FOREVER:
 	op.sem_flg = 0;
 	while (1) {
-	    if (semop(H2DEV_SEM_SEM_ID(dev), &op, 1) < 0) {
+	  if (
+#if USE_POSIX_SEMAPHORES
+	    sem_wait(&H2DEV_SEM_SEM_PTR(dev)[sem]) < 0
+#else
+	    semop(H2DEV_SEM_SEM_ID(dev), &op, 1) < 0
+#endif
+	    ) {
 		if (errno == EINTR) {
 		    continue;
 		} else {
@@ -298,15 +381,21 @@ h2semTake(H2SEM_ID sem, int timeout)
 	    }
 	} /* while */
 	break;
-	
-      case 0:				
+
+      case 0:
 	/* Dans comLib, ce cas n'est pas possible */
 	/* On laisse le code ici, pour reference, au cas ou */
 	op.sem_flg = IPC_NOWAIT;
-	if (semop(H2DEV_SEM_SEM_ID(dev), &op, 1) < 0) {
+	if (
+#if USE_POSIX_SEMAPHORES
+	  sem_trywait(&H2DEV_SEM_SEM_PTR(dev)[sem]) < 0
+#else
+	  semop(H2DEV_SEM_SEM_ID(dev), &op, 1) < 0
+#endif
+	  ) {
 	    if (errno == EAGAIN) {
 		errnoSet(S_h2semLib_TIMEOUT);
-	    } else { 
+	    } else {
 		errnoSet(errno);
 	    }
 	    return FALSE;
@@ -319,9 +408,15 @@ h2semTake(H2SEM_ID sem, int timeout)
 	wdStart(timer, timeout, (FUNCPTR)h2semHandler, 0);
 
 	op.sem_flg = 0;
-	
+
 	while (1) {
-	    if (semop(H2DEV_SEM_SEM_ID(dev), &op, 1) < 0) {
+	    if (
+#if USE_POSIX_SEMAPHORES
+	      sem_wait(&H2DEV_SEM_SEM_PTR(dev)[sem]) < 0
+#else
+	      semop(H2DEV_SEM_SEM_ID(dev), &op, 1) < 0
+#endif
+	      ) {
 		if (errno == EINTR) {
 
 		    if (tickGet() - ticks > timeout) {
@@ -343,30 +438,57 @@ h2semTake(H2SEM_ID sem, int timeout)
 	wdDelete(timer);
 	break;
     } /* switch */
-    
+
     return TRUE;
 }
 
 /*----------------------------------------------------------------------*/
 
 /**
- ** Liberation d'un semaphore 
+ ** Liberation d'un semaphore
  **/
 STATUS
 h2semGive(H2SEM_ID sem)
 {
+#if USE_POSIX_SEMAPHORES
+    int dev;
+
+    dev = sem / MAX_SEM;
+    sem = sem % MAX_SEM;
+
+    if (sem_trywait(&H2DEV_SEM_SEM_PTR(dev)[sem]) < 0)
+      if (errno != EAGAIN) return ERROR;
+
+    if (sem_post(&H2DEV_SEM_SEM_PTR(dev)[sem]) < 0)
+      return ERROR;
+
+    return OK;
+#else
     return h2semSet(sem, 1);
+#endif
 }
 
 /*----------------------------------------------------------------------*/
 
 /**
- ** Flush d'un semaphore 
+ ** Flush d'un semaphore
  **/
 BOOL
 h2semFlush(H2SEM_ID sem)
 {
+#if USE_POSIX_SEMAPHORES
+    int dev;
+
+    dev = sem / MAX_SEM;
+    sem = sem % MAX_SEM;
+
+    while (!sem_trywait(&H2DEV_SEM_SEM_PTR(dev)[sem]))
+      /* empty body */;
+
+    return TRUE;
+#else
     return h2semSet(sem, 0) == OK ? TRUE : FALSE;
+#endif
 }
 
 /*----------------------------------------------------------------------*/
@@ -375,11 +497,35 @@ STATUS
 h2semShow(H2SEM_ID sem)
 {
     int val, dev, sem1;
+#if USE_SVR4_SEMAPHORES
     union semun semun;
+#endif
 
     dev = sem / MAX_SEM;
     sem1 = sem % MAX_SEM;
 
+#if USE_POSIX_SEMAPHORES
+    if (H2DEV_SEM_EMPTY(dev)[sem])
+      val = SEM_UNALLOCATED;
+    else if (sem_getvalue(&H2DEV_SEM_SEM_PTR(dev)[sem], &val))
+      return ERROR;
+
+    switch(val) {
+      case 0:
+	printf("%3d: SEM_EMPTY\n", (int)sem);
+	break;
+      case 1:
+	printf("%3d: SEM_FULL\n", (int)sem);
+	break;
+      case SEM_UNALLOCATED:
+	printf("%3d: SEM_UNALLOCATED\n", (int)sem);
+	break;
+
+      default:
+	printf("%3d: %d\n", (int)sem, val);
+	break;
+    }
+#else
     semun.val = 0;
     switch ((val = semctl(H2DEV_SEM_SEM_ID(dev), sem1, GETVAL, semun))) {
       case SEM_EMPTY:
@@ -395,6 +541,8 @@ h2semShow(H2SEM_ID sem)
 	printf("%3d: %d\n", (int)sem, val);
 	break;
     } /* switch */
+#endif
+
     return OK;
 }
 
@@ -402,16 +550,24 @@ h2semShow(H2SEM_ID sem)
 STATUS
 h2semSet(H2SEM_ID sem, int value)
 {
+#if USE_SVR4_SEMAPHORES
     union semun semun;
+#endif
     int dev;
 
     dev = sem / MAX_SEM;
     sem = sem % MAX_SEM;
-    
+
+#if USE_POSIX_SEMAPHORES
+    if (value)
+      h2semGive(sem);
+    else
+      h2semFlush(sem);
+#else
     semun.val = value;
     if (semctl(H2DEV_SEM_SEM_ID(dev), sem, SETVAL, semun) == -1) {
 	return ERROR;
     }
+#endif
     return OK;
 }
-

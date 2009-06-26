@@ -1,6 +1,6 @@
 /* $LAAS$ */
 /*
- * Copyright (c) 1998, 2003-2004 CNRS/LAAS
+ * Copyright (c) 1998, 2003-2004,2009 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,6 +18,12 @@
 #ifndef _H2DEVLIB_H
 #define _H2DEVLIB_H
 
+@SEMAPHORE_TYPE@
+
+#if USE_POSIX_SEMAPHORES
+# include <semaphore.h>
+#endif
+
 #include "h2rngLib.h"
 #include "h2timeLib.h"
 #include "h2semLib.h"
@@ -29,7 +35,7 @@ extern "C" {
 
 /**
  ** H2 device structures
- ** The array of h2 devices is stored in shared memory. 
+ ** The array of h2 devices is stored in shared memory.
  **/
 
 /* Default access mode for IPC data */
@@ -37,8 +43,13 @@ extern "C" {
 
 /* Semaphore */
 typedef struct H2_SEM_STR {
-    int semId;
-    int semNum;
+#if USE_POSIX_SEMAPHORES
+  sem_t sem[MAX_SEM];
+  char empty[MAX_SEM];
+#else
+  int semId;
+  int semNum;
+#endif
 } H2_SEM_STR;
 
 /*
@@ -62,7 +73,7 @@ typedef struct H2_POSTER_STAT_STR {
 	unsigned int read_bytes;
 	unsigned int write_bytes;
 } H2_POSTER_STAT_STR;
-		
+
 /* Poster */
 typedef struct H2_POSTER_STR {
     int taskId;				/* Unix pid */
@@ -165,8 +176,13 @@ extern H2_DEV_STR *h2Devs;
 #define H2DEV_TYPE(dev) h2Devs[dev].type
 #define H2DEV_UID(dev)  h2Devs[dev].uid
 
-#define H2DEV_SEM_SEM_ID(dev) h2Devs[dev].data.sem.semId
-#define H2DEV_SEM_SEM_NUM(dev) h2Devs[dev].data.sem.semNum
+#if USE_POSIX_SEMAPHORES
+# define H2DEV_SEM_SEM_PTR(dev) h2Devs[dev].data.sem.sem
+# define H2DEV_SEM_EMPTY(dev) h2Devs[dev].data.sem.empty
+#else
+# define H2DEV_SEM_SEM_ID(dev) h2Devs[dev].data.sem.semId
+# define H2DEV_SEM_SEM_NUM(dev) h2Devs[dev].data.sem.semNum
+#endif
 
 #define H2DEV_MBOX_STR(dev) (&(h2Devs[dev].data.mbox))
 #define H2DEV_MBOX_SEM_ID(dev) h2Devs[dev].data.mbox.semSigRd
@@ -207,7 +223,11 @@ extern int h2devFind ( const char *name, H2_DEV_TYPE type );
 extern STATUS h2devFree ( int dev );
 extern STATUS h2devClean ( const char *name );
 extern long h2devGetKey ( int type, int dev, BOOL create, int *pFd );
+#if USE_POSIX_SEMAPHORES
+extern sem_t *h2devGetSemId ( void );
+#else
 extern int h2devGetSemId ( void );
+#endif
 extern STATUS h2devInit ( int smMemSize, int posterServFlag );
 extern STATUS h2devShow ( void );
 
