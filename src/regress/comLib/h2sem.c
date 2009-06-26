@@ -50,8 +50,11 @@ int
 pocoregress_unlock()
 {
   struct timespec wreq = { tv_sec: 2, tv_nsec: 0 };
+  struct timespec rreq;
 
-  nanosleep(&wreq, NULL);
+  while (nanosleep(&wreq, &rreq))
+    wreq = rreq;
+
   logMsg("unlocking deadlock\n");
   count = 1;
   h2semGive(sem[0]);
