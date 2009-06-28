@@ -1,11 +1,11 @@
 dnl autoconf script for portLib/comLib (aka pocolibs)
 dnl
-dnl Copyright (c) 2004 
+dnl Copyright (c) 2004
 dnl      Autonomous Systems Lab, Swiss Federal Institute of Technology.
 dnl Copyright (c) 2003-2004,2010 CNRS/LAAS
 dnl
 dnl GPL, since some parts were copied from other configure.in
-dnl 
+dnl
 dnl
 AC_REVISION($LAAS$)
 AC_INIT([pocolibs],[2.7],[openrobots@laas.fr])
@@ -31,7 +31,13 @@ AH_VERBATIM(__RCSID,[
 
 dnl --- OS flavour checks -----------------------------------------------
 
+dnl default to posix OS
+dnl
+OSAPI=posix
+AC_SUBST(OSAPI)
 
+dnl xenomai support
+dnl
 AC_ARG_WITH(xenomai,
 	AC_HELP_STRING([--with-xenomai=yes|no], [configure to use Xenomai]),
 	[opt_xenomai=$withval],[opt_xenomai=no])
@@ -47,8 +53,6 @@ if test "x$opt_xenomai" = "xyes"; then
 		AC_MSG_RESULT([Configuring to use Xenomai])
 	fi
 fi
-OSAPI=posix
-AC_SUBST(OSAPI)
 
 if test "$OSAPI" = "xenomai"; then
 	XENO_CFLAGS=`${XENO_CONFIG} --posix-cflags`
@@ -59,12 +63,38 @@ CFLAGS="${CFLAGS} ${XENO_CFLAGS}"
 LDFLAGS="${LDFLAGS} ${XENO_LDFLAGS}"
 
 
+dnl ART-linux support
+dnl
+AC_ARG_WITH(art,
+	AC_HELP_STRING([--with-art=yes|no], [configure to use ART-linux]),
+	[opt_art=$withval],
+	AC_CHECK_FILE([/usr/lib/art_syscalls.o],
+		 [opt_art=yes; ART_SYSCALLS=/usr/lib/art_syscalls.o],
+		 [opt_art=no; ART_SYSCALLS=no]))
+
+if test "x$opt_art" = "xyes"; then
+	if test -z "$ART_SYSCALLS"; then
+		AC_CHECK_FILE([/usr/lib/art_syscalls.o],
+			[ART_SYSCALLS=/usr/lib/art_syscalls.o],
+			[ART_SYSCALLS=no])
+	fi
+	if test "x$ART_SYSCALLS" = "xno" ; then
+		AC_MSG_FAILURE([--with-art=yes specified, but art_syscalls.o not found])
+		opt_art=no
+	else
+		AC_MSG_RESULT([Configuring to use ART-linux])
+		OSAPI=art
+		AC_SUBST([ART_SYSCALLS])
+	fi
+fi
+
+
 dnl --- end of OS flavour checks ----------------------------------------
 
 AC_LIBTOOL_DLOPEN
 AC_PROG_LIBTOOL
 
-dnl add -ldl if needed 
+dnl add -ldl if needed
 if test -n "$lt_cv_dlopen_libs" ; then
 	LIBS=$lt_cv_dlopen_libs
 fi
@@ -94,7 +124,7 @@ else
 fi
 AC_SUBST(PURIFY)
 
-dnl processor tests 
+dnl processor tests
 AC_C_BIGENDIAN
 
 dnl
@@ -111,7 +141,7 @@ AC_DEFUN([AC_CHECK_PTHREADS],
 	AC_TRY_RUN([
 #include <pthread.h>
 void *pipo(void *a) { exit(0); }
- 
+
 int main() {
     pthread_t t;
     pthread_create(&t, NULL, pipo, NULL);
@@ -128,7 +158,7 @@ AC_CACHE_CHECK(
 	ac_save_CFLAGS=$CFLAGS
 	CFLAGS="$CFLAGS -pthread"
 	AC_CHECK_PTHREADS(
-		poco_cv_gcc_pthread=yes, 
+		poco_cv_gcc_pthread=yes,
 		poco_cv_gcc_pthread=no
 	)
 	CFLAGS=$ac_save_CFLAGS
@@ -179,9 +209,11 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
 	])], [xopen=no], [CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE=500"; xopen=yes])
 AC_MSG_RESULT([$xopen])
 
-fi 
+fi
 dnl --- end of checks for pthread ---------------------------------------
 
+
+dnl --- check for posix functions ------------------------------------------
 
 AC_SEARCH_LIBS([fabs], [m])
 AC_SEARCH_LIBS([atan], [m])
@@ -197,7 +229,7 @@ case `uname -r` in
 esac
 fi
 
-AC_ARG_ENABLE([posix-timers], 
+AC_ARG_ENABLE([posix-timers],
 	AC_HELP_STRING([--disable-posix-timers Force use of setitimer(2)],
 			[instead of timer_create(3p)]),
 	[ if test "$enable_posix_timers" = "yes"; then
@@ -215,10 +247,10 @@ AC_CHECK_FUNCS(clock_gettime)
 AC_SEARCH_LIBS(sched_get_priority_min, [rt])
 
 AC_MSG_CHECKING([for pthread_attr_setschedpolicy])
-AC_TRY_LINK([#include <pthread.h>], 
+AC_TRY_LINK([#include <pthread.h>],
 	[pthread_attr_setschedpolicy(NULL, SCHED_RR);],
 	[AC_MSG_RESULT([yes])]
-	[AC_DEFINE(HAVE_SETSCHEDPOLICY, 1, 
+	[AC_DEFINE(HAVE_SETSCHEDPOLICY, 1,
 		[posix threads scheduling policies])],
 	[AC_MSG_RESULT([no])]
 )
@@ -241,15 +273,17 @@ AC_CHECK_FUNCS([fnmatch],[], [
 ])
 AC_SUBST(COMLIB_COMPATSRC)
 
+dnl --- End of posix checks ------------------------------------------------
+
 dnl --- Debugging options -----------------------------------------------
 
 AC_ARG_ENABLE(valgrind,
             AC_HELP_STRING([--enable-valgrind], [compile with valgrind support]),
             [valgrind=$enableval], [valgrind=no])
 if test "x$valgrind" = "xyes"; then
-    PKG_CHECK_MODULES(VALGRIND, valgrind >= 1.1, 
-        [ AC_DEFINE([VALGRIND_SUPPORT], 1, 
-		[Support for running under valgrind])], 
+    PKG_CHECK_MODULES(VALGRIND, valgrind >= 1.1,
+        [ AC_DEFINE([VALGRIND_SUPPORT], 1,
+		[Support for running under valgrind])],
 	[ AC_MSG_ERROR(Valgrind not present and Valgrind support requested) ])
 fi
 
@@ -273,33 +307,33 @@ if test "x$opt_debug" = "xall"; then
 fi
 
 ac_save_ifs=$IFS; IFS=","
-for dopt in $opt_debug_output; do 
+for dopt in $opt_debug_output; do
 	test -z "$dopt" && break
 
 	case "$dopt" in
-	   task)	
+	   task)
 		AC_DEFINE([PORTLIB_DEBUG_TASKLIB], 1,
-			 [Enable debug in taskLib]) 
+			 [Enable debug in taskLib])
 		;;
-	   sys)		
+	   sys)
 		AC_DEFINE([PORTLIB_DEBUG_SYSLIB], 1,
 			[Enable debug in sysLib])
 		;;
 
-	   h2dev)	
+	   h2dev)
 		AC_DEFINE([COMLIB_DEBUG_H2DEVLIB], 1,
 			[Enable debug in h2devLib])
 		;;
-	   smmem)	
+	   smmem)
 		AC_DEFINE([COMLIB_DEBUG_SMMEMLIB], 1,
 			[Enable debug in smMemLib])
 		;;
-	   h2evn)	
+	   h2evn)
 		AC_DEFINE([COMLIB_DEBUG_H2EVNLIB], 1,
 			[Enable debug in h2evnLib])
 		;;
-	   mbox)	
-		AC_DEFINE([COMLIB_DEBUG_MBOXLIB], 1, 
+	   mbox)
+		AC_DEFINE([COMLIB_DEBUG_MBOXLIB], 1,
 			[Enable debug in mboxLib])
 		;;
 	   gcom)
@@ -310,7 +344,7 @@ for dopt in $opt_debug_output; do
 		AC_DEFINE([COMLIB_DEBUG_H2TIMERLIB], 1,
 			[Enable debug in h2timerLib])
 		;;
-	   *)		
+	   *)
 	    IFS=$ac_save_ifs
 	    AC_MSG_ERROR([Invalid debug output mode "$dopt"]) ;;
 	esac
@@ -353,3 +387,13 @@ AC_OUTPUT(Init.make
 	src/regress/Makefile
 )
 
+AC_MSG_NOTICE([
+----------------------------------------------------------------------------
+Summary of build options:
+
+Operating system flavour:	$OSAPI
+Use POSIX timers:		$enable_posix_timers
+
+Valgrind support:		$valgrind
+Run-time debug output:		$debug_output
+----------------------------------------------------------------------------])

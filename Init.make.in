@@ -1,7 +1,7 @@
 # -*- Makefile -*-
 # @configure_input@
 #
-# Copyright (C) 1999-2003 LAAS/CNRS
+# Copyright (C) 1999-2003,2009 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or withou
@@ -48,14 +48,21 @@ LIBTOOL=	@LIBTOOL@
 LTCC=           $(LIBTOOL) --mode=compile $(CC)
 LTLD=           $(LIBTOOL) --mode=link $(CC)
 
-CPPFLAGS=	-I$(top_srcdir)/include -I$(top_builddir)/src
-CPPFLAGS+=	-I$(top_srcdir)/include/os/$(OSAPI) @CPPFLAGS@
+CPPFLAGS=	-I$(top_srcdir)/include -I$(top_srcdir)/include/os/$(OSAPI)
+CPPFLAGS+=	-I$(top_builddir)/src -I$(top_builddir)/include
+CPPFLAGS+=	@CPPFLAGS@
 CFLAGS=		@CFLAGS@
 LDFLAGS=	@LDFLAGS@
 
 XENO_CONFIG=	@XENO_CONFIG@
+ART_SYSCALLS=	@ART_SYSCALLS@
 
 OSAPI=		@OSAPI@
+ifeq (posix, $(OSAPI))
+  CFLAGS+=	-DOSAPI_POSIX
+else ifeq (art, $(OSAPI))
+  CFLAGS+=	-DOSAPI_ART
+endif
 
 # Base directory of the software
 ROOTROBOTS ?= 	@prefix@

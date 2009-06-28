@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2003-2004 CNRS/LAAS
+ * Copyright (c) 1999, 2003-2004,2009 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -28,6 +28,10 @@ __RCSID("$LAAS$");
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
+
+#ifdef OSAPI_ART
+# include <linux/art_task.h>
+#endif
 
 #include "portLib.h"
 static const H2_ERROR portLibH2errMsgs[]  = PORT_LIB_H2_ERR_MSGS;
@@ -109,7 +113,7 @@ portRecordH2ErrMsgs(void)
 /*
  * Two functions to map a VxWorks-like  priority to a Posix priority
  */
-#ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
+#if defined(HAVE_PTHREAD_ATTR_SETSCHEDPOLICY) || defined(OSAPI_ART)
 static int
 priorityVxToPosix(int priority)
 {
@@ -148,15 +152,22 @@ taskLibInit(void)
     char name[12];
     
     /* Determine the min and max allowable priorities */
-#ifdef PTHREAD_MIN_PRIORITY
+#ifdef OSAPI_ART
+    rr_min_priority = ART_PRIO_MIN;
+    rr_max_priority = ART_PRIO_MAX;
+#else
+
+# ifdef PTHREAD_MIN_PRIORITY
     rr_min_priority = PTHREAD_MIN_PRIORITY;
-#else
+# else
     rr_min_priority = sched_get_priority_min (SCHED_RR);
-#endif
-#ifdef PTHREAD_MAX_PRIORITY
+# endif
+# ifdef PTHREAD_MAX_PRIORITY
     rr_max_priority = PTHREAD_MAX_PRIORITY;
-#else
+# else
     rr_max_priority = sched_get_priority_max (SCHED_RR);
+# endif
+
 #endif
 
     /* Create a thread specific key to access TCB */
@@ -169,12 +180,13 @@ taskLibInit(void)
     }
     snprintf(name, sizeof(name), "tUnix%d", (int)getpid());
     tcb->name = strdup(name);
-#ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
+#if defined(HAVE_PTHREAD_ATTR_SETSCHEDPOLICY) && !defined(OSAPI_ART)
     pthread_getschedparam(pthread_self(), &policy, &param);
 #else
     policy = 0;
     param.sched_priority = rr_min_priority;
 #endif
+
     tcb->policy = policy;
     tcb->priority = priorityPosixToVx(param.sched_priority);
     tcb->options = 0;
@@ -201,6 +213,10 @@ taskLibInit(void)
     /* Initialize the global task List */
     taskList = tcb;
 
+#ifdef OSAPI_ART
+    /* switch to real-time scheduling, with sysClkRate period */
+    art_enter(ART_PRIO_MIN, ART_TASK_PERIODIC, 1000000/sysClkRateGet());
+#endif
     return OK;
 }
 
@@ -261,6 +277,12 @@ taskStarter(void *data)
     /* Register a cleanup function */
     pthread_cleanup_push(taskCleanUp, data);
 
+#ifdef OSAPI_ART
+    /* switch to real-time scheduling, with sysClkRate period */
+    art_enter(priorityVxToPosix(tcb->priority),
+	      ART_TASK_PERIODIC, 1000000/sysClkRateGet());
+#endif
+
     /* Execute create hooks */
     executeHooks(createHooks, tcb);
 
@@ -270,8 +292,15 @@ taskStarter(void *data)
 
     result = (*(tcb->entry))(p->arg1, p->arg2, p->arg3, p->arg4, p->arg5, 
 				p->arg6, p->arg7, p->arg8, p->arg9, p->arg10);
+
     /* Execute cleanup functions */
     pthread_cleanup_pop(1);
+
+#ifdef OSAPI_ART
+    /* leave real-time scheduling */
+    art_exit();
+#endif
+
     /* Terminate thread */
     pthread_exit(&result);
     return NULL;
@@ -364,7 +393,7 @@ taskSpawn(char *name, int priority, int options, int stackSize,
     }
 #endif    
 #endif
-#ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
+#if defined(HAVE_PTHREAD_ATTR_SETSCHEDPOLICY) && !defined(OSAPI_ART)
     if (rr_min_priority > 0 && rr_min_priority > 0) {
 	    /* Set priority of new thread */
 	    thread_param.sched_priority = priorityVxToPosix(priority);
@@ -400,7 +429,7 @@ taskSpawn(char *name, int priority, int options, int stackSize,
 	    } /* switch */
 #endif /* __linux__ */
     }
-#endif /* HAVE_PTHREAD_ATTR_SETSCHEDPOLICY */
+#endif /* HAVE_PTHREAD_ATTR_SETSCHEDPOLICY && !OSAPI_ART */
 
     tcb->params.arg1 = arg1;
     tcb->params.arg2 = arg2;
@@ -419,14 +448,21 @@ taskSpawn(char *name, int priority, int options, int stackSize,
 	pthread_mutex_unlock(tcb->starter);
 	return ERROR;
     }
-#ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
+#ifdef OSAPI_ART
+    tcb->policy = 0;
+    thread_param.sched_priority = priorityVxToPosix(priority);
+#else
+
+# ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
     /* Read back the scheduler parameters of the created thread */
     pthread_getschedparam(thread_id, &policy, &thread_param);
     tcb->policy = policy;
-#else
+# else
     tcb->policy = 0;
     thread_param.sched_priority = rr_min_priority;
-#endif /* HAVE_PTHREAD_ATTR_SETSCHEDPOLICY */
+# endif /* HAVE_PTHREAD_ATTR_SETSCHEDPOLICY */
+
+#endif /* OSAPI_ART */
     tcb->priority = priorityPosixToVx(thread_param.sched_priority);
 
     /* Register thread id in TCB */
@@ -484,14 +520,15 @@ taskFromThread(char *name)
     tcb->params.arg9 = 0;
     tcb->params.arg10 = 0;
 
-#ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
+#if defined(HAVE_PTHREAD_ATTR_SETSCHEDPOLICY) && !defined(OSAPI_ART)
     /* Read back the scheduler parameters of the current thread */
     pthread_getschedparam(pthread_self(), &policy, &thread_param);
     tcb->policy = policy;
 #else
     tcb->policy = 0;
     thread_param.sched_priority = rr_min_priority;
-#endif /* HAVE_PTHREAD_ATTR_SETSCHEDPOLICY */
+#endif /* HAVE_PTHREAD_ATTR_SETSCHEDPOLICY && !OSAPI_ART */
+
     tcb->priority = priorityPosixToVx(thread_param.sched_priority);
 
     /* Register thread id in TCB */
@@ -628,15 +665,23 @@ taskPrioritySet(long tid, int newPriority)
 	 errnoSet(S_portLib_INVALID_TASKID);
 	 return ERROR;
      }
-     
-#ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
+
+#ifdef OSAPI_ART
+     art_exit();
+     art_enter(priorityVxToPosix(newPriority),
+	       ART_TASK_PERIODIC, 1000000/sysClkRateGet());
+#else
+
+# ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
     my_param.sched_priority = newPriority;
     status = pthread_setschedparam(tcb->tid, SCHED_RR, &my_param);
     if (status != 0) {
 	errnoSet(status);
 	return ERROR;
     }
-#endif
+# endif
+
+#endif /*OSAPI_ART */
     tcb->priority = newPriority;
     return OK;
 }
@@ -650,7 +695,7 @@ STATUS
 taskPriorityGet(long tid, int *pPriority)
 {
     OS_TCB *tcb = (OS_TCB *)tid;
-#ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
+#if defined(HAVE_PTHREAD_ATTR_SETSCHEDPOLICY) && !defined(OSAPI_ART)
     struct sched_param my_param;
     int my_policy;
     int status;
@@ -702,14 +747,23 @@ taskUnlock(void)
 /*
  * Sleep for a number of ticks, or just yield cpu if ticks==0.
  *
- * This implementation diverges from the VxWorks implementation that 
+ * The posix implementation diverges from the VxWorks implementation that
  * wakes up exactly on the next clock tick. 
  * Using nanosleep() on system where it has high resolution, will 
  * wake up the task between to clock ticks.
+ *
+ * The ART-linux implementation wakes up at the specified clock tick, as under
+ * VxWorks.
  */
 STATUS
 taskDelay(int ticks)
 {
+#ifdef OSAPI_ART
+	unsigned long end = tickGet() + ticks;
+	while (tickGet() < end)
+	  art_wait();
+	return OK;
+#else
 	struct timespec ts, tr;
 	int clkRate = sysClkRateGet();
 
@@ -728,6 +782,7 @@ taskDelay(int ticks)
 	}
 	/*NOTREACHED*/
 	return ERROR;
+#endif
 }
 
 /*----------------------------------------------------------------------*/
