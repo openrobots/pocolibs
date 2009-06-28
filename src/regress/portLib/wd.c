@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 CNRS/LAAS
+ * Copyright (c) 2004,2009 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -50,6 +50,8 @@ pocoregress_init()
       logMsg("cannot create semaphore\n");
       return 0;
    }
+
+   logMsg("waiting %d ticks...\n", 10);
 
    t1 = tickGet();
    wdStart(wd, 10, wddone, 0);
