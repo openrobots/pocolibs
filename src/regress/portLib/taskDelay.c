@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003-2004 CNRS/LAAS
+ * Copyright (c) 1990, 2003-2004,2009 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -30,13 +30,7 @@ __RCSID("$LAAS$");
 static long
 time_difference(struct timeval *t1, struct timeval *t2)
 {
-	long usec_diff = t1->tv_usec - t2->tv_usec, retenue = 0;
-	
-	if (usec_diff < 0) {
-		usec_diff = 1000000 + usec_diff;
-		retenue = 1;
-	}
-	return (t1->tv_sec - t2->tv_sec - retenue)*1000000 + usec_diff;
+	return (t1->tv_sec - t2->tv_sec)*1000000 + t1->tv_usec - t2->tv_usec;
 }
 
 
