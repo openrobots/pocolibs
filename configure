@@ -794,6 +794,7 @@ VALGRIND_LIBS
 VALGRIND_CFLAGS
 PKG_CONFIG
 COMLIB_COMPATSRC
+SEMAPHORE_TYPE
 PURIFY
 RPCGEN_C
 RPCGEN
@@ -891,6 +892,8 @@ with_gnu_ld
 enable_libtool_lock
 with_purify
 enable_posix_timers
+enable_svr4_semaphores
+enable_posix_semaphores
 enable_valgrind
 enable_debug
 with_debug_output
@@ -1544,6 +1547,10 @@ Optional Features:
   --disable-libtool-lock  avoid locking (might break parallel builds)
   --disable-posix-timers Force use of setitimer(2)
                           instead of timer_create(3p)
+  --enable-posix-semaphores
+                          Use SVr4 semaphores (default)
+  --enable-posix-semaphores
+                          Use POSIX semaphores
   --enable-valgrind       compile with valgrind support
   --enable-debug          compile with DEBUG defined
 
@@ -4073,6 +4080,41 @@ case `echo X|tr X '\101'` in
  *) # EBCDIC based system
   lt_SP2NL='tr \100 \n'
   lt_NL2SP='tr \r\n \100\100'
+*-*-irix6*)
+  # Find out which ABI we are using.
+  echo '#line 3967 "configure"' > conftest.$ac_ext
+  if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; then
+   if test "$lt_cv_prog_gnu_ld" = yes; then
+    case `/usr/bin/file conftest.$ac_objext` in
+    *32-bit*)
+      LD="${LD-ld} -melf32bsmip"
+      ;;
+    *N32*)
+      LD="${LD-ld} -melf32bmipn32"
+      ;;
+    *64-bit*)
+      LD="${LD-ld} -melf64bmip"
+      ;;
+    esac
+   else
+    case `/usr/bin/file conftest.$ac_objext` in
+    *32-bit*)
+      LD="${LD-ld} -32"
+      ;;
+    *N32*)
+      LD="${LD-ld} -n32"
+      ;;
+    *64-bit*)
+      LD="${LD-ld} -64"
+      ;;
+    esac
+   fi
+  fi
+  rm -rf conftest*
   ;;
 esac
 
@@ -6049,6 +6091,34 @@ $as_echo "$ac_try_echo") >&5
 else
   $as_echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
+  lt_cv_prog_compiler_rtti_exceptions=no
+  ac_outfile=conftest.$ac_objext
+   echo "$lt_simple_compile_test_code" > conftest.$ac_ext
+   lt_compiler_flag="-fno-rtti -fno-exceptions"
+   # Insert the option either (1) after the last *FLAGS variable, or
+   # (2) before a word containing "conftest.", or (3) at the end.
+   # Note that $ac_compile itself does not contain backslashes and begins
+   # with a dollar sign (not a hyphen), so the echo should work correctly.
+   # The option is referenced via a variable to avoid confusing sed.
+   lt_compile=`echo "$ac_compile" | $SED \
+   -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
+   -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
+   -e 's:$: $lt_compiler_flag:'`
+   (eval echo "\"\$as_me:6944: $lt_compile\"" >&5)
+   (eval "$lt_compile" 2>conftest.err)
+   ac_status=$?
+   cat conftest.err >&5
+   echo "$as_me:6948: \$? = $ac_status" >&5
+   if (exit $ac_status) && test -s "$ac_outfile"; then
+     # The compiler can only warn and ignore the option if not recognized
+     # So say no if there are warnings other than the usual output.
+     $echo "X$_lt_compiler_boilerplate" | $Xsed -e '/^$/d' >conftest.exp
+     $SED '/^$/d; /^ *+/d' conftest.err >conftest.er2
+     if test ! -s conftest.er2 || diff conftest.exp conftest.er2 >/dev/null; then
+       lt_cv_prog_compiler_rtti_exceptions=yes
+     fi
+   fi
+   $rm conftest*
 
   # Broken: fails on valid input.
 continue
@@ -6347,6 +6417,34 @@ $as_echo "$ac_try_echo") >&5
 else
   $as_echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
+  lt_cv_prog_compiler_pic_works=no
+  ac_outfile=conftest.$ac_objext
+   echo "$lt_simple_compile_test_code" > conftest.$ac_ext
+   lt_compiler_flag="$lt_prog_compiler_pic -DPIC"
+   # Insert the option either (1) after the last *FLAGS variable, or
+   # (2) before a word containing "conftest.", or (3) at the end.
+   # Note that $ac_compile itself does not contain backslashes and begins
+   # with a dollar sign (not a hyphen), so the echo should work correctly.
+   # The option is referenced via a variable to avoid confusing sed.
+   lt_compile=`echo "$ac_compile" | $SED \
+   -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
+   -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
+   -e 's:$: $lt_compiler_flag:'`
+   (eval echo "\"\$as_me:7234: $lt_compile\"" >&5)
+   (eval "$lt_compile" 2>conftest.err)
+   ac_status=$?
+   cat conftest.err >&5
+   echo "$as_me:7238: \$? = $ac_status" >&5
+   if (exit $ac_status) && test -s "$ac_outfile"; then
+     # The compiler can only warn and ignore the option if not recognized
+     # So say no if there are warnings other than the usual output.
+     $echo "X$_lt_compiler_boilerplate" | $Xsed -e '/^$/d' >conftest.exp
+     $SED '/^$/d; /^ *+/d' conftest.err >conftest.er2
+     if test ! -s conftest.er2 || diff conftest.exp conftest.er2 >/dev/null; then
+       lt_cv_prog_compiler_pic_works=yes
+     fi
+   fi
+   $rm conftest*
 
 	eval "$as_ac_Header=no"
 fi
@@ -6431,6 +6529,39 @@ fi
 
 done
 
+   lt_compiler_flag="-o out/conftest2.$ac_objext"
+   # Insert the option either (1) after the last *FLAGS variable, or
+   # (2) before a word containing "conftest.", or (3) at the end.
+   # Note that $ac_compile itself does not contain backslashes and begins
+   # with a dollar sign (not a hyphen), so the echo should work correctly.
+   lt_compile=`echo "$ac_compile" | $SED \
+   -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
+   -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
+   -e 's:$: $lt_compiler_flag:'`
+   (eval echo "\"\$as_me:7338: $lt_compile\"" >&5)
+   (eval "$lt_compile" 2>out/conftest.err)
+   ac_status=$?
+   cat out/conftest.err >&5
+   echo "$as_me:7342: \$? = $ac_status" >&5
+   if (exit $ac_status) && test -s out/conftest2.$ac_objext
+   then
+     # The compiler can only warn and ignore the option if not recognized
+     # So say no if there are warnings
+     $echo "X$_lt_compiler_boilerplate" | $Xsed -e '/^$/d' > out/conftest.exp
+     $SED '/^$/d; /^ *+/d' out/conftest.err >out/conftest.er2
+     if test ! -s out/conftest.er2 || diff out/conftest.exp out/conftest.er2 >/dev/null; then
+       lt_cv_prog_compiler_c_o=yes
+     fi
+   fi
+   chmod u+w . 2>&5
+   $rm conftest*
+   # SGI C++ compiler will create directory out/ii_files/ for
+   # template instantiation
+   test -d out/ii_files && $rm out/ii_files/* && rmdir out/ii_files
+   $rm out/* && rmdir out
+   cd ..
+   rmdir conftest
+   $rm conftest*
 
 
 # Set options
@@ -7343,6 +7474,11 @@ if test x"$lt_cv_prog_compiler_static_works" = xyes; then
 else
     lt_prog_compiler_static=
 fi
+  lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
+  lt_status=$lt_dlunknown
+  cat > conftest.$ac_ext <<EOF
+#line 9738 "configure"
+#include "confdefs.h"
 
 
 
@@ -7416,6 +7552,20 @@ else
    cd conftest
    mkdir out
    echo "$lt_simple_compile_test_code" > conftest.$ac_ext
+  if test "$cross_compiling" = yes; then :
+  lt_cv_dlopen_self_static=cross
+else
+  lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
+  lt_status=$lt_dlunknown
+  cat > conftest.$ac_ext <<EOF
+#line 9838 "configure"
+#include "confdefs.h"
+
+#if HAVE_DLFCN_H
+#include <dlfcn.h>
+#endif
+
+#include <stdio.h>
 
    lt_compiler_flag="-o out/conftest2.$ac_objext"
    # Insert the option either (1) after the last *FLAGS variable, or
@@ -8778,6 +8928,39 @@ esac
 
 
 
+{ $as_echo "$as_me:$LINENO: checking if $compiler PIC flag $lt_prog_compiler_pic_CXX works" >&5
+$as_echo_n "checking if $compiler PIC flag $lt_prog_compiler_pic_CXX works... " >&6; }
+if test "${lt_cv_prog_compiler_pic_works_CXX+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  lt_cv_prog_compiler_pic_works_CXX=no
+  ac_outfile=conftest.$ac_objext
+   echo "$lt_simple_compile_test_code" > conftest.$ac_ext
+   lt_compiler_flag="$lt_prog_compiler_pic_CXX -DPIC"
+   # Insert the option either (1) after the last *FLAGS variable, or
+   # (2) before a word containing "conftest.", or (3) at the end.
+   # Note that $ac_compile itself does not contain backslashes and begins
+   # with a dollar sign (not a hyphen), so the echo should work correctly.
+   # The option is referenced via a variable to avoid confusing sed.
+   lt_compile=`echo "$ac_compile" | $SED \
+   -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
+   -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
+   -e 's:$: $lt_compiler_flag:'`
+   (eval echo "\"\$as_me:12247: $lt_compile\"" >&5)
+   (eval "$lt_compile" 2>conftest.err)
+   ac_status=$?
+   cat conftest.err >&5
+   echo "$as_me:12251: \$? = $ac_status" >&5
+   if (exit $ac_status) && test -s "$ac_outfile"; then
+     # The compiler can only warn and ignore the option if not recognized
+     # So say no if there are warnings other than the usual output.
+     $echo "X$_lt_compiler_boilerplate" | $Xsed -e '/^$/d' >conftest.exp
+     $SED '/^$/d; /^ *+/d' conftest.err >conftest.er2
+     if test ! -s conftest.er2 || diff conftest.exp conftest.er2 >/dev/null; then
+       lt_cv_prog_compiler_pic_works_CXX=yes
+     fi
+   fi
+   $rm conftest*
 
 
 
@@ -8787,6 +8970,39 @@ esac
 
 
 
+   lt_compiler_flag="-o out/conftest2.$ac_objext"
+   # Insert the option either (1) after the last *FLAGS variable, or
+   # (2) before a word containing "conftest.", or (3) at the end.
+   # Note that $ac_compile itself does not contain backslashes and begins
+   # with a dollar sign (not a hyphen), so the echo should work correctly.
+   lt_compile=`echo "$ac_compile" | $SED \
+   -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
+   -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
+   -e 's:$: $lt_compiler_flag:'`
+   (eval echo "\"\$as_me:12351: $lt_compile\"" >&5)
+   (eval "$lt_compile" 2>out/conftest.err)
+   ac_status=$?
+   cat out/conftest.err >&5
+   echo "$as_me:12355: \$? = $ac_status" >&5
+   if (exit $ac_status) && test -s out/conftest2.$ac_objext
+   then
+     # The compiler can only warn and ignore the option if not recognized
+     # So say no if there are warnings
+     $echo "X$_lt_compiler_boilerplate" | $Xsed -e '/^$/d' > out/conftest.exp
+     $SED '/^$/d; /^ *+/d' out/conftest.err >out/conftest.er2
+     if test ! -s out/conftest.er2 || diff out/conftest.exp out/conftest.er2 >/dev/null; then
+       lt_cv_prog_compiler_c_o_CXX=yes
+     fi
+   fi
+   chmod u+w . 2>&5
+   $rm conftest*
+   # SGI C++ compiler will create directory out/ii_files/ for
+   # template instantiation
+   test -d out/ii_files && $rm out/ii_files/* && rmdir out/ii_files
+   $rm out/* && rmdir out
+   cd ..
+   rmdir conftest
+   $rm conftest*
 
 
 
@@ -9574,6 +9790,39 @@ fi
 
 
 
+{ $as_echo "$as_me:$LINENO: checking if $compiler PIC flag $lt_prog_compiler_pic_F77 works" >&5
+$as_echo_n "checking if $compiler PIC flag $lt_prog_compiler_pic_F77 works... " >&6; }
+if test "${lt_cv_prog_compiler_pic_works_F77+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  lt_cv_prog_compiler_pic_works_F77=no
+  ac_outfile=conftest.$ac_objext
+   echo "$lt_simple_compile_test_code" > conftest.$ac_ext
+   lt_compiler_flag="$lt_prog_compiler_pic_F77"
+   # Insert the option either (1) after the last *FLAGS variable, or
+   # (2) before a word containing "conftest.", or (3) at the end.
+   # Note that $ac_compile itself does not contain backslashes and begins
+   # with a dollar sign (not a hyphen), so the echo should work correctly.
+   # The option is referenced via a variable to avoid confusing sed.
+   lt_compile=`echo "$ac_compile" | $SED \
+   -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
+   -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
+   -e 's:$: $lt_compiler_flag:'`
+   (eval echo "\"\$as_me:13934: $lt_compile\"" >&5)
+   (eval "$lt_compile" 2>conftest.err)
+   ac_status=$?
+   cat conftest.err >&5
+   echo "$as_me:13938: \$? = $ac_status" >&5
+   if (exit $ac_status) && test -s "$ac_outfile"; then
+     # The compiler can only warn and ignore the option if not recognized
+     # So say no if there are warnings other than the usual output.
+     $echo "X$_lt_compiler_boilerplate" | $Xsed -e '/^$/d' >conftest.exp
+     $SED '/^$/d; /^ *+/d' conftest.err >conftest.er2
+     if test ! -s conftest.er2 || diff conftest.exp conftest.er2 >/dev/null; then
+       lt_cv_prog_compiler_pic_works_F77=yes
+     fi
+   fi
+   $rm conftest*
 
 
 
@@ -9583,6 +9832,39 @@ fi
 
 
 
+   lt_compiler_flag="-o out/conftest2.$ac_objext"
+   # Insert the option either (1) after the last *FLAGS variable, or
+   # (2) before a word containing "conftest.", or (3) at the end.
+   # Note that $ac_compile itself does not contain backslashes and begins
+   # with a dollar sign (not a hyphen), so the echo should work correctly.
+   lt_compile=`echo "$ac_compile" | $SED \
+   -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
+   -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
+   -e 's:$: $lt_compiler_flag:'`
+   (eval echo "\"\$as_me:14038: $lt_compile\"" >&5)
+   (eval "$lt_compile" 2>out/conftest.err)
+   ac_status=$?
+   cat out/conftest.err >&5
+   echo "$as_me:14042: \$? = $ac_status" >&5
+   if (exit $ac_status) && test -s out/conftest2.$ac_objext
+   then
+     # The compiler can only warn and ignore the option if not recognized
+     # So say no if there are warnings
+     $echo "X$_lt_compiler_boilerplate" | $Xsed -e '/^$/d' > out/conftest.exp
+     $SED '/^$/d; /^ *+/d' out/conftest.err >out/conftest.er2
+     if test ! -s out/conftest.er2 || diff out/conftest.exp out/conftest.er2 >/dev/null; then
+       lt_cv_prog_compiler_c_o_F77=yes
+     fi
+   fi
+   chmod u+w . 2>&5
+   $rm conftest*
+   # SGI C++ compiler will create directory out/ii_files/ for
+   # template instantiation
+   test -d out/ii_files && $rm out/ii_files/* && rmdir out/ii_files
+   $rm out/* && rmdir out
+   cd ..
+   rmdir conftest
+   $rm conftest*
 
 
 
@@ -11663,6 +11945,38 @@ _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
+  lt_cv_prog_compiler_rtti_exceptions=no
+  ac_outfile=conftest.$ac_objext
+   echo "$lt_simple_compile_test_code" > conftest.$ac_ext
+   lt_compiler_flag="-fno-rtti -fno-exceptions"
+   # Insert the option either (1) after the last *FLAGS variable, or
+   # (2) before a word containing "conftest.", or (3) at the end.
+   # Note that $ac_compile itself does not contain backslashes and begins
+   # with a dollar sign (not a hyphen), so the echo should work correctly.
+   # The option is referenced via a variable to avoid confusing sed.
+   lt_compile=`echo "$ac_compile" | $SED \
+   -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
+   -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
+   -e 's:$: $lt_compiler_flag:'`
+   (eval echo "\"\$as_me:16253: $lt_compile\"" >&5)
+   (eval "$lt_compile" 2>conftest.err)
+   ac_status=$?
+   cat conftest.err >&5
+   echo "$as_me:16257: \$? = $ac_status" >&5
+   if (exit $ac_status) && test -s "$ac_outfile"; then
+     # The compiler can only warn and ignore the option if not recognized
+     # So say no if there are warnings other than the usual output.
+     $echo "X$_lt_compiler_boilerplate" | $Xsed -e '/^$/d' >conftest.exp
+     $SED '/^$/d; /^ *+/d' conftest.err >conftest.er2
+     if test ! -s conftest.er2 || diff conftest.exp conftest.er2 >/dev/null; then
+       lt_cv_prog_compiler_rtti_exceptions=yes
+     fi
+   fi
+   $rm conftest*
+
+fi
+{ $as_echo "$as_me:$LINENO: result: $lt_cv_prog_compiler_rtti_exceptions" >&5
+$as_echo "$lt_cv_prog_compiler_rtti_exceptions" >&6; }
 
 /* Override any GCC internal prototype to avoid an error.
    Use char because int might match the return type of a GCC
@@ -12011,6 +12325,34 @@ else
   $as_echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
+  lt_cv_prog_compiler_pic_works_GCJ=no
+  ac_outfile=conftest.$ac_objext
+   echo "$lt_simple_compile_test_code" > conftest.$ac_ext
+   lt_compiler_flag="$lt_prog_compiler_pic_GCJ"
+   # Insert the option either (1) after the last *FLAGS variable, or
+   # (2) before a word containing "conftest.", or (3) at the end.
+   # Note that $ac_compile itself does not contain backslashes and begins
+   # with a dollar sign (not a hyphen), so the echo should work correctly.
+   # The option is referenced via a variable to avoid confusing sed.
+   lt_compile=`echo "$ac_compile" | $SED \
+   -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
+   -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
+   -e 's:$: $lt_compiler_flag:'`
+   (eval echo "\"\$as_me:16543: $lt_compile\"" >&5)
+   (eval "$lt_compile" 2>conftest.err)
+   ac_status=$?
+   cat conftest.err >&5
+   echo "$as_me:16547: \$? = $ac_status" >&5
+   if (exit $ac_status) && test -s "$ac_outfile"; then
+     # The compiler can only warn and ignore the option if not recognized
+     # So say no if there are warnings other than the usual output.
+     $echo "X$_lt_compiler_boilerplate" | $Xsed -e '/^$/d' >conftest.exp
+     $SED '/^$/d; /^ *+/d' conftest.err >conftest.er2
+     if test ! -s conftest.er2 || diff conftest.exp conftest.er2 >/dev/null; then
+       lt_cv_prog_compiler_pic_works_GCJ=yes
+     fi
+   fi
+   $rm conftest*
 
 fi
 
@@ -12125,6 +12467,51 @@ if test "$ac_res" != no; then
 
 fi
 
+{ $as_echo "$as_me:$LINENO: checking if $compiler supports -c -o file.$ac_objext" >&5
+$as_echo_n "checking if $compiler supports -c -o file.$ac_objext... " >&6; }
+if test "${lt_cv_prog_compiler_c_o_GCJ+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  lt_cv_prog_compiler_c_o_GCJ=no
+   $rm -r conftest 2>/dev/null
+   mkdir conftest
+   cd conftest
+   mkdir out
+   echo "$lt_simple_compile_test_code" > conftest.$ac_ext
+
+   lt_compiler_flag="-o out/conftest2.$ac_objext"
+   # Insert the option either (1) after the last *FLAGS variable, or
+   # (2) before a word containing "conftest.", or (3) at the end.
+   # Note that $ac_compile itself does not contain backslashes and begins
+   # with a dollar sign (not a hyphen), so the echo should work correctly.
+   lt_compile=`echo "$ac_compile" | $SED \
+   -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
+   -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
+   -e 's:$: $lt_compiler_flag:'`
+   (eval echo "\"\$as_me:16647: $lt_compile\"" >&5)
+   (eval "$lt_compile" 2>out/conftest.err)
+   ac_status=$?
+   cat out/conftest.err >&5
+   echo "$as_me:16651: \$? = $ac_status" >&5
+   if (exit $ac_status) && test -s out/conftest2.$ac_objext
+   then
+     # The compiler can only warn and ignore the option if not recognized
+     # So say no if there are warnings
+     $echo "X$_lt_compiler_boilerplate" | $Xsed -e '/^$/d' > out/conftest.exp
+     $SED '/^$/d; /^ *+/d' out/conftest.err >out/conftest.er2
+     if test ! -s out/conftest.er2 || diff out/conftest.exp out/conftest.er2 >/dev/null; then
+       lt_cv_prog_compiler_c_o_GCJ=yes
+     fi
+   fi
+   chmod u+w . 2>&5
+   $rm conftest*
+   # SGI C++ compiler will create directory out/ii_files/ for
+   # template instantiation
+   test -d out/ii_files && $rm out/ii_files/* && rmdir out/ii_files
+   $rm out/* && rmdir out
+   cd ..
+   rmdir conftest
+   $rm conftest*
 
 if test "x$opt_xenomai" != "xyes" ; then
 case `uname -r` in
@@ -16770,6 +17157,246 @@ fi
 fi
 
 
+# Check whether --enable-svr4-semaphores was given.
+if test "${enable_svr4_semaphores+set}" = set; then
+  enableval=$enable_svr4_semaphores;  if test "$enable_svr4_semaphores" = "yes"; then
+		{ $as_echo "$as_me:$LINENO: forcing use of SVr4 semaphores" >&5
+$as_echo "$as_me: forcing use of SVr4 semaphores" >&6;}
+	else
+		{ $as_echo "$as_me:$LINENO: disabling use of SVr4 semaphores" >&5
+$as_echo "$as_me: disabling use of SVr4 semaphores" >&6;}
+	fi
+else
+   { $as_echo "$as_me:$LINENO: checking for semop" >&5
+$as_echo_n "checking for semop... " >&6; }
+if test "${ac_cv_func_semop+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+/* Define semop to an innocuous variant, in case <limits.h> declares semop.
+   For example, HP-UX 11i <limits.h> declares gettimeofday.  */
+#define semop innocuous_semop
+
+/* System header to define __stub macros and hopefully few prototypes,
+    which can conflict with char semop (); below.
+    Prefer <limits.h> to <assert.h> if __STDC__ is defined, since
+    <limits.h> exists even on freestanding compilers.  */
+
+#ifdef __STDC__
+# include <limits.h>
+#else
+# include <assert.h>
+#endif
+
+#undef semop
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char semop ();
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined __stub_semop || defined __stub___semop
+choke me
+#endif
+
+int
+main ()
+{
+return semop ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+  ac_cv_func_semop=yes
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_cv_func_semop=no
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_func_semop" >&5
+$as_echo "$ac_cv_func_semop" >&6; }
+if test "x$ac_cv_func_semop" = x""yes; then
+  enable_svr4_semaphores=yes
+else
+  enable_svr4_semaphores=no
+fi
+
+
+
+fi
+
+
+# Check whether --enable-posix-semaphores was given.
+if test "${enable_posix_semaphores+set}" = set; then
+  enableval=$enable_posix_semaphores;  if test "$enable_posix_semaphores" = "yes"; then
+		enable_svr4_semaphores=no
+		{ $as_echo "$as_me:$LINENO: forcing use of POSIX semaphores" >&5
+$as_echo "$as_me: forcing use of POSIX semaphores" >&6;}
+	else
+		{ $as_echo "$as_me:$LINENO: disabling use of POSIX semaphores" >&5
+$as_echo "$as_me: disabling use of POSIX semaphores" >&6;}
+	fi
+else
+   if test "$enable_svr4_semaphores" = "no"; then
+		{ $as_echo "$as_me:$LINENO: checking for sem_init" >&5
+$as_echo_n "checking for sem_init... " >&6; }
+if test "${ac_cv_func_sem_init+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+/* Define sem_init to an innocuous variant, in case <limits.h> declares sem_init.
+   For example, HP-UX 11i <limits.h> declares gettimeofday.  */
+#define sem_init innocuous_sem_init
+
+/* System header to define __stub macros and hopefully few prototypes,
+    which can conflict with char sem_init (); below.
+    Prefer <limits.h> to <assert.h> if __STDC__ is defined, since
+    <limits.h> exists even on freestanding compilers.  */
+
+#ifdef __STDC__
+# include <limits.h>
+#else
+# include <assert.h>
+#endif
+
+#undef sem_init
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char sem_init ();
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined __stub_sem_init || defined __stub___sem_init
+choke me
+#endif
+
+int
+main ()
+{
+return sem_init ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+  ac_cv_func_sem_init=yes
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_cv_func_sem_init=no
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_func_sem_init" >&5
+$as_echo "$ac_cv_func_sem_init" >&6; }
+if test "x$ac_cv_func_sem_init" = x""yes; then
+  enable_posix_semaphores=yes
+else
+  enable_posix_semaphores=no
+fi
+
+	else
+		enable_posix_semaphores=no
+	fi
+
+fi
+
+
+if test "$enable_svr4_semaphores" = "yes"; then
+	SEMAPHORE_TYPE="
+#define USE_SVR4_SEMAPHORES	1
+#undef USE_POSIX_SEMAPHORES
+"
+
+elif test "$enable_posix_semaphores" = "yes"; then
+	SEMAPHORE_TYPE="
+#define USE_POSIX_SEMAPHORES	1
+#undef USE_SVR4_SEMAPHORES
+"
+
+else
+	{ { $as_echo "$as_me:$LINENO: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+{ { $as_echo "$as_me:$LINENO: error: no usable semaphores
+See \`config.log' for more details." >&5
+$as_echo "$as_me: error: no usable semaphores
+See \`config.log' for more details." >&2;}
+   { (exit 1); exit 1; }; }; }
+	SEMAPHORE_TYPE=""
+
+fi
+
 { $as_echo "$as_me:$LINENO: checking for library containing clock_gettime" >&5
 $as_echo_n "checking for library containing clock_gettime... " >&6; }
 if test "${ac_cv_search_clock_gettime+set}" = set; then
@@ -17966,6 +18593,8 @@ cat >>$CONFIG_STATUS <<\_ACEOF || ac_write_fail=1
 # If the template does not know about datarootdir, expand it.
 # FIXME: This hack should be removed a few years after 2.60.
 ac_datarootdir_hack=; ac_datarootdir_seen=
+ac_config_files="$ac_config_files Init.make Makefile pocolibs.pc include/Makefile include/h2devLib.h src/portLib/Makefile src/errorLib/Makefile src/comLib/Makefile src/posterLib/Makefile src/posterLib/posterServ/Makefile src/posterLib/test/basic/Makefile src/posterLib/test/endian/Makefile src/h2/Makefile src/shell/Makefile src/regress/Makefile"
+
 
 ac_sed_dataroot='
 /datarootdir/ {
@@ -18369,6 +18998,26 @@ pic_flag=$lt_lt_prog_compiler_pic
 
 # Compiler flag to prevent dynamic linking.
 link_static_flag=$lt_lt_prog_compiler_static
+# Handling of arguments.
+for ac_config_target in $ac_config_targets
+do
+  case $ac_config_target in
+    "src/pocolibs-config.h") CONFIG_HEADERS="$CONFIG_HEADERS src/pocolibs-config.h" ;;
+    "Init.make") CONFIG_FILES="$CONFIG_FILES Init.make" ;;
+    "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
+    "pocolibs.pc") CONFIG_FILES="$CONFIG_FILES pocolibs.pc" ;;
+    "include/Makefile") CONFIG_FILES="$CONFIG_FILES include/Makefile" ;;
+    "include/h2devLib.h") CONFIG_FILES="$CONFIG_FILES include/h2devLib.h" ;;
+    "src/portLib/Makefile") CONFIG_FILES="$CONFIG_FILES src/portLib/Makefile" ;;
+    "src/errorLib/Makefile") CONFIG_FILES="$CONFIG_FILES src/errorLib/Makefile" ;;
+    "src/comLib/Makefile") CONFIG_FILES="$CONFIG_FILES src/comLib/Makefile" ;;
+    "src/posterLib/Makefile") CONFIG_FILES="$CONFIG_FILES src/posterLib/Makefile" ;;
+    "src/posterLib/posterServ/Makefile") CONFIG_FILES="$CONFIG_FILES src/posterLib/posterServ/Makefile" ;;
+    "src/posterLib/test/basic/Makefile") CONFIG_FILES="$CONFIG_FILES src/posterLib/test/basic/Makefile" ;;
+    "src/posterLib/test/endian/Makefile") CONFIG_FILES="$CONFIG_FILES src/posterLib/test/endian/Makefile" ;;
+    "src/h2/Makefile") CONFIG_FILES="$CONFIG_FILES src/h2/Makefile" ;;
+    "src/shell/Makefile") CONFIG_FILES="$CONFIG_FILES src/shell/Makefile" ;;
+    "src/regress/Makefile") CONFIG_FILES="$CONFIG_FILES src/regress/Makefile" ;;
 
 # Does compiler simultaneously support -c and -o options?
 compiler_c_o=$lt_lt_cv_prog_compiler_c_o
@@ -18761,6 +19410,8 @@ Summary of build options:
 
 Operating system flavour:	$OSAPI
 Use POSIX timers:		$enable_posix_timers
+Use POSIX semaphores:		$enable_posix_semaphores
+Use SVr4 semaphores:		$enable_svr4_semaphores
 
 Valgrind support:		$valgrind
 Run-time debug output:		$debug_output
@@ -18771,6 +19422,8 @@ Summary of build options:
 
 Operating system flavour:	$OSAPI
 Use POSIX timers:		$enable_posix_timers
+Use POSIX semaphores:		$enable_posix_semaphores
+Use SVr4 semaphores:		$enable_svr4_semaphores
 
 Valgrind support:		$valgrind
 Run-time debug output:		$debug_output
