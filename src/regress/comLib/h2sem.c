@@ -24,7 +24,7 @@
 
 #define PING_PONG_STEPS	11
 
-H2SEM_ID  sync;
+H2SEM_ID  sync[2];
 H2SEM_ID  sem[2];
 
 static int count;
@@ -38,11 +38,11 @@ pocoregress_ping(int side)
     logMsg("%s", side ? "ping..." : " ...pong\n");
     if (side) ++count;
 
-    if (count >= PING_PONG_STEPS) break;
     h2semGive(sem[1-side]);
+    if (count >= PING_PONG_STEPS) break;
   }
 
-  h2semGive(sync);
+  h2semGive(sync[side]);
   return 0;
 }
 
@@ -66,7 +66,7 @@ pocoregress_incr()
 {
   h2semTake(sem[0], WAIT_FOREVER);
   count++;
-  h2semGive(sync);
+  h2semGive(sync[0]);
   return 0;
 }
 
@@ -74,11 +74,12 @@ pocoregress_incr()
 int
 pocoregress_init()
 {
-  sync = h2semAlloc(H2SEM_SYNC);
+  sync[0] = h2semAlloc(H2SEM_SYNC);
+  sync[1] = h2semAlloc(H2SEM_SYNC);
 
   sem[0] = h2semAlloc(H2SEM_EXCL);
   sem[1] = h2semAlloc(H2SEM_EXCL);
-  if (sync == ERROR || sem[0] == ERROR || sem[1] == ERROR) {
+  if (sync[0] == ERROR || sync[1] == ERROR || sem[0] == ERROR || sem[1] == ERROR) {
     logMsg("Error: could not create h2sem\n");
     return 2;
   }
@@ -107,7 +108,7 @@ pocoregress_init()
 
   count = 0;
   h2semFlush(sem[0]);
-  h2semFlush(sync);
+  h2semFlush(sync[0]);
   taskSpawn("unlock", 200, VX_FP_TASK, 20000, pocoregress_incr);
   taskSpawn("unlock", 200, VX_FP_TASK, 20000, pocoregress_incr);
 
@@ -116,14 +117,14 @@ pocoregress_init()
     return 2;
   }
   h2semGive(sem[0]);
-  h2semTake(sync, 200);
+  h2semTake(sync[0], 200);
   if (count != 1) {
     logMsg("h2semGive() did not wake up task: wrong\n");
     return 2;
   }
 
   h2semGive(sem[0]);
-  h2semTake(sync, 200);
+  h2semTake(sync[0], 200);
   if (count != 2) {
     logMsg("h2semGive() did not wake up task: wrong\n");
     return 2;
@@ -140,8 +141,8 @@ pocoregress_init()
   taskSpawn("ping", 200, VX_FP_TASK, 20000, pocoregress_ping, 0);
   taskSpawn("pong", 200, VX_FP_TASK, 20000, pocoregress_ping, 1);
 
-  h2semTake(sync, WAIT_FOREVER);
-  h2semFlush(sync);
+  h2semTake(sync[0], WAIT_FOREVER);
+  h2semTake(sync[1], WAIT_FOREVER);
   if (count != PING_PONG_STEPS) {
     logMsg("Did %d ping pongs: wrong\n", count);
     return 2;
@@ -152,7 +153,8 @@ pocoregress_init()
 
   h2semDelete(sem[0]);
   h2semDelete(sem[1]);
-  h2semDelete(sync);
+  h2semDelete(sync[0]);
+  h2semDelete(sync[1]);
 
   return 0;
 }
