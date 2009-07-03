@@ -84,8 +84,12 @@ h2semInit(int num, int *pSemId)
 #if USE_POSIX_SEMAPHORES
     int i;
 
-    /* initialize all semaphores to empty */
-    for (i = 0; i < MAX_SEM; i++) {
+    /* initialize all semaphores to empty, except number #0, because number #0
+     * will be used in all cases after this function is called. This is not
+     * really clean, since there is some hidden assumptions here, but given the
+     * current API of h2semCreate0() it's simpler. */
+    H2DEV_SEM_EMPTY(num)[0] = 0;
+    for (i = 1; i < MAX_SEM; i++) {
       H2DEV_SEM_EMPTY(num)[i] = 1;
     }
 #else
