@@ -58,6 +58,14 @@ void h2semHandler(int sig)
 {
 }
 
+#ifdef OSAPI_ART
+static
+void h2killalarm(int sig)
+{
+  pthread_kill((pthread_t)sig, SIGALRM);
+}
+#endif
+
 /**
  ** Record errors messages
  **/
@@ -405,11 +413,40 @@ h2semTake(H2SEM_ID sem, int timeout)
 	    return FALSE;
 	}
 	break;
-      default:
-	/* Arme un timer pour gerer le timeout */
-	timer=wdCreate();
+      default: {
+	/* Setup a watchdog to implement timeout */
+	FUNCPTR timeout_handler;
+
+#ifdef OSAPI_ART
+	/* With ART-linux, no signal are used within sysLib: the system calls
+	 * are not interrupted at each tick. To implement an interruptible
+	 * sem_wait, we have thus to generate SIGALRM by hand, after the
+	 * timeout has expired. Note: though Linux has a sem_timedwait()
+	 * function, it's not standard. */
+	sigset_t osigset, timeout_sigset;
+	struct sigaction osigact, timeout_sigact;
+
+	sigemptyset(&timeout_sigset);
+	sigaddset(&timeout_sigset, SIGALRM);
+	pthread_sigmask(SIG_UNBLOCK, &timeout_sigset, &osigset);
+
+	timeout_sigact.sa_handler = h2semHandler;
+	sigemptyset(&timeout_sigact.sa_mask);
+	timeout_sigact.sa_flags = 0;
+	if (sigaction(SIGALRM, &timeout_sigact, &osigact) == -1) {
+	  perror("sigaction(SIGALRM)");
+	  return FALSE;
+	}
+
+	timeout_handler = (FUNCPTR)h2killalarm;
+#else
+	timeout_handler = (FUNCPTR)h2semHandler;
+#endif /* OSAPI_ART */
+
+	timer = wdCreate();
 	ticks = tickGet();
-	wdStart(timer, timeout, (FUNCPTR)h2semHandler, 0);
+	/* XXX we pass pthread_self() as an int... */
+	wdStart(timer, timeout, timeout_handler, pthread_self());
 
 	op.sem_flg = 0;
 
@@ -423,17 +460,15 @@ h2semTake(H2SEM_ID sem, int timeout)
 	      ) {
 		if (errno == EINTR) {
 
-		    if (tickGet() - ticks > timeout) {
+		    if (tickGet() - ticks >= timeout) {
 			errnoSet(S_h2semLib_TIMEOUT);
-			wdDelete(timer);
-			return FALSE;
+			goto semtake_error;
 		    } else {
 			continue;
 		    }
 		} else {
 		    errnoSet(errno);
-		    wdDelete(timer);
-		    return FALSE;
+		    goto semtake_error;
 		}
 	    } else {
 		break;
@@ -441,6 +476,15 @@ h2semTake(H2SEM_ID sem, int timeout)
 	} /* while */
 	wdDelete(timer);
 	break;
+      semtake_error:
+#ifdef OSAPI_ART
+	/* restore previous thread's signal mask */
+	sigaction(SIGALRM, &osigact, NULL);
+	pthread_sigmask(SIG_SETMASK, &osigset, NULL);
+#endif /* OSAPI_ART */
+	wdDelete(timer);
+	return FALSE;
+      }
     } /* switch */
 
     return TRUE;

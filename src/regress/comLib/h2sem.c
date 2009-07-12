@@ -86,9 +86,25 @@ pocoregress_init()
 
   /* ----------------------------------------------------------------------- */
 
+  logMsg("* testing timeout (should block 50 ticks)\n");
+
+  h2semTake(sem[0], WAIT_FOREVER);
+  count = 0;
+  taskSpawn("unlock", 200, VX_FP_TASK, 20000, pocoregress_unlock);
+  h2semTake(sem[0], 50);
+
+  if (count) {
+    logMsg("timeout not working\n");
+    return 2;
+  }
+
+
+  /* ----------------------------------------------------------------------- */
+
   logMsg("* testing recursive behaviour (should deadlock for two seconds)\n");
 
   count = 0;
+  h2semFlush(sem[0]);
   h2semGive(sem[0]);
   h2semGive(sem[0]); /* 2nd give must be a noop */
 
