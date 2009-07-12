@@ -214,8 +214,21 @@ taskLibInit(void)
     taskList = tcb;
 
 #ifdef OSAPI_ART
-    /* switch to real-time scheduling, with sysClkRate period */
-    art_enter(ART_PRIO_MIN, ART_TASK_PERIODIC, 1000000/sysClkRateGet());
+    {
+      int s;
+
+      /* use art_yield() to figure out if we are already a real-time task. If
+       * not, switch to real-time scheduling, with sysClkRate period and lowest
+       * priority. */
+      s = art_yield();
+      if (s) {
+	s = art_enter(ART_PRIO_MIN, ART_TASK_PERIODIC, 1000000/sysClkRateGet());
+	if (s) {
+	  perror("art_enter");
+	  return ERROR;
+	}
+      }
+    }
 #endif
     return OK;
 }
@@ -278,9 +291,17 @@ taskStarter(void *data)
     pthread_cleanup_push(taskCleanUp, data);
 
 #ifdef OSAPI_ART
-    /* switch to real-time scheduling, with sysClkRate period */
-    art_enter(priorityVxToPosix(tcb->priority),
-	      ART_TASK_PERIODIC, 1000000/sysClkRateGet());
+    {
+      int s;
+
+      /* switch to real-time scheduling, with sysClkRate period */
+      s = art_enter(priorityVxToPosix(tcb->priority),
+		    ART_TASK_PERIODIC, 1000000/sysClkRateGet());
+      if (s) {
+	perror("art_enter");
+	return ERROR;
+      }
+    }
 #endif
 
     /* Execute create hooks */
