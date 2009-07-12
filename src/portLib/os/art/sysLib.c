@@ -106,10 +106,21 @@ sysClkRateGet(void)
 static void *
 sysClkThread(void *arg)
 {
-    art_enter(ART_PRIO_MAX, ART_TASK_PERIODIC, 1000000/sysClkTicksPerSecond);
+    int s;
+
+    s = art_enter(ART_PRIO_MAX,
+		  ART_TASK_PERIODIC, 1000000/sysClkTicksPerSecond);
+    if (s) {
+      perror("art_enter");
+      exit(255);
+    }
 
     while (sysClkRunning == TRUE) {
-      art_wait();
+      s = art_wait();
+      if (s) {
+	perror("art_wait");
+	exit(255);
+      }
       if (sysClkRoutine != NULL) {
 	  (*sysClkRoutine)(sysClkArg);
       }
