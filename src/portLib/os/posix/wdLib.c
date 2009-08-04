@@ -45,7 +45,7 @@ WDOG_ID
 wdCreate(void)
 {
     WDOG_ID wd;
-    sigset_t set, old;
+    sigset_t set;
 
     wd = (WDOG_ID)malloc(sizeof(struct wdog));
     if (wd == NULL) {
@@ -59,7 +59,7 @@ wdCreate(void)
     /* Block clock signal */
     sigemptyset(&set);
     sigaddset(&set, SIGALRM);
-    sigprocmask(SIG_BLOCK, &set, &old);
+    sigprocmask(SIG_BLOCK, &set, NULL);
 
     pthread_mutex_lock(&wdMutex);
 
@@ -67,7 +67,7 @@ wdCreate(void)
     wd->next = wdList;
     wdList = wd;
     pthread_mutex_unlock(&wdMutex);
-    sigprocmask(SIG_SETMASK, &old, NULL); /* unblock clock sig */
+    sigprocmask(SIG_UNBLOCK, &set, NULL);
     return wd;
 }
 
@@ -75,7 +75,7 @@ STATUS
 wdDelete(WDOG_ID wdId)
 {
     WDOG_ID wd;
-    sigset_t set, old;
+    sigset_t set;
 
     if (wdId == NULL || wdId->magic != WDLIB_MAGIC) {
 	errnoSet(S_wdLib_ID_ERROR);
@@ -84,7 +84,7 @@ wdDelete(WDOG_ID wdId)
     /* Block clock signal */
     sigemptyset(&set);
     sigaddset(&set, SIGALRM);
-    sigprocmask(SIG_BLOCK, &set, &old);
+    sigprocmask(SIG_BLOCK, &set, NULL);
 
     /* Remove from wdList */
     pthread_mutex_lock(&wdMutex);
@@ -100,14 +100,14 @@ wdDelete(WDOG_ID wdId)
     }
     free(wdId);
     pthread_mutex_unlock(&wdMutex);
-    sigprocmask(SIG_SETMASK, &old, NULL); /* unblock clock sig */
+    sigprocmask(SIG_UNBLOCK, &set, NULL); /* unblock clock sig */
     return OK;
 }
 
 STATUS
 wdStart(WDOG_ID wdId, int delay, FUNCPTR pRoutine, long parameter)
 {
-    sigset_t set, old;
+    sigset_t set;
 
     if (wdId == NULL || wdId->magic != WDLIB_MAGIC) {
 	errnoSet(S_wdLib_ID_ERROR);
@@ -116,7 +116,7 @@ wdStart(WDOG_ID wdId, int delay, FUNCPTR pRoutine, long parameter)
     /* Block clock signal */
     sigemptyset(&set);
     sigaddset(&set, SIGALRM);
-    sigprocmask(SIG_BLOCK, &set, &old);
+    sigprocmask(SIG_BLOCK, &set, NULL);
 
     /* XXX */
     /* mutex_lock n'est pas aync signal safe, or wdStart() doit l'etre */
@@ -127,14 +127,14 @@ wdStart(WDOG_ID wdId, int delay, FUNCPTR pRoutine, long parameter)
     wdId->parameter = parameter;
     pthread_mutex_unlock(&wdMutex);
 
-    sigprocmask(SIG_SETMASK, &old, NULL); /* unblock clock sig */
+    sigprocmask(SIG_UNBLOCK, &set, NULL);
     return OK;
 }
 
 STATUS
 wdCancel(WDOG_ID wdId)
 {
-    sigset_t set, old;
+    sigset_t set;
 
     if (wdId == NULL || wdId->magic != WDLIB_MAGIC) {
 	errnoSet(S_wdLib_ID_ERROR);
@@ -143,14 +143,14 @@ wdCancel(WDOG_ID wdId)
     /* Block clock signal */
     sigemptyset(&set);
     sigaddset(&set, SIGALRM);
-    sigprocmask(SIG_BLOCK, &set, &old);
+    sigprocmask(SIG_BLOCK, &set, NULL);
 
     pthread_mutex_lock(&wdMutex);
     wdId->delay = 0;
     wdId->pRoutine = NULL;
     pthread_mutex_unlock(&wdMutex);
 
-    sigprocmask(SIG_SETMASK, &old, NULL); /* unblock clock sig */
+    sigprocmask(SIG_UNBLOCK, &set, NULL); /* unblock clock sig */
     return OK;
 }
 
