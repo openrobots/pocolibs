@@ -51,9 +51,10 @@ execTask(SEM_ID done)
    for(i=0; i<3; i++) {
       h2timerPause(t);
       t1 = tickGet();
-      result = semTake(sem, 20);
+      result = semTake(sem, 5);
       t2 = tickGet();
       printf("result: %s %lu ticks\n", result == OK ? "OK" : "ERROR", t2 - t1);
+      semGive(sem);
    }
 
    h2timerStop(t);
