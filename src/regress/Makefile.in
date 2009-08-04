@@ -41,6 +41,7 @@ SRCS=\
 	comLib/h2sem.c		\
 	comLib/mbox.c		\
 	comLib/h2timer.c	\
+	comLib/h2timersem.c	\
 				\
 	posterLib/poster.c
 
