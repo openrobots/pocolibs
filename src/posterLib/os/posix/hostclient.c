@@ -76,19 +76,23 @@ CLIENT *
 clientCreate(pthread_key_t key, const char *hostname)
 {
 	CLIENT *client;
+	char *rpc_hostname;
 
 	client = pthread_getspecific(key);
-	if (client == NULL) {
-		client = clnt_create(hostname, POSTER_SERV, 
-		    POSTER_VERSION, "tcp");
-	} else {
+	if (client != NULL)
 		return client;
-	}
+		
+	rpc_hostname = strdup(hostname);
+	if (rpc_hostname == NULL) 
+		return NULL;
+	client = clnt_create(rpc_hostname, POSTER_SERV, POSTER_VERSION, "tcp");
 	if (client == NULL) {
-		clnt_pcreateerror(hostname);
-		return(NULL);
+		clnt_pcreateerror(rpc_hostname);
+		goto done;
 	}
 	pthread_setspecific(key, client);
+done:
+	free(rpc_hostname);
 	return client;
 }
 
