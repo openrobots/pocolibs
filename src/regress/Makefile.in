@@ -30,6 +30,7 @@ DIRS=		portLib comLib posterLib
 SRCS=\
 	portLib/semaphore.c	\
 	portLib/wd.c		\
+	portLib/wd2.c		\
 	portLib/taskDelete.c	\
 	portLib/taskDeleteHook.c \
 	portLib/taskDelay.c	\
