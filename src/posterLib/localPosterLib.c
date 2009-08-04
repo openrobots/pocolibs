@@ -40,11 +40,11 @@ __RCSID("$LAAS$");
 #include <valgrind/memcheck.h>
 #endif
 
-static STATUS localPosterCreate ( char *name, int size, POSTER_ID *pPosterId );
-static STATUS localPosterMemCreate ( char *name, int busSpace, void *pPool,
+static STATUS localPosterCreate ( const char *name, int size, POSTER_ID *pPosterId );
+static STATUS localPosterMemCreate ( const char *name, int busSpace, void *pPool,
 				     int size, POSTER_ID *pPosterId );
 static STATUS localPosterDelete ( POSTER_ID posterId );
-static STATUS localPosterFind ( char *name, POSTER_ID *pPosterId );
+static STATUS localPosterFind ( const char *name, POSTER_ID *pPosterId );
 static int localPosterWrite ( POSTER_ID posterId, int offset, void *buf, 
 			      int nbytes );
 static int localPosterRead ( POSTER_ID posterId, int offset, void *buf, 
@@ -82,7 +82,7 @@ const POSTER_FUNCS posterLocalFuncs = {
 
 
 static STATUS
-localPosterCreate(char *name, int size, POSTER_ID *pPosterId)
+localPosterCreate(const char *name, int size, POSTER_ID *pPosterId)
 {
     long dev;
     unsigned char *pool;
@@ -140,7 +140,7 @@ localPosterCreate(char *name, int size, POSTER_ID *pPosterId)
 
 static STATUS 
 localPosterMemCreate(
-     char *name,                /* Nom du device a creer */
+     const char *name,          /* Nom du device a creer */
      int busSpace,		/* espace d'adressage de l'addresse pPool */
      void *pPool,		/* adresse Pool de memoire pour le poster */
      int size,                  /* Taille poster - en bytes */
@@ -187,7 +187,7 @@ localPosterDelete(POSTER_ID posterId)
 /*----------------------------------------------------------------------*/
 
 static STATUS
-localPosterFind(char *name, POSTER_ID *pPosterId)
+localPosterFind(const char *name, POSTER_ID *pPosterId)
 {
     long p;
 

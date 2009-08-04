@@ -200,10 +200,10 @@ extern H2_DEV_STR *h2Devs;
  * Prototypes
  */
 extern int h2devRecordH2ErrMsgs(void);
-extern int h2devAlloc ( char *name, H2_DEV_TYPE type );
+extern int h2devAlloc ( const char *name, H2_DEV_TYPE type );
 extern STATUS h2devAttach ( void );
 extern STATUS h2devEnd ( void );
-extern int h2devFind ( char *name, H2_DEV_TYPE type );
+extern int h2devFind ( const char *name, H2_DEV_TYPE type );
 extern STATUS h2devFree ( int dev );
 extern STATUS h2devClean ( const char *name );
 extern long h2devGetKey ( int type, int dev, BOOL create, int *pFd );

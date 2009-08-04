@@ -37,14 +37,14 @@ __RCSID("$LAAS$");
 static const char *posterHost;
 
 static STATUS remotePosterInit(void);
-static STATUS remotePosterCreate(char *name, int size, 
+static STATUS remotePosterCreate(const char *name, int size, 
     POSTER_ID *pPosterId);
-static STATUS remotePosterMemCreate(char *name, int busSpace, 
+static STATUS remotePosterMemCreate(const char *name, int busSpace, 
     void *pPool, int size, 
     POSTER_ID *pPosterId);
 static int remotePosterWrite(POSTER_ID posterId, int offset, void *buf, 
     int nbytes);
-static STATUS remotePosterFind(char *posterName, POSTER_ID *pPosterId);
+static STATUS remotePosterFind(const char *posterName, POSTER_ID *pPosterId);
 static int remotePosterRead(POSTER_ID posterId, int offset, void *buf, 
     int nbytes);
 static STATUS remotePosterTake(POSTER_ID posterId, POSTER_OP op);
@@ -104,7 +104,7 @@ remotePosterInit(void)
 */
 
 static STATUS 
-remotePosterCreate(char *name,		/* Name of the device to create */
+remotePosterCreate(const char *name,	/* Name of the device to create */
     int size,				/* Poster size in bytes */
     POSTER_ID *pPosterId)		/* where to store the resulting Id */
 {
@@ -113,10 +113,6 @@ remotePosterCreate(char *name,		/* Name of the device to create */
 	REMOTE_POSTER_ID remPosterId;
 	CLIENT *client;
 	pthread_key_t key;
-	
-	param.name = name;
-	param.length = size;
-	param.endianness = H2_LOCAL_ENDIANNESS;
 	
 	if (posterHost == NULL) {
 		errnoSet(S_remotePosterLib_POSTER_HOST_NOT_DEFINED);
@@ -133,7 +129,12 @@ remotePosterCreate(char *name,		/* Name of the device to create */
 		return(ERROR);
 	}
 
+	param.name = strdup(name);
+	param.length = size;
+	param.endianness = H2_LOCAL_ENDIANNESS;
+	
 	res = poster_create_1(&param, client);
+	free(param.name);
 	if (res == NULL) {
 		clnt_perror(client, "poster_create_1");
 		return(ERROR);
@@ -173,7 +174,7 @@ remotePosterCreate(char *name,		/* Name of the device to create */
 
 
 static STATUS 
-remotePosterMemCreate(char *name,	/* Device name to be created */
+remotePosterMemCreate(const char *name,	/* Device name to be created */
     int busSpace,			/* Address space of the memoy pool */
     void *pPool,			/* Effective address within the pool */
     int size,				/* Poster size, in bytes */
@@ -243,7 +244,7 @@ remotePosterWrite (POSTER_ID posterId,	/* Id of the poster */
 */
 
 static STATUS 
-posterFindPath(char *posterName, REMOTE_POSTER_ID *pPosterId)
+posterFindPath(const char *posterName, REMOTE_POSTER_ID *pPosterId)
 {
 	POSTER_FIND_RESULT *res = NULL;
 	char *host;
@@ -310,11 +311,12 @@ posterFindPath(char *posterName, REMOTE_POSTER_ID *pPosterId)
 
 
 static STATUS 
-remotePosterFind (char *posterName, POSTER_ID *pPosterId)
+remotePosterFind (const char *posterName, POSTER_ID *pPosterId)
 {
 	POSTER_FIND_RESULT *res = NULL;
 	REMOTE_POSTER_ID remPosterId;
 	CLIENT *client = NULL;
+	char *rpc_posterName;
 	pthread_key_t key;
 	
 	if (posterHost != NULL) {
@@ -326,7 +328,9 @@ remotePosterFind (char *posterName, POSTER_ID *pPosterId)
 		}
 		client = clientCreate(key, posterHost);
 		if (client != NULL) {
-			res = poster_find_1(&posterName, client);
+			rpc_posterName = strdup(posterName);
+			res = poster_find_1(&rpc_posterName, client);
+			free(rpc_posterName);
 		}
 	}
 	/* search along POSTER_PATH */

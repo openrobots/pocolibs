@@ -65,7 +65,7 @@ h2devRecordH2ErrMsgs(void)
  ** Allocation d'un device h2
  **/
 int
-h2devAlloc(char *name, H2_DEV_TYPE type)
+h2devAlloc(const char *name, H2_DEV_TYPE type)
 {
     int i;
 
@@ -200,7 +200,7 @@ h2devFindAux(const char *name, H2_DEV_TYPE type)
 }
 
 int
-h2devFind(char *name, H2_DEV_TYPE type)
+h2devFind(const char *name, H2_DEV_TYPE type)
 {
     int i;
 

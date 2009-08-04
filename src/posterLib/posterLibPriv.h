@@ -21,10 +21,10 @@
 
 typedef struct POSTER_FUNCS {
     STATUS (* init)(void);
-    STATUS (* create)(char *, int, POSTER_ID *);
-    STATUS (* memCreate)(char *, int, void *, int, POSTER_ID *);
+    STATUS (* create)(const char *, int, POSTER_ID *);
+    STATUS (* memCreate)(const char *, int, void *, int, POSTER_ID *);
     STATUS (* delete)(POSTER_ID);
-    STATUS (* find)(char *, POSTER_ID *);
+    STATUS (* find)(const char *, POSTER_ID *);
     int (* write)(POSTER_ID, int, void *, int);
     int (* read)(POSTER_ID, int, void *, int);
     STATUS (* take)(POSTER_ID, POSTER_OP);

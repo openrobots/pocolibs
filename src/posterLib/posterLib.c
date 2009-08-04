@@ -42,7 +42,7 @@ static POSTER_STR *allPosters = NULL;
 /*----------------------------------------------------------------------*/
 
 STATUS 
-posterCreate(char *name, int size, POSTER_ID *pPosterId)
+posterCreate(const char *name, int size, POSTER_ID *pPosterId)
 {
     POSTER_STR *p;
     STATUS res;
@@ -106,7 +106,7 @@ char* posterName(POSTER_ID pPosterId)
 /*----------------------------------------------------------------------*/
 
 STATUS
-posterMemCreate(char *name, int busSpace, void *pPool, 
+posterMemCreate(const char *name, int busSpace, void *pPool, 
 		int size, POSTER_ID *pPosterId)
 {
     logMsg("posterMemCreate: Not supported under Unix\n");
@@ -139,7 +139,7 @@ posterDelete(POSTER_ID posterId)
 /*----------------------------------------------------------------------*/
 
 STATUS
-posterFind(char *name, POSTER_ID *pPosterId)
+posterFind(const char *name, POSTER_ID *pPosterId)
 {
     POSTER_STR *p, *old_p;
     POSTER_ID id;

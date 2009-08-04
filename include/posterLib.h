@@ -55,10 +55,10 @@ typedef void *POSTER_ID;
 
 /* -- PROTOTYPES ------------------------------------------ */
 
-extern STATUS posterCreate ( char *name, int size, POSTER_ID *pPosterId );
-extern STATUS posterMemCreate ( char *name, int busSpace, void *pPool, int size, POSTER_ID *pPosterId );
+extern STATUS posterCreate (const char *name, int size, POSTER_ID *pPosterId );
+extern STATUS posterMemCreate (const char *name, int busSpace, void *pPool, int size, POSTER_ID *pPosterId );
 extern STATUS posterDelete ( POSTER_ID dev );
-extern STATUS posterFind ( char *name, POSTER_ID *pPosterId );
+extern STATUS posterFind (const char *name, POSTER_ID *pPosterId );
 extern int posterWrite ( POSTER_ID posterId, int offset, void *buf, int nbytes );
 extern int posterRead ( POSTER_ID posterId, int offset, void *buf, int nbytes );
 extern STATUS posterTake ( POSTER_ID posterId, POSTER_OP op );
