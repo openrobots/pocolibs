@@ -257,6 +257,9 @@ h2devAttach(void)
     int fd, n;
     char buf[16];
 
+    if (h2Devs != NULL) 
+        return OK;
+
     h2devRecordH2ErrMsgs();
 
     pthread_mutex_lock(&h2devMutex);
