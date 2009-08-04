@@ -26,13 +26,13 @@ int
 pocoregress_init()
 {
    SEM_ID sem;
+   int result;
 
    sem = semBCreate(0, SEM_FULL);
    if (!sem) goto done;
 
-   semDelete(sem);
-
-   printf("ok\n");
-  done:
+   result = semDelete(sem);
+   printf("%s\n", result == OK ? "OK": "ERROR");
+ done:
    return 0;
 }
