@@ -179,8 +179,8 @@ semDelete(SEM_ID semId)
 #ifndef USE_SEM_OPEN
          status = sem_destroy(semId->v.sem);
 #else
-	 status = sem_unlink(semId->name);
-	 unlink(semId->name);
+	 sem_unlink(semId->name);
+	 status = sem_close(semId->v.sem);
 #endif
          break;
     }
