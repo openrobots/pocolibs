@@ -600,22 +600,20 @@ h2semSet(H2SEM_ID sem, int value)
 {
 #if USE_SVR4_SEMAPHORES
     union semun semun;
-#endif
     int dev;
 
     dev = sem / MAX_SEM;
     sem = sem % MAX_SEM;
 
-#if USE_POSIX_SEMAPHORES
-    if (value)
-      h2semGive(sem);
-    else
-      h2semFlush(sem);
-#else
     semun.val = value;
     if (semctl(H2DEV_SEM_SEM_ID(dev), sem, SETVAL, semun) == -1) {
 	return ERROR;
     }
+#else
+    if (value)
+      h2semGive(sem);
+    else
+      h2semFlush(sem);
 #endif
     return OK;
 }
