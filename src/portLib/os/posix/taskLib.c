@@ -452,6 +452,10 @@ taskSpawn(char *name, int priority, int options, int stackSize,
     }
 #endif /* HAVE_PTHREAD_ATTR_SETSCHEDPOLICY && !OSAPI_ART */
 
+#ifdef OSAPI_ART
+    tcb->priority = priority;
+#endif /* OSAPI_ART */
+
     tcb->params.arg1 = arg1;
     tcb->params.arg2 = arg2;
     tcb->params.arg3 = arg3;
@@ -469,11 +473,8 @@ taskSpawn(char *name, int priority, int options, int stackSize,
 	pthread_mutex_unlock(tcb->starter);
 	return ERROR;
     }
-#ifdef OSAPI_ART
-    tcb->policy = 0;
-    thread_param.sched_priority = priorityVxToPosix(priority);
-#else
 
+#ifndef OSAPI_ART
 # ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
     /* Read back the scheduler parameters of the created thread */
     pthread_getschedparam(thread_id, &policy, &thread_param);
@@ -483,8 +484,8 @@ taskSpawn(char *name, int priority, int options, int stackSize,
     thread_param.sched_priority = rr_min_priority;
 # endif /* HAVE_PTHREAD_ATTR_SETSCHEDPOLICY */
 
-#endif /* OSAPI_ART */
     tcb->priority = priorityPosixToVx(thread_param.sched_priority);
+#endif /* !OSAPI_ART */
 
     /* Register thread id in TCB */
     tcb->tid = thread_id;
