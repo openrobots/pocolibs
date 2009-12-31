@@ -18,34 +18,49 @@
 
 #include <stdio.h>
 #include <sys/time.h>
+#include <sys/types.h>
+#include <time.h>
 
 #include "portLib.h"
 #include "h2timeLib.h"
 
-static char *dayStr [] = {
-	"sunday", "monday", "tuesday", "wednesday", "thursday",
-	"friday", "saturday"};
+static char *dayStr [] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
 
 int
 pocoregress_init(void)
 {
 	struct timeval tv;
+	struct tm tm;
 	H2TIME h2time;
+	int total = 0, error = 0;
 
+#if 0
 	/* Special case for bugzilla #102 */
 	tv.tv_sec = 1262172119;
 	tv.tv_usec = 796000;
-
-	h2timeFromTimeval(&h2time, &tv);
-
-	printf("Date: %02u-%02u-%02u, %s, %02uh:%02umin:%02us\n\n", 
-	    h2time.month, h2time.date, h2time.year + 1900, 
-	    dayStr[h2time.day], h2time.hour, h2time.minute, 
-	    h2time.sec);
-
-	if (h2time.month != 12 || h2time.date != 30 || h2time.year != 109
-		|| h2time.day != 3) {
-		fprintf(stderr, "Error decoding date\n");
+#endif
+	tv.tv_usec = 0;
+	for (tv.tv_sec = 1000000000; tv.tv_sec < 2147400000;
+	     tv.tv_sec += 3600) {
+		
+		h2timeFromTimeval(&h2time, &tv);
+		gmtime_r(&tv.tv_sec, &tm);
+		
+		if (h2time.month != tm.tm_mon + 1 || h2time.date != tm.tm_mday 
+		    || h2time.year != tm.tm_year || h2time.day != tm.tm_wday) {
+			fprintf(stderr, "Error decoding date: %ld %s", 
+			    tv.tv_sec, ctime(&tv.tv_sec));
+			fprintf(stderr, 
+			    "->  %s %02u-%02u-%04u, %02u:%02u:%02u\n", 
+			    dayStr[h2time.day], 
+			    h2time.month, h2time.date, h2time.year + 1900, 
+			    h2time.hour, h2time.minute, h2time.sec);
+			error++;
+		}
+		total++;
+	}
+	if (error) {
+		printf("%d/%d errors\n", error, total);
 		return 1;
 	}
 	return 0;
