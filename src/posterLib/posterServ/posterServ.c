@@ -68,7 +68,8 @@ posterServ(void)
 {
     SVCXPRT *transp;
  
-    h2initGlob(0);
+    if (h2initGlob(0) == ERROR)
+	    return(ERROR);
  
     svc_unregister(POSTER_SERV, POSTER_VERSION);
 
