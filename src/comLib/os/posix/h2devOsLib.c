@@ -159,7 +159,7 @@ h2devInit(int smMemSize, int posterServFlag)
 {
     key_t key;
     int i;
-    int fd;
+    int fd, pipefd[2];
     char buf[16];
     int savedError;
 
@@ -215,14 +215,28 @@ h2devInit(int smMemSize, int posterServFlag)
     }
     /* Start poster server */
     if (getenv("POSTER_HOST") == NULL && posterServFlag == TRUE) {
+	if (pipe(pipefd) < 0) {
+	    errnoSet(errno);
+	    close(fd);
+	    return ERROR;
+	}
+	
 	posterServPid = fork();
 	if (posterServPid == 0) {
+	    close(pipefd[1]);
+	    /* wait until pid is written to the file */
+	    if (read(pipefd[0], &buf, 3) != 3) {
+		printf("h2devInit: pipe read error\n");
+		exit(-1);
+	    }
+	    close(pipefd[0]);
 	    /* Processus fils */
 	    if (execl(posterServPath, "posterServ", (char *)NULL) == -1) {
 		fprintf(stderr, "h2devInit: couldn't exec posterServ\n");
 		exit(-1);
 	    }
 	} else {
+	    close(pipefd[0]);
 	    /* Store the pid in the lock file */
 	    i = snprintf(buf, sizeof(buf), "%d\n", posterServPid);
 	    if (write(fd, buf, i) < 0) {
@@ -231,6 +245,13 @@ h2devInit(int smMemSize, int posterServFlag)
 		return ERROR;
 	    }
 	    close(fd);
+	    /* tell child that we're done */
+	    if (write(pipefd[1], "OK\n", 3) != 3) {
+		errnoSet(errno);
+		printf("h2devInit: pipe write error\n");
+		return ERROR;
+	    }
+	    close(pipefd[1]);
 	}
     } else {
 	/* Store  -1 in the lock file if no posterServ was started */
