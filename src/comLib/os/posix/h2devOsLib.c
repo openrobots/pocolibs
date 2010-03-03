@@ -110,7 +110,7 @@ h2devGetKey(int type, int dev, BOOL create, int *pFd)
 	errnoSet(errno);
 	return ERROR;
     }
-    /* Check the lenght of the string */
+    /* Check the length of the string */
     if (strlen(home)+strlen(uts.nodename)+strlen(H2_DEV_NAME)+3 > MAXPATHLEN) {
 	errnoSet(S_h2devLib_BAD_HOME_DIR);
 	return ERROR;
