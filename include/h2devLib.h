@@ -69,7 +69,7 @@ typedef struct H2_POSTER_STR {
     unsigned char *pPool;		/* global address of the data */
     H2SEM_ID semId;			/* synchronization semaphore */
     int flgFresh;			/* available data flag */
-    H2TIME date;			/* last modification date */
+    H2TIMESPEC date;			/* last modification date */
     int size;				/* poster size */
     int op;				/* current operation */
     H2_ENDIANNESS endianness;

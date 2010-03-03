@@ -110,6 +110,10 @@ h2timeFromTimeval(H2TIME* pTimeStr, const struct timeval* tv)
     year = (day / 365 + 1970);        // We'll have one year difference each 4*365 years (roughly)
     day  -= days_since_epoch(year);  // day in the year
 
+    if (day < 0) {
+	    day = 365 + day;
+	    year -= 1;
+    }
     day_per_month[1] = is_bisextile(year) ? 29 : 28;
     for (month = 0; month < 12; ++month)
     {
@@ -157,6 +161,41 @@ timevalFromH2time(struct timeval* tv, const H2TIME* pTimeStr)
             + days            *24*3600;
 }
 
+/*----------------------------------------------------------------------*/
+void
+h2timeFromTimespec(H2TIME* pTimeStr, const H2TIMESPEC *ts)
+{
+	struct tm tm;
+	
+	gmtime_r(&ts->tv_sec, &tm);
+
+	pTimeStr->msec   = ts->tv_nsec / 1000000;
+	pTimeStr->sec    = tm.tm_sec;
+	pTimeStr->minute = tm.tm_min;
+	pTimeStr->hour   = tm.tm_hour;
+	pTimeStr->day    = tm.tm_wday == 0 ? 7 : tm.tm_wday;
+	pTimeStr->date   = tm.tm_mday;
+	pTimeStr->month  = tm.tm_mon + 1;
+	pTimeStr->year   = tm.tm_year;
+}
+
+/*----------------------------------------------------------------------*/
+void
+timespecFromH2time(H2TIMESPEC *ts, const H2TIME *pTimeStr)
+{
+	struct tm tm;
+
+	tm.tm_sec = pTimeStr->sec;
+	tm.tm_min = pTimeStr->minute;
+	tm.tm_hour = pTimeStr->hour;
+	tm.tm_wday = pTimeStr->day;
+	tm.tm_mday = pTimeStr->date;
+	tm.tm_mon = pTimeStr->month - 1;
+	tm.tm_year = pTimeStr->year;
+
+	ts->tv_sec = mktime(&tm);
+	ts->tv_nsec = pTimeStr->msec*1000000;
+}
 /*----------------------------------------------------------------------*/
 
 STATUS
@@ -241,6 +280,30 @@ h2timeInterval (H2TIME *pOldTime, unsigned long *pNmsec)
 			/NTICKS_PER_SEC;
     return (OK);
 } /* h2timeInterval */
+
+/*----------------------------------------------------------------------*/
+
+/**
+ ** Returns the difference in mili-seconds between current time and 
+ ** an older H2TIMESPEC value
+ **/
+
+STATUS
+h2timespecInterval(const H2TIMESPEC *pOldTime, unsigned long *pNmsec)
+{
+	H2TIMESPEC ts, res;
+
+	if (h2GetTimeSpec(&ts) != OK)
+		return (ERROR);
+	res.tv_sec = ts.tv_sec - pOldTime->tv_sec;
+	res.tv_nsec = ts.tv_nsec - pOldTime->tv_nsec;
+	if (res.tv_nsec < 0) {
+		res.tv_sec--;
+		res.tv_nsec += 1000000000;
+	}
+	*pNmsec = 1000*res.tv_sec + res.tv_nsec / 1000000;
+	return OK;
+}
 
 /*----------------------------------------------------------------------*/
 

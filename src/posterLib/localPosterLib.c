@@ -33,6 +33,7 @@ __RCSID("$LAAS$");
 #include "h2semLib.h"
 #include "h2devLib.h"
 #include "posterLib.h"
+#include "h2timeLib.h"
 
 #include "posterLibPriv.h"
 
@@ -297,7 +298,7 @@ static STATUS
 localPosterGive(POSTER_ID posterId)
 {
     long dev = (long)posterId;
-    H2TIME date;
+    H2TIMESPEC date;
 
     if (dev < 0 || dev >= H2_DEV_MAX 
 	|| H2DEV_TYPE(dev) != H2_DEV_TYPE_POSTER) {
@@ -311,12 +312,12 @@ localPosterGive(POSTER_ID posterId)
 	H2DEV_POSTER_FLG_FRESH(dev) = TRUE;
 
 	/* Lire la date */
-	if (h2timeGet(&date) == ERROR) {
+	if (h2GetTimeSpec(&date) == ERROR) {
 	    h2semGive(H2DEV_POSTER_SEM_ID(dev));
 	    return ERROR;
 	}
 	/* La copier dans le device */
-	memcpy(H2DEV_POSTER_DATE(dev), &date, sizeof(H2TIME));
+	memcpy(H2DEV_POSTER_DATE(dev), &date, sizeof(H2TIMESPEC));
     }
 
     return(h2semGive(H2DEV_POSTER_SEM_ID(dev)));
@@ -385,6 +386,7 @@ localPosterIoctl(POSTER_ID posterId, int code, void *parg)
 {
     long dev = (long)posterId;
     STATUS retval;
+    H2TIME h2time;
 
     if (dev < 0 || dev >= H2_DEV_MAX 
 	|| H2DEV_TYPE(dev) != H2_DEV_TYPE_POSTER) {
@@ -409,7 +411,8 @@ localPosterIoctl(POSTER_ID posterId, int code, void *parg)
 	    retval = ERROR;
 	}
 	/* Copier la date du poster */
-	memcpy(parg, (char *)H2DEV_POSTER_DATE(dev), sizeof(H2TIME));
+	h2timeFromTimespec(&h2time, (H2TIMESPEC *)H2DEV_POSTER_DATE(dev));
+	memcpy(parg, (char *)&h2time, sizeof(H2TIME));
 	break;
 	
       case FIO_NMSEC:
@@ -419,7 +422,7 @@ localPosterIoctl(POSTER_ID posterId, int code, void *parg)
 	    retval = ERROR;
 	}
 	/* Nombre de millisecondes depuis la derniere ecriture */
-	if (h2timeInterval(H2DEV_POSTER_DATE(dev), 
+	if (h2timespecInterval(H2DEV_POSTER_DATE(dev), 
 		(unsigned long *)parg) == ERROR) {
 	    retval = ERROR;
 	}
@@ -454,7 +457,8 @@ static STATUS
 localPosterShow(void)
 {
     int i;
-    H2TIME *date;
+    H2TIMESPEC *date;
+    H2TIME h2time;
 
     if (h2devAttach() == ERROR) {
 	return ERROR;
@@ -468,8 +472,9 @@ localPosterShow(void)
 		   H2DEV_POSTER_SIZE(i));
 	    if (H2DEV_POSTER_FLG_FRESH(i)) {
 		date = H2DEV_POSTER_DATE(i);
-		logMsg(" %02dh:%02dmin%02ds\n", date->hour, date->minute,
-		       date->sec);
+		h2timeFromTimespec(&h2time, date);
+		logMsg(" %02dh:%02dmin%02ds\n", h2time.hour, h2time.minute,
+		       h2time.sec);
 	    } else {
 		logMsg(" EMPTY_POSTER!\n");
 	    }
