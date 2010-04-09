@@ -34,6 +34,7 @@ SRCS=\
 	portLib/taskDelete.c	\
 	portLib/taskDeleteHook.c \
 	portLib/taskDelay.c	\
+	portLib/taskSuspend.c	\
 	portLib/tick.c		\
 				\
 	comLib/commonStruct.c	\

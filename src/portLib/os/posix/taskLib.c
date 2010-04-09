@@ -17,6 +17,9 @@
 __RCSID("$LAAS$");
 
 #include <sys/types.h>
+#ifdef __linux__
+#include <execinfo.h>
+#endif
 #include <pthread.h>
 #include <sched.h>
 #include <time.h>
@@ -558,22 +561,34 @@ taskName(long tid)
 /* 
  * Suspend a task
  *
- * XXX should be implemented 
  */   
+
+#define BT_SIZE 100
+
 STATUS 
 taskSuspend(long tid)
 {
     OS_TCB *tcb;
+#ifdef __linux__
+    static void *buffer[BT_SIZE];
+    int nptrs;
+#endif
 
     if (tid == 0) {
 	tid = taskIdSelf();
     }
+#ifdef __linux__
+    nptrs = backtrace(buffer, BT_SIZE);
+#endif
     tcb = (OS_TCB *)tid;
     if (tcb->magic != TASK_MAGIC) {
 	errnoSet(S_portLib_INVALID_TASKID);
 	return ERROR;
     }
     fprintf(stderr, "*** suspending task %lx\n", tid);
+#ifdef __linux__
+    backtrace_symbols_fd(buffer, nptrs, STDERR_FILENO);
+#endif
     abort();
     /*NOTREACHED*/
     return ERROR;
