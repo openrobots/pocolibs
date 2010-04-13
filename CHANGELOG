@@ -1,3 +1,10 @@
+Version 2.6, 13 April 2010
+
+ 96. On Linux systems, let taskSuspend() throw a backtrace to stderr.
+ 95. Use a pipe to wait until h2dev lock is ready before launching posterServ.
+ 94. Implement poster time stamps using H2TIMESPEC instead of H2TIME. 
+ 93. Don't start posterServ if it cannot find h2 devices.
+ 92. Add regression tests for h2time conversion functions
  91. Constify posterName arguments in posterLib.
  90. A few more fixes for running modules on Darwin.
  89. Add regression tests for h2 semaphores.
