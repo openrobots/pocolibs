@@ -171,10 +171,15 @@ void
 h2timeFromTimespec(H2TIME* pTimeStr, const H2TIMESPEC *ts)
 {
 	struct tm tm;
-	
+	H2TIMESPEC diff;
+	unsigned long rate = sysClkRateGet();
+
+	h2timespec_subtract(&diff, ts, &h2TimeSpec0);
 	gmtime_r(&ts->tv_sec, &tm);
 
-	pTimeStr->msec   = ts->tv_nsec / 1000000;
+	pTimeStr->ntick  = diff.tv_sec*rate + (unsigned long long)diff.tv_nsec*rate/1000000000ULL;
+	printf("xxx %lu:%09lu\n", diff.tv_sec, diff.tv_nsec);
+	pTimeStr->msec   = diff.tv_nsec / 1000000;
 	pTimeStr->sec    = tm.tm_sec;
 	pTimeStr->minute = tm.tm_min;
 	pTimeStr->hour   = tm.tm_hour;
@@ -341,7 +346,7 @@ h2timespec_subtract(H2TIMESPEC *result,
 void
 h2timeInit(void)
 {
-
+	h2GetTimeSpec(&h2TimeSpec0);
 } /* h2timeInit */
 
 /*----------------------------------------------------------------------*/
