@@ -342,6 +342,8 @@ void
 h2timeInit(void)
 {
 	h2GetTimeSpec(&h2TimeSpec0);
+	h2TimeSpec0.tv_sec = h2TimeSpec0.tv_sec - h2TimeSpec0.tv_sec % 86400;
+	h2TimeSpec0.tv_nsec = 0;
 } /* h2timeInit */
 
 /*----------------------------------------------------------------------*/
