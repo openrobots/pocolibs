@@ -28,7 +28,7 @@ __RCSID("$LAAS$");
 #include "h2timeLib.h"
 
 static H2TIMESPEC h2TimeSpec0;
-static void h2timespec_subtract(H2TIMESPEC *, 
+static void h2timespec_subtract(H2TIMESPEC *,
     const H2TIMESPEC *, const H2TIMESPEC *);
 
 /*----------------------------------------------------------------------*/
@@ -36,7 +36,7 @@ static void h2timespec_subtract(H2TIMESPEC *,
 /**
  **  h2timeGet  -  Lire la valeur actuelle de l'horloge
  **
- **  Description : 
+ **  Description :
  **  Lit la valeur actuelle de l'horloge et la met dans la structure
  **  fournit par l'utlisateur.
  **
@@ -52,7 +52,7 @@ h2timeGet(H2TIME *pTimeStr)
 
     h2timeFromTimeval(pTimeStr, &tv);
     /* free(tmp); */
-    
+
     return(OK);
 } /* h2timeGet */
 
@@ -79,7 +79,7 @@ h2GetTimeSpec(H2TIMESPEC *pTs)
 	return OK;
 }
 
-static int days_in_year[] = 
+static int days_in_year[] =
     { 0,                // Janvier
       31,               // Fevrier
       31+28,            // Mars
@@ -103,8 +103,8 @@ void
 h2timeFromTimeval(H2TIME* pTimeStr, const struct timeval* tv)
 {
     long sec, day, dow, month, year;
-    static int day_per_month[] = 
-        { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+    static int day_per_month[] =
+	{ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
     pTimeStr->ntick = tv -> tv_sec * NTICKS_PER_SEC + tv -> tv_usec / TICK_US;
     pTimeStr->msec = tv -> tv_usec / 1000;
@@ -122,9 +122,9 @@ h2timeFromTimeval(H2TIME* pTimeStr, const struct timeval* tv)
     day_per_month[1] = is_bisextile(year) ? 29 : 28;
     for (month = 0; month < 12; ++month)
     {
-        if (day < day_per_month[month])
-            break;
-        day -= day_per_month[month];
+	if (day < day_per_month[month])
+	    break;
+	day -= day_per_month[month];
     }
     // now, day is the day in the month and month the month index
 
@@ -153,17 +153,17 @@ timevalFromH2time(struct timeval* tv, const H2TIME* pTimeStr)
 {
     int year = pTimeStr->year + 1900;
     int days = pTimeStr->date - 1
-             + days_in_year[pTimeStr->month - 1]
-             + ((pTimeStr->month > 2) ? is_bisextile(year) : 0)
-             + days_since_epoch(year);
+	     + days_in_year[pTimeStr->month - 1]
+	     + ((pTimeStr->month > 2) ? is_bisextile(year) : 0)
+	     + days_since_epoch(year);
 
     tv -> tv_usec = pTimeStr->msec*1000;
 
-    tv -> tv_sec 
-        = pTimeStr->sec 
-            + pTimeStr->minute*60
-            + pTimeStr->hour  *3600
-            + days            *24*3600;
+    tv -> tv_sec
+	= pTimeStr->sec
+	    + pTimeStr->minute*60
+	    + pTimeStr->hour  *3600
+	    + days            *24*3600;
 }
 
 /*----------------------------------------------------------------------*/
@@ -177,7 +177,7 @@ h2timeFromTimespec(H2TIME* pTimeStr, const H2TIMESPEC *ts)
 	h2timespec_subtract(&diff, ts, &h2TimeSpec0);
 	gmtime_r(&ts->tv_sec, &tm);
 
-	pTimeStr->ntick  = diff.tv_sec*rate 
+	pTimeStr->ntick  = diff.tv_sec*rate
 	    + (unsigned long long)diff.tv_nsec*rate/1000000000ULL;
 	pTimeStr->msec   = diff.tv_nsec / 1000000;
 	pTimeStr->sec    = tm.tm_sec;
@@ -248,12 +248,12 @@ h2timeShow(void)
 	logMsg ("Problem reading date/time!\n");
 	return;
     }
-    
+
     /* Envoyer la date vers la console */
-    snprintf(buf, sizeof(buf), 
-	"\nDate: %02u-%02u-%02u, %s, %02uh:%02umin:%02us\n\n", 
-	strTime.month, strTime.date, strTime.year + 1900, 
-	dayStr[strTime.day], strTime.hour, strTime.minute, 
+    snprintf(buf, sizeof(buf),
+	"\nDate: %02u-%02u-%02u, %s, %02uh:%02umin:%02us\n\n",
+	strTime.month, strTime.date, strTime.year + 1900,
+	dayStr[strTime.day], strTime.hour, strTime.minute,
 	strTime.sec);
     logMsg(buf);
 } /* h2timeShow */
@@ -263,9 +263,9 @@ h2timeShow(void)
 /**
  **  h2timeInterval  -  Intervalle de temps entre deux lectures horloge
  **
- **  Description: 
+ **  Description:
  **  Donne l'ecart en milli-secondes entre une ancienne lecture de l'horloge
- **  et sa valeur actuelle. 
+ **  et sa valeur actuelle.
  **
  **  Retourne : OK ou ERROR
  **/
@@ -275,15 +275,15 @@ h2timeInterval (H2TIME *pOldTime, unsigned long *pNmsec)
 {
     H2TIME strTime;		/* Ou` mettre la valeur actuelle */
     unsigned long ntick1, ntick2;	/* Nombre de ticks */
- 
+
     /* Lire l'horloge */
     if (h2timeGet (&strTime) != OK)
 	return (ERROR);
-    
+
     /* Charger les compteurs de ticks */
     ntick2 = strTime.ntick;
     ntick1 = pOldTime->ntick;
-    
+
     /* Retourner l'intervalle de temps */
     *pNmsec = 1000 * ((ntick2 >= ntick1) ? (ntick2 - ntick1)
 		   : (((unsigned long) ~0 - ntick1) + 1 + ntick2))
@@ -294,7 +294,7 @@ h2timeInterval (H2TIME *pOldTime, unsigned long *pNmsec)
 /*----------------------------------------------------------------------*/
 
 /**
- ** Returns the difference in mili-seconds between current time and 
+ ** Returns the difference in mili-seconds between current time and
  ** an older H2TIMESPEC value
  **/
 
@@ -318,7 +318,7 @@ h2timespecInterval(const H2TIMESPEC *pOldTime, unsigned long *pNmsec)
 /*----------------------------------------------------------------------*/
 
 static void
-h2timespec_subtract(H2TIMESPEC *result, 
+h2timespec_subtract(H2TIMESPEC *result,
     const H2TIMESPEC *x, const H2TIMESPEC *y)
 {
 	H2TIMESPEC yy;
@@ -336,7 +336,7 @@ h2timespec_subtract(H2TIMESPEC *result,
 		yy.tv_nsec += 1000000000 * sec;
 		yy.tv_sec -= sec;
 	}
-	
+
 	result->tv_sec = x->tv_sec - yy.tv_sec;
 	result->tv_nsec = x->tv_nsec - yy.tv_nsec;
 }
