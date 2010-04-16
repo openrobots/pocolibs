@@ -19,12 +19,17 @@ __RCSID("$LAAS$");
 
 
 #include <stdio.h>
+#include <string.h>
 #include <time.h>
 #include <sys/time.h>
 #include <sys/types.h>
 
 #include "portLib.h"
 #include "h2timeLib.h"
+
+static H2TIMESPEC h2TimeSpec0;
+static void h2timespec_subtract(H2TIMESPEC *, 
+    const H2TIMESPEC *, const H2TIMESPEC *);
 
 /*----------------------------------------------------------------------*/
 
@@ -303,6 +308,32 @@ h2timespecInterval(const H2TIMESPEC *pOldTime, unsigned long *pNmsec)
 	}
 	*pNmsec = 1000*res.tv_sec + res.tv_nsec / 1000000;
 	return OK;
+}
+
+/*----------------------------------------------------------------------*/
+
+static void
+h2timespec_subtract(H2TIMESPEC *result, 
+    const H2TIMESPEC *x, const H2TIMESPEC *y)
+{
+	H2TIMESPEC yy;
+
+	memcpy(&yy, y, sizeof(H2TIMESPEC));
+
+	/* Carry */
+	if (x->tv_nsec < y->tv_nsec) {
+		long sec = (y->tv_nsec - x->tv_nsec) / 1000000000 + 1;
+		yy.tv_nsec -= 1000000000 * sec;
+		yy.tv_sec += sec;
+	}
+	if (x->tv_nsec - y->tv_nsec > 1000000000) {
+		int sec = (x->tv_nsec - y->tv_nsec) / 1000000000;
+		yy.tv_nsec += 1000000000 * sec;
+		yy.tv_sec -= sec;
+	}
+	
+	result->tv_sec = x->tv_sec - yy.tv_sec;
+	result->tv_nsec = x->tv_nsec - yy.tv_nsec;
 }
 
 /*----------------------------------------------------------------------*/
