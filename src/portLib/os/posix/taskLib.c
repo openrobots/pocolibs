@@ -20,6 +20,7 @@ __RCSID("$LAAS$");
 #ifdef __linux__
 #include <execinfo.h>
 #endif
+#include <limits.h>
 #include <pthread.h>
 #include <sched.h>
 #include <time.h>
@@ -345,7 +346,7 @@ taskSpawn(char *name, int priority, int options, int stackSize,
 	pthread_mutex_unlock(tcb->starter);
 	return ERROR;
     }
-#ifdef notyet
+#if 1
 #ifdef _POSIX_THREAD_ATTR_STACKSIZE
     /*
      * If supported, determine the default stack size and report
@@ -356,6 +357,8 @@ taskSpawn(char *name, int priority, int options, int stackSize,
      * not be the size that will actually be used.  Solaris 2.5
      * uses a value of 0 to indicate the default.
      */
+    if (stackSize < PTHREAD_STACK_MIN) 
+	    stackSize = PTHREAD_STACK_MIN;
     status = pthread_attr_setstacksize(&thread_attr, stackSize);
     if (status != 0) {
 	errnoSet(status);
