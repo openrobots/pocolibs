@@ -305,12 +305,7 @@ h2timespecInterval(const H2TIMESPEC *pOldTime, unsigned long *pNmsec)
 
 	if (h2GetTimeSpec(&ts) != OK)
 		return (ERROR);
-	res.tv_sec = ts.tv_sec - pOldTime->tv_sec;
-	res.tv_nsec = ts.tv_nsec - pOldTime->tv_nsec;
-	if (res.tv_nsec < 0) {
-		res.tv_sec--;
-		res.tv_nsec += 1000000000;
-	}
+	h2timespec_subtract(&res, &ts, pOldTime);
 	*pNmsec = 1000*res.tv_sec + res.tv_nsec / 1000000;
 	return OK;
 }
