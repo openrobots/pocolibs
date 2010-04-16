@@ -177,8 +177,8 @@ h2timeFromTimespec(H2TIME* pTimeStr, const H2TIMESPEC *ts)
 	h2timespec_subtract(&diff, ts, &h2TimeSpec0);
 	gmtime_r(&ts->tv_sec, &tm);
 
-	pTimeStr->ntick  = diff.tv_sec*rate + (unsigned long long)diff.tv_nsec*rate/1000000000ULL;
-	printf("xxx %lu:%09lu\n", diff.tv_sec, diff.tv_nsec);
+	pTimeStr->ntick  = diff.tv_sec*rate 
+	    + (unsigned long long)diff.tv_nsec*rate/1000000000ULL;
 	pTimeStr->msec   = diff.tv_nsec / 1000000;
 	pTimeStr->sec    = tm.tm_sec;
 	pTimeStr->minute = tm.tm_min;
