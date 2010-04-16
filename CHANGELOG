@@ -1,3 +1,8 @@
+Version 2.7, 16 april 2010
+
+ 97. Fix updating 'ntick' field in H2TIME timespamps of posters.
+     (fallout from change #94, which broke pom-genom).
+
 Version 2.6, 13 April 2010
 
  96. On Linux systems, let taskSuspend() throw a backtrace to stderr.
