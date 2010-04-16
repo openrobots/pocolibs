@@ -473,8 +473,8 @@ localPosterShow(void)
 	    if (H2DEV_POSTER_FLG_FRESH(i)) {
 		date = H2DEV_POSTER_DATE(i);
 		h2timeFromTimespec(&h2time, date);
-		logMsg(" %02dh:%02dmin%02ds\n", h2time.hour, h2time.minute,
-		       h2time.sec);
+		logMsg(" %02dh:%02dmin%02ds %lu\n", h2time.hour, h2time.minute,
+		    h2time.sec, h2time.ntick);
 	    } else {
 		logMsg(" EMPTY_POSTER!\n");
 	    }
