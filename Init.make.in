@@ -46,7 +46,7 @@ MKDEP=          @MKDEP@
 
 LIBTOOL=	@LIBTOOL@
 LTCC=           $(LIBTOOL) --mode=compile $(CC)
-LTLD=           $(LIBTOOL) --mode=link $(CC)
+LTLD=           $(LIBTOOL) --mode=link $(CC) $(LDFLAGS)
 
 CPPFLAGS=	-I$(top_srcdir)/include -I$(top_builddir)/src
 CPPFLAGS+=	-I$(top_srcdir)/include/os/$(OSAPI) @CPPFLAGS@
