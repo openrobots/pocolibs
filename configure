@@ -822,8 +822,8 @@ EGREP
 GREP
 SED
 LIBTOOL
-OSAPI
 XENO_CONFIG
+OSAPI
 OBJEXT
 EXEEXT
 ac_ct_CC
@@ -3083,6 +3083,8 @@ fi
 
 
 
+OSAPI=posix
+
 
 
 # Check whether --with-xenomai was given.
@@ -3151,17 +3153,14 @@ See \`config.log' for more details." >&2;}
 $as_echo "Configuring to use Xenomai" >&6; }
 	fi
 fi
-OSAPI=posix
 
-
-if test "$OSAPI" = "xenomai"; then
-	XENO_CFLAGS=`${XENO_CONFIG} --posix-cflags`
-	XENO_LDFLAGS=`${XENO_CONFIG} --posix-ldflags`
+if test "x$XENO_CONFIG" != "xno"; then
+	XENO_CFLAGS=`${XENO_CONFIG} --skin posix --cflags`
+	XENO_LDFLAGS=`${XENO_CONFIG} --skin posix --ldflags`
 fi
 
 CFLAGS="${CFLAGS} ${XENO_CFLAGS}"
 LDFLAGS="${LDFLAGS} ${XENO_LDFLAGS}"
-
 
 
 enable_dlopen=yes
@@ -3787,13 +3786,13 @@ if test "${lt_cv_nm_interface+set}" = set; then
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:3790: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:3789: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:3793: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:3792: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:3796: output\"" >&5)
+  (eval echo "\"\$as_me:3795: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -4999,7 +4998,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 5002 "configure"' > conftest.$ac_ext
+  echo '#line 5001 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -6850,11 +6849,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:6853: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:6852: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:6857: \$? = $ac_status" >&5
+   echo "$as_me:6856: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7189,11 +7188,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7192: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7191: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7196: \$? = $ac_status" >&5
+   echo "$as_me:7195: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7294,11 +7293,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7297: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7296: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7301: \$? = $ac_status" >&5
+   echo "$as_me:7300: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -7349,11 +7348,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7352: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7351: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7356: \$? = $ac_status" >&5
+   echo "$as_me:7355: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10152,7 +10151,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10155 "configure"
+#line 10154 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10248,7 +10247,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10251 "configure"
+#line 10250 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11322,6 +11321,7 @@ _ACEOF
 fi
 
 done
+
 
 
 if test "x$opt_xenomai" != "xyes" ; then
@@ -13367,6 +13367,7 @@ if test "x$TAR" = "xno"; then
 $as_echo "$as_me: error: Cannot find a tar program" >&2;}
    { (exit 1); exit 1; }; }
 fi
+
 
 
 ac_config_headers="$ac_config_headers src/pocolibs-config.h"
