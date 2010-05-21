@@ -31,6 +31,8 @@ AH_VERBATIM(__RCSID,[
 
 dnl --- OS flavour checks -----------------------------------------------
 
+OSAPI=posix
+AC_SUBST(OSAPI)
 
 AC_ARG_WITH(xenomai,
 	AC_HELP_STRING([--with-xenomai=yes|no], [configure to use Xenomai]),
@@ -47,17 +49,14 @@ if test "x$opt_xenomai" = "xyes"; then
 		AC_MSG_RESULT([Configuring to use Xenomai])
 	fi
 fi
-OSAPI=posix
-AC_SUBST(OSAPI)
 
-if test "$OSAPI" = "xenomai"; then
-	XENO_CFLAGS=`${XENO_CONFIG} --posix-cflags`
-	XENO_LDFLAGS=`${XENO_CONFIG} --posix-ldflags`
+if test "x$XENO_CONFIG" != "xno"; then
+	XENO_CFLAGS=`${XENO_CONFIG} --skin posix --cflags`
+	XENO_LDFLAGS=`${XENO_CONFIG} --skin posix --ldflags`
 fi
 
 CFLAGS="${CFLAGS} ${XENO_CFLAGS}"
 LDFLAGS="${LDFLAGS} ${XENO_LDFLAGS}"
-
 
 dnl --- end of OS flavour checks ----------------------------------------
 
