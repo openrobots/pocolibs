@@ -301,5 +301,6 @@ main(int argc, char *argv[])
 	fprintf(stderr, "posterServ() exited.\n");
 	h2printErrno(errnoGet());
     }
+    svc_unregister(POSTER_SERV, POSTER_VERSION);
     return 0;
 }
