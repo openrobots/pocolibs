@@ -1,3 +1,11 @@
+Version 2.8, xx, xxxx, xxxx
+
+102. Go back to pmap_unset() to unregister pre-existing posterServer service.
+101. Fixes for building Xenomai support.
+100. Fixes for cross-compilation in OpenEmbedded
+ 99. Display the ntick field of poster's timestamps in posterShow().
+ 98. Enforce stack size in taskSpawn() using pthread_attr_setstacksize().
+
 Version 2.7, 16 april 2010
 
  97. Fix updating 'ntick' field in H2TIME timespamps of posters.
