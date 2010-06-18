@@ -249,7 +249,7 @@ sighandler(int sig)
 
       case SIGINT:
       case SIGTERM:
-	(void) pmap_unset(POSTER_SERV, POSTER_VERSION);
+	(void) svc_unregister(POSTER_SERV, POSTER_VERSION);
         exit(0);
     }
 }
