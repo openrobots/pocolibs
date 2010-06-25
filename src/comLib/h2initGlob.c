@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990-2008 CNRS/LAAS
+ * Copyright (c) 1990-2010 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -23,8 +23,10 @@
  ***/
 
 #include "pocolibs-config.h"
-__RCSID("$LAAS$");
 
+#ifdef __XENO__
+#include <sys/mman.h>
+#endif
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdarg.h>
@@ -51,6 +53,10 @@ STATUS
 h2initGlob(int ticksPerSec)
 {
 
+#ifdef __XENO__
+    /* Lock process in RAM */
+    mlockall(MCL_CURRENT | MCL_FUTURE);
+#endif
     /* init error msgs for sub-libraries without specific init functions */
     h2evnRecordH2ErrMsgs();
     h2semRecordH2ErrMsgs();
