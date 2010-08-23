@@ -12051,9 +12051,9 @@ fi
 if test "x$opt_xenomai" != "xyes" ; then
 case `uname -r` in
 	*-adeos)
-		enable_posix_timers=no
-		{ $as_echo "$as_me:$LINENO: WARNING: Running adeos, disabling posix timers" >&5
-$as_echo "$as_me: WARNING: Running adeos, disabling posix timers" >&2;}
+		enable_posix_timers=yes
+		{ $as_echo "$as_me:$LINENO: WARNING: Running adeos, enabling posix timers" >&5
+$as_echo "$as_me: WARNING: Running adeos, enabling posix timers" >&2;}
 		;;
 esac
 fi
