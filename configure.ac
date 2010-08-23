@@ -190,8 +190,8 @@ AC_SEARCH_LIBS([timer_create], [rt])
 if test "x$opt_xenomai" != "xyes" ; then
 case `uname -r` in
 	*-adeos)
-		enable_posix_timers=no
-		AC_MSG_WARN([Running adeos, disabling posix timers])
+		enable_posix_timers=yes
+		AC_MSG_WARN([Running adeos, enabling posix timers])
 		;;
 esac
 fi
