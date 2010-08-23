@@ -211,6 +211,8 @@ remotePosterWrite (POSTER_ID posterId,	/* Id of the poster */
 		errnoSet(S_remotePosterLib_BAD_RPC);
 		return ERROR;
 	}
+	if (nbytes == 0)
+		return 0;
 	param.id = (int)(long)remPosterId->vxPosterId;
 	param.offset = offset;
 	param.length = nbytes;
@@ -393,6 +395,8 @@ remotePosterRead(POSTER_ID posterId,   /* Id of the poster to read */
 		errnoSet(S_remotePosterLib_BAD_RPC);
 		return ERROR;
 	}
+	if (nbytes == 0)
+		return 0;
 	param.id = (int)(long)(remPosterId->vxPosterId);
 	param.length = nbytes;
 	param.offset = offset;
