@@ -15,7 +15,6 @@
  */
 
 #include "pocolibs-config.h"
-__RCSID("$LAAS$");
 
 #include <sys/time.h>
 #include <stdio.h>

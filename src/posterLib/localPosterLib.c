@@ -19,7 +19,6 @@
  *** using SYSV shared memory segments
  ***/
 #include "pocolibs-config.h"
-__RCSID("$LAAS$");
 
 #include <sys/types.h>
 #include <string.h>

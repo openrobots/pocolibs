@@ -1,4 +1,3 @@
-/* $LAAS$ */
 /*
  * Copyright (c) 2004 
  *      Autonomous Systems Lab, Swiss Federal Institute of Technology.

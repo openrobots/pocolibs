@@ -1,4 +1,3 @@
-/*	$LAAS$	*/
 /*	$NetBSD: fnmatch.c,v 1.20 2003/08/07 16:42:48 agc Exp $	*/
 
 /*
@@ -33,7 +32,6 @@
  * SUCH DAMAGE.
  */
 #include "pocolibs-config.h"
-__RCSID("$LAAS$");
 
 /*
  * Function fnmatch() as specified in POSIX 1003.2-1992, section B.6.

@@ -1,4 +1,3 @@
-/*	$LAAS$	*/
 /*	$NetBSD: fnmatch.h,v 1.11 2003/08/07 09:44:10 agc Exp $	*/
 
 /*-

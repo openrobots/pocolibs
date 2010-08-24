@@ -7,7 +7,6 @@ dnl
 dnl GPL, since some parts were copied from other configure.in
 dnl 
 dnl
-AC_REVISION($LAAS$)
 AC_INIT([pocolibs],[2.7.99],[openrobots@laas.fr])
 AC_PREREQ(2.59)
 

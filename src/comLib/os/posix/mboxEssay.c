@@ -28,7 +28,6 @@
    systeme et, eventuelement, pour leur deletion, tests, etc.
 */
 #include "pocolibs-config.h"
-__RCSID("$LAAS$");
 
 
 #include <errno.h>

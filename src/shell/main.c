@@ -20,7 +20,6 @@
  ***/
 
 #include "pocolibs-config.h"
-__RCSID("$LAAS$");
 
 #include <errno.h>
 #include <pthread.h>

@@ -14,7 +14,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 #include "pocolibs-config.h"
-__RCSID("$LAAS$");
 
 #include <sys/types.h>
 #ifdef __linux__

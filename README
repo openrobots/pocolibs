@@ -16,7 +16,3 @@ start, you should be able to build and install it using:
     ./configure
     make
     make install
-
-
--- 
-$LAAS$

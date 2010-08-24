@@ -27,7 +27,6 @@
    pour le partage de donnees entre des taches d'une meme CPU.
 */
 #include "pocolibs-config.h"
-__RCSID("$LAAS$");
 
 # include <stdlib.h>
 # include <string.h>

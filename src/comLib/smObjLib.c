@@ -24,7 +24,6 @@
  ***/
 
 #include "pocolibs-config.h"
-__RCSID("$LAAS$");
 
 #include <stddef.h>
 #include "portLib.h"

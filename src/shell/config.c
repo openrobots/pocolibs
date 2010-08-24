@@ -15,7 +15,6 @@
  */
 
 #include "pocolibs-config.h"
-__RCSID("$LAAS$");
 
 /***
  *** Configuration des modules inclus dans le shell

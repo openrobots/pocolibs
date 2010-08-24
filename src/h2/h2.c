@@ -15,7 +15,6 @@
  */
 
 #include "pocolibs-config.h"
-__RCSID("$LAAS$");
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>

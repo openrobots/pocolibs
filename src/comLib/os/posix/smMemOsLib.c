@@ -19,7 +19,6 @@
  ***
  ***/
 #include "pocolibs-config.h"
-__RCSID("$LAAS$");
 
 #include <assert.h>
 

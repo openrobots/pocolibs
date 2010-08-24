@@ -29,7 +29,6 @@
 */
   
 #include "pocolibs-config.h"
-__RCSID("$LAAS$");
 
 # include <stdio.h>
 # include <math.h>
