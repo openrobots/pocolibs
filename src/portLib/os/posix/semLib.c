@@ -48,7 +48,7 @@ struct SEM_ID {
 #ifndef USE_SEM_OPEN
    sem_t sem_storage;
 #else
-   char name[32]; /* /semaphoreXXXXXXXXXX */
+   char name[32]; /* /tmp/semaphoreXXXXXXXXXX */
 #endif
 };
 
