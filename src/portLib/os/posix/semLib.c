@@ -16,6 +16,9 @@
 #include "pocolibs-config.h"
 
 #include <errno.h>
+#ifdef USE_SEM_OPEN
+#include <fcntl.h>
+#endif
 #include <pthread.h>
 #include <stdlib.h>
 #include <string.h>
