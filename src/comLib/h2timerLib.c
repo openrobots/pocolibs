@@ -81,7 +81,8 @@ h2timerInit(void)
 		timerTab[nTimer].semSync = semBCreate(SEM_Q_PRIORITY,
 		    SEM_EMPTY);
 		if (timerTab[nTimer].semSync == NULL) {
-			logMsg("h2timerInit: error semBCreate %d\n", nTimer);
+			logMsg("h2timerInit: error semBCreate %d: 0x%x\n", 
+			    nTimer, errnoGet());
 			return ERROR;
 		}
 	}
