@@ -69,7 +69,7 @@ _sem_init(SEM_ID sem, unsigned int value)
 { 
 	int fd;
 
-	strlcpy(sem->name, TEMPLATE, sizeof(sem->name));
+	strncpy(sem->name, TEMPLATE, sizeof(sem->name));
 	fd = mkstemp(sem->name);
 	if (fd == -1)
 		return -1;
