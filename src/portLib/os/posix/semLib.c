@@ -67,7 +67,7 @@ semRecordH2ErrMsgs()
 static int
 _sem_init(SEM_ID sem, unsigned int value)
 { 
-	int fd;
+	int fd, saved_errno;
 
 	strncpy(sem->name, TEMPLATE, sizeof(sem->name));
 	fd = mkstemp(sem->name);
@@ -77,7 +77,10 @@ _sem_init(SEM_ID sem, unsigned int value)
 	close(fd);
 	sem->v.sem = sem_open(sem->name, O_CREAT|O_EXCL, 0700, value);
 	if (sem->v.sem == (sem_t *)SEM_FAILED) {
+		saved_errno = errno;
+		printf("sem_open returns SEM_FAILED errno %d\n", errno);
 		unlink(sem->name);
+		errno = saved_errno;
 		return -1;
 	}
 	return 0;
@@ -105,8 +108,8 @@ semBCreate(int options, SEM_B_STATE initialState)
     status = _sem_init(sem, initialState);
 #endif
     if (status != 0) {
-        free(sem);
 	errnoSet(errno);
+        free(sem);
 	return NULL;
     }
     return sem;
