@@ -293,6 +293,9 @@ taskSpawn(char *name, int priority, int options, int stackSize,
 #ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
     int policy;
 #endif /* HAVE_PTHREAD_ATTR_SETSCHEDPOLICY */
+#ifdef _POSIX_THREAD_ATTR_STACKSIZE
+    int pagesize = getpagesize();
+#endif
     int status;
     OS_TCB *tcb;
     char bufName[12];
@@ -358,6 +361,9 @@ taskSpawn(char *name, int priority, int options, int stackSize,
      */
     if (stackSize < PTHREAD_STACK_MIN) 
 	    stackSize = PTHREAD_STACK_MIN;
+    /* round to page size */
+    if (stackSize % pagesize != 0) 
+	stackSize = stackSize - (stackSize % pagesize) + pagesize;
     status = pthread_attr_setstacksize(&thread_attr, stackSize);
     if (status != 0) {
 	errnoSet(status);
