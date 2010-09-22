@@ -35,12 +35,9 @@ if test "x$opt_xenomai" = "xyes"; then
 		opt_xenomai=no
 	else
 		AC_MSG_RESULT([Configuring to use Xenomai])
+		XENO_CFLAGS=`${XENO_CONFIG} --skin posix --cflags`
+		XENO_LDFLAGS=`${XENO_CONFIG} --skin posix --ldflags`
 	fi
-fi
-
-if test "x$XENO_CONFIG" != "xno"; then
-	XENO_CFLAGS=`${XENO_CONFIG} --skin posix --cflags`
-	XENO_LDFLAGS=`${XENO_CONFIG} --skin posix --ldflags`
 fi
 
 CFLAGS="${CFLAGS} ${XENO_CFLAGS}"
