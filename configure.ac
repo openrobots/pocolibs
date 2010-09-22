@@ -17,17 +17,6 @@ if test "x${GCC}" = "xyes"; then
   CFLAGS="${CFLAGS} -Wall"
 fi
 
-
-AH_VERBATIM(__RCSID,[
-#ifndef __RCSID
-#ifdef __GNUC__
-#define __RCSID(id) static const char rcsid[] __attribute__((__unused__)) = id
-#else
-#define __RCSID(id) static const char rcsid[] = id
-#endif /* __GNUC__ */
-#endif
-])
-
 dnl --- OS flavour checks -----------------------------------------------
 
 OSAPI=posix
