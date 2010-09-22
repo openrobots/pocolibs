@@ -46,6 +46,11 @@ fi
 CFLAGS="${CFLAGS} ${XENO_CFLAGS}"
 LDFLAGS="${LDFLAGS} ${XENO_LDFLAGS}"
 
+# there's no simple way to check this
+case $host_os in
+	darwin*) CFLAGS="${CFLAGS} -DUSE_SEM_OPEN" ;;
+esac
+
 dnl --- end of OS flavour checks ----------------------------------------
 
 AC_LIBTOOL_DLOPEN
