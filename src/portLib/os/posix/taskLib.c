@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2003-2004 CNRS/LAAS
+ * Copyright (c) 1999, 2003-2010 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -348,7 +348,6 @@ taskSpawn(char *name, int priority, int options, int stackSize,
 	pthread_mutex_unlock(tcb->starter);
 	return ERROR;
     }
-#if 1
 #ifdef _POSIX_THREAD_ATTR_STACKSIZE
     /*
      * If supported, determine the default stack size and report
@@ -371,7 +370,6 @@ taskSpawn(char *name, int priority, int options, int stackSize,
 	return ERROR;
     }
 #endif    
-#endif
 #ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
     if (rr_min_priority > 0 && rr_min_priority > 0) {
 	    /* Set priority of new thread */
