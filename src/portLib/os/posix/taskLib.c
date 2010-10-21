@@ -358,7 +358,9 @@ taskSpawn(char *name, int priority, int options, int stackSize,
      * not be the size that will actually be used.  Solaris 2.5
      * uses a value of 0 to indicate the default.
      */
-    if (stackSize < PTHREAD_STACK_MIN) 
+    /* give at least 64kB */
+    if (stackSize < 65536) stackSize = 65536;
+    if (stackSize < PTHREAD_STACK_MIN)
 	    stackSize = PTHREAD_STACK_MIN;
     /* round to page size */
     if (stackSize % pagesize != 0) 
