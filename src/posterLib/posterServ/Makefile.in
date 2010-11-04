@@ -24,7 +24,7 @@ include $(top_builddir)/Init.make
 
 INSTALL=	@INSTALL@
 
-CPPFLAGS+=	-I.
+CPPFLAGS+=	-I. -I${top_srcdir}/src/posterLib
 
 vpath %.c @srcdir@
 
