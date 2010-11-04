@@ -592,14 +592,21 @@ remotePosterDelete(POSTER_ID posterId)
 	CLIENT *client = clientCreate(remPosterId->key, remPosterId->hostname);
 	
 	int *pres = poster_delete_1((int *)&(remPosterId->vxPosterId), client);
-	
-	if (pres != NULL) {
-		/* Mark remote poster Id as deleted */
-		remPosterId->dataSize = 0;
-		return(*pres);
-	} else {
-		return(ERROR);
+		
+	/* Mark remote poster Id as deleted */
+	remPosterId->dataSize = 0;
+
+	if (pres == NULL) {
+		/* RPC error */
+		errnoSet(S_remotePosterLib_BAD_RPC);
+		return ERROR;
 	}
+	if (*pres != OK) {
+		/* Error on the remote side */
+		errnoSet(*pres);
+		return(ERROR);
+	} 
+	return OK;
 }
 
 
