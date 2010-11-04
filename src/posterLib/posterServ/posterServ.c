@@ -179,16 +179,15 @@ int *
 SVC(poster_write_1)(POSTER_WRITE_PAR *param, struct svc_req *clnt)
 {
     static int res;
-    int err;
     POSTER_ID p = (POSTER_ID)param->id;
 
     res = posterLocalFuncs.write(p, param->offset,
 		      param->data.data_val, param->length);
     if (res == ERROR) {
-	err = errnoGet();
+	res = errnoGet();
 	if (verbose) {
 	    fprintf(stderr, "posterServ error: write ");
-	    h2printErrno(err);
+	    h2printErrno(res);
 	}
     }
     /* xdr_free((xdrproc_t)xdr_POSTER_WRITE_PAR, (char *)param); */
@@ -227,14 +226,13 @@ int *
 SVC(poster_delete_1)(int *id, struct svc_req *clnt)
 {
     static int res;
-    int err;
 
     res = posterLocalFuncs.delete((POSTER_ID)(*id));
     if (res == ERROR) {
-	err = errnoGet();
+	res = errnoGet();
 	if (verbose) {
 	    fprintf(stderr, "posterServ error: delete ");
-	    h2printErrno(err);
+	    h2printErrno(res);
 	}
     }
     return(&res);
