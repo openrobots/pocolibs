@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006 CNRS/LAAS
+ * Copyright (c) 2006,2010 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -13,7 +13,6 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#ident "$Id$"
 
 #include <pthread.h>
 #include <stdlib.h>
