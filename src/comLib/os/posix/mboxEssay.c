@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003 CNRS/LAAS
+ * Copyright (c) 1990, 2003, 2010 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -82,7 +82,7 @@ mboxEssay (void)
   char *bufMes;                     /* Ptr vers buffer de messages */
   MBOX_ID mboxId1, mboxId2;         /* Identificateurs de mailbox */
 
-  char *menu = "\n\
+  const char *const menu = "\n\
 Available functions:\
 \n\n\
 1 - Create a mailbox;\
