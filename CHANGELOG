@@ -1,7 +1,10 @@
-Version 2.8, xx, xxxx, xxxx
+Version 2.9, xx, xxxx, xxxx
 
 106. Change posterServ to use local poster functions only.
 105. taskLib: make sure each task gets at least 64k of stack space.
+
+Version 2.8, 22, September, 2010
+
 104. Nuke RCS ids in source files.
 103. Call mlockall() in h2initGlob() when running under Xenomai.
 102. Go back to pmap_unset() to unregister pre-existing posterServer service.
