@@ -230,6 +230,8 @@ AC_CHECK_FUNCS([fnmatch],[], [
 ])
 AC_SUBST(COMLIB_COMPATSRC)
 
+AC_CHECK_HEADERS([sys/tree.h])
+
 dnl --- Debugging options -----------------------------------------------
 
 AC_ARG_ENABLE(valgrind,
