@@ -237,6 +237,7 @@ SVC(poster_delete_1)(int *id, struct svc_req *clnt)
 	    h2printErrno(res);
 	}
     }
+    remposterIdRemove(*id);
     return(&res);
 }
 
