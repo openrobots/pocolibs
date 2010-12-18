@@ -1,6 +1,6 @@
 # -*- Makefile -*-
 #
-# Copyright (c) 1996, 2003 CNRS/LAAS
+# Copyright (c) 1996,2003,2010 CNRS/LAAS
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -29,7 +29,8 @@ CPPFLAGS+=	-I. -I${top_srcdir}/src/posterLib
 vpath %.c @srcdir@
 
 SRCS = \
-	posterServ.c
+	posterServ.c \
+	remPosterId.c
 
 SRCS_RPC = \
 	posters_svc.c

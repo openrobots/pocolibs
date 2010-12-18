@@ -45,6 +45,7 @@
 
 #include <h2devLib.h>
 #include "posterLibPriv.h"
+#include "remPosterId.h"
 
 #if defined(HAVE_RPCGEN_C)
 #define SVC(f) f##_svc
@@ -134,7 +135,7 @@ SVC(poster_find_1)(char **nom, struct svc_req *clnt)
     } 
 
     /* fill the data to be returned to the client */
-    res.id = (int)id;
+    res.id = remposterIdAlloc(id);
     res.status = POSTER_OK;
     return(&res);
 }
@@ -145,10 +146,10 @@ POSTER_CREATE_RESULT *
 SVC(poster_create_1)(POSTER_CREATE_PAR *param, struct svc_req *clnt)
 {
     static POSTER_CREATE_RESULT res;
-    
+    POSTER_ID id;
+
     /* create the poster locally */
-    if (posterLocalFuncs.create(param->name, param->length, 
-	    (POSTER_ID*)&(res.id)) == ERROR) {
+    if (posterLocalFuncs.create(param->name, param->length, &id) == ERROR) {
 	res.status = errnoGet();
 	if (verbose) {
 	    fprintf(stderr, "posterServ error: create: ");
@@ -158,7 +159,7 @@ SVC(poster_create_1)(POSTER_CREATE_PAR *param, struct svc_req *clnt)
     } 
 
     /* set correct endianness in h2dev and in POSTER_STR */
-    if (posterLocalFuncs.setEndianness((POSTER_ID)(res.id), param->endianness)
+    if (posterLocalFuncs.setEndianness(id, param->endianness)
 	== ERROR) {
       res.status = errnoGet();
       if (verbose) {
@@ -167,6 +168,7 @@ SVC(poster_create_1)(POSTER_CREATE_PAR *param, struct svc_req *clnt)
       }
     }
  
+    res.id = remposterIdAlloc(id);
     /* OK */
     res.status = POSTER_OK;
     
@@ -179,7 +181,7 @@ int *
 SVC(poster_write_1)(POSTER_WRITE_PAR *param, struct svc_req *clnt)
 {
     static int res;
-    POSTER_ID p = (POSTER_ID)param->id;
+    POSTER_ID p = (POSTER_ID)remposterIdLookup(param->id);
 
     res = posterLocalFuncs.write(p, param->offset,
 		      param->data.data_val, param->length);
@@ -200,7 +202,7 @@ POSTER_READ_RESULT *
 SVC(poster_read_1)(POSTER_READ_PAR *param, struct svc_req *clnt)
 {
     static POSTER_READ_RESULT res;
-    POSTER_ID p = (POSTER_ID)param->id;
+    POSTER_ID p = (POSTER_ID)remposterIdLookup(param->id);
 
     xdr_free((xdrproc_t)xdr_POSTER_READ_RESULT, (char *)&res);
     
@@ -227,7 +229,7 @@ SVC(poster_delete_1)(int *id, struct svc_req *clnt)
 {
     static int res;
 
-    res = posterLocalFuncs.delete((POSTER_ID)(*id));
+    res = posterLocalFuncs.delete((POSTER_ID)remposterIdLookup(*id));
     if (res == ERROR) {
 	res = errnoGet();
 	if (verbose) {
@@ -244,7 +246,7 @@ POSTER_IOCTL_RESULT *
 SVC(poster_ioctl_1)(POSTER_IOCTL_PAR *param, struct svc_req *clnt)
 {
     static POSTER_IOCTL_RESULT res;
-    POSTER_ID p = (POSTER_ID)param->id;
+    POSTER_ID p = (POSTER_ID)remposterIdLookup(param->id);
     H2TIME date;
 
     memset(&date, 0, sizeof(H2TIME));

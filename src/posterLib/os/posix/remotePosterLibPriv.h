@@ -20,7 +20,7 @@
 
 /* Structure of remote posters */
 typedef  struct {
-    void *vxPosterId;		/* Id of the remote poster (hist. vxWorks) */
+    int vxPosterId;		/* Id of the remote poster (hist. vxWorks) */
     const char *hostname;	/* host of the poster */
     pthread_key_t key;		/* key to thread-specific client ID */
     unsigned int dataSize;	/* Size of the poster (for local cache) */

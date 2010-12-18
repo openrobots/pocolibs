@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 2004 CNRS/LAAS
+ * Copyright (c) 1996, 2004, 2010 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -152,7 +152,7 @@ remotePosterCreate(const char *name,	/* Name of the device to create */
 		return(ERROR);
 	}
 	
-	remPosterId->vxPosterId = (void *)res->id;
+	remPosterId->vxPosterId = res->id;
 	remPosterId->hostname = posterHost;
 	remPosterId->key = key;
 	remPosterId->pid = getpid();
@@ -212,7 +212,7 @@ remotePosterWrite (POSTER_ID posterId,	/* Id of the poster */
 	}
 	if (nbytes == 0)
 		return 0;
-	param.id = (int)(long)remPosterId->vxPosterId;
+	param.id = remPosterId->vxPosterId;
 	param.offset = offset;
 	param.length = nbytes;
 	param.data.data_val = buf;
@@ -282,7 +282,7 @@ posterFindPath(const char *posterName, REMOTE_POSTER_ID *pPosterId)
 				if (*pPosterId == NULL) {
 					return(ERROR);
 				}
-				(*pPosterId)->vxPosterId = (void *)(long)(res->id);
+				(*pPosterId)->vxPosterId = res->id;
 				(*pPosterId)->key = key;
 				(*pPosterId)->hostname = h;
 				(*pPosterId)->dataSize = res->length;
@@ -353,7 +353,7 @@ remotePosterFind (const char *posterName, POSTER_ID *pPosterId)
 	remPosterId = (REMOTE_POSTER_ID)malloc(sizeof(REMOTE_POSTER_STR));
 	if (remPosterId == NULL)
 		return(ERROR);
-	remPosterId->vxPosterId = (void *)(long)(res->id);
+	remPosterId->vxPosterId = res->id;
 	remPosterId->key = key;
 	remPosterId->hostname = posterHost;
 	/* record endianness in REMOTE_POSTER_STR */
@@ -396,7 +396,7 @@ remotePosterRead(POSTER_ID posterId,   /* Id of the poster to read */
 	}
 	if (nbytes == 0)
 		return 0;
-	param.id = (int)(long)(remPosterId->vxPosterId);
+	param.id = remPosterId->vxPosterId;
 	param.length = nbytes;
 	param.offset = offset;
 	
@@ -458,7 +458,7 @@ remotePosterTake(POSTER_ID posterId, POSTER_OP op)
 		return(ERROR);
 	} /* switch */
 	
-	param.id = (int)(long)(remPosterId->vxPosterId);
+	param.id = remPosterId->vxPosterId;
 	param.length = remPosterId->dataSize;
 	param.offset = 0;
 	
@@ -520,7 +520,7 @@ remotePosterGive(POSTER_ID posterId)
 			return ERROR;
 		}
 		/* copy local cache back to the server */
-		param.id = (int)(long)remPosterId->vxPosterId;
+		param.id = remPosterId->vxPosterId;
 		param.offset = 0;
 		param.length = remPosterId->dataSize;
 		param.data.data_val = remPosterId->dataCache;
@@ -591,7 +591,7 @@ remotePosterDelete(POSTER_ID posterId)
 	REMOTE_POSTER_ID remPosterId = (REMOTE_POSTER_ID)posterId;
 	CLIENT *client = clientCreate(remPosterId->key, remPosterId->hostname);
 	
-	int *pres = poster_delete_1((int *)&(remPosterId->vxPosterId), client);
+	int *pres = poster_delete_1(&(remPosterId->vxPosterId), client);
 		
 	/* Mark remote poster Id as deleted */
 	remPosterId->dataSize = 0;
@@ -638,7 +638,7 @@ remotePosterIoctl(POSTER_ID posterId,	/* poster Id */
 		return OK;
 	}
 	
-	param.id = (int)(long)remPosterId->vxPosterId;
+	param.id = remPosterId->vxPosterId;
 	param.cmd = code;
 	
 	res = poster_ioctl_1(&param, client);
