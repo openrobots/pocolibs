@@ -16,6 +16,7 @@
 #include "pocolibs-config.h"
 
 #include <stdio.h>
+#include <stdarg.h>
 
 #define LOGLIB_C
 #include "portLib.h"
@@ -38,8 +39,14 @@ logEnd(void)
 }
 
 int
-logMsg(const char *fmt,
-       int arg1, int arg2, int arg3, int arg4, int arg5, int arg6)
+logMsg(const char *fmt, ...)
 {
-   return fprintf(stderr, fmt, arg1, arg2, arg3, arg4, arg5, arg6);
+	int retval;
+	va_list ap;
+
+	va_start(ap, fmt);
+	
+	retval = vfprintf(stderr, fmt, ap);
+	va_end(ap);
+	return retval;
 }

@@ -25,12 +25,7 @@ extern "C" {
 extern STATUS	logInit(int fd, int maxMsgs);
 extern void	logEnd(void);
 
-#ifdef LOGLIB_C
-extern int logMsg ( const char *fmt, int arg1, int arg2, int arg3, int arg4,
-		    int arg5, int arg6 );
-#else
 extern int logMsg ( const char *fmt, ... );
-#endif
 
 #ifdef __cplusplus
 };
