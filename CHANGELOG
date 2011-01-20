@@ -1,5 +1,7 @@
 Version 2.9, xx, xxxx, xxxx
 
+108. Produce an error if trying to create a device name longer than 
+     H2_DEV_MAX_DEVICE_NAME
 107. Make remotePosterLib/posterServ LP64 safe.
 106. Change posterServ to use local poster functions only.
 105. taskLib: make sure each task gets at least 64k of stack space.

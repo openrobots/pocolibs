@@ -83,6 +83,13 @@ h2devAlloc(const char *name, H2_DEV_TYPE type)
     for (i = 0; i < H2_DEV_MAX; i++) {
 	if (h2Devs[i].type == H2_DEV_TYPE_NONE) {
 	    /* Trouve' */
+	    if (snprintf(h2Devs[i].name, H2_DEV_MAX_NAME, "%s", name) 
+		>= H2_DEV_MAX_NAME) {
+		h2semGive(0);
+		LOGDBG(("comLib:h2devAlloc: device name too long\n"));
+		errnoSet(S_h2devLib_BAD_PARAMETERS);
+		return ERROR;
+	    }
 	    strncpy(h2Devs[i].name, name, H2_DEV_MAX_NAME);
 	    h2Devs[i].type = type;
 	    h2Devs[i].uid = getuid();
