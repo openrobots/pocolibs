@@ -272,6 +272,34 @@ SVC(poster_ioctl_1)(POSTER_IOCTL_PAR *param, struct svc_req *clnt)
     return &res;
 }
 
+POSTER_LIST_RESULT *
+SVC(poster_list_1)(void *unused, struct svc_req *clnt)
+{
+    static POSTER_LIST_RESULT res;
+    POSTER_LIST *list = NULL, *l;
+    int i;
+
+    xdr_free((xdrproc_t)xdr_POSTER_LIST_RESULT, (char *)&res);
+    if (h2devAttach() == ERROR) {
+	return NULL;
+    }
+    for (i = 0; i < H2_DEV_MAX; i++) {
+	if (H2DEV_TYPE(i) == H2_DEV_TYPE_POSTER) {
+	    l = malloc(sizeof(struct POSTER_LIST));
+	    l->next = list;
+	    snprintf(l->name, H2_DEV_MAX_NAME, "%s", H2DEV_NAME(i));
+	    l->id = i;
+	    l->size = H2DEV_POSTER_SIZE(i);
+	    l->fresh = H2DEV_POSTER_FLG_FRESH(i);
+	    l->tv_sec = H2DEV_POSTER_DATE(i)->tv_sec;
+	    l->tv_nsec = H2DEV_POSTER_DATE(i)->tv_nsec;
+	    list = l;
+	}
+    } /* for */
+    res.list = list;
+    return &res;
+}
+
 /*----------------------------------------------------------------------*/
 
 static RETSIGTYPE

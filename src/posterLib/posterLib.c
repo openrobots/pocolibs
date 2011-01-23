@@ -332,8 +332,8 @@ posterShow(void)
     if (posterLocalFuncs.show() == ERROR) {
 	return ERROR;
     }
-    /* For now, no way to list remote posters, sigh */
-    return OK;
+    
+    return posterRemoteFuncs.show();
 }
 
 /*----------------------------------------------------------------------*/

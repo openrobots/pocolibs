@@ -56,6 +56,7 @@ static STATUS remotePosterSetEndianness(POSTER_ID posterId,
     H2_ENDIANNESS endianness);
 static STATUS remotePosterGetEndianness(POSTER_ID posterId, 
     H2_ENDIANNESS *endianness);
+static STATUS remotePosterShowHost(const char *host);
 
 const POSTER_FUNCS posterRemoteFuncs = {
 	remotePosterInit,
@@ -663,7 +664,50 @@ remotePosterIoctl(POSTER_ID posterId,	/* poster Id */
 	return OK;
 }
 
+static STATUS
+remotePosterShowHost(const char *host)
+{
+    POSTER_LIST_RESULT *res = NULL;
+    POSTER_LIST *l;
+    CLIENT *client = NULL;
+    H2TIME h2time;
+    H2TIMESPEC h2ts;
+    pthread_key_t key;
+    char *h;
 
+    if (clientKeyFind(host, &key) == -1) {
+	fprintf(stderr, "remotePosterShow: %s: clientKeyFind failed\n",
+		host);
+	return ERROR;
+    }
+    h = strdup(host);
+    client = clientCreate(key, h);
+    if (client != NULL) {
+	res = poster_list_1(NULL, client);
+	if (res == NULL) {
+	    clnt_perror(client, "remotePosterList");
+	    return ERROR;
+	}
+	l = res->list;
+	while (l) {
+	    logMsg("%-32s %-8s:%-3d %8d", l->name, host, l->id, l->size);
+	    if (l->fresh) {
+		h2ts.tv_sec = l->tv_sec;
+		h2ts.tv_nsec = l->tv_nsec;
+		h2timeFromTimespec(&h2time, &h2ts);
+		logMsg(" %02dh:%02dmin%02ds %lu\n", h2time.hour, h2time.minute,
+		       h2time.sec, h2time.ntick);
+	    } else
+		logMsg(" EMPTY_POSTER!\n");
+	    
+	    l = l->next;
+	}
+	xdr_free((xdrproc_t)xdr_POSTER_LIST_RESULT, (char *)res);
+    }
+    free(h);
+    return OK;
+}
+    
 
 /*****************************************************************************
 *
@@ -679,6 +723,19 @@ static STATUS
 remotePosterShow(void)
 
 {
-	fprintf(stderr, "remotePosterShow: not implemented\n");
-	return (ERROR);
+    char *host, *pp, *tmp = NULL;
+    char *posterPath = getenv("POSTER_PATH");
+
+    if (posterHost != NULL) {
+	remotePosterShowHost(posterHost);
+    }
+    if (posterPath == NULL || *posterPath == '\0')
+	return OK;
+    pp = strdup(posterPath);
+    for (host = strtok_r(pp, ":", &tmp); host != NULL; 
+	 host = strtok_r(NULL, ":", &tmp)) {
+	remotePosterShowHost(host);
+    }
+    free(pp);
+    return OK;
 }

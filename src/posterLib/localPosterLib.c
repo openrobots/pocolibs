@@ -463,11 +463,11 @@ localPosterShow(void)
 	return ERROR;
     }
     logMsg("\n");
-    logMsg("NAME                             Id      Size T(last write)\n");
-    logMsg("------------------------------- --- --------- -------------\n");
+    logMsg("NAME                              Id/host      Size T(last write)\n");
+    logMsg("-------------------------------- -------- --------- -------------\n");
     for (i = 0; i < H2_DEV_MAX; i++) {
 	if (H2DEV_TYPE(i) == H2_DEV_TYPE_POSTER) {
-	    logMsg("%-32s %3d %8d", H2DEV_NAME(i), i,
+	    logMsg("%-32s %8d %8d", H2DEV_NAME(i), i,
 		   H2DEV_POSTER_SIZE(i));
 	    if (H2DEV_POSTER_FLG_FRESH(i)) {
 		date = H2DEV_POSTER_DATE(i);
