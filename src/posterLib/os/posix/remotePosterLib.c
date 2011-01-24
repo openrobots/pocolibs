@@ -690,7 +690,7 @@ remotePosterShowHost(const char *host)
 	}
 	l = res->list;
 	while (l) {
-	    logMsg("%-32s %-8s:%-3d %8d", l->name, host, l->id, l->size);
+	    logMsg("%-32s %8s:%-3d %8d", l->name, host, l->id, l->size);
 	    if (l->fresh) {
 		h2ts.tv_sec = l->tv_sec;
 		h2ts.tv_nsec = l->tv_nsec;
