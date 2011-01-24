@@ -85,12 +85,9 @@ clientCreate(pthread_key_t key, const char *hostname)
 	if (rpc_hostname == NULL) 
 		return NULL;
 	client = clnt_create(rpc_hostname, POSTER_SERV, POSTER_VERSION, "tcp");
-	if (client == NULL) {
-		clnt_pcreateerror(rpc_hostname);
-		goto done;
-	}
-	pthread_setspecific(key, client);
-done:
+	if (client != NULL)
+		pthread_setspecific(key, client);
+
 	free(rpc_hostname);
 	return client;
 }

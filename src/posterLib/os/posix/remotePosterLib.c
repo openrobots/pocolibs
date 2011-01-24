@@ -125,7 +125,7 @@ remotePosterCreate(const char *name,	/* Name of the device to create */
 	client = clientCreate(key, posterHost);
 	if (client == NULL) {
 		errnoSet(S_remotePosterLib_BAD_RPC);
-		clnt_pcreateerror("remotePosterLib/cnt_create");
+		clnt_pcreateerror(posterHost);
 		return(ERROR);
 	}
 
