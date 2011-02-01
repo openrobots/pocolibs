@@ -277,22 +277,13 @@ taskStarter(void *data)
     return NULL;
 }
 
+
 /*----------------------------------------------------------------------*/
 
-/*
- * Create a new task 
- */
-long
-taskSpawn(char *name, int priority, int options, int stackSize,
-	  FUNCPTR entryPt, int arg1, int arg2, int arg3, int arg4, int arg5,
-	  int arg6, int arg7, int arg8, int arg9, int arg10)
+static OS_TCB *
+newTcb(char *name, int priority, int options, int stackSize,
+       pthread_attr_t *attr)
 {
-    pthread_attr_t thread_attr;
-    pthread_t thread_id;
-    struct sched_param thread_param;
-#ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
-    int policy;
-#endif /* HAVE_PTHREAD_ATTR_SETSCHEDPOLICY */
 #ifdef _POSIX_THREAD_ATTR_STACKSIZE
     int pagesize = getpagesize();
 #endif
@@ -306,13 +297,13 @@ taskSpawn(char *name, int priority, int options, int stackSize,
     tcb = (OS_TCB *)malloc(sizeof(OS_TCB));
     if (tcb == NULL) {
 	errnoSet(S_portLib_NO_MEMORY);
-	return ERROR;
+	return NULL;
     }
     tcb->starter = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t));
     if (tcb->starter == NULL) {
 	    errnoSet(S_portLib_NO_MEMORY);
 	    free(tcb);
-	    return ERROR;
+	    return NULL;
     }
     /* Startup mutex - guaranties the the tcb isn't destroyed early */
     pthread_mutex_init(tcb->starter, NULL);
@@ -328,7 +319,6 @@ taskSpawn(char *name, int priority, int options, int stackSize,
     printf("taskSpawn \"%s\" %p\n", tcb->name, tcb);
 #endif
     tcb->options = options;
-    tcb->entry = entryPt;
     tcb->errorStatus = 0;
     tcb->pid = getpid();
     tcb->userData = 0; /* XXX */
@@ -336,17 +326,17 @@ taskSpawn(char *name, int priority, int options, int stackSize,
     /* 
      * Initialize thread attributes 
      */
-    status = pthread_attr_init (&thread_attr);
+    status = pthread_attr_init(attr);
     if (status != 0) {
 	errnoSet(status);
-	return ERROR;
+	return NULL;
     }
-    status = pthread_attr_setdetachstate(&thread_attr, 
+    status = pthread_attr_setdetachstate(attr, 
 					 PTHREAD_CREATE_DETACHED);
     if (status != 0) {
 	errnoSet(status);
 	pthread_mutex_unlock(tcb->starter);
-	return ERROR;
+	return NULL;
     }
 #ifdef _POSIX_THREAD_ATTR_STACKSIZE
     /*
@@ -365,11 +355,11 @@ taskSpawn(char *name, int priority, int options, int stackSize,
     /* round to page size */
     if (stackSize % pagesize != 0) 
 	stackSize = stackSize - (stackSize % pagesize) + pagesize;
-    status = pthread_attr_setstacksize(&thread_attr, stackSize);
+    status = pthread_attr_setstacksize(attr, stackSize);
     if (status != 0) {
 	errnoSet(status);
 	pthread_mutex_unlock(tcb->starter);
-	return ERROR;
+	return NULL;
     }
 #endif    
 #ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
@@ -378,16 +368,16 @@ taskSpawn(char *name, int priority, int options, int stackSize,
 	    thread_param.sched_priority = priorityVxToPosix(priority);
 #ifndef __linux__
 	    /* XXX Voir message de commit de la version 1.17 */
-	    status = pthread_attr_setschedpolicy(&thread_attr, SCHED_RR);
+	    status = pthread_attr_setschedpolicy(attr, SCHED_RR);
 	    switch (status) {
 	    case 0:
 		    /* set policy is ok, set priority */
-		    status = pthread_attr_setschedparam(&thread_attr, 
+		    status = pthread_attr_setschedparam(attr, 
 							&thread_param);
 		    if (status != 0) {
 			    errnoSet(status);
 			    pthread_mutex_unlock(tcb->starter);
-			    return ERROR;
+			    return NULL;
 		    }
 		    break;
 		    
@@ -404,29 +394,22 @@ taskSpawn(char *name, int priority, int options, int stackSize,
 	    default :
 		    errnoSet(status);
 		    pthread_mutex_unlock(tcb->starter);
-		    return ERROR;
+		    return NULL;
 	    } /* switch */
 #endif /* __linux__ */
     }
 #endif /* HAVE_PTHREAD_ATTR_SETSCHEDPOLICY */
+    return tcb;
+}
 
-    tcb->params.arg1 = arg1;
-    tcb->params.arg2 = arg2;
-    tcb->params.arg3 = arg3;
-    tcb->params.arg4 = arg4;
-    tcb->params.arg5 = arg5;
-    tcb->params.arg6 = arg6;
-    tcb->params.arg7 = arg7;
-    tcb->params.arg8 = arg8;
-    tcb->params.arg9 = arg9;
-    tcb->params.arg10 = arg10;
+static void
+registerTcb(OS_TCB *tcb, pthread_t thread_id)
+{
+    struct sched_param thread_param;
+#ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
+    int policy;
+#endif /* HAVE_PTHREAD_ATTR_SETSCHEDPOLICY */
 
-    status = pthread_create(&thread_id, &thread_attr, taskStarter, tcb);
-    if (status != 0) {
-	errnoSet(status);
-	pthread_mutex_unlock(tcb->starter);
-	return ERROR;
-    }
 #ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
     /* Read back the scheduler parameters of the created thread */
     pthread_getschedparam(thread_id, &policy, &thread_param);
@@ -446,6 +429,44 @@ taskSpawn(char *name, int priority, int options, int stackSize,
     tcb->next = taskList;
     taskList = tcb;
     pthread_mutex_unlock(tcb->starter);
+}
+
+/*
+ * Create a new task 
+ */
+long
+taskSpawn(char *name, int priority, int options, int stackSize,
+	  FUNCPTR entryPt, int arg1, int arg2, int arg3, int arg4, int arg5,
+	  int arg6, int arg7, int arg8, int arg9, int arg10)
+{
+    pthread_attr_t thread_attr;
+    pthread_t thread_id;
+    int status;
+    OS_TCB *tcb;
+    
+    tcb = newTcb(name, priority, options, stackSize, &thread_attr);
+    if (tcb == NULL) 
+	return ERROR;
+
+    tcb->entry = entryPt;
+    tcb->params.arg1 = arg1;
+    tcb->params.arg2 = arg2;
+    tcb->params.arg3 = arg3;
+    tcb->params.arg4 = arg4;
+    tcb->params.arg5 = arg5;
+    tcb->params.arg6 = arg6;
+    tcb->params.arg7 = arg7;
+    tcb->params.arg8 = arg8;
+    tcb->params.arg9 = arg9;
+    tcb->params.arg10 = arg10;
+
+    status = pthread_create(&thread_id, &thread_attr, taskStarter, tcb);
+    if (status != 0) {
+	errnoSet(status);
+	pthread_mutex_unlock(tcb->starter);
+	return ERROR;
+    }
+    registerTcb(tcb, thread_id);
     return (long)tcb;
 }
 
