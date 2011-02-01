@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2003-2008 CNRS/LAAS
+ * Copyright (c) 1999, 2003-2011 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -38,11 +38,11 @@ typedef struct OS_TCB OS_TCB, WIND_TCB;
  */
 extern STATUS taskLibInit(void);
 #ifdef TASKLIB_C
-extern long taskSpawn(char *, int, int, int, FUNCPTR, int, int, int, 
+extern long taskSpawn(char *, int, int, int, FUNCPTR, int, int, int,
 		       int, int, int, int, int, int, int);
 #else
 /* Awful hack */
-extern long taskSpawn(char *name, int priority, int options, 
+extern long taskSpawn(char *name, int priority, int options,
     int stackSize, FUNCPTR entryPt, ... );
 #endif
 extern long taskSpawn2(char *name, int priority, int options, int stackSize,

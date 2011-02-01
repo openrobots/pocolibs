@@ -83,7 +83,7 @@ struct OS_TCB {
 #define TASK_MAGIC  0x5441534b
 
 /*
- * Task hooks globals 
+ * Task hooks globals
  */
 typedef struct TASK_HOOK_LIST {
     FUNCPTR hook;
@@ -103,8 +103,8 @@ static STATUS executeHooks(TASK_HOOK_LIST *list, OS_TCB *tcb);
 int
 portRecordH2ErrMsgs(void)
 {
-    return h2recordErrMsgs("portRecordH2ErrMsg", "portLib", M_portLib, 
-			   sizeof(portLibH2errMsgs)/sizeof(H2_ERROR), 
+    return h2recordErrMsgs("portRecordH2ErrMsg", "portLib", M_portLib,
+			   sizeof(portLibH2errMsgs)/sizeof(H2_ERROR),
 			   portLibH2errMsgs);
 }
 /*----------------------------------------------------------------------*/
@@ -118,7 +118,7 @@ priorityVxToPosix(int priority)
 {
 	if (rr_max_priority != -1) {
 		return rr_min_priority +
-                    (255 - priority)*(rr_max_priority- rr_min_priority)/255;
+		    (255 - priority)*(rr_max_priority- rr_min_priority)/255;
 	} else {
 		return -1;
 	}
@@ -127,13 +127,13 @@ priorityVxToPosix(int priority)
 
 /*----------------------------------------------------------------------*/
 
-static int 
+static int
 priorityPosixToVx(int priority)
 {
 	if (rr_min_priority != rr_max_priority)
 		return (rr_max_priority - priority)*255
 			/(rr_max_priority - rr_min_priority);
-	else 
+	else
 		return 0;	/* arbitrary value */
 }
 
@@ -149,7 +149,7 @@ taskLibInit(void)
     struct sched_param param;
     int policy;
     char name[12];
-    
+
     /* Determine the min and max allowable priorities */
 #ifdef PTHREAD_MIN_PRIORITY
     rr_min_priority = PTHREAD_MIN_PRIORITY;
@@ -164,7 +164,7 @@ taskLibInit(void)
 
     /* Create a thread specific key to access TCB */
     pthread_key_create(&taskControlBlock, NULL);
-    
+
     /* allocate a TCB for main thread */
     tcb = (OS_TCB *)malloc(sizeof(OS_TCB));
     if (tcb == NULL) {
@@ -212,7 +212,7 @@ taskLibInit(void)
 /*
  * Thread clean-up function
  */
-void 
+void
 taskCleanUp(void *data)
 {
     OS_TCB *tcb = (OS_TCB *)data;
@@ -243,9 +243,9 @@ taskCleanUp(void *data)
 
 /*----------------------------------------------------------------------*/
 
-/* 
- * A Helper function to convert form VxWorks task function prototype to 
- *  pthreads function prototype 
+/*
+ * A Helper function to convert form VxWorks task function prototype to
+ *  pthreads function prototype
  */
 void *
 taskStarter(void *data)
@@ -253,7 +253,7 @@ taskStarter(void *data)
     OS_TCB *tcb = (OS_TCB *)data;
     TASK_PARAMS *p = (TASK_PARAMS *)&(tcb->params);
     static int result;
-    
+
     pthread_mutex_lock(tcb->starter); 	/* released in taskCleanUp() */
     tcb->pid = getpid();
 
@@ -271,7 +271,7 @@ taskStarter(void *data)
     printf("taskStart \"%s\" %p\n", tcb->name, tcb);
 #endif
 
-    result = (*(tcb->entry))(p->arg1, p->arg2, p->arg3, p->arg4, p->arg5, 
+    result = (*(tcb->entry))(p->arg1, p->arg2, p->arg3, p->arg4, p->arg5,
 				p->arg6, p->arg7, p->arg8, p->arg9, p->arg10);
     /* Execute cleanup functions */
     pthread_cleanup_pop(1);
@@ -290,7 +290,7 @@ taskStarter2(void *data)
     OS_TCB *tcb = (OS_TCB *)data;
     void *args = tcb->params2;
     void *result;
-    
+
     pthread_mutex_lock(tcb->starter); 	/* released in taskCleanUp() */
     tcb->pid = getpid();
 
@@ -319,7 +319,7 @@ taskStarter2(void *data)
 /*----------------------------------------------------------------------*/
 
 /*
- * Create and initialize a new TCB, 
+ * Create and initialize a new TCB,
  * and prepare pthread attributes for the new task
  */
 static OS_TCB *
@@ -334,7 +334,7 @@ newTcb(char *name, int priority, int options, int stackSize,
     char bufName[12];
 
     /*
-     * Allocate a TCB 
+     * Allocate a TCB
      */
     tcb = (OS_TCB *)malloc(sizeof(OS_TCB));
     if (tcb == NULL) {
@@ -364,16 +364,16 @@ newTcb(char *name, int priority, int options, int stackSize,
     tcb->errorStatus = 0;
     tcb->pid = getpid();
     tcb->userData = 0; /* XXX */
-    
-    /* 
-     * Initialize thread attributes 
+
+    /*
+     * Initialize thread attributes
      */
     status = pthread_attr_init(attr);
     if (status != 0) {
 	errnoSet(status);
 	return NULL;
     }
-    status = pthread_attr_setdetachstate(attr, 
+    status = pthread_attr_setdetachstate(attr,
 					 PTHREAD_CREATE_DETACHED);
     if (status != 0) {
 	errnoSet(status);
@@ -395,7 +395,7 @@ newTcb(char *name, int priority, int options, int stackSize,
     if (stackSize < PTHREAD_STACK_MIN)
 	    stackSize = PTHREAD_STACK_MIN;
     /* round to page size */
-    if (stackSize % pagesize != 0) 
+    if (stackSize % pagesize != 0)
 	stackSize = stackSize - (stackSize % pagesize) + pagesize;
     status = pthread_attr_setstacksize(attr, stackSize);
     if (status != 0) {
@@ -403,7 +403,7 @@ newTcb(char *name, int priority, int options, int stackSize,
 	pthread_mutex_unlock(tcb->starter);
 	return NULL;
     }
-#endif    
+#endif
 #ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
     if (rr_min_priority > 0 && rr_min_priority > 0) {
 	    /* Set priority of new thread */
@@ -414,7 +414,7 @@ newTcb(char *name, int priority, int options, int stackSize,
 	    switch (status) {
 	    case 0:
 		    /* set policy is ok, set priority */
-		    status = pthread_attr_setschedparam(attr, 
+		    status = pthread_attr_setschedparam(attr,
 							&thread_param);
 		    if (status != 0) {
 			    errnoSet(status);
@@ -422,17 +422,17 @@ newTcb(char *name, int priority, int options, int stackSize,
 			    return NULL;
 		    }
 		    break;
-		    
+
 #ifdef ENOTSUP
 # if ENOTSUP != EOPNOTSUPP
 	    case ENOTSUP:
 # endif
 #endif /* ENOTSUP */
 	    case EOPNOTSUPP:
-		    /* fprintf(stderr, 
+		    /* fprintf(stderr,
 		       "warning: cannot set RR scheduling policy\n"); */
 		    break;
-		    
+
 	    default :
 		    errnoSet(status);
 		    pthread_mutex_unlock(tcb->starter);
@@ -479,7 +479,7 @@ registerTcb(OS_TCB *tcb, pthread_t thread_id)
 }
 /*----------------------------------------------------------------------*/
 /*
- * Create a new task 
+ * Create a new task
  */
 long
 taskSpawn(char *name, int priority, int options, int stackSize,
@@ -490,9 +490,9 @@ taskSpawn(char *name, int priority, int options, int stackSize,
     pthread_t thread_id;
     int status;
     OS_TCB *tcb;
-    
+
     tcb = newTcb(name, priority, options, stackSize, &thread_attr);
-    if (tcb == NULL) 
+    if (tcb == NULL)
 	return ERROR;
 
     tcb->entry = entryPt;
@@ -519,7 +519,7 @@ taskSpawn(char *name, int priority, int options, int stackSize,
 
 /*----------------------------------------------------------------------*/
 /*
- * version of taskSpawn() that passes parameters to the new task as a 
+ * version of taskSpawn() that passes parameters to the new task as a
  * single pointer
  */
 long
@@ -558,7 +558,7 @@ taskFromThread(char *name)
     char bufName[12];
 
     /*
-     * Allocate a TCB 
+     * Allocate a TCB
      */
     tcb = (OS_TCB *)malloc(sizeof(OS_TCB));
     if (tcb == NULL) {
@@ -623,7 +623,7 @@ taskFromThread(char *name)
 /*----------------------------------------------------------------------*/
 
 /*
- * Delete a task 
+ * Delete a task
  */
 STATUS
 taskDelete(long tid)
@@ -645,18 +645,18 @@ taskDelete(long tid)
     if (status != 0) {
 	errnoSet(status);
 	return ERROR;
-    }    
-    /* Removing the task from the tasklist 
+    }
+    /* Removing the task from the tasklist
        is done in the thread cleanup handler */
     return OK;
 }
 
 /*----------------------------------------------------------------------*/
 
-/* 
+/*
  * Return the name of a task
- */   
-const char * 
+ */
+const char *
 taskName(long tid)
 {
    OS_TCB *tcb = taskTcb(tid);
@@ -668,14 +668,14 @@ taskName(long tid)
 
 /*----------------------------------------------------------------------*/
 
-/* 
+/*
  * Suspend a task
  *
- */   
+ */
 
 #define BT_SIZE 100
 
-STATUS 
+STATUS
 taskSuspend(long tid)
 {
     OS_TCB *tcb;
@@ -705,11 +705,11 @@ taskSuspend(long tid)
 }
 
 /*----------------------------------------------------------------------*/
- 
+
 /*
- * Resume a suspended task 
+ * Resume a suspended task
  */
-STATUS 
+STATUS
 taskResume(long tid)
 {
     errnoSet(S_portLib_NOT_IMPLEMENTED);
@@ -721,7 +721,7 @@ taskResume(long tid)
 /*
  * define a new priority for a task
  */
-STATUS 
+STATUS
 taskPrioritySet(long tid, int newPriority)
 {
     OS_TCB *tcb;
@@ -730,15 +730,15 @@ taskPrioritySet(long tid, int newPriority)
     int status;
 #endif
 
-    if (tid == 0) 
+    if (tid == 0)
  	    tid = taskIdSelf();
-     
+
      tcb = (OS_TCB *)tid;
      if (tcb->magic != TASK_MAGIC) {
 	 errnoSet(S_portLib_INVALID_TASKID);
 	 return ERROR;
      }
-     
+
 #ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
     my_param.sched_priority = newPriority;
     status = pthread_setschedparam(tcb->tid, SCHED_RR, &my_param);
@@ -764,7 +764,7 @@ taskPriorityGet(long tid, int *pPriority)
     struct sched_param my_param;
     int my_policy;
     int status;
-    
+
     if (tcb->magic != TASK_MAGIC) {
 	errnoSet(S_portLib_INVALID_TASKID);
 	return ERROR;
@@ -776,7 +776,7 @@ taskPriorityGet(long tid, int *pPriority)
     }
     if (pPriority != NULL) {
 	*pPriority = my_param.sched_priority;
-    } 
+    }
 #else
     *pPriority = tcb->priority;
 #endif
@@ -798,7 +798,7 @@ taskLock(void)
 /*----------------------------------------------------------------------*/
 
 /*
- * Restart the scheduler 
+ * Restart the scheduler
  */
 STATUS
 taskUnlock(void)
@@ -812,9 +812,9 @@ taskUnlock(void)
 /*
  * Sleep for a number of ticks, or just yield cpu if ticks==0.
  *
- * This implementation diverges from the VxWorks implementation that 
- * wakes up exactly on the next clock tick. 
- * Using nanosleep() on system where it has high resolution, will 
+ * This implementation diverges from the VxWorks implementation that
+ * wakes up exactly on the next clock tick.
+ * Using nanosleep() on system where it has high resolution, will
  * wake up the task between to clock ticks.
  */
 STATUS
@@ -829,11 +829,11 @@ taskDelay(int ticks)
 	ts.tv_sec = ticks / clkRate;
 	ts.tv_nsec = (ticks % clkRate) * (1000000000/clkRate);
 	for (;;) {
-		if (nanosleep(&ts, &tr) == 0) 
+		if (nanosleep(&ts, &tr) == 0)
 			return OK;
-		if (errno == EINTR) 
+		if (errno == EINTR)
 			memcpy(&ts, &tr, sizeof ts);
-		else 
+		else
 			return ERROR;
 	}
 	/*NOTREACHED*/
@@ -841,7 +841,7 @@ taskDelay(int ticks)
 }
 
 /*----------------------------------------------------------------------*/
-    
+
 /*
  * Return the id of current task
  */
@@ -908,14 +908,14 @@ taskGetUserData(long tid)
     if (tcb != NULL) {
 	if (tcb->magic != TASK_MAGIC) {
 	    errnoSet(S_portLib_INVALID_TASKID);
-	    fprintf(stderr, 
+	    fprintf(stderr,
 		"taskGetUserData: bad/unregisterd taskId %ld %lx\n",
 		tid, (unsigned long)pthread_self());
 	    return 0;
 	}
-        return tcb->userData;
+	return tcb->userData;
     } else {
-        fprintf(stderr, 
+	fprintf(stderr,
 		"taskLib: fatal error: taskGetUserData: tcb == NULL.\n");
 	abort();
     }
@@ -953,8 +953,8 @@ STATUS
 taskOptionsGet(long tid, int *pOptions)
 {
     OS_TCB *tcb = taskTcb(tid);
-    
-   if (tcb == NULL) 
+
+   if (tcb == NULL)
        return ERROR;
    if (tcb->magic != TASK_MAGIC) {
        errnoSet(S_portLib_INVALID_TASKID);
@@ -968,13 +968,13 @@ taskOptionsGet(long tid, int *pOptions)
 /*----------------------------------------------------------------------*/
 
 /*
- * Return the Task Id associated with a name 
+ * Return the Task Id associated with a name
  */
-long 
+long
 taskNameToId(char *name)
 {
     OS_TCB *t;
-    
+
     for (t = taskList; t != NULL; t = t->next) {
 	if (t->magic != TASK_MAGIC) {
 	    errnoSet(S_portLib_INVALID_TASKID);
@@ -1008,12 +1008,12 @@ static char *policyName[] = {
 STATUS
 i(void)
 {
-    OS_TCB *t; 
+    OS_TCB *t;
 
     printf("  NAME                     TID        SCHED PRI   ERRNO\n"
 	   "-------------------- ---------------- ----- --- --------\n");
     for (t = taskList; t != NULL; t = t->next) {
-	printf("%-20s %16lx %-5s %3d %8x\n", t->name, (long)t, 
+	printf("%-20s %16lx %-5s %3d %8x\n", t->name, (long)t,
 	       policyName[t->policy], t->priority, t->errorStatus);
     }
     return OK;
@@ -1032,7 +1032,7 @@ taskHookInit(void)
 /*----------------------------------------------------------------------*/
 
 /*
- * Add a hook to the head of a list 
+ * Add a hook to the head of a list
  */
 static STATUS
 addHookHead(TASK_HOOK_LIST **list, FUNCPTR hook)
@@ -1056,7 +1056,7 @@ addHookHead(TASK_HOOK_LIST **list, FUNCPTR hook)
 /*----------------------------------------------------------------------*/
 
 /*
- * Add a hook to the tail of a list 
+ * Add a hook to the tail of a list
  */
 static STATUS
 addHookTail(TASK_HOOK_LIST **list, FUNCPTR hook)
@@ -1078,17 +1078,17 @@ addHookTail(TASK_HOOK_LIST **list, FUNCPTR hook)
 	return OK;
     }
     /* walk through the list to the last element */
-    for (p = *list; p->next != NULL; p = p->next) 
+    for (p = *list; p->next != NULL; p = p->next)
 	;
     /* Add it to the tail */
     p->next = l;
     return OK;
 }
-	
+
 /*----------------------------------------------------------------------*/
 
 /*
- * Remove a hook from a list 
+ * Remove a hook from a list
  */
 static STATUS
 deleteHook(TASK_HOOK_LIST **list, FUNCPTR hook)
@@ -1124,7 +1124,7 @@ deleteHook(TASK_HOOK_LIST **list, FUNCPTR hook)
 /*----------------------------------------------------------------------*/
 
 /*
- * Execute a list of hooks 
+ * Execute a list of hooks
  */
 static STATUS
 executeHooks(TASK_HOOK_LIST *list, OS_TCB *tcb)
@@ -1138,7 +1138,7 @@ executeHooks(TASK_HOOK_LIST *list, OS_TCB *tcb)
 }
 /*----------------------------------------------------------------------*/
 
-/* 
+/*
  * Add a routine to be called at every task create
  */
 STATUS
@@ -1152,7 +1152,7 @@ taskCreateHookAdd(FUNCPTR createHook)
 /*
  * Delete a previously added task create routine
  */
-STATUS 
+STATUS
 taskCreateHookDelete(FUNCPTR createHook)
 {
     return deleteHook(&createHooks, createHook);
@@ -1160,7 +1160,7 @@ taskCreateHookDelete(FUNCPTR createHook)
 
 /*----------------------------------------------------------------------*/
 
-/* 
+/*
  * Add a routine to be called at every task switch
  */
 STATUS
@@ -1175,7 +1175,7 @@ taskSwitchHookAdd(FUNCPTR switchHook)
 /*
  * Delete a previously added task switch routine
  */
-STATUS 
+STATUS
 taskSwitchHookDelete(FUNCPTR switchHook)
 {
     errnoSet(S_portLib_NOT_IMPLEMENTED);
@@ -1183,7 +1183,7 @@ taskSwitchHookDelete(FUNCPTR switchHook)
 }
 
 /*----------------------------------------------------------------------*/
-/* 
+/*
  * Add a routine to be called at every task delete
  */
 STATUS
@@ -1198,7 +1198,7 @@ taskDeleteHookAdd(FUNCPTR deleteHook)
 /*
  * Delete a previously added task delete routine
  */
-STATUS 
+STATUS
 taskDeleteHookDelete(FUNCPTR deleteHook)
 {
     deleteHook(&deleteHooks, deleteHook);
@@ -1218,7 +1218,7 @@ int
 errnoGet(void)
 {
     OS_TCB *tcb = taskTcb(taskIdSelf());
-    
+
     if (tcb != NULL) {
 	return tcb->errorStatus;
     }

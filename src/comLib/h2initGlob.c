@@ -38,7 +38,7 @@
 #include "h2initGlob.h"
 
 /**
- ** ComLib initialisation procedure for Unix processes 
+ ** ComLib initialisation procedure for Unix processes
  ** should be called once, before any other comLib/posterLib function
  **/
 
@@ -80,7 +80,7 @@ h2initGlob(int ticksPerSec)
 	printf("Error: could not attach shared memory\n");
 	return ERROR;
     }
-		
+
     /* Start h2 timers if a clock is available */
     if (ticksPerSec != 0) {
 	if (h2timerInit() == ERROR) {
@@ -89,7 +89,7 @@ h2initGlob(int ticksPerSec)
     }
     h2timeInit();
     printf("%s execution environment version %s\n"
-	"Copyright (c) 1999-2011 CNRS-LAAS\n", 
+	"Copyright (c) 1999-2011 CNRS-LAAS\n",
 	PACKAGE_NAME, PACKAGE_VERSION);
 
     return OK;
