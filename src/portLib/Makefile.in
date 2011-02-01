@@ -1,7 +1,7 @@
 #
 # Copyright (c) 2004 
 #      Autonomous Systems Lab, Swiss Federal Institute of Technology.
-# Copyright (c) 2003-2004 CNRS/LAAS
+# Copyright (c) 2003-2004,2011 CNRS/LAAS
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -38,9 +38,9 @@ SRCS+= \
 	wdLib.c
 OBJS=		$(SRCS:%.c=%.lo)
 
-SHLIB_CURRENT=	4
+SHLIB_CURRENT=	5
 SHLIB_REVISION=	0
-SHLIB_AGE=	1
+SHLIB_AGE=	2
 
 BASENAME=	portLib
 LIB=		lib$(BASENAME).la

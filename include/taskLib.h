@@ -45,6 +45,8 @@ extern long taskSpawn(char *, int, int, int, FUNCPTR, int, int, int,
 extern long taskSpawn(char *name, int priority, int options, 
     int stackSize, FUNCPTR entryPt, ... );
 #endif
+extern long taskSpawn2(char *name, int priority, int options, int stackSize,
+    void *(*start_routine)(void *), void *arg);
 extern STATUS taskDelete(long);
 extern const char *taskName(long);
 extern STATUS taskSuspend(long);

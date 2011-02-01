@@ -1,5 +1,8 @@
 Version 2.9, xx, xxxx, xxxx
 
+112. Implement taskSpawn2() a version of taskSpawn() that takes a single
+     void pointer for arguments. This is the only working solution on 
+     x86_64 architectures, because of the C calling conventions used there.
 111. Implement remotePosterShow().
 110. Add a regression test for parameters passig with taskSpawn.
 109. Fix logMsg() on LP64 architectures.

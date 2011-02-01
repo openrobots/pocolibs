@@ -75,6 +75,9 @@ struct OS_TCB {
     struct OS_TCB *next;		/* next tcb in list */
     unsigned int magic;			/* magic */
     pthread_mutex_t *starter;		/* guard tcb during task startup */
+
+    void *(*entry2)(void *);		/* entry point for taskSpawn2 */
+    void *params2;			/* params for taskSpawn2 */
 };
 
 #define TASK_MAGIC  0x5441534b
@@ -277,9 +280,48 @@ taskStarter(void *data)
     return NULL;
 }
 
+/*----------------------------------------------------------------------*/
+/*
+ * Helper function for taskSpawn2
+ */
+void *
+taskStarter2(void *data)
+{
+    OS_TCB *tcb = (OS_TCB *)data;
+    void *args = tcb->params2;
+    void *result;
+    
+    pthread_mutex_lock(tcb->starter); 	/* released in taskCleanUp() */
+    tcb->pid = getpid();
+
+    /* Register the TCB pointer in a thread-specific key */
+    if (pthread_setspecific(taskControlBlock, (void *)tcb) != 0) {
+	return NULL;
+    }
+    /* Register a cleanup function */
+    pthread_cleanup_push(taskCleanUp, data);
+
+    /* Execute create hooks */
+    executeHooks(createHooks, tcb);
+
+#ifdef DEBUG
+    printf("taskStart \"%s\" %p\n", tcb->name, tcb);
+#endif
+
+    result = (*(tcb->entry2))(args);
+    /* Execute cleanup functions */
+    pthread_cleanup_pop(1);
+    /* Terminate thread */
+    pthread_exit(result);
+    return NULL;
+}
 
 /*----------------------------------------------------------------------*/
 
+/*
+ * Create and initialize a new TCB, 
+ * and prepare pthread attributes for the new task
+ */
 static OS_TCB *
 newTcb(char *name, int priority, int options, int stackSize,
        pthread_attr_t *attr)
@@ -402,6 +444,11 @@ newTcb(char *name, int priority, int options, int stackSize,
     return tcb;
 }
 
+/*----------------------------------------------------------------------*/
+
+/*
+ * Register a just created thread in its TCB
+ */
 static void
 registerTcb(OS_TCB *tcb, pthread_t thread_id)
 {
@@ -430,7 +477,7 @@ registerTcb(OS_TCB *tcb, pthread_t thread_id)
     taskList = tcb;
     pthread_mutex_unlock(tcb->starter);
 }
-
+/*----------------------------------------------------------------------*/
 /*
  * Create a new task 
  */
@@ -461,6 +508,37 @@ taskSpawn(char *name, int priority, int options, int stackSize,
     tcb->params.arg10 = arg10;
 
     status = pthread_create(&thread_id, &thread_attr, taskStarter, tcb);
+    if (status != 0) {
+	errnoSet(status);
+	pthread_mutex_unlock(tcb->starter);
+	return ERROR;
+    }
+    registerTcb(tcb, thread_id);
+    return (long)tcb;
+}
+
+/*----------------------------------------------------------------------*/
+/*
+ * version of taskSpawn() that passes parameters to the new task as a 
+ * single pointer
+ */
+long
+taskSpawn2(char *name, int priority, int options, int stackSize,
+	   void *(*entryPt)(void *), void *arg)
+{
+    pthread_attr_t thread_attr;
+    pthread_t thread_id;
+    int status;
+    OS_TCB *tcb;
+
+    tcb = newTcb(name, priority, options, stackSize, &thread_attr);
+    if (tcb == NULL)
+	return ERROR;
+
+    tcb->entry2 = entryPt;
+    tcb->params2 = arg;
+
+    status = pthread_create(&thread_id, &thread_attr, taskStarter2, tcb);
     if (status != 0) {
 	errnoSet(status);
 	pthread_mutex_unlock(tcb->starter);
@@ -512,6 +590,9 @@ taskFromThread(char *name)
     tcb->params.arg8 = 0;
     tcb->params.arg9 = 0;
     tcb->params.arg10 = 0;
+
+    tcb->entry2 = NULL;
+    tcb->params2 = NULL;
 
 #ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
     /* Read back the scheduler parameters of the current thread */
