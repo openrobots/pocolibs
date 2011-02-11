@@ -50,7 +50,7 @@ static H2_MOD_ERRORS_LIST *modErrorsList;
  
 static const H2_ERROR * findErrorId(const H2_MODULE_ERRORS *modErrors, short error);
 static const H2_MODULE_ERRORS * findSourceId(short source);
-static H2_MOD_ERRORS_LIST * allocModErrorsElt(char *moduleName, int moduleId, 
+static H2_MOD_ERRORS_LIST * allocModErrorsElt(const char *moduleName, int moduleId, 
 					      int nbErrors, 
 					      const H2_ERROR errors[]);
  
@@ -62,8 +62,8 @@ static H2_MOD_ERRORS_LIST * allocModErrorsElt(char *moduleName, int moduleId,
  * returns : 1 if recorded, or else 0
  */
 int
-h2recordErrMsgs(char *bywho,
-		char *moduleName, short moduleId, 
+h2recordErrMsgs(const char *bywho,
+		const char *moduleName, short moduleId, 
 		int nbErrors, const H2_ERROR errors[])
 {
   H2_MOD_ERRORS_LIST *last=modErrorsList;
@@ -149,7 +149,7 @@ h2recordErrMsgs(char *bywho,
  *
  */
 static H2_MOD_ERRORS_LIST * 
-allocModErrorsElt(char *moduleName, int moduleId, 
+allocModErrorsElt(const char *moduleName, int moduleId, 
 		  int nbErrors, const H2_ERROR errors[])
 {
   H2_MOD_ERRORS_LIST *elt;
@@ -192,7 +192,7 @@ h2printErrno(int numErr)
  
 
 void 
-h2perror(char *inString)
+h2perror(const char *inString)
 {
   char outString[256];
 

@@ -203,10 +203,10 @@ typedef struct H2_ERROR {
 
 /*---------------- PROTOTYPES of EXPORTED FUNCTIONS -----------------------*/
 
-int h2recordErrMsgs(char *bywho, char *moduleName, short moduleId, 
+int h2recordErrMsgs(const char *bywho, const char *moduleName, short moduleId, 
 		    int nbErrors, const H2_ERROR errMsgs[]);
 void h2printErrno(int numErr);
-void h2perror(char *string);
+void h2perror(const char *string);
 char * h2getMsgErrno(int fullError); /* OBSOLET */
 char * h2getErrMsg(int fullError, char *string, int maxLength);
 short h2decodeError(int error, short *num, 
