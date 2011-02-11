@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1992, 2005 CNRS/LAAS
+ * Copyright (c) 1992, 2005, 2011 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -17,7 +17,7 @@
 /* ----------------------- INCLUSIONS ------------------------------- */
 
 #define VERBOSE 0
- 
+
 #include "pocolibs-config.h"
 
 #include <stdio.h>
@@ -47,13 +47,13 @@ typedef struct H2_MOD_ERRORS_LIST {
 static H2_MOD_ERRORS_LIST *modErrorsList;
 
 /* ----------------- PROTOTYPES OF INTERNAL FUNCTIONS -------------------- */
- 
+
 static const H2_ERROR * findErrorId(const H2_MODULE_ERRORS *modErrors, short error);
 static const H2_MODULE_ERRORS * findSourceId(short source);
-static H2_MOD_ERRORS_LIST * allocModErrorsElt(const char *moduleName, int moduleId, 
-					      int nbErrors, 
+static H2_MOD_ERRORS_LIST * allocModErrorsElt(const char *moduleName, int moduleId,
+					      int nbErrors,
 					      const H2_ERROR errors[]);
- 
+
 /* -----------------------------------------------------------------
  *
  * h2recordErrMsgs - Record a new *H2_MODULE_ERRORS
@@ -63,7 +63,7 @@ static H2_MOD_ERRORS_LIST * allocModErrorsElt(const char *moduleName, int module
  */
 int
 h2recordErrMsgs(const char *bywho,
-		const char *moduleName, short moduleId, 
+		const char *moduleName, short moduleId,
 		int nbErrors, const H2_ERROR errors[])
 {
   H2_MOD_ERRORS_LIST *last=modErrorsList;
@@ -73,7 +73,7 @@ h2recordErrMsgs(const char *bywho,
 
   /* create list */
   if (!modErrorsList) {
-    if (!(modErrorsList=allocModErrorsElt(moduleName, moduleId, 
+    if (!(modErrorsList=allocModErrorsElt(moduleName, moduleId,
 					  nbErrors, errors))) {
       printf ("h2recordErrMsgs by %-20s error: cannot alloc errors\n",
 	      bywho?bywho:"?");
@@ -148,8 +148,8 @@ h2recordErrMsgs(const char *bywho,
  * allocModErrorsElt
  *
  */
-static H2_MOD_ERRORS_LIST * 
-allocModErrorsElt(const char *moduleName, int moduleId, 
+static H2_MOD_ERRORS_LIST *
+allocModErrorsElt(const char *moduleName, int moduleId,
 		  int nbErrors, const H2_ERROR errors[])
 {
   H2_MOD_ERRORS_LIST *elt;
@@ -168,14 +168,14 @@ allocModErrorsElt(const char *moduleName, int moduleId,
 
 /* --------------------------------------------------------------------
  *
- *  h2printErrno - 
+ *  h2printErrno -
  *
  *  Description: print message corresponding to the error number
  *
  *  Returns: nothing
  */
- 
-void 
+
+void
 h2printErrno(int numErr)
 {
   char string[256];
@@ -189,9 +189,9 @@ h2printErrno(int numErr)
  *
  *  Returns: nothing
  */
- 
 
-void 
+
+void
 h2perror(const char *inString)
 {
   char outString[256];
@@ -224,7 +224,7 @@ char * h2getMsgErrno(int fullError)
  *
  *  h2getErrMsg - fillin string with error msg
  *
- *  Returns: string 
+ *  Returns: string
  */
 
 char * h2getErrMsg(int fullError, char *string, int maxLength)
@@ -260,25 +260,25 @@ char * h2getErrMsg(int fullError, char *string, int maxLength)
 
     /* find out std source */
     if (!(modStdErrors = findSourceId(srcStd))) {
-      snprintf (string, maxLength, "S_%s_std%d_%d", 
+      snprintf (string, maxLength, "S_%s_std%d_%d",
 		modErrors->name, srcStd, errStd);
       return(string);
     }
     /* find out std err */
     if(!(error = findErrorId(modStdErrors, numErr))) {
-      snprintf (string, maxLength, "S_%s_%s_%d", 
+      snprintf (string, maxLength, "S_%s_%s_%d",
 		modErrors->name, modStdErrors->name, errStd);
       return(string);
     }
-    snprintf (string, maxLength, "S_%s_%s_%s", 
-	      modErrors->name, modStdErrors->name, error->name); 
+    snprintf (string, maxLength, "S_%s_%s_%s",
+	      modErrors->name, modStdErrors->name, error->name);
     return(string);
   }
 
   /* Look for error within given source */
   if (!(error = findErrorId(modErrors, numErr))) {
     snprintf (string, maxLength, "S_%s_%d", modErrors->name, numErr);
-    return(string);    
+    return(string);
   }
 
   /* Find out */
@@ -288,16 +288,16 @@ char * h2getErrMsg(int fullError, char *string, int maxLength)
 
 /* -----------------------------------------------------------------
  *
- * h2decodeError  -  
+ * h2decodeError  -
  *     returns M_lib or M_stdLib, the lib that has emit the error
  *     *err is the error code or the still composed std error
- *     *srcStd is the lib or module that has defined the std err (or 0) 
+ *     *srcStd is the lib or module that has defined the std err (or 0)
  *     *errStd is the emited std err (if any)
- *     
+ *
  */
-short h2decodeError(int fullError, 
-		    short *err, 
-		    short *srcStd, 
+short h2decodeError(int fullError,
+		    short *err,
+		    short *srcStd,
 		    short *errStd)
 {
   short srcEmit;
@@ -323,7 +323,7 @@ void h2listModules(void)
 {
   H2_MOD_ERRORS_LIST *elt=modErrorsList;
   while(elt) {
-    printf ("Module id  %5d  M_%-16s  (%2d errors)\n", 
+    printf ("Module id  %5d  M_%-16s  (%2d errors)\n",
 	    elt->modErrors.id, elt->modErrors.name, elt->modErrors.nbErrors);
     elt=elt->next;
   }
@@ -340,10 +340,10 @@ void h2listErrors(void)
   int i;
 
   while(elt) {
-    printf ("Module id  %5d  M_%-16s  (%2d errors)\n", 
+    printf ("Module id  %5d  M_%-16s  (%2d errors)\n",
 	    elt->modErrors.id, elt->modErrors.name, elt->modErrors.nbErrors);
     for (i=0; i<elt->modErrors.nbErrors; i++) {
-      printf ("    %2d %s \n", 
+      printf ("    %2d %s \n",
 	      elt->modErrors.errorsArray[i].num,
 	      elt->modErrors.errorsArray[i].name);
     }
@@ -359,11 +359,11 @@ void h2listErrors(void)
  *
  *  findSourceId - Recherche de l'indice de la source dans le tableau d'erreur
  *
- *  Description: 
+ *  Description:
  *
  *  Returns: Indice de tableau ou -1
  */
- 
+
 static const H2_MODULE_ERRORS * findSourceId(short source)
 
 {
@@ -380,11 +380,11 @@ static const H2_MODULE_ERRORS * findSourceId(short source)
  *
  *  findErrorId - Recherche de l'indice de l'erreur dans le tableau d'erreur
  *
- *  Description: 
+ *  Description:
  *
  *  Returns: Indice de tableau ou -1
  */
- 
+
 static const H2_ERROR * findErrorId(const H2_MODULE_ERRORS *modErrors, short error)
 {
   int i;
