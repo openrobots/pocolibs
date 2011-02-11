@@ -1,4 +1,4 @@
-Version 2.9, xx, xxxx, xxxx
+Version 2.9, 11 february 2011
 
 112. Implement taskSpawn2() a version of taskSpawn() that takes a single
      void pointer for arguments. This is the only working solution on 
