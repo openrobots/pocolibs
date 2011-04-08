@@ -1,4 +1,4 @@
-*/*
+/*
  * Copyright (c) 1999, 2003 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
