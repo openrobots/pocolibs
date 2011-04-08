@@ -60,7 +60,7 @@ STATUS symFindByValue(SYMTAB_ID symTldId, char *value, char *name,
 		      int *pValue, SYM_TYPE *pType);
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif

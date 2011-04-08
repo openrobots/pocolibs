@@ -148,7 +148,7 @@ extern STATUS posterSetEndianness(POSTER_ID posterId, H2_ENDIANNESS endianness);
       }
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif /* _POSTERLIB_H */

@@ -95,7 +95,7 @@ extern int h2scanf ( const char *fmt, void *value );
 
 #endif /* XES_STDIO_C */
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif

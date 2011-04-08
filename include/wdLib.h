@@ -1,4 +1,4 @@
-/*
+*/*
  * Copyright (c) 1999, 2003 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -59,7 +59,7 @@ extern STATUS wdStart ( WDOG_ID wdId, int delay, FUNCPTR pRoutine,
 extern STATUS wdCancel ( WDOG_ID wdId );
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif

@@ -50,7 +50,7 @@ void *smMemRealloc(void *pBlock, size_t newSize);
 STATUS smMemFree(void *ptr); 
 void smMemShow(int option);
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif

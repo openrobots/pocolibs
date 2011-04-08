@@ -29,7 +29,7 @@ extern int sysClkRateGet ( void );
  
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif

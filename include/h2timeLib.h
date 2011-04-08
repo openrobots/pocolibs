@@ -59,7 +59,7 @@ extern STATUS h2timeSet ( H2TIME *pTimeStr );
 extern void h2timeShow ( void );
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif /* _H2TIMELIB_H */

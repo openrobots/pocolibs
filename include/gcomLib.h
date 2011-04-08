@@ -163,7 +163,7 @@ void gcomSelect(char *sendIdTable);
 
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif /* GCOM_LIB_H */

@@ -30,7 +30,7 @@ STATUS taskDeleteHookAdd(FUNCPTR deleteHook);
 STATUS taskDeleteHookDelete(FUNCPTR deleteHook);
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif

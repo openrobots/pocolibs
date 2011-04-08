@@ -66,7 +66,7 @@ extern long taskNameToId(char *);
 extern long taskFromThread(char *);
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif

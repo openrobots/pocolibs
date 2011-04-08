@@ -28,7 +28,7 @@ extern int errnoGet ( void );
 extern STATUS errnoSet ( int errorValue );
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif /* _ERRNOLIB_H */

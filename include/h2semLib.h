@@ -80,7 +80,7 @@ extern STATUS h2semSet ( H2SEM_ID sem, int value );
 
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif

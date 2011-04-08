@@ -86,7 +86,7 @@ extern STATUS h2timerFree ( H2TIMER_ID timerId );
   }
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif /* _H2TIMERLIB_H */

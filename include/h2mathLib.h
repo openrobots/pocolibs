@@ -96,7 +96,7 @@ double integSinFresnel ();
 #endif
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif

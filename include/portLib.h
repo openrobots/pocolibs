@@ -73,7 +73,7 @@ typedef void *(*VOIDPTRFUNCPTR)();
 #endif
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 /* XXX Does this belong here ?? */
@@ -113,7 +113,7 @@ extern STATUS osInit(int);
 extern void   osExit(void);
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif /* _PORTLIB_H */

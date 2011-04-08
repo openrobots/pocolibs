@@ -51,7 +51,7 @@ extern H2_ENDIANNESS h2localEndianness (void);
 #endif
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif /* H2_ENDIANNESS_H */

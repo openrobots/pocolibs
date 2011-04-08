@@ -215,7 +215,7 @@ void h2listModules(void);
 void h2listErrors(void);
 
 #ifdef __cplusplus
-};
+}
 #endif /* __cplusplus */
 
 /*--------------------- end file loading ----------------------*/

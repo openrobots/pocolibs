@@ -41,7 +41,7 @@ void *smObjGlobalToLocal(void *globalAdrs);
 void *smObjLocalToGlobal(void *localAdrs);
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif /* _SMOBJLIB_H */

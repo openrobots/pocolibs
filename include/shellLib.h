@@ -31,7 +31,7 @@ extern void getstr ( int soc, char *buf, int cnt, char *errmesg );
 extern void parse_args(int firstArg, int argc, char *argv[], int argType[]);
 extern void shellMainLoop(FILE *in, FILE *out, FILE *err, char *prompt);
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif

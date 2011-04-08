@@ -66,7 +66,7 @@ extern STATUS commonStructGive ( void *pCommonStruct );
 extern STATUS commonStructTake ( void *pCommonStruct );
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif /* COMMON_STRUCT_H */

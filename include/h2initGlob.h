@@ -24,7 +24,7 @@ extern "C" {
 extern STATUS h2initGlob(int tickPerSec); 
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif

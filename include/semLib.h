@@ -105,7 +105,7 @@ extern STATUS semFlush ( SEM_ID semId );
   }
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif /* _SEMLIB_H */

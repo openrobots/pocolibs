@@ -40,7 +40,7 @@ extern STATUS h2evnSignal ( int taskId );
 extern BOOL h2evnSusp ( int timeout );
  
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif

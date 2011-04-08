@@ -211,7 +211,7 @@ extern STATUS h2devInit ( int smMemSize, int posterServFlag );
 extern STATUS h2devShow ( void );
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif

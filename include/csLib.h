@@ -153,7 +153,7 @@ extern STATUS csServRqstParamsGet ( SERV_ID servId, int rqstId,
     char *rqstDataAdrs, int rqstDataSize, FUNCPTR decodFunc );
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif /* CS_LIB_H */

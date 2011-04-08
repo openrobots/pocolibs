@@ -28,7 +28,7 @@ extern void	logEnd(void);
 extern int logMsg ( const char *fmt, ... );
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif /* _LOGLIB_H */

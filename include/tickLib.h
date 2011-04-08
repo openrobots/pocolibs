@@ -31,7 +31,7 @@ extern unsigned long tickGet ( void );
  
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif
