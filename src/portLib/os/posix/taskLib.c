@@ -406,10 +406,10 @@ newTcb(char *name, int priority, int options, int stackSize,
 #endif
 #ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
     if (rr_min_priority > 0 && rr_min_priority > 0) {
+	    struct sched_param thread_param;
+
 	    /* Set priority of new thread */
 	    thread_param.sched_priority = priorityVxToPosix(priority);
-#ifndef __linux__
-	    /* XXX Voir message de commit de la version 1.17 */
 	    status = pthread_attr_setschedpolicy(attr, SCHED_RR);
 	    switch (status) {
 	    case 0:
@@ -438,7 +438,6 @@ newTcb(char *name, int priority, int options, int stackSize,
 		    pthread_mutex_unlock(tcb->starter);
 		    return NULL;
 	    } /* switch */
-#endif /* __linux__ */
     }
 #endif /* HAVE_PTHREAD_ATTR_SETSCHEDPOLICY */
     return tcb;
@@ -556,6 +555,9 @@ taskFromThread(char *name)
     struct sched_param thread_param;
     OS_TCB *tcb;
     char bufName[12];
+#ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
+    int policy;
+#endif
 
     /*
      * Allocate a TCB
