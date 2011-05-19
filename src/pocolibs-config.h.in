@@ -51,11 +51,11 @@
 /* timer_*() functions */
 #undef HAVE_POSIX_TIMERS
 
+/* posix threads scheduling policies */
+#undef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
+
 /* define if rpcgen supports the -C option */
 #undef HAVE_RPCGEN_C
-
-/* posix threads scheduling policies */
-#undef HAVE_SETSCHEDPOLICY
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
