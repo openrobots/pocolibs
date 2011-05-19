@@ -207,7 +207,7 @@ AC_MSG_CHECKING([for pthread_attr_setschedpolicy])
 AC_TRY_LINK([#include <pthread.h>], 
 	[pthread_attr_setschedpolicy(NULL, SCHED_RR);],
 	[AC_MSG_RESULT([yes])]
-	[AC_DEFINE(HAVE_SETSCHEDPOLICY, 1, 
+	[AC_DEFINE(HAVE_PTHREAD_ATTR_SETSCHEDPOLICY, 1, 
 		[posix threads scheduling policies])],
 	[AC_MSG_RESULT([no])]
 )
