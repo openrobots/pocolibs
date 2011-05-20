@@ -36,7 +36,7 @@ extern "C" {
 
 extern int h2evnRecordH2ErrMsgs(void);
 extern void h2evnClear ( void );
-extern STATUS h2evnSignal ( int taskId );
+extern STATUS h2evnSignal ( long taskId );
 extern BOOL h2evnSusp ( int timeout );
  
 #ifdef __cplusplus

@@ -1,3 +1,7 @@
+112. More LP64 fixes, a few places were still using ints for taskIds
+113. Activate the code that sets pthread scheduler policy and parameters
+     for new tasks if available
+
 Version 2.9, 11 february 2011
 
 112. Implement taskSpawn2() a version of taskSpawn() that takes a single

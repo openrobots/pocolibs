@@ -107,7 +107,7 @@ h2evnSusp(int timeout)
 */
 
 STATUS
-h2evnSignal(int taskId)
+h2evnSignal(long taskId)
 {
     unsigned dev = taskGetUserData(taskId);
 

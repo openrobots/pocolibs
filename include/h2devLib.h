@@ -17,6 +17,8 @@
 #ifndef _H2DEVLIB_H
 #define _H2DEVLIB_H
 
+#include <sys/types.h>
+
 #include "h2rngLib.h"
 #include "h2timeLib.h"
 #include "h2semLib.h"
@@ -47,7 +49,7 @@ typedef struct H2_SEM_STR {
 
 /* Mailbox */
 typedef struct H2_MBOX_STR {
-    int taskId;				/* h2dev id */
+    long taskId;			/* h2dev id */
     int size;				/* mbox size */
     H2SEM_ID semExcl;			/* mutex for this mailbox */
     H2SEM_ID semSigRd;			/* signalling semaphore  */
@@ -77,7 +79,7 @@ typedef struct H2_POSTER_STR {
 
 /* Task */
 typedef struct H2_TASK_STR {
-    int taskId;				/* taskLib id */
+    long taskId;			/* taskLib id */
     int semId;
 } H2_TASK_STR;
 

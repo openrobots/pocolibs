@@ -52,7 +52,7 @@ static const H2_ERROR h2rngLibH2errMsgs[] = H2_RNG_LIB_H2_ERR_MSGS;
 STATUS
 mboxInit(char *procName)		/* unused parameter procName */
 {
-    int tid = taskIdSelf();
+    long tid = taskIdSelf();
     const char *tName;
     int dev;
 
@@ -107,9 +107,10 @@ mboxInit(char *procName)		/* unused parameter procName */
 /*----------------------------------------------------------------------*/
 
 STATUS
-mboxEnd(int taskId)
+mboxEnd(long taskId)
 {
-    int i, dev;
+    int i; 
+    long dev;
 
     if (taskId == 0) {
 	taskId = taskIdSelf();
@@ -378,8 +379,8 @@ mboxPause(MBOX_ID mboxId, int timeout)
 {
     int nMbox;                  /* mailbox index */
     int nMes;                   /* number of messages in a mailbox */
-    int myTaskId;               /* my task identifier */
     int takeStatus;             /* status of semTake() */
+    long myTaskId;              /* my task identifier */
     H2SEM_ID semId;
 
     /* Check if we're waiting on all mailboxes */
