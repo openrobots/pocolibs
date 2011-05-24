@@ -142,7 +142,7 @@ posterFind(const char *name, POSTER_ID *pPosterId)
 {
     POSTER_STR *p, *old_p;
     POSTER_ID id;
-    unsigned int size;
+    size_t size;
 
     POSTER_INIT;
 
