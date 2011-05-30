@@ -350,7 +350,7 @@ main(int argc, char *argv[])
     if (bg) {
 	if (fork()) {
 	    printf("posterServ\n"
-		   "Copyright (C) LAAS/CNRS 1992-2010\n");
+		   "Copyright (C) LAAS/CNRS 1992-2011\n");
 	    exit(0);
 	}
     }
