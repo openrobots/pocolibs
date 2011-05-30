@@ -1,4 +1,5 @@
-112. More LP64 fixes, a few places were still using ints for taskIds
+115. New h2logMsg() API for syslog-style logging of events
+114. More LP64 fixes, a few places were still using ints for taskIds
 113. Activate the code that sets pthread scheduler policy and parameters
      for new tasks if available
 
