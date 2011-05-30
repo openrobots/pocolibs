@@ -11606,7 +11606,7 @@ fi
 
 ac_config_headers="$ac_config_headers src/pocolibs-config.h"
 
-ac_config_files="$ac_config_files Init.make Makefile pocolibs.pc include/Makefile src/portLib/Makefile src/errorLib/Makefile src/comLib/Makefile src/posterLib/Makefile src/posterLib/posterServ/Makefile src/posterLib/test/basic/Makefile src/posterLib/test/endian/Makefile src/h2/Makefile src/shell/Makefile src/regress/Makefile"
+ac_config_files="$ac_config_files Init.make Makefile pocolibs.pc include/Makefile src/portLib/Makefile src/errorLib/Makefile src/comLib/Makefile src/posterLib/Makefile src/posterLib/posterServ/Makefile src/posterLib/test/basic/Makefile src/posterLib/test/endian/Makefile src/h2/Makefile src/h2logd/Makefile src/shell/Makefile src/regress/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -12569,6 +12569,7 @@ do
     "src/posterLib/test/basic/Makefile") CONFIG_FILES="$CONFIG_FILES src/posterLib/test/basic/Makefile" ;;
     "src/posterLib/test/endian/Makefile") CONFIG_FILES="$CONFIG_FILES src/posterLib/test/endian/Makefile" ;;
     "src/h2/Makefile") CONFIG_FILES="$CONFIG_FILES src/h2/Makefile" ;;
+    "src/h2logd/Makefile") CONFIG_FILES="$CONFIG_FILES src/h2logd/Makefile" ;;
     "src/shell/Makefile") CONFIG_FILES="$CONFIG_FILES src/shell/Makefile" ;;
     "src/regress/Makefile") CONFIG_FILES="$CONFIG_FILES src/regress/Makefile" ;;
 
