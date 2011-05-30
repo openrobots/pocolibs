@@ -340,6 +340,7 @@ AC_OUTPUT(Init.make
 	src/posterLib/test/basic/Makefile
 	src/posterLib/test/endian/Makefile
 	src/h2/Makefile
+	src/h2logd/Makefile
 	src/shell/Makefile
 	src/regress/Makefile
 )

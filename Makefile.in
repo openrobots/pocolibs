@@ -33,6 +33,7 @@ SUBDIRS=\
 	src/posterLib			\
 	src/posterLib/posterServ	\
 	src/h2				\
+	src/h2logd			\
 	src/shell
 
 TEST_SUBDIRS = \
