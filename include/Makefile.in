@@ -34,6 +34,7 @@ flist=\
 	h2errorLib.h		\
 	h2evnLib.h		\
 	h2initGlob.h		\
+	h2logLib.h		\
 	h2mathLib.h		\
 	h2rngLib.h		\
 	h2semLib.h		\
