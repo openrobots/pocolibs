@@ -207,6 +207,7 @@ extern STATUS h2devEnd ( void );
 extern int h2devFind ( const char *name, H2_DEV_TYPE type );
 extern STATUS h2devFree ( int dev );
 extern STATUS h2devClean ( const char *name );
+extern STATUS h2devGetDir( char *, size_t);
 extern long h2devGetKey ( int type, int dev, BOOL create, int *pFd );
 extern int h2devGetSemId ( void );
 extern STATUS h2devInit ( int smMemSize, int posterServFlag );

@@ -16,6 +16,7 @@
 #include "pocolibs-config.h"
 
 #include <sys/param.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -57,9 +58,23 @@ H2_DEV_STR *h2Devs = NULL;
 
 static int shmid = -1;
 static char h2devFileName[MAXPATHLEN];
+static char h2devDirName[MAXPATHLEN];
 static pthread_mutex_t h2devMutex = PTHREAD_MUTEX_INITIALIZER;
 static int posterServPid = -1;		/* pid du serveur de posters */
 static char const posterServPath[] = POSTER_SERV_PATH;
+
+/*----------------------------------------------------------------------*/
+
+STATUS
+h2devGetDir(char *name, size_t len)
+{
+    if (len < strlen(h2devDirName) + 1) {
+	errnoSet(ENOSPC);
+	return ERROR;
+    }
+    strncpy(name, h2devDirName, strlen(h2devDirName) + 1);
+    return OK;
+}
 
 /*----------------------------------------------------------------------*/
 
@@ -111,15 +126,25 @@ h2devGetKey(int type, int dev, BOOL create, int *pFd)
 	return ERROR;
     }
     /* Check the length of the string */
-    if (strlen(home)+strlen(uts.nodename)+strlen(H2_DEV_NAME)+3 > MAXPATHLEN) {
+    if (strlen(home)+strlen(uts.nodename)+strlen(H2_DEV_NAME)+6 > MAXPATHLEN) {
 	errnoSet(S_h2devLib_BAD_HOME_DIR);
 	return ERROR;
     }
-    snprintf(h2devFileName, sizeof(h2devFileName), "%s/%s-%s",
+    snprintf(h2devDirName, sizeof(h2devDirName), "%s/%s-%s",
+	home, H2_DEV_NAME, uts.nodename);
+
+    snprintf(h2devFileName, sizeof(h2devFileName), "%s/%s-%s/pid",
 	home, H2_DEV_NAME, uts.nodename);
 
     if (create) {
-	/* Create the file */
+	/* Create the directory */
+	int result;
+
+	result = mkdir(h2devDirName, 0777);
+	if (result == -1) {
+	    errnoSet(errno);
+	    return ERROR;
+	}
 	fd = open(h2devFileName, O_WRONLY | O_CREAT | O_EXCL, PORTLIB_MODE);
 	if (fd < 0) {
 	    errnoSet(errno);
@@ -405,6 +430,7 @@ h2devEnd(void)
 fail:
     /* remove the .h2devs lock file */
     unlink(h2devFileName);
+    rmdir(h2devDirName);
     /* and mark the global pointer as invalid */
     h2Devs = NULL;
     return rv;
