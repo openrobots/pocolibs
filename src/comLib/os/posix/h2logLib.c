@@ -37,7 +37,7 @@
 
 static int h2logFd = -1;
 static int h2logConnected = FALSE;
-static char h2logPath[MAXPATHLEN];
+static char h2logPath[MAXPATHLEN] = { '\0' };
 
 STATUS
 h2logGetPath(char *path, size_t len)
@@ -76,7 +76,8 @@ h2logConnect(const char *path)
 
 	if (path == NULL) {
 		/* init log functions */
-		if (h2logGetPath(h2logPath, sizeof(h2logPath)) == ERROR)
+		if (h2logPath[0] == '\0' && 
+		    h2logGetPath(h2logPath, sizeof(h2logPath)) == ERROR)
 			return ERROR;
 	} else
 		snprintf(h2logPath, sizeof(h2logPath), "%s", path);
