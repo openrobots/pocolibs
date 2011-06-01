@@ -56,8 +56,8 @@ h2logGetPath(char *path, size_t len)
 		return ERROR;
 	}
 	/* Check the length of the string */
-	if (strlen(home)+strlen(uts.nodename)+strlen(H2LOG_SOCKET_NAME)+3 
-	    > len) {
+	if (strlen(home) + strlen(uts.nodename) +
+	    strlen(H2LOG_SOCKET_NAME) + 3 > len) {
 		errnoSet(S_h2devLib_BAD_HOME_DIR);
 		return ERROR;
 	}
