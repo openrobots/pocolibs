@@ -134,7 +134,7 @@ h2logMsgv(const char *func, const char *fmt, va_list ap)
 	char buf[H2LOG_MSG_LENGTH];
 	struct timeval tv;
 	size_t len;
-	ssize_t error;
+	ssize_t sent, totsent;
 
 	if (h2logFd == -1 && h2logMsgInit(NULL) == ERROR)
 		return;
@@ -146,11 +146,18 @@ h2logMsgv(const char *func, const char *fmt, va_list ap)
 	    (intmax_t)tv.tv_sec, (intmax_t)tv.tv_usec);
 	len += snprintf(buf+len, sizeof(buf) - len , "%s: ", func);
 	len += vsnprintf(buf+len, sizeof(buf) - len, fmt, ap);
-	error = send(h2logFd, buf, len, MSG_DONTWAIT);
-
-	if (error == -1) {
-		close(h2logFd);
-		h2logFd = -1;
-		h2logConnected = -1;
-	}
+	totsent = 0;
+	do {
+		sent = send(h2logFd, buf + totsent, len, MSG_DONTWAIT);
+		if (sent > 0) {
+			len -= sent;
+			totsent += sent;
+			continue;
+		} else {
+			close(h2logFd);
+			h2logFd = -1;
+			h2logConnected = -1;
+			break;
+		}
+	} while (len > 0);
 }
