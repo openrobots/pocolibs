@@ -133,15 +133,23 @@ h2logMsgv(const char *func, const char *fmt, va_list ap)
 {
 	char buf[H2LOG_MSG_LENGTH];
 	struct timeval tv;
+	static struct timeval otv = { 0 };
 	size_t len;
 	ssize_t sent, totsent;
 
+	gettimeofday(&tv, NULL);
+
+	/* Only try to reconnect once per second */
+	if ((h2logFd == -1 || !h2logConnected) && otv.tv_sec == tv.tv_sec)
+		return;
+
+	otv = tv;
 	if (h2logFd == -1 && h2logMsgInit(NULL) == ERROR)
 		return;
 	if (h2logConnected == FALSE && h2logConnect(NULL) == ERROR)
 		return;
 
-	gettimeofday(&tv, NULL);
+	/* Now we have a connection */
 	len = snprintf(buf, sizeof(buf), "[%9" PRIdMAX ".%06" PRIdMAX "] ", 
 	    (intmax_t)tv.tv_sec, (intmax_t)tv.tv_usec);
 	len += snprintf(buf+len, sizeof(buf) - len , "%s: ", func);
