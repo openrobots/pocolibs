@@ -392,8 +392,10 @@ newTcb(char *name, int priority, int options, int stackSize,
      */
     /* give at least 64kB */
     if (stackSize < 65536) stackSize = 65536;
+#ifdef PTHREAD_STACK_MIN
     if (stackSize < PTHREAD_STACK_MIN)
 	    stackSize = PTHREAD_STACK_MIN;
+#endif
     /* round to page size */
     if (stackSize % pagesize != 0)
 	stackSize = stackSize - (stackSize % pagesize) + pagesize;
