@@ -7,7 +7,7 @@ dnl
 dnl GPL, since some parts were copied from other configure.in
 dnl 
 dnl
-AC_INIT([pocolibs],[2.10],[openrobots@laas.fr])
+AC_INIT([pocolibs],[2.10.99],[openrobots@laas.fr])
 AC_PREREQ(2.59)
 
 AC_CANONICAL_HOST
