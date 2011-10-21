@@ -343,7 +343,6 @@ STATUS
 h2devEnd(void)
 {
     int i, rv = OK;
-    POSTER_ID p;
 
     if (h2devAttach() == ERROR) {
 	/* Unlink the lock file, just in case */
