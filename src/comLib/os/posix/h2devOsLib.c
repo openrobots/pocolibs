@@ -364,9 +364,10 @@ h2devEnd(void)
 	    mboxDelete(i);
 	    break;
 	  case H2_DEV_TYPE_POSTER:
-	    if (posterFind(H2DEV_NAME(i), &p) == OK) {
-		posterDelete(p);
-	    }
+	    /* Don't call posterLib, to avoid circular lib dependencies */
+	    smMemFree(smObjGlobalToLocal(H2DEV_POSTER_POOL(i)));
+	    h2semDelete(H2DEV_POSTER_SEM_ID(i));
+	    h2devFree(i);
 	    break;
 	  case H2_DEV_TYPE_SEM:
 	    /* Nothing to do, semaphores are cleaned further down */
