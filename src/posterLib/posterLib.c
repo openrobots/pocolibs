@@ -227,6 +227,32 @@ posterFind(const char *name, POSTER_ID *pPosterId)
 
 /*----------------------------------------------------------------------*/
 
+STATUS
+posterForget(POSTER_ID posterId)
+{
+	POSTER_STR *p = (POSTER_STR *)posterId;
+	POSTER_STR *p1, *p2;
+
+	/* remove from local cache */
+	p1 = allPosters;
+	p2 = NULL;
+	while (p1 != NULL) {
+		if (p1 == p) {
+			if (p2 == NULL)
+				allPosters = allPosters->next;
+			else
+				p2->next = p1->next;
+			free(p1);
+			return OK;
+		}
+	}
+	errnoSet(S_posterLib_POSTER_CLOSED);
+	return ERROR;
+}
+
+	
+/*----------------------------------------------------------------------*/
+
 int
 posterWrite(POSTER_ID posterId, int offset, void *buf, int nbytes)
 {
