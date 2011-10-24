@@ -1,0 +1,56 @@
+
+lib_LTLIBRARIES = libposterLib.la
+
+libposterLib_la_LDFLAGS = -version-number 7:0:1 -no-undefined
+
+AM_CPPFLAGS = -I$(top_srcdir)/include \
+	-DPOSTER_SERV_PATH=\"$(BINDIR)/posterServ\"
+
+libposterLib_la_SOURCES = \
+	os/$(OSAPI)/hostclient.c \
+	posterLib.c \
+	localPosterLib.c \
+	os/$(OSAPI)/remotePosterLib.c \
+	posters_clnt.c \
+	posters_xdr.c \
+	posterLibPriv.h \
+	os/$(OSAPI)/remotePosterLibPriv.h \
+	posters.x
+
+bin_PROGRAMS = posterServ
+
+posterServ_LDFLAGS =
+posterServ_LDADD =  posters_xdr.lo localPosterLib.lo \
+	-L../comLib -L../portLib -L../errorLib -lcomLib -lportLib -lerrorLib
+
+posterServ_SOURCES = \
+	posterServ.c \
+	remPosterId.c \
+	posters_svc.c \
+	remPosterId.h \
+	tree.h
+
+BUILT_SOURCES = \
+	posters.h \
+	posters_xdr.c \
+	posters_clnt.c \
+	posters_svc.c
+
+posters_clnt.c: posters.x
+	rm -f $@
+	(cd $(dir $<) ; $(RPCGEN) -l posters.x) > $@
+
+posters_svc.c: posters.x
+	rm -f $@
+	(cd $(dir $<) ; $(RPCGEN) -m posters.x) > $@
+
+posters_xdr.c: posters.x
+	rm -f $@
+	(cd $(dir $<) ; $(RPCGEN) -c posters.x) > $@
+
+posters.h: posters.x
+	rm -f $@
+	(cd $(dir $<) ; $(RPCGEN) -h posters.x) > $@
+
+CLEANFILES = $(BUILT_SOURCES)
+

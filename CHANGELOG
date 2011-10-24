@@ -1,3 +1,11 @@
+Version 2.2, XXX 2011
+
+118. Switch build system to automake.
+117. [h2devLib] don't call posterLib functions to free a poster.
+116. [posterLib] add posterForget() to invalidate a posterId.
+
+Version 2.10, 3 october 2011
+
 115. New h2logMsg() API for syslog-style logging of events
 114. More LP64 fixes, a few places were still using ints for taskIds
 113. Activate the code that sets pthread scheduler policy and parameters

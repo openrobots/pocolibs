@@ -8,7 +8,11 @@ dnl GPL, since some parts were copied from other configure.in
 dnl 
 dnl
 AC_INIT([pocolibs],[2.10.99],[openrobots@laas.fr])
-AC_PREREQ(2.59)
+AC_PREREQ(2.62)
+AM_INIT_AUTOMAKE([foreign])
+AM_MAINTAINER_MODE([enable])
+
+AC_CONFIG_MACRO_DIR([m4])
 
 AC_CANONICAL_HOST
 
@@ -328,7 +332,7 @@ fi
 dnl --- Make makefiles --------------------------------------------------
 
 AC_CONFIG_HEADER(src/pocolibs-config.h)
-AC_OUTPUT(Init.make
+AC_OUTPUT(
 	Makefile
 	pocolibs.pc
 	include/Makefile
@@ -336,12 +340,8 @@ AC_OUTPUT(Init.make
 	src/errorLib/Makefile
 	src/comLib/Makefile
 	src/posterLib/Makefile
-	src/posterLib/posterServ/Makefile
-	src/posterLib/test/basic/Makefile
-	src/posterLib/test/endian/Makefile
 	src/h2/Makefile
 	src/h2logd/Makefile
 	src/shell/Makefile
-	src/regress/Makefile
 )
 
