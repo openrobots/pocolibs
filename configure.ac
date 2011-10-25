@@ -330,7 +330,6 @@ AC_OUTPUT(
 	pocolibs.pc
 	include/Makefile
 	src/portLib/Makefile
-	src/errorLib/Makefile
 	src/comLib/Makefile
 	src/posterLib/Makefile
 	src/h2/Makefile
