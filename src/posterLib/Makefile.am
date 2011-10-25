@@ -39,19 +39,19 @@ BUILT_SOURCES = \
 
 posters_clnt.c: posters.x
 	rm -f $@
-	(cd $(dir $<) ; $(RPCGEN) -l posters.x) > $@
+	(cd $(dir $<) ; $(RPCGEN) $(RPCGEN_C) -l posters.x) > $@
 
 posters_svc.c: posters.x
 	rm -f $@
-	(cd $(dir $<) ; $(RPCGEN) -m posters.x) > $@
+	(cd $(dir $<) ; $(RPCGEN)  $(RPCGEN_C) -m posters.x) > $@
 
 posters_xdr.c: posters.x
 	rm -f $@
-	(cd $(dir $<) ; $(RPCGEN) -c posters.x) > $@
+	(cd $(dir $<) ; $(RPCGEN) $(RPCGEN_C) -c posters.x) > $@
 
 posters.h: posters.x
 	rm -f $@
-	(cd $(dir $<) ; $(RPCGEN) -h posters.x) > $@
+	(cd $(dir $<) ; $(RPCGEN) $(RPCGEN_C) -h posters.x) > $@
 
 CLEANFILES = $(BUILT_SOURCES)
 
