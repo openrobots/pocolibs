@@ -1,5 +1,6 @@
 Version 2.2, XXX 2011
 
+119. Merge errorLib into portLib.
 118. Switch build system to automake.
 117. [h2devLib] don't call posterLib functions to free a poster.
 116. [posterLib] add posterForget() to invalidate a posterId.
