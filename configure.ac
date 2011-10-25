@@ -64,13 +64,6 @@ fi
 
 AC_PROG_INSTALL
 
-dnl check for mkdep
-AC_ARG_VAR(MKDEP, [full path of the LAAS' dependency generator])
-AC_PATH_PROG(MKDEP, mkdep, no, $prefix/bin:$exec_prefix/bin:$PATH)
-if test "x$MKDEP" = "xno"; then
-    AC_MSG_ERROR( [Cannot find the mkdep executable, needed to build pocolibs] )
-fi
-
 dnl check for rpcgen
 AC_ARG_VAR(RPCGEN, [Remote Procedure Call (RPC) protocol compiler])
 AC_PATH_PROG(RPCGEN, rpcgen, no, [$PATH])
