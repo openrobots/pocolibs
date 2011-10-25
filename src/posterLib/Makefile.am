@@ -2,6 +2,7 @@
 lib_LTLIBRARIES = libposterLib.la
 
 libposterLib_la_LDFLAGS = -version-number 7:0:1 -no-undefined
+libposterLib_la_LIBADD = -L../comLib -L../portLib -lcomLib -lportLib
 
 AM_CPPFLAGS = -I$(top_srcdir)/include \
 	-DPOSTER_SERV_PATH=\"$(BINDIR)/posterServ\"
