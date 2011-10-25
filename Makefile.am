@@ -4,7 +4,6 @@ ACLOCAL_AMFLAGS = -I m4
 SUBDIRS = \
 	include 	\
 	src/portLib	\
-	src/errorLib	\
 	src/comLib	\
 	src/posterLib	\
 	src/h2		\

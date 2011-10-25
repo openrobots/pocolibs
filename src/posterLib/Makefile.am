@@ -21,7 +21,7 @@ bin_PROGRAMS = posterServ
 
 posterServ_LDFLAGS =
 posterServ_LDADD =  posters_xdr.lo localPosterLib.lo \
-	-L../comLib -L../portLib -L../errorLib -lcomLib -lportLib -lerrorLib
+	-L../comLib -L../portLib -lcomLib -lportLib
 
 posterServ_SOURCES = \
 	posterServ.c \
