@@ -6,5 +6,7 @@ test -z "$srcdir" && srcdir=.
 ORIGDIR=`pwd`
 cd $srcdir
 
-aclocal -I . || exit 1
-exec autoconf
+autoreconf --force -v --install || exit 1
+cd $ORIGDIR || exit $?
+
+$srcdir/configure --enable-maintainer-mode "$@"
