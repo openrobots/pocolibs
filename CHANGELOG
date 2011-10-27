@@ -1,4 +1,4 @@
-Version 2.2, XXX 2011
+Version 2.11, 27 october 2011
 
 119. Merge errorLib into portLib.
 118. Switch build system to automake.
