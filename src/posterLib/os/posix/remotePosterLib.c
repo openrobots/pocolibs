@@ -283,8 +283,8 @@ remotePosterWrite (POSTER_ID posterId,	/* Id of the poster */
 		clnt_perror(client, "remotePosterWrite");
 		return(ERROR);
 	}
-	if (*res != nbytes) {
-		errnoSet(*res);
+	if (*res == ERROR) {
+		errnoSet(S_posterLib_BAD_FORMAT);
 		return(ERROR);
 	}
 	return(*res);
@@ -448,7 +448,8 @@ remotePosterRead(POSTER_ID posterId,   /* Id of the poster to read */
 	POSTER_READ_PAR param;
 	REMOTE_POSTER_ID remPosterId = (REMOTE_POSTER_ID)posterId;
 	CLIENT *client = clientCreate(remPosterId->key, remPosterId->hostname);
-	
+        size_t len;
+
 	if (client == NULL) {
 		errnoSet(S_remotePosterLib_BAD_RPC);
 		return ERROR;
@@ -476,10 +477,12 @@ remotePosterRead(POSTER_ID posterId,   /* Id of the poster to read */
 		return(ERROR);
 	}
 	
-	memcpy(buf, res->data.data_val, nbytes);
+        len = res->data.data_len;
+        if (len > nbytes) len = nbytes;
+	memcpy(buf, res->data.data_val, len);
 	
 	xdr_free((xdrproc_t)xdr_POSTER_READ_RESULT, (char *)res);
-	return (nbytes);
+	return len;
 }
 
 /******************************************************************************

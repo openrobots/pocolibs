@@ -239,8 +239,9 @@ SVC(poster_read_1)(POSTER_READ_PAR *param, struct svc_req *clnt)
     res.data.data_len = param->length;
     res.data.data_val = malloc(param->length);
 
-    if (posterLocalFuncs.read(p, param->offset, 
-	    res.data.data_val, param->length) == ERROR) {
+    res.data.data_len = posterLocalFuncs.read(p, param->offset,
+                                              res.data.data_val, param->length);
+    if (res.data.data_len == ERROR) {
 	res.status = errnoGet();
 	if (verbose) {
 	    fprintf(stderr, "posterServ error: read ");

@@ -1,3 +1,5 @@
+124. Let posterRead()/posterWrite() also return the number of bytes read/write
+     in the remote case.
 123. Fix bounds checks in posterRead()/posterWrite()
 122. Add FIO_RESIZE posterIoctl command, for resizing an existing poster.
 121. Reconnect regression test to the build after automake switch.
