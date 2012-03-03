@@ -292,16 +292,16 @@ localPosterRead(POSTER_ID posterId, int offset, void *buf, int nbytes)
 	return(ERROR);
     }
     /* Copier les donnees */
-    memcpy(buf, (char *)localPosterAddr(posterId) + offset, nbytes);
+    memcpy(buf, (char *)localPosterAddr(posterId) + offset, nRd);
 
     /* statistics */
     H2DEV_POSTER_READ_OPS(dev)++;
-    H2DEV_POSTER_READ_BYTES(dev) += nbytes;
+    H2DEV_POSTER_READ_BYTES(dev) += nRd;
 
     /* Liberer le semaphore */
     localPosterGive(posterId);
     
-    return(nbytes);
+    return(nRd);
 
 } /* posterRead */
 
