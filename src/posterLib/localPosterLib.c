@@ -253,23 +253,31 @@ static int
 localPosterWrite(POSTER_ID posterId, int offset, void *buf, int nbytes)
 {
     long dev = (long)posterId;
+    int nWr;
 
     /* Prise du semaphore d'exclusion mutuelle */
     if (localPosterTake(posterId, POSTER_WRITE) == ERROR) {
 	return(ERROR);
     }
 
+    /* Calculer le nombre d'octets a écrire */
+    nWr = MIN(nbytes, H2DEV_POSTER_SIZE(dev) - offset);
+    if (nWr <= 0) {
+        errnoSet(S_posterLib_BAD_FORMAT);
+	return 0;
+    }
+
     /* Ecrire les donnees dans le poster */
-    memcpy((char *)localPosterAddr(posterId) + offset, buf, nbytes);
+    memcpy((char *)localPosterAddr(posterId) + offset, buf, nWr);
     
     /* Store statistics */
     H2DEV_POSTER_WRITE_OPS(dev)++;
-    H2DEV_POSTER_WRITE_BYTES(dev) += nbytes;    
+    H2DEV_POSTER_WRITE_BYTES(dev) += nWr;    
 
     /* liberer le semaphore d'exclusion mutuelle */
     localPosterGive(posterId);
     
-    return(nbytes);
+    return(nWr);
 
 } /* posterWrite */
 
