@@ -454,7 +454,7 @@ remotePosterRead(POSTER_ID posterId,   /* Id of the poster to read */
 		errnoSet(S_remotePosterLib_BAD_RPC);
 		return ERROR;
 	}
-	if (nbytes == 0)
+	if (nbytes <= 0)
 		return 0;
 	param.id = remPosterId->vxPosterId;
 	param.length = nbytes;
