@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003, 2010 CNRS/LAAS
+ * Copyright (c) 1990, 2003, 2010,2012 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -178,6 +178,27 @@ SVC(poster_create_1)(POSTER_CREATE_PAR *param, struct svc_req *clnt)
 /*----------------------------------------------------------------------*/
 
 int *
+SVC(poster_resize_1)(POSTER_RESIZE_PAR *param, struct svc_req *clnt)
+{
+    static int res;
+    POSTER_ID p = (POSTER_ID)remposterIdLookup(param->id);
+    size_t size = param->size; /* copy here to make sure sizeof is correct */
+
+    res = posterLocalFuncs.ioctl(p, FIO_RESIZE, &size);
+    if (res == ERROR) {
+	res = errnoGet();
+	if (verbose) {
+	    fprintf(stderr, "posterServ error: resize ");
+	    h2printErrno(res);
+	}
+    }
+
+    return(&res);
+}
+
+/*----------------------------------------------------------------------*/
+
+int *
 SVC(poster_write_1)(POSTER_WRITE_PAR *param, struct svc_req *clnt)
 {
     static int res;
@@ -205,7 +226,16 @@ SVC(poster_read_1)(POSTER_READ_PAR *param, struct svc_req *clnt)
     POSTER_ID p = (POSTER_ID)remposterIdLookup(param->id);
 
     xdr_free((xdrproc_t)xdr_POSTER_READ_RESULT, (char *)&res);
-    
+
+    /* tread data_len == -1 as 'read whole poster'. This can only come from a
+     * remotePosterTake(), as far as posterLib API is concerned */
+    if (param->length == -1) {
+      /* do not lock? there is a race in any case until the actual read(),
+       * however the read() will return the correct number of bytes read in any
+       * case.
+       */
+      param->length = H2DEV_POSTER_SIZE((long)p);
+    }
     res.data.data_len = param->length;
     res.data.data_val = malloc(param->length);
 

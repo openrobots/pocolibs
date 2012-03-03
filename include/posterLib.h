@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998, 2005,2009 CNRS/LAAS
+ * Copyright (c) 1998, 2005,2009,2012 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -39,6 +39,7 @@ typedef enum {
 #define   FIO_GETSIZE				 3
 #define   FIO_FRESH                  		 4
 #define	  FIO_GETSTATS				 5
+#define	  FIO_RESIZE				 6
 
 /* bus address space for poster storage */
 #define POSTER_LOCAL_MEM   0		/* local memory of one process

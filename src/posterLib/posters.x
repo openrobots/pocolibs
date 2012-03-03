@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1991, 2004, 2011 CNRS/LAAS
+ * Copyright (c) 1991, 2004, 2011-2012 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -62,6 +62,11 @@ struct POSTER_READ_RESULT {
     char data<>;
 };
 
+struct POSTER_RESIZE_PAR {
+    int id;
+    int size;
+};
+
 struct POSTER_IOCTL_PAR {
     int id;
     int cmd;
@@ -103,6 +108,7 @@ program POSTER_SERV {
 	int poster_delete(int) = 5;
 	POSTER_IOCTL_RESULT poster_ioctl(POSTER_IOCTL_PAR) = 6;
 	POSTER_LIST_RESULT poster_list() = 7;
+	int poster_resize(POSTER_RESIZE_PAR) = 8;
      } = 1;
 } = 600000001;
 

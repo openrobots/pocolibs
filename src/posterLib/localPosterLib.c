@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 2003-2004,2009 CNRS/LAAS
+ * Copyright (c) 1996, 2003-2004,2009,2012 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -43,6 +43,7 @@
 static STATUS localPosterCreate ( const char *name, int size, POSTER_ID *pPosterId );
 static STATUS localPosterMemCreate ( const char *name, int busSpace, void *pPool,
 				     int size, POSTER_ID *pPosterId );
+static STATUS localPosterResize(POSTER_ID posterId, size_t size);
 static STATUS localPosterDelete ( POSTER_ID posterId );
 static STATUS localPosterFind ( const char *name, POSTER_ID *pPosterId );
 static int localPosterWrite ( POSTER_ID posterId, int offset, void *buf, 
@@ -149,6 +150,43 @@ localPosterMemCreate(
     logMsg("posterMemCreate: pas encore supportee sur Unix\n");
     return(ERROR);
 }
+
+/*----------------------------------------------------------------------*/
+
+/* called from posterIoctl with a lock on POSTER_ID */
+
+static STATUS
+localPosterResize(POSTER_ID posterId, size_t size)
+{
+    long dev = (long)posterId;
+    unsigned char *pool;
+
+    /* check owner */
+    if (H2DEV_POSTER_TASK_ID(dev) != getpid()) {
+        errnoSet(S_posterLib_NOT_OWNER);
+        return ERROR;
+    }
+
+    /* optimize if size does not change */
+    if (size == H2DEV_POSTER_SIZE(dev)) return OK;
+
+    /* realloc shared memory, even if new size is smaller than current size,
+     * for garbage collection */
+    pool = smObjGlobalToLocal(H2DEV_POSTER_POOL(dev));
+    pool = smMemRealloc(pool, size);
+    if (pool == NULL) {
+        errnoSet(S_posterLib_MALLOC_ERROR);
+        return ERROR;
+    }
+
+    /* update poster device */
+    H2DEV_POSTER_POOL(dev) = smObjLocalToGlobal(pool);
+    H2DEV_POSTER_SIZE(dev) = size;
+    H2DEV_POSTER_FLG_FRESH(dev) = FALSE;
+
+    return OK;
+
+} /* posterResize */
 
 /*----------------------------------------------------------------------*/
 
@@ -440,6 +478,11 @@ localPosterIoctl(POSTER_ID posterId, int code, void *parg)
 	H2DEV_POSTER_READ_BYTES(dev) = 0;
 	H2DEV_POSTER_WRITE_OPS(dev) = 0;
 	H2DEV_POSTER_WRITE_BYTES(dev) = 0;
+	break;
+
+      case FIO_RESIZE:
+	/* Change poster size */
+        retval = localPosterResize(posterId, *(size_t *)parg);
 	break;
 
       default:

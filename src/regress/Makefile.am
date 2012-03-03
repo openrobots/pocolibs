@@ -21,7 +21,8 @@ TESTS=\
 	comLib/h2timefromts	\
 	comLib/h2timefromtv	\
 				\
-	posterLib/poster
+	posterLib/poster	\
+	posterLib/resize
 
 XFAIL_TESTS=	portLib/taskSuspend	# since this dumps core
 

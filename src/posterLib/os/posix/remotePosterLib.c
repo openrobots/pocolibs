@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 2004, 2010 CNRS/LAAS
+ * Copyright (c) 1996, 2004, 2010,2012 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -183,6 +183,64 @@ remotePosterMemCreate(const char *name,	/* Device name to be created */
 	fprintf(stderr, "posterMemCreate: not suppored on Unix\n");
 	return(ERROR);
 }
+
+/*****************************************************************************
+*
+*  posterResize  -  Resize a poster, called from posterIoctl only
+*
+*  Returns : OK or ERROR
+*/
+
+static STATUS
+remotePosterResize (REMOTE_POSTER_ID remPosterId,	/* Id of the poster */
+                    size_t size,			/* new size */
+                    CLIENT *client)			/* rpc client */
+{
+	POSTER_RESIZE_PAR param;
+	void *cache;
+	int *res;
+
+	/* check owner */
+	if (remPosterId->pid != getpid()) {
+		errnoSet(S_remotePosterLib_NOT_OWNER);
+		return ERROR;
+	}
+
+	/* optimize if size does not change */
+	if (size == remPosterId->dataSize)
+		return OK;
+
+	/* create new local cache now - do not realloc() in case the remote
+         * fails */
+	cache = malloc(size);
+	if (!cache) {
+		errnoSet(S_posterLib_MALLOC_ERROR);
+		return ERROR;
+	}
+
+	/* resize remote poster - if this fails, forget about new cache */
+	param.id = remPosterId->vxPosterId;
+	param.size = (int)size;
+	res = poster_resize_1(&param, client);
+	if (res == NULL || *res != OK) {
+		free(cache);
+		errnoSet(res ? *res : S_posterLib_MALLOC_ERROR);
+		return ERROR;
+	}
+
+	/* update local cache */
+	if (size > remPosterId->dataSize)
+		memcpy(cache, remPosterId->dataCache, remPosterId->dataSize);
+	else
+		memcpy(cache, remPosterId->dataCache, size);
+	remPosterId->dataSize = size;
+
+	free(remPosterId->dataCache);
+	remPosterId->dataCache = cache;
+
+	return OK;
+}
+
 
 /*****************************************************************************
 *
@@ -460,7 +518,7 @@ remotePosterTake(POSTER_ID posterId, POSTER_OP op)
 	} /* switch */
 	
 	param.id = remPosterId->vxPosterId;
-	param.length = remPosterId->dataSize;
+	param.length = -1 /* whole poster (in case the size was changed) */;
 	param.offset = 0;
 	
 	res = poster_read_1(&param, client);
@@ -475,6 +533,20 @@ remotePosterTake(POSTER_ID posterId, POSTER_OP op)
 		errnoSet(res->status);
 		return(ERROR);
 	}
+
+        /* update cache size if needed */
+        if (res->status == POSTER_OK &&
+            remPosterId->dataSize < res->data.data_len) {
+          void *c = realloc(remPosterId->dataCache, res->data.data_len);
+          if (!c) {
+            xdr_free((xdrproc_t)xdr_POSTER_READ_RESULT, (char *)res);
+            errnoSet(S_posterLib_MALLOC_ERROR);
+            return ERROR;
+          }
+          remPosterId->dataSize = res->data.data_len;
+          remPosterId->dataCache = c;
+        }
+
 	remPosterId->op = op;
 	if (res->status == S_posterLib_POSTER_CLOSED 
 	    || res->status == S_posterLib_EMPTY_POSTER) {
@@ -638,7 +710,10 @@ remotePosterIoctl(POSTER_ID posterId,	/* poster Id */
 		*(u_long *)parg = (u_long)remPosterId->dataSize;
 		return OK;
 	}
-	
+	if (code == FIO_RESIZE) {
+		return remotePosterResize(remPosterId, *(size_t *)parg, client);
+	}
+
 	param.id = remPosterId->vxPosterId;
 	param.cmd = code;
 	
