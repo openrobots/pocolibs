@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2003-2004 CNRS/LAAS
+ * Copyright (c) 1999, 2003-2004,2012 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -350,6 +350,12 @@ smMemShow(BOOL option)
 {
     unsigned long bytes = 0, blocks = 0, maxb = 0;
     SM_MALLOC_CHUNK *c;
+
+    if (smMemFreeList == NULL) {
+	if (smMemAttach() == ERROR) {
+	    return NULL;
+	}
+    }
 
     if (option) {
 	logMsg("\nFREE LIST:\n");
