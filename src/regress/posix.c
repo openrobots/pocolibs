@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 CNRS/LAAS
+ * Copyright (c) 2004,2012 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,7 +18,9 @@
 
 #include "portLib.h"
 
+#include <libgen.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "h2devLib.h"
 #include "h2timerLib.h"
@@ -29,24 +31,26 @@ int
 main(int argc, char *argv[])
 {
 	int status;
-	
+
 	osInit(100);
+	h2devEnd();
 	if (h2devInit(1<<10, FALSE) == ERROR) {
 		char buf[1024];
 		h2getErrMsg(errnoGet(), buf, sizeof(buf));
 		printf("cannot create h2 devices: %s\n", buf);
 		exit(2);
 	}
-	
+
 	if (h2timerInit() == ERROR) {
 		printf("cannot not initialize h2 timers\n");
 		h2devEnd();
 		exit(2);
 	}
-	
-	printf("--- pocolibs regression test -------------------\n");
+
+	printf("--- %s regression test -------------------\n",
+               basename(argv[0]));
 	status = pocoregress_init();
-	
+
 	h2timerEnd();
 	h2devEnd();
 	osExit();
