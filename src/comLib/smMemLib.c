@@ -282,14 +282,26 @@ smMemCalloc(size_t elemNum, size_t elemSize)
 void *
 smMemRealloc(void *pBlock, size_t newSize)
 {
+    SM_MALLOC_CHUNK *c;
     void *newBlock;
 
+    /* get a pointer to the old block header */
+    c = (SM_MALLOC_CHUNK *)pBlock - 1;
+    if (c->next != MALLOC_MAGIC) {
+       LOGDBG(("comLib:smMemLib: realloc(something not returned by malloc)\n"));
+       return NULL;
+    }
+
+    /* alloc new block */
     newBlock = smMemMalloc(newSize);
     if (newBlock == NULL) {
 	return NULL;
     }
     if (pBlock != NULL) {
-	memcpy(newBlock, pBlock, newSize);
+	if (newSize > c->length)
+            memcpy(newBlock, pBlock, c->length);
+        else
+            memcpy(newBlock, pBlock, newSize);
 	smMemFree(pBlock);
     }
     return newBlock;
