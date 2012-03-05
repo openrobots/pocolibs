@@ -5,7 +5,7 @@ libposterLib_la_LDFLAGS = -version-info 7:0:1 -no-undefined
 libposterLib_la_LIBADD = -L../comLib -L../portLib -lcomLib -lportLib
 
 AM_CPPFLAGS = -I$(top_srcdir)/include \
-	-DPOSTER_SERV_PATH=\"$(BINDIR)/posterServ\"
+	-DPOSTER_SERV_PATH=\"$(bindir)/posterServ\"
 
 libposterLib_la_SOURCES = \
 	os/$(OSAPI)/hostclient.c \

@@ -5,7 +5,7 @@ libcomLib_la_LDFLAGS = -version-info 10:0:1 -no-undefined
 libcomLib_la_LIBADD = -L../portLib -lportLib
 
 AM_CPPFLAGS = -I$(top_srcdir)/include \
-	-DPOSTER_SERV_PATH=\"$(BINDIR)/posterServ\"
+	-DPOSTER_SERV_PATH=\"$(bindir)/posterServ\"
 
 libcomLib_la_SOURCES = \
         commonStructLib.c       	\

@@ -1,3 +1,5 @@
+120. Fix built-in posterServ path by using the right automake bindir variable
+
 Version 2.11, 27 october 2011
 
 119. Merge errorLib into portLib.
