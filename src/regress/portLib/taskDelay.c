@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003-2004,2009 CNRS/LAAS
+ * Copyright (c) 1990, 2003-2004,2009,2012 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -41,7 +41,7 @@ pocoregress_init()
    struct timeval tp1, tp2;
    int i;
 
-   for (i = 0; i < 50; i++) {
+   for (i = 0; i < 100; i=2*i+1) {
       gettimeofday(&tp1, NULL);
 
       taskDelay(i);
