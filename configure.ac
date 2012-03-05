@@ -335,5 +335,5 @@ AC_OUTPUT(
 	src/h2/Makefile
 	src/h2logd/Makefile
 	src/shell/Makefile
+	src/regress/Makefile
 )
-
