@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 CNRS/LAAS
+ * Copyright (c) 2004,2012 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -33,7 +33,13 @@ pocoregress_init()
    struct test data = { 3, 3.1415926 };
    struct test data2;
    POSTER_ID p;
+   char *e;
    int n;
+
+   e = getenv("POSTER_HOST");
+   logMsg("POSTER_HOST: %s\n", e?e:"(none)");
+   e = getenv("POSTER_PATH");
+   logMsg("POSTER_PATH: %s\n", e?e:"(none)");
 
    if (posterCreate("pocoster", sizeof(data), &p) != OK) {
       logMsg("Error: could not create poster\n");
