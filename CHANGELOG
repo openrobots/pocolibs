@@ -1,3 +1,4 @@
+126. Fix internal timer for the h2initGlob(1) case (1 tick per second)
 125. Make sure smMemRealloc() does not read uninitialized bytes when copying
      the content of previous memory block.
 124. Let posterRead()/posterWrite() also return the number of bytes read/write

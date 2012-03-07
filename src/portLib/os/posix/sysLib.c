@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2003 CNRS/LAAS
+ * Copyright (c) 1999, 2003,2012 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -112,15 +112,29 @@ sysClkEnable(void)
 	    printf("Erreur creation timer %d\n", errno);
 	    ERRNO_SET(errno);
 	}
-	tv.it_interval.tv_nsec = 1000000000/sysClkTicksPerSecond;
-	tv.it_interval.tv_sec = 0;
-	tv.it_value.tv_nsec = 1000000000/sysClkTicksPerSecond;
-	tv.it_value.tv_sec = 0;
+        if (sysClkTicksPerSecond == 1) {
+            tv.it_interval.tv_nsec = 0;
+            tv.it_interval.tv_sec = 1;
+            tv.it_value.tv_nsec = 0;
+            tv.it_value.tv_sec = 1;
+        } else {
+            tv.it_interval.tv_nsec = 1000000000/sysClkTicksPerSecond;
+            tv.it_interval.tv_sec = 0;
+            tv.it_value.tv_nsec = 1000000000/sysClkTicksPerSecond;
+            tv.it_value.tv_sec = 0;
+        }
 #else 
-	tv.it_interval.tv_usec = 1000000/sysClkTicksPerSecond;
-	tv.it_interval.tv_sec = 0;
-	tv.it_value.tv_usec = 1000000/sysClkTicksPerSecond;
-	tv.it_value.tv_sec = 0;
+        if (sysClkTicksPerSecond == 1) {
+            tv.it_interval.tv_usec = 0;
+            tv.it_interval.tv_sec = 1;
+            tv.it_value.tv_usec = 0;
+            tv.it_value.tv_sec = 1;
+        } else {
+            tv.it_interval.tv_usec = 1000000/sysClkTicksPerSecond;
+            tv.it_interval.tv_sec = 0;
+            tv.it_value.tv_usec = 1000000/sysClkTicksPerSecond;
+            tv.it_value.tv_sec = 0;
+        }
 #endif
     
 #ifdef HAVE_POSIX_TIMERS
