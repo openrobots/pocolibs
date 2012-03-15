@@ -15,6 +15,7 @@ TESTS=\
 	comLib/commonStruct	\
 	comLib/h2dev		\
 	comLib/h2sem		\
+	comLib/h2semAlloc	\
 	comLib/mbox		\
 	comLib/h2timer		\
 	comLib/h2timersem	\
