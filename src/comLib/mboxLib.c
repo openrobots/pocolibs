@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003-2005 CNRS/LAAS
+ * Copyright (c) 1990, 2003-2005,2012 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -474,6 +474,11 @@ mboxSend(MBOX_ID toId, MBOX_ID fromId, char *buf, int nbytes)
     H2SEM_ID semTask;
     int result;
     char msg[64];
+
+    if (H2DEV_TYPE(toId) != H2_DEV_TYPE_MBOX) {
+      errnoSet(S_mboxLib_MBOX_CLOSED);
+      return ERROR;
+    }
 
     /* take the mutex semaphore of the device */
     if (h2semTake (H2DEV_MBOX_SEM_EXCL_ID(toId), WAIT_FOREVER) != TRUE) {
