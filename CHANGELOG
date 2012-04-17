@@ -1,3 +1,10 @@
+129. Implement csMboxUpdate() and gcomUpdate() for resizing mailboxes (requests
+     and/or replies) associated with a task. This makes sense only after a
+     successful csMboxInit() or gcomInit(). Shrinking mailboxes is not allowed
+     to avoid potential issues with legacy code.
+128. Implement mboxResize() for resizing an mboxLib mailbox.
+127. Implement h2rngRealloc() for resizing h2 ring buffers. Shrinking is
+     explicitly disallowed.
 126. Fix internal timer for the h2initGlob(1) case (1 tick per second)
 125. Make sure smMemRealloc() does not read uninitialized bytes when copying
      the content of previous memory block.
