@@ -186,6 +186,55 @@ mboxCreate(char *name, int size, MBOX_ID *pMboxId)
 
 /*----------------------------------------------------------------------*/
 
+/**
+ **  mboxResize  -  Resize an existing mailbox device
+ **
+ **  Description:
+ **  Modify the size of a mailbox. No content is lost.
+ **
+ **  Returns: OK or ERROR
+ **/
+
+STATUS
+mboxResize(MBOX_ID mboxId, int size)
+{
+    uid_t uid = getuid();
+    H2_MBOX_STR *mbox;
+    H2RNG_ID rngId;
+
+    if (uid != H2DEV_UID(mboxId) && uid != H2DEV_UID(0)) {
+        errnoSet(S_mboxLib_NOT_OWNER);
+        return ERROR;
+    }
+    mbox = H2DEV_MBOX_STR(mboxId);
+    if (mbox->size == size) return OK;
+
+    /* take the mutex semaphore of the device */
+    if (h2semTake (H2DEV_MBOX_SEM_EXCL_ID(mboxId), WAIT_FOREVER) != TRUE) {
+        return ERROR;
+    }
+
+    /* resize the ring buffer */
+    rngId = (H2RNG_ID)smObjGlobalToLocal(H2DEV_MBOX_RNG_ID(mboxId));
+    rngId = h2rngRealloc(rngId, size);
+    if (rngId == NULL) {
+      h2semGive(H2DEV_MBOX_SEM_EXCL_ID(mboxId));
+      return ERROR;
+    }
+
+    /* store the global identifier of the new ring buffer */
+    mbox->rngId = (H2RNG_ID)smObjLocalToGlobal(rngId);
+
+    /* other information */
+    mbox->size = size;
+
+    /* that's it */
+    h2semGive(H2DEV_MBOX_SEM_EXCL_ID(mboxId));
+    return OK;
+}
+
+/*----------------------------------------------------------------------*/
+
 STATUS
 mboxDelete(MBOX_ID mboxId)
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1991, 2003 CNRS/LAAS
+ * Copyright (c) 1991, 2003,2012 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -60,6 +60,7 @@ typedef int MBOX_ID;
 
 /* -- PROTOTYPES ----------------------------------------------- */
 extern STATUS mboxCreate ( char *name, int len, MBOX_ID *pMboxId );
+extern STATUS mboxResize ( MBOX_ID mboxId, int size );
 extern STATUS mboxDelete ( MBOX_ID mboxId );
 extern STATUS mboxEnd ( long taskId );
 extern STATUS mboxFind ( char *name, MBOX_ID *pMboxId );
