@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003-2004 CNRS/LAAS
+ * Copyright (c) 1990, 2003-2004,2012 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -119,6 +119,38 @@ gcomInit(char *procName, int rcvMboxSize, int replyMboxSize)
     }
     return OK;
 }
+
+
+/******************************************************************************
+*
+*  gcomUpdate  -  Resize mailboxes
+*
+*  Description :
+*  This function resizes task mailboxes
+*
+*  Retourne : OK ou ERROR
+*/
+
+STATUS
+gcomUpdate(int rcvMboxSize, int replyMboxSize)
+{
+    int myIndice;
+
+    myIndice = MY_TASK_DEV;
+    if (rcvMboxSize > 0) {
+        if (mboxResize(rcvMboxTab[myIndice], rcvMboxSize) != OK) {
+            return ERROR;
+        }
+    }
+    if (replyMboxSize > 0) {
+        if (mboxResize(replyMboxTab[myIndice], replyMboxSize) != OK) {
+            return ERROR;
+        }
+    }
+
+    return OK;
+}
+
 
 /*****************************************************************************
 *

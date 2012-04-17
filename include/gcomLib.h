@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1991, 2003-2005 CNRS/LAAS
+ * Copyright (c) 1991, 2003-2005,2012 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -135,6 +135,7 @@ BOOL gcomLetterRcv (LETTER_ID letter, MBOX_ID *pOrigMboxId, int *pSendId,
     int timeout);
 STATUS gcomEnd (void);
 STATUS gcomInit (char *procName, int rcvMboxSize, int replyMboxSize);
+STATUS gcomUpdate (int rcvMboxSize, int replyMboxSize );
 STATUS gcomLetterAlloc (int sizeLetter, LETTER_ID *pLetterId);
 STATUS gcomLetterDiscard (LETTER_ID letterId);
 STATUS gcomLetterReply (MBOX_ID mboxId, int sendId, int replyLetterType, 

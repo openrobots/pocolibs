@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003-2005 CNRS/LAAS
+ * Copyright (c) 1990, 2003-2005,2012 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -340,6 +340,26 @@ csMboxInit(char *mboxBaseName, /* Nom de base des boites aux lettres crees */
 
     /* Initialiser le module gcom */
     return gcomInit(mboxBaseName, rcvMboxSize, replyMboxSize);
+}
+
+
+/******************************************************************************
+*
+*  csMboxUpdate - Resize mailboxes of a task
+*
+*  Description:
+*  This procedure resizes mailboxes of a task. It must be called after
+*  csMboxInit().
+*
+*  Retourne : OK ou ERROR
+*/
+
+STATUS
+csMboxUpdate(int rcvMboxSize,    /* New size of requests mailbox */
+             int replyMboxSize)  /* New size of replies mailbox */
+{
+    /* update gcom */
+    return gcomUpdate(rcvMboxSize, replyMboxSize);
 }
 
 

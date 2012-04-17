@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1991-2005 CNRS/LAAS
+ * Copyright (c) 1991-2005,2012 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -136,6 +136,7 @@ extern STATUS csClientRqstSend ( CLIENT_ID clientId, int rqstType,
 extern STATUS csMboxEnd ( void );
 extern STATUS csMboxInit ( char *mboxBaseName, int rcvMboxSize, 
     int replyMboxSize );
+extern STATUS csMboxUpdate( int rcvMboxSize, int replyMboxSize );
 extern int csMboxStatus ( int mask );
 extern int csMboxWait ( int timeout, int mboxMask );
 extern STATUS csServEnd ( SERV_ID servId );
