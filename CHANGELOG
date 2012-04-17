@@ -1,3 +1,4 @@
+130. Bump comLib version-info to 11:0:2 for recent API additions.
 129. Implement csMboxUpdate() and gcomUpdate() for resizing mailboxes (requests
      and/or replies) associated with a task. This makes sense only after a
      successful csMboxInit() or gcomInit(). Shrinking mailboxes is not allowed
