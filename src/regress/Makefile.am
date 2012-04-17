@@ -21,6 +21,7 @@ TESTS=\
 	comLib/h2timersem	\
 	comLib/h2timefromts	\
 	comLib/h2timefromtv	\
+	comLib/h2rngRealloc	\
 				\
 	posterLib/poster	\
 	posterLib/resize

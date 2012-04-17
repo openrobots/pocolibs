@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1989, 2003 CNRS/LAAS
+ * Copyright (c) 1989, 2003,2012 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -238,6 +238,7 @@ extern int h2rngBlockSpy ( H2RNG_ID rngId, int *pidBlk, int *pnbytes, char *buf,
 extern int h2rngBufGet ( H2RNG_ID rngId, char *buf, int maxbytes );
 extern int h2rngBufPut ( H2RNG_ID rngId, char *buf, int nbytes );
 extern H2RNG_ID h2rngCreate ( int type, int nbytes );
+extern H2RNG_ID h2rngRealloc ( H2RNG_ID rngId, int nbytes );
 extern void h2rngDelete ( H2RNG_ID rngId );
 extern STATUS h2rngFlush ( H2RNG_ID rngId );
 extern int h2rngFreeBytes ( H2RNG_ID rngId );

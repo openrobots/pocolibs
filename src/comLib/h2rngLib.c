@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2004 
  *      Autonomous Systems Lab, Swiss Federal Institute of Technology.
- * Copyright (c) 1990, 2003-2004 CNRS/LAAS
+ * Copyright (c) 1990, 2003-2004,2012 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -269,6 +269,89 @@ h2rngCreate(int type,			/* Type du ring buffer */
     return (rngId);
 }
 
+
+/*****************************************************************************
+*
+*   h2rngRealloc  -  Resize an existing ring buffer
+*
+*   Return : new ring buffer id (old freed) or NULL (old kept)
+*/
+
+H2RNG_ID
+h2rngRealloc(H2RNG_ID rngId,		/* Ring buffer identifier */
+            int nbytes)			/* New size in bytes */
+{
+    int used;
+    H2RNG_ID newId;
+
+    /* check input validity */
+    if (rngId == NULL || (rngId->flgInit != H2RNG_INIT_BYTE &&
+                          rngId->flgInit != H2RNG_INIT_BLOCK)) {
+        errnoSet(S_h2rngLib_NOT_A_RING);
+        return NULL;
+    }
+    if (nbytes <= 0) {
+        errnoSet(S_h2rngLib_ILLEGAL_NBYTES);
+        return NULL;
+    }
+
+    /* compute actual ring buffer size */
+    switch (rngId->flgInit) {
+      case H2RNG_INIT_BYTE:           /* Ring buffer type byte */
+        nbytes = nbytes + 1;
+        break;
+
+      case H2RNG_INIT_BLOCK:         /* Ring buffer type "block" */
+        nbytes = nbytes + 12 - (nbytes & 3);
+        break;
+    } /* switch */
+
+    /* dummy case: same size */
+    if (rngId->size == nbytes) return OK;
+
+    /* compute number of bytes in use */
+    if (rngId->pRd <= rngId->pWr)
+        used = rngId->pWr - rngId->pRd;
+    else
+        used = rngId->pWr + rngId->size - rngId->pRd;
+
+    /* shrinking requires special attention. The commented out code works, but
+     * may lead to unwanted side effects for users of this API. E.g. the
+     * resized buffer may become too small for holding some messages, and the
+     * users of h2rngLib may not be prepared to deal with this. As long as
+     * there is no concrete use case for shrinking h2rng buffer, be
+     * conservative and allow only growing. */
+    if (rngId->size > nbytes /* && used >= nbytes */) {
+        errnoSet(S_h2rngLib_ILLEGAL_NBYTES);
+        return NULL;
+    }
+
+    /* allocate a new buffer */
+    newId = smMemMalloc((size_t)(nbytes + sizeof(H2RNG_HDR)));
+    if (newId == NULL) return NULL;
+
+    /* move current data into the new buffer */
+    if (rngId->pRd <= rngId->pWr) {
+        /* one block */
+        memcpy((char *)(newId+1), (char *)(rngId+1) + rngId->pRd, used);
+    } else {
+        /* wrapping block */
+        int ntop = rngId->size - rngId->pRd;
+        memcpy((char *)(newId+1), (char *)(rngId+1) + rngId->pRd, ntop);
+        memcpy((char *)(newId+1) + ntop, (char *)(rngId+1), rngId->pWr);
+    }
+
+    /* initialize header */
+    newId->pRd = 0;
+    newId->pWr = used;
+    newId->size = nbytes;
+    newId->flgInit = rngId->flgInit;
+
+    /* free old buffer */
+    h2rngDelete(rngId);
+
+    return newId;
+}
 
 
 /*****************************************************************************
