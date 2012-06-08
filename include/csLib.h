@@ -123,7 +123,7 @@ typedef struct {
 
 
 extern STATUS csClientEnd ( CLIENT_ID clientId );
-extern STATUS csClientInit ( char *servMboxName, int maxRqstSize, 
+extern STATUS csClientInit ( const char *servMboxName, int maxRqstSize, 
     int maxIntermedReplySize, int maxFinalReplySize, CLIENT_ID *pClientId );
 extern int csClientReplyRcv ( CLIENT_ID clientId, int rqstId, int block, 
     char *intermedReplyDataAdrs, int intermedReplyDataSize, 
@@ -134,7 +134,7 @@ extern STATUS csClientRqstSend ( CLIENT_ID clientId, int rqstType,
     char *rqstDataAdrs, int rqstDataSize, FUNCPTR codFunc, BOOL intermedFlag, 
     int intermedReplyTout, int finalReplyTout, int *pRqstId );
 extern STATUS csMboxEnd ( void );
-extern STATUS csMboxInit ( char *mboxBaseName, int rcvMboxSize, 
+extern STATUS csMboxInit ( const char *mboxBaseName, int rcvMboxSize, 
     int replyMboxSize );
 extern STATUS csMboxUpdate( int rcvMboxSize, int replyMboxSize );
 extern int csMboxStatus ( int mask );

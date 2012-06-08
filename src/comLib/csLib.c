@@ -329,7 +329,7 @@ static const H2_ERROR csLibH2errMsgs[] = CS_LIB_H2_ERR_MSGS;
 */
 
 STATUS 
-csMboxInit(char *mboxBaseName, /* Nom de base des boites aux lettres crees */ 
+csMboxInit(const char *mboxBaseName, /* Nom de base des boites aux lettres crees */ 
 	   int rcvMboxSize,    /* Taille de la boite aux lettres de requetes */
 	   int replyMboxSize)  /* Taille de la boite aux lettres de repliques*/
 {
@@ -810,7 +810,7 @@ csServEnd(SERV_ID servId)    /* Id du serveur */
 */
 
 STATUS 
-csClientInit(char * servMboxName,	/* Nom boite aux lettres du serveur */ 
+csClientInit(const char * servMboxName,	/* Nom boite aux lettres du serveur */ 
 	     int maxRqstSize,		/* Taille max des requetes */ 
 	     int maxIntermedReplySize,	/* Taille max des repliques 
 					   intermed. */ 

@@ -66,7 +66,7 @@ static int gcomVerifTout (int sendId, int *pTimeout);
 */
 
 STATUS
-gcomInit(char *procName, int rcvMboxSize, int replyMboxSize)
+gcomInit(const char *procName, int rcvMboxSize, int replyMboxSize)
 {
     char replyMboxName[H2_DEV_MAX_NAME];
     int myTaskNum;
@@ -249,7 +249,7 @@ gcomSelect(char *sendIdTable)
 */
 
 STATUS 
-gcomMboxFind(char *procName, MBOX_ID *pMboxId)
+gcomMboxFind(const char *procName, MBOX_ID *pMboxId)
 {
     return mboxFind(procName, pMboxId);
 }

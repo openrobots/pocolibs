@@ -59,12 +59,12 @@ typedef int MBOX_ID;
   }
 
 /* -- PROTOTYPES ----------------------------------------------- */
-extern STATUS mboxCreate ( char *name, int len, MBOX_ID *pMboxId );
+extern STATUS mboxCreate ( const char *name, int len, MBOX_ID *pMboxId );
 extern STATUS mboxResize ( MBOX_ID mboxId, int size );
 extern STATUS mboxDelete ( MBOX_ID mboxId );
 extern STATUS mboxEnd ( long taskId );
-extern STATUS mboxFind ( char *name, MBOX_ID *pMboxId );
-extern STATUS mboxInit ( char *procName );
+extern STATUS mboxFind ( const char *name, MBOX_ID *pMboxId );
+extern STATUS mboxInit ( const char *procName );
 extern STATUS mboxIoctl ( MBOX_ID mboxId, int codeFunc, void *pArg );
 extern BOOL mboxPause ( MBOX_ID mboxId, int timeout );
 extern int mboxRcv ( MBOX_ID mboxId, MBOX_ID *pFromId, char *buf, int maxbytes, int timeout );

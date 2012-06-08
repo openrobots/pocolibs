@@ -134,7 +134,7 @@ typedef struct {
 BOOL gcomLetterRcv (LETTER_ID letter, MBOX_ID *pOrigMboxId, int *pSendId, 
     int timeout);
 STATUS gcomEnd (void);
-STATUS gcomInit (char *procName, int rcvMboxSize, int replyMboxSize);
+STATUS gcomInit (const char *procName, int rcvMboxSize, int replyMboxSize);
 STATUS gcomUpdate (int rcvMboxSize, int replyMboxSize );
 STATUS gcomLetterAlloc (int sizeLetter, LETTER_ID *pLetterId);
 STATUS gcomLetterDiscard (LETTER_ID letterId);
@@ -142,7 +142,7 @@ STATUS gcomLetterReply (MBOX_ID mboxId, int sendId, int replyLetterType,
     LETTER_ID letterReply);
 STATUS gcomLetterWrite (LETTER_ID letterId, int dataType, char *pData, 
     int dataSize, FUNCPTR codingFunc);
-STATUS gcomMboxFind (char *procName, MBOX_ID *pMboxId);
+STATUS gcomMboxFind (const char *procName, MBOX_ID *pMboxId);
 STATUS gcomMboxName (MBOX_ID mboxId, char *pName);
 STATUS gcomSendIdFree (int sendId);
 int gcomLetterList (LETTER_ID *pList, int maxList);

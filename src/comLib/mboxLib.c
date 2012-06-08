@@ -50,7 +50,7 @@ static const H2_ERROR h2rngLibH2errMsgs[] = H2_RNG_LIB_H2_ERR_MSGS;
  ** in each task using mailboxes
  **/
 STATUS
-mboxInit(char *procName)		/* unused parameter procName */
+mboxInit(const char *procName)		/* unused parameter procName */
 {
     long tid = taskIdSelf();
     const char *tName;
@@ -144,7 +144,7 @@ mboxEnd(long taskId)
  **/
 
 STATUS
-mboxCreate(char *name, int size, MBOX_ID *pMboxId)
+mboxCreate(const char *name, int size, MBOX_ID *pMboxId)
 {
     H2_MBOX_STR *mbox;
     H2RNG_ID rngId;
@@ -271,7 +271,7 @@ mboxDelete(MBOX_ID mboxId)
  **   OK or ERROR
  **/
 STATUS
-mboxFind(char *name, MBOX_ID *pMboxId)
+mboxFind(const char *name, MBOX_ID *pMboxId)
 {
     MBOX_ID mbox;
 
