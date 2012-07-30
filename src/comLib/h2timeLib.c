@@ -27,7 +27,7 @@
 #include "h2timeLib.h"
 
 static H2TIMESPEC h2TimeSpec0;
-static void h2timespec_subtract(H2TIMESPEC *,
+static void h2timespec_substract(H2TIMESPEC *,
     const H2TIMESPEC *, const H2TIMESPEC *);
 
 /*----------------------------------------------------------------------*/
@@ -173,7 +173,7 @@ h2timeFromTimespec(H2TIME* pTimeStr, const H2TIMESPEC *ts)
 	H2TIMESPEC diff;
 	unsigned long rate = sysClkRateGet();
 
-	h2timespec_subtract(&diff, ts, &h2TimeSpec0);
+	h2timespec_substract(&diff, ts, &h2TimeSpec0);
 	gmtime_r(&ts->tv_sec, &tm);
 
 	pTimeStr->ntick  = diff.tv_sec*rate
@@ -304,7 +304,7 @@ h2timespecInterval(const H2TIMESPEC *pOldTime, unsigned long *pNmsec)
 
 	if (h2GetTimeSpec(&ts) != OK)
 		return (ERROR);
-	h2timespec_subtract(&res, &ts, pOldTime);
+	h2timespec_substract(&res, &ts, pOldTime);
 	*pNmsec = 1000*res.tv_sec + res.tv_nsec / 1000000;
 	return OK;
 }
@@ -312,7 +312,7 @@ h2timespecInterval(const H2TIMESPEC *pOldTime, unsigned long *pNmsec)
 /*----------------------------------------------------------------------*/
 
 static void
-h2timespec_subtract(H2TIMESPEC *result,
+h2timespec_substract(H2TIMESPEC *result,
     const H2TIMESPEC *x, const H2TIMESPEC *y)
 {
 	H2TIMESPEC yy;
