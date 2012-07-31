@@ -68,6 +68,7 @@ extern void * posterAddr ( POSTER_ID posterId );
 extern STATUS posterIoctl(POSTER_ID posterId, int code, void *parg);
 extern STATUS posterEndianness(POSTER_ID posterId, H2_ENDIANNESS *endianness);
 extern char* posterName(POSTER_ID posterId);
+extern STATUS posterForget(POSTER_ID posterId);
 extern STATUS posterShow(void);
 extern STATUS posterStats(void);
 
