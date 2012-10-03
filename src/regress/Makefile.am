@@ -20,13 +20,12 @@ TESTS=\
 	comLib/h2timer		\
 	comLib/h2timersem	\
 	comLib/h2timefromts	\
-	comLib/h2timefromtv	\
 	comLib/h2rngRealloc	\
 				\
 	posterLib/poster	\
 	posterLib/resize
 
-XFAIL_TESTS=	portLib/taskSuspend	# since this dumps core
+XFAIL_TESTS=	portLib/taskSuspend	# since this dumps core 
 
 # build test programs
 check_PROGRAMS=${TESTS}
