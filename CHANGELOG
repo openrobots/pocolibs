@@ -1,3 +1,5 @@
+131. Remove h2timeFromTimeval() and timevalFromH2time().
+
 Version 2.12, 3 october 2012
 
 130. Bump comLib version-info to 11:0:2 for recent API additions.
