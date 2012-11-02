@@ -38,18 +38,31 @@ const H2_ERROR semLibH2errMsgs[]   = SEM_LIB_H2_ERR_MSGS;
 #define TEMPLATE "/tmp/semaphoreXXXXXXXXXX"
 #endif
 
+typedef struct ticket_lock {
+	pthread_cond_t cond;
+	pthread_mutex_t mutex;
+	unsigned long queue_head, queue_tail;
+} ticket_lock_t;
+
+#define TICKET_LOCK_INITIALIZER { \
+	PTHREAD_COND_INITIALIZER, \
+	PTHREAD_MUTEX_INITIALIZER \
+}
+
+
 /* semaphore structure */
 struct SEM_ID {
    enum { SEM_T_BIN, SEM_T_CNT, SEM_T_MTX } type;
    union {
       sem_t *sem;
-      pthread_mutex_t mtx;
+      ticket_lock_t ticket;
    } v;
 #ifndef USE_SEM_OPEN
    sem_t sem_storage;
 #else
    char name[32]; /* /tmp/semaphoreXXXXXXXXXX */
 #endif
+   int options;
 };
 
 /*
@@ -61,6 +74,88 @@ semRecordH2ErrMsgs()
     return h2recordErrMsgs("semRecordH2ErrMsg", "semLib", M_semLib, 
 			   sizeof(semLibH2errMsgs)/sizeof(H2_ERROR), 
 			   semLibH2errMsgs);
+}
+
+/*
+ * simple ticket lock (mutex with fifo)
+ * http://stackoverflow.com/questions/3050083/linux-synchronization-with-fifo-waiting-queue
+ * from caf : http://stackoverflow.com/users/134633/caf
+ *
+ */
+static int
+ticket_init(ticket_lock_t *ticket)
+{
+	int result;
+	result = pthread_mutex_init(&ticket->mutex, NULL);
+	if (result != 0)
+		return result;
+	result = pthread_cond_init(&ticket->cond, NULL);
+	if (result != 0) {
+		pthread_mutex_destroy(&ticket->mutex);
+		return result;
+	}
+	ticket->queue_head = ticket->queue_tail = 0;
+	return 0;
+}
+
+static int
+ticket_destroy(ticket_lock_t *ticket)
+{
+	int error;
+
+	error = pthread_mutex_destroy(&ticket->mutex);
+	if (error != 0)
+		return error;
+	return pthread_cond_destroy(&ticket->cond);
+}
+
+static int
+ticket_lock(ticket_lock_t *ticket)
+{
+	unsigned long queue_me;
+	int error;
+	
+	error = pthread_mutex_lock(&ticket->mutex);
+	if (error != 0)
+		return error;
+	queue_me = ticket->queue_tail++;
+	while (queue_me != ticket->queue_head) {
+		error = pthread_cond_wait(&ticket->cond, &ticket->mutex);
+		if (error != 0)
+			break;
+	}
+	pthread_mutex_unlock(&ticket->mutex);
+	return error;
+}
+
+static int
+ticket_trylock(ticket_lock_t *ticket)
+{
+	unsigned long queue_me;
+	int error = 0;
+
+	error = pthread_mutex_trylock(&ticket->mutex);
+	if (error != 0)
+		return error;
+	queue_me = ticket->queue_tail++;
+	if (queue_me != ticket->queue_head)
+		error = EBUSY;
+	pthread_mutex_unlock(&ticket->mutex);
+	return error;
+}
+
+static int
+ticket_unlock(ticket_lock_t *ticket)
+{
+	int error;
+
+	error = pthread_mutex_lock(&ticket->mutex);
+	if (error != 0)
+		return error;
+	ticket->queue_head++;
+	error = pthread_cond_broadcast(&ticket->cond);
+	pthread_mutex_unlock(&ticket->mutex);
+	return error;
 }
 
 #ifdef USE_SEM_OPEN
@@ -157,7 +252,7 @@ semMCreate(int options)
        return NULL;
     }
     sem->type = SEM_T_MTX;
-    status = pthread_mutex_init(&sem->v.mtx, NULL);
+    status = ticket_init(&sem->v.ticket);
     if (status != 0) {
        free(sem);
        errnoSet(status);
@@ -177,7 +272,7 @@ semDelete(SEM_ID semId)
 
     switch(semId->type) {
        case SEM_T_MTX:
-         status = pthread_mutex_destroy(&semId->v.mtx);
+         status = ticket_destroy(&semId->v.ticket);
          break;
 
        default:
@@ -208,7 +303,7 @@ semGive(SEM_ID semId)
     
     switch(semId->type) {
        case SEM_T_MTX:
-         status = pthread_mutex_unlock(&semId->v.mtx);
+         status = ticket_unlock(&semId->v.ticket);
          break;
 
        default:          
@@ -245,7 +340,7 @@ semTake(SEM_ID semId, int timeout)
 	while (1) {
 	   switch(semId->type) {
 	      case SEM_T_MTX:
-		 status = pthread_mutex_lock(&semId->v.mtx);
+		 status = ticket_lock(&semId->v.ticket);
 		 break;
 
 	      default:
@@ -269,7 +364,7 @@ semTake(SEM_ID semId, int timeout)
 	 switch(semId->type) {
 	    case SEM_T_MTX:
 	       e = EBUSY;
-	       status = pthread_mutex_trylock(&semId->v.mtx);
+	       status = ticket_trylock(&semId->v.ticket);
 	       break;
 
 	    default:
@@ -295,7 +390,7 @@ semTake(SEM_ID semId, int timeout)
 	while (1) {
 	   switch(semId->type) {
 	      case SEM_T_MTX:
-		 status = pthread_mutex_lock(&semId->v.mtx);
+		 status = ticket_lock(&semId->v.ticket);
 		 break;
 
 	      default:
