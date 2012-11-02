@@ -13,6 +13,7 @@ TESTS=\
 	portLib/tick		\
 				\
 	comLib/commonStruct	\
+	comLib/commonStructScheduler \
 	comLib/h2dev		\
 	comLib/h2sem		\
 	comLib/h2semAlloc	\
