@@ -197,7 +197,7 @@ AC_ARG_ENABLE([posix-timers],
 
 AC_SEARCH_LIBS(clock_gettime, [rt posix4])
 AC_CHECK_FUNCS(clock_gettime, [], 
-	       AC_MSG_ERROR([clock_gettime() support is required]))
+	       AC_MSG_WARN([clock_gettime() support is required]))
 
 AC_SEARCH_LIBS(sched_get_priority_min, [rt])
 
