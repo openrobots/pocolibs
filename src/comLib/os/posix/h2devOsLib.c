@@ -284,10 +284,7 @@ h2devAttach(void)
     h2devRecordH2ErrMsgs();
 
     pthread_mutex_lock(&h2devMutex);
-    if (h2Devs != NULL) {
-	pthread_mutex_unlock(&h2devMutex);
-	return OK;
-    }
+
     key = h2devGetKey(H2_DEV_TYPE_H2DEV, 0, FALSE, &fd);
     if (key == -1) {
 	pthread_mutex_unlock(&h2devMutex);
