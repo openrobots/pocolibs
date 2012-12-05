@@ -119,25 +119,33 @@ h2devGetKey(int type, int dev, BOOL create, int *pFd)
 	home, H2_DEV_NAME, uts.nodename);
 
     if (create) {
+	if (pFd == NULL) {
+	    errnoSet(S_h2devLib_BAD_PARAMETERS);
+	    return ERROR;
+	}
 	/* Create the file */
 	fd = open(h2devFileName, O_WRONLY | O_CREAT | O_EXCL, PORTLIB_MODE);
 	if (fd < 0) {
 	    errnoSet(errno);
 	    return ERROR;
 	}
-    } else {
-	/* Check for existence */
-	fd = open(h2devFileName, O_RDONLY, 0);
-	if (fd == -1) {
-	    errnoSet(S_h2devLib_NOT_INITIALIZED);
-	    return ERROR;
-	}
-    }
-    /* Return the file descriptor */
-    if (pFd != NULL) {
 	*pFd = fd;
     } else {
-	close(fd);
+	if (pFd != NULL) {
+	    /* open for reading */
+	    fd = open(h2devFileName, O_RDONLY, 0);
+	    if (fd == -1) {
+		errnoSet(S_h2devLib_NOT_INITIALIZED);
+		return ERROR;
+	    }
+	    *pFd = fd;
+	} else {
+	    /* check existence */
+	    if (access(h2devFileName, R_OK) < 0) {
+		errnoSet(S_h2devLib_NOT_INITIALIZED);
+		return ERROR;
+	    }
+	}
     }
     /* compute the key id depending on the device type and number */
     key = ftok(h2devFileName, dev*H2DEV_MAX_TYPES + type);
