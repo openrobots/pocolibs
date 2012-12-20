@@ -1,3 +1,9 @@
+Version 2.13, 20 december 2012
+
+134. Constify the 'name' argument of taskSpawn2().
+133. Avoid opening .h2devs multiple times
+132. Provide an alternative to clock_gettime for Mac OS X.
+132. Implement mutex semaphores with a ticket lock.
 131. Remove h2timeFromTimeval() and timevalFromH2time().
 
 Version 2.12, 3 october 2012
