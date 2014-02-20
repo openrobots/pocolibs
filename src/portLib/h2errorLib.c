@@ -239,7 +239,7 @@ char * h2getErrMsg(int fullError, char *string, int maxLength)
 
   /* unknown error */
   if (fullError == 0) {
-    strncpy(string, "Unknown error", maxLength);
+    snprintf (string, maxLength, "Unknown error");
     return(string);
   }
 
