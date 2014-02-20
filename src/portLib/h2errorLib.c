@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1992, 2005, 2011 CNRS/LAAS
+ * Copyright (c) 1992, 2005, 2011,2014 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -237,9 +237,9 @@ char * h2getErrMsg(int fullError, char *string, int maxLength)
   const H2_MODULE_ERRORS *modStdErrors;
   const H2_ERROR *error;
 
-  /* "OK" */
+  /* unknown error */
   if (fullError == 0) {
-    strncpy(string, "OK", maxLength);
+    strncpy(string, "Unknown error", maxLength);
     return(string);
   }
 
