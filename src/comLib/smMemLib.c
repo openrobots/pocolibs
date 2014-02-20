@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2003-2004,2012 CNRS/LAAS
+ * Copyright (c) 1999, 2003-2004,2012,2014 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -20,6 +20,7 @@
  ***/
 #include "pocolibs-config.h"
 
+#include <errno.h>
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -212,6 +213,7 @@ internal_malloc(size_t size)
 	    return((void *)(c+1));
 	}
     } else {
+	errnoSet(ENOMEM);
 	return NULL;
     }
 
