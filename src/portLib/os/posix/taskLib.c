@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2003-2010,2012 CNRS/LAAS
+ * Copyright (c) 1999, 2003-2010 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -406,14 +406,23 @@ newTcb(const char *name, int priority, int options, int stackSize,
 	return NULL;
     }
 #endif
+#ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
     if (rr_min_priority > 0 && rr_min_priority > 0) {
 	    struct sched_param thread_param;
 
-	    /* Set real-time scheduling when available */
-#ifdef HAVE_PTHREAD_ATTR_SETSCHEDPOLICY
+	    /* Set priority of new thread */
+	    thread_param.sched_priority = priorityVxToPosix(priority);
 	    status = pthread_attr_setschedpolicy(attr, SCHED_RR);
 	    switch (status) {
 	    case 0:
+		    /* set policy is ok, set priority */
+		    status = pthread_attr_setschedparam(attr,
+							&thread_param);
+		    if (status != 0) {
+			    errnoSet(status);
+			    pthread_mutex_unlock(tcb->starter);
+			    return NULL;
+		    }
 		    break;
 
 #ifdef ENOTSUP
@@ -431,18 +440,8 @@ newTcb(const char *name, int priority, int options, int stackSize,
 		    pthread_mutex_unlock(tcb->starter);
 		    return NULL;
 	    } /* switch */
-#endif /* HAVE_PTHREAD_ATTR_SETSCHEDPOLICY */
-
-	    /* Set priority of new thread */
-	    thread_param.sched_priority = priorityVxToPosix(priority);
-            status = pthread_attr_setschedparam(attr,
-                                                &thread_param);
-            if (status != 0) {
-		errnoSet(status);
-		pthread_mutex_unlock(tcb->starter);
-		return NULL;
-            }
     }
+#endif /* HAVE_PTHREAD_ATTR_SETSCHEDPOLICY */
     return tcb;
 }
 
