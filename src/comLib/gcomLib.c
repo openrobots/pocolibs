@@ -195,6 +195,9 @@ gcomEnd(void)
     
     /* Obtenir le pointeur vers le debut du tableau de lettres */
     letterId = &letterTab[taskIndice][0];
+    if (!letterId) {
+	return bilan;
+    }
 
     /* Liberer les lettres allouees */
     for (cLetter = 0; cLetter < MAX_LETTER; cLetter++) {
