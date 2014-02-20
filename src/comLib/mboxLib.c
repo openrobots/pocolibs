@@ -109,14 +109,22 @@ mboxInit(const char *procName)		/* unused parameter procName */
 STATUS
 mboxEnd(long taskId)
 {
-    int i; 
+    const char *tName;
+    int i;
     long dev;
 
     if (taskId == 0) {
 	taskId = taskIdSelf();
     }
+
     /* Device for the given task */
-    dev = taskGetUserData(taskId);
+    tName = taskName(taskId);
+    dev = h2devFind((char *)tName, H2_DEV_TYPE_TASK);
+    if (dev == ERROR ||
+        H2DEV_TASK_TID(dev) != taskId || taskGetUserData(taskId) != dev) {
+	errnoSet(S_mboxLib_NOT_OWNER);
+	return ERROR;
+    }
 
     /* Free all mailboxes attached to this task */
     for (i = 0; i < H2_DEV_MAX; i++) {
