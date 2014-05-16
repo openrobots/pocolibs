@@ -367,7 +367,7 @@ smMemShow(BOOL option)
 
     if (smMemFreeList == NULL) {
 	if (smMemAttach() == ERROR) {
-	    return NULL;
+	    return;
 	}
     }
 
