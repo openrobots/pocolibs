@@ -39,7 +39,7 @@ struct my_args {
 		
 SEM_ID sem;
 
-void
+void *
 myTask(void *ptr)
 {
 	struct my_args *args = (struct my_args *)ptr;
@@ -56,6 +56,7 @@ myTask(void *ptr)
 	if (strcmp(args->arg4, ARG4) != 0) 
 		fprintf(stderr, "arg4 \"%s\" != \"%s\"\n", args->arg4, ARG4);
 	semGive(sem);
+	return NULL;
 }
 
 		
