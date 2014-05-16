@@ -1,3 +1,21 @@
+Version 2.14, 16 may 2014
+
+148. h2timeLib: Don't cast H2TIMESPEC to struct timespec
+147. h2rngLib: constify write buffer arguments
+146. Remove xes.h.
+145. commonStructLib: constify commonStruct descriptors
+144. taskLib: constify task names
+143. mboxEssay: Fix format string usage
+142. h2devlib: Properly init 'fd' and avoid closing a random fd later.
+141. Add a COPYING file
+140. Make mboxEnd() robust to a call before any successful mboxInit()
+139. Make gcomEnd() robust to a call before any successful gcomInit()
+138. On error, cleanup partially allocated objects in 
+     mboxCreate() and gcomInit()
+137. Replace an unsafe strncpy by a snprintf in h2getErrMsg()
+136. Return 'Unknown error' instead of 'OK' when errno == 0 in h2getErrMsg
+135. Set errno to ENOMEM when internal_malloc fails in smMemAlloc()
+
 Version 2.13, 20 december 2012
 
 134. Constify the 'name' argument of taskSpawn2().
