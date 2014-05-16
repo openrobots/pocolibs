@@ -67,7 +67,6 @@ h2recordErrMsgs(const char *bywho,
 		int nbErrors, const H2_ERROR errors[])
 {
   H2_MOD_ERRORS_LIST *last=modErrorsList;
-  H2_MOD_ERRORS_LIST *prev;
   H2_MOD_ERRORS_LIST *smaller=NULL, *tmp;
   int sameId, sameName;
 
@@ -87,7 +86,6 @@ h2recordErrMsgs(const char *bywho,
   }
 
   /* look for last elt */
-  prev = last;
   do {
     sameId = last->modErrors.id == moduleId;
     sameName = strcmp(last->modErrors.name, moduleName) ? 0 : 1;
@@ -117,7 +115,6 @@ h2recordErrMsgs(const char *bywho,
     if (last->modErrors.id < moduleId) {
       smaller = last;
     }
-    prev = last;
     last = last->next;
   }while (last);
 
