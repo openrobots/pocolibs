@@ -552,7 +552,7 @@ taskSpawn2(const char *name, int priority, int options, int stackSize,
 /*----------------------------------------------------------------------*/
 
 long
-taskFromThread(char *name)
+taskFromThread(const char *name)
 {
     struct sched_param thread_param;
     OS_TCB *tcb;
@@ -975,7 +975,7 @@ taskOptionsGet(long tid, int *pOptions)
  * Return the Task Id associated with a name
  */
 long
-taskNameToId(char *name)
+taskNameToId(const char *name)
 {
     OS_TCB *t;
 
