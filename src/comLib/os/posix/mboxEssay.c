@@ -125,7 +125,7 @@ Enter number of desired function : ";
       errnoSet (0);
 
       /* Printer le menu des commandes disponibles / demander le choix */
-      do printf (menu);
+      do printf ("%s", menu);
       while (h2scanf ("%d", &nFunc) != 1);
 
       /* Executer la commande demandee */
