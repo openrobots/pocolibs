@@ -26,8 +26,6 @@ TESTS=\
 	posterLib/poster	\
 	posterLib/resize
 
-XFAIL_TESTS=	portLib/taskSuspend	# since this dumps core 
-
 # build test programs
 check_PROGRAMS=${TESTS}
 AM_CPPFLAGS=	-I$(top_srcdir)/include
