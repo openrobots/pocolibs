@@ -73,7 +73,6 @@ extern const double cosTab[];
 
 /*------------------------     FONCTIONS EXTERNES    ------------------------*/
 
-#ifdef __STDC__
 double angleLimit (double angle);
 double angleDegLimit (double angleDeg);
 double superTab (int n, double *pTab);
@@ -83,17 +82,6 @@ double h2cos (double angle);
 double h2sin (double angle);
 double integCosFresnel (double theta);
 double integSinFresnel (double theta);
-#else
-double angleLimit ();
-double angleDegLimit ();
-double superTab ();
-double inferTab ();
-double atan2Par ();
-double h2cos ();
-double h2sin ();
-double integCosFresnel ();
-double integSinFresnel ();
-#endif
 
 #ifdef __cplusplus
 }
