@@ -77,7 +77,7 @@ h2devGetKey(int type, int dev, BOOL create, int *pFd)
     char *home;
     key_t key;
     struct utsname uts;
-    int fd;
+    int fd = -1;
     int amode;
 
     /*
@@ -151,7 +151,8 @@ h2devGetKey(int type, int dev, BOOL create, int *pFd)
     key = ftok(h2devFileName, dev*H2DEV_MAX_TYPES + type);
     if (key == -1) {
 	errnoSet(errno);
-	close(fd);
+	if (fd != -1)
+	    close(fd);
 	return ERROR;
     }
     return key;
