@@ -1,4 +1,4 @@
-Version 2.14, 16 may 2014
+Version 2.14, 23 may 2014
 
 148. h2timeLib: Don't cast H2TIMESPEC to struct timespec
 147. h2rngLib: constify write buffer arguments
