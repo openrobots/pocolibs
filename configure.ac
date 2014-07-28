@@ -263,6 +263,7 @@ fi
 
 ac_save_ifs=$IFS; IFS=","
 for dopt in $opt_debug_output; do 
+        IFS=$ac_save_ifs
 	test -z "$dopt" && break
 
 	case "$dopt" in
