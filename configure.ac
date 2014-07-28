@@ -257,8 +257,8 @@ AC_ARG_WITH(debug-output,
            [print debugging information at run-time (comma separated list)]),
            [opt_debug_output=$withval],[opt_debug_output=])
 
-if test "x$opt_debug" = "xall"; then
-   opt_debug="task,sys,h2dev,smmem,h2evn,mbox,gcom,h2timer"
+if test "x$opt_debug_output" = "xall"; then
+   opt_debug_output="task,sys,h2dev,smmem,h2evn,mbox,gcom,h2timer"
 fi
 
 ac_save_ifs=$IFS; IFS=","
