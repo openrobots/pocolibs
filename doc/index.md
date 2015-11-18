@@ -18,5 +18,5 @@ helper functions for various tasks (time management, watchdogs and
 timers, math,...).
 
  
-* [portLib](../portLib)
+* [portLib](portLib)
 * [comLib](../comLib)
