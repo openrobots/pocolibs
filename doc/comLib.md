@@ -13,7 +13,7 @@ identify themselve.
 The comLib API allows several Unix processes on the same machine to
 communicate. posterLib has an extension that make it possible to
 semi-transparently access posters on other nodes of the network. See
-the _remotePosterLib_ documentation for that.
+the [remotePosterLib](remotePosterLib) documentation for that.
 
 Initialization
 --------------
