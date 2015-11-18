@@ -20,9 +20,9 @@ This posterLib version can read and write local and remote posters.
 
     the posterFind() function looks for posters sequentially in that order:
  
-    1. locally in shared memory
-    1. on the host designated by `POSTER_HOST` if defined
-    1. on each host designated by the colon-separated `POSTER_PATH` list.
+  1. locally in shared memory
+  1. on the host designated by `POSTER_HOST` if defined
+  1. on each host designated by the colon-separated `POSTER_PATH` list.
 
 
 *   typical setups:
@@ -30,15 +30,15 @@ This posterLib version can read and write local and remote posters.
     * My posters are created locally, but I need to access to posters
       on the remote host 'host1':
  
-        unsetenv POSTER_HOST
-        setenv POSTER_PATH host1
+            unsetenv POSTER_HOST
+            setenv POSTER_PATH host1
 
 
     * I want to create my posters on the remote host 'host1', and also
       access posters on remote hosts 'host2' and 'host3:
 
-        setenv POSTER_HOST host1
-        setenv POSTER_PATH host2:host3
+            setenv POSTER_HOST host1
+            setenv POSTER_PATH host2:host3
 
 ## Mac OS X / Darwin note
 
