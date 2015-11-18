@@ -19,4 +19,4 @@ timers, math,...).
 
  
 * [portLib](portLib)
-* [comLib](../comLib)
+* [comLib](comLib)
