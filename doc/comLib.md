@@ -157,7 +157,7 @@ timer specified  by _timerId_.  This function will not block if it was not
 called enough times in the past to ensure that all expirations of the
 timer have been waited on.
 
-#h2timerPauseReset
+### h2timerPauseReset
 
 	#include <h2timerLib.h>
     STATUS h2timerPauseReset(H2TIMER_ID timerId);
