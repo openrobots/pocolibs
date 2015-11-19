@@ -306,10 +306,178 @@ Mailboxes
 Client-Server Objects
 ---------------------
 
-### csClientEnd
+These functions will be used both on the client and server sides of a
+task.
+
+### csMboxInit
 
 	#include <csLib.h>
-    STATUS csClientEnd ( CLIENT_ID clientId );
+    STATUS csMboxInit ( const char *mboxBaseName, int rcvMboxSize, 
+                        int replyMboxSize );
+
+Calling this function creates two mailboxes: one will receive requests
+sent by clients when this task is acting as a server and the other
+will receive replies from servers to which this task has sent
+requests.
+
+_mboxBaseName_ is the base name for the created mailboxes.
+_rcvMboxSize_ is the size of the request mailbox. 
+_replyMboxSize_ is the sie of the reply mailbox.
+If any of the _Size_ argument is zero, the corresponding mailbox will
+not be created.
+
+__Note__: this function must be called before any call to
+`csServInit()` or `csClientInit()`.
+
+### csMoxEnd
+
+	#include <csLib.h>
+    STATUS csMboxEnd ( void );
+
+This function frees the mailboxes created by `csMboxInit()`.
+
+### csMboxUpdate
+
+	#include <csLib.h>
+    STATUS csMboxUpdate( int rcvMboxSize, int replyMboxSize );
+
+This function makes it possible to change the size of either mailbox
+of a running task.
+
+### csMboxWait
+
+	#include <csLib.h>
+    int csMboxWait ( int timeout, int mboxMask );
+
+This function waits for the arrival of either a request or a reply in
+one of the task's mailboxes.  
+_timeout_ is expressed in ticks or can be
+one of the `WAIT_FOREVER` or `NO_WAIT` constants.
+_mboxMask__ is a logical combinaison of `RCV_MBOX` and `REPLY_MBOX`
+specifying which mailboxes are waited upon.
+`csMboxWait` returns a combinaision of `RCV_MBOX` and `REPLY_MBOX` to
+indicate which mailboxes were ready. It can also return `0` if a
+timeout occured (there will be no message available) or `ERROR` if an
+error occured.
+
+### csMboxStatus
+
+	#include <csLib.h>
+    int csMboxStatus ( int mask );
+
+This function checks the state of the mailboxes of a task, like
+csMboxWait, but without waiting.
+
+Server side
+-----------
+
+### csServInit
+
+	#include <csLib.h>
+    STATUS csServInit ( int maxRqstDataSize, int maxReplyDataSize, 
+                        SERV_ID *pServId );
+
+Sets up the calling task as a server.
+_maxRqstDataSize_ is the maximum size, in bytes, of a request that
+will be received.
+_maxReplyDataSize_ is the maximum size, in bytes, of a reply that will
+be sent.
+_pServId_ is a pointer to store the identifier of the created server.
+
+This function pre-allocates all memory needed to store the various
+messages. So further interactions with the server will not cause any
+memory allocation from the comLib level.
+
+### csServInitN
+
+	#include <csLib.h>
+    STATUS csServInitN ( int maxRqstDataSize, int maxReplyDataSize, 
+                         int nbRqstFunc, SERV_ID *pServId );
+
+This is the sams as `csServInit()`, with an extra parameter
+_nbReqstFunc_, to specify the maximum number of request types that
+will be supported (instead of the default `NMAX_RQST_TYPE`).
+
+### csServEnd
+
+	#include <csLib.h>
+    STATUS csServEnd ( SERV_ID servId );
+
+This function frees all the memory associated with a server task.
+
+### csServFuncInstall
+
+	#include <csLib.h>
+    STATUS csServFuncInstall ( SERV_ID servId, int rqstType, 
+                               FUNCPTR rqstFunc );
+
+This function allow a server to install the callback associated with a
+given request type.
+_servId_ is the identifer of the server.
+_rqstType_ is an integer representing the request type (id). It should
+be between 0 and `NMAX_RQST_TYPE - 1`. (or the valur of nbRqstFunc
+passed to `csServInitN()` if the latter initialisation function was used).
+_rqstFunc_ is a pointer to the function associated with this request.
+
+### csServRqstExec
+
+	#include <csLib.h>
+    STATUS csServRqstExec ( SERV_ID servId );
+
+This function reads a request from the input mailbox, checks its type
+and calls the associated callback (installed via `csServFuncInstall`).
+
+
+### csServRqstParamsGet
+
+	#include <csLib.h>
+    STATUS csServRqstParamsGet ( SERV_ID servId, int rqstId, 
+                                 char *rqstDataAdrs, int rqstDataSize,
+								 FUNCPTR decodFunc );
+
+This function should be called by the callback associated with a
+request type to read its parameters (if they exist).
+_servId_ is the server identifier.
+_rqstId_ is the request identifier
+_rqstDataAdrs_ is a pointer to storage where the parameters will be
+stored
+_rqstDataSize_ is the size of the above storage structure.
+_decodFunc_ is a pointer to an optional decoding function. (`NULL`
+means a simple copy of the bytes).
+
+### csServReplySend
+
+	#include <csLib.h>
+    STATUS csServReplySend ( SERV_ID servId, int rqstId, int replyType, 
+                             int replyBilan, char *replyDataAdrs,
+							 int replyDataSize, FUNCPTR codFunc );
+
+This function is used to send a reply to the client. Two kinds of
+replies are possible: an _intermediate_ reply and a _final_ reply.
+
+_servId_ is the identifier of the server.
+_rqstId_ is the identifier of the request
+_replyType_ is the type of the reply (`INTERMED_REPLY` or
+`FINAL_REPLY`)
+_replyBilan_ is the result of the execution (`OK` or an error code).
+_replyDataAdrs_ is the pointer to the reply to be sent.
+_replyDataSize_ is the length of the reply structure.
+_codFunc_ is an optional encoding function. (`NULL means a simple copy
+of the bytes).
+
+
+### csServRqstIdFree
+
+	#include <csLib.h>
+    STATUS csServRqstIdFree ( SERV_ID servId, int rqstId );
+
+This function frees the id of a received request. Normally this is
+done automatically by `csServReplySend` when the final reply is sent
+to a client. So this function should not be called directly.
+
+
+Client Side
+-----------
 
 ### csClientInit
 
@@ -317,6 +485,55 @@ Client-Server Objects
 	STATUS csClientInit ( const char *servMboxName, int maxRqstSize, 
   	                     int maxIntermedReplySize, int maxFinalReplySize,
                          CLIENT_ID *pClientId );
+
+This function initializes the current task as a client of a given
+server.
+
+_servMboxName_ is the name of the mailbox of the server task.
+_maxRqstSize_ is the maximum size of a request that will be sent to
+the server.
+_maxIntermedReplySize_ is the maximum size of an intermediate reply
+that will be received
+_maxFinalReplySize_ is the maximum size of a final reply that will be
+received.
+_pClientId_ is a pointer where the identifier of the client will be
+stored.
+
+This function will pre-allocate all the memory needed to interact with
+the given server. No further memory allocation will be made when
+sending requests or receiving replies to/from the given server.
+
+### csClientEnd
+
+	#include <csLib.h>
+    STATUS csClientEnd ( CLIENT_ID clientId );
+
+Frees all resources associated with this _clientId_. 
+
+### csClientRqstSend
+
+	#include <csLib.h>
+    STATUS csClientRqstSend ( CLIENT_ID clientId, int rqstType, 
+                              char *rqstDataAdrs, int rqstDataSize,
+							  FUNCPTR codFunc, BOOL intermedFlag, 
+                              int intermedReplyTout, int finalReplyTout,
+                              int *pRqstId );
+
+This function sends a request to a server. Sending requests is always
+non-blocking.
+
+_clientId_ is the idenfier of the client (which has been associated with a
+server in `csClientInit()`).
+_rqstType_ is the type of the request that will be executed.
+_rqstDataAdrs_ is a pointer to the request parameters.
+_rqstDataSize_ is the length of the above structure.
+_codeFunc_ is an optional encoding function for the parameters.
+_intermedFlag_ is a flag indicating if an intermediate reply is
+expected (`TRUE`) or not (`FALSE`)
+_intermedReplyTout_ is the timeout to wait on the intermediate reply
+in ticks.
+_finalReplyTot_ is the timeout to wait on the final reply in ticks.
+_pRqstId_ is a pointer to store the request identifier.
 
 ### csClientReplyRcv
 
@@ -329,93 +546,38 @@ Client-Server Objects
                            int finalReplyDataSize,
 						   FUNCPTR finalReplyDecodFunc );
 
+This function allows to receive (either in a blocking or non-blocking
+way) replies from a server (which can be the intermediate reply or the
+final one).
+
+_clientId_ is the client identifier.
+_rqstId_ is the request identifier (returned by csClientRqstSend).
+_block_ is a flag indicating the type of blocking behaviour. It can be
+any of:
+
+* `NO_BLOCK`
+* `BLOCK_ON_INTERMED_REPLY`
+* `BLOCK_ON_FINAL_REPLY`
+
+_intermedReplyDataAdrs_ is a pointer to storage for the intermediate
+reply.
+_intermedReplyDataSize_ is the size of the above structure.
+_intermedReplyDecodFunc_ is an optional function to decode the
+intermediate reply.
+_finalReplyDataAdrs_ is a pointer to storage for the final reply.
+_finalReplyDataSize_ is the size of the above structure.
+_finalReplyDecodFunc_ is an optional function to decode the final
+reply.
+
 ### csClientRqstIdFree
 
 	#include <csLib.h>
     int csClientRqstIdFree ( CLIENT_ID clientId, int rqstId );
 
-### csClientRqstSend
-
-	#include <csLib.h>
-    STATUS csClientRqstSend ( CLIENT_ID clientId, int rqstType, 
-                              char *rqstDataAdrs, int rqstDataSize,
-							  FUNCPTR codFunc, BOOL intermedFlag, 
-                              int intermedReplyTout, int finalReplyTout,
-                              int *pRqstId );
-### csMoxEnd
-
-	#include <csLib.h>
-    STATUS csMboxEnd ( void );
-
-### csMboxInit
-
-	#include <csLib.h>
-    STATUS csMboxInit ( const char *mboxBaseName, int rcvMboxSize, 
-                        int replyMboxSize );
-
-### csMboxUpdate
-
-	#include <csLib.h>
-    STATUS csMboxUpdate( int rcvMboxSize, int replyMboxSize );
-
-### csMboxStatus
-
-	#include <csLib.h>
-    int csMboxStatus ( int mask );
-
-### csMboxWait
-
-	#include <csLib.h>
-    int csMboxWait ( int timeout, int mboxMask );
-
-### csServEnd
-
-	#include <csLib.h>
-    STATUS csServEnd ( SERV_ID servId );
-
-### csServFuncInstall
-
-	#include <csLib.h>
-    STATUS csServFuncInstall ( SERV_ID servId, int rqstType, 
-                               FUNCPTR rqstFunc );
-
-### csServInit
-
-	#include <csLib.h>
-    STATUS csServInit ( int maxRqstDataSize, int maxReplyDataSize, 
-                        SERV_ID *pServId );
-
-### csServInitN
-
-	#include <csLib.h>
-    STATUS csServInitN ( int maxRqstDataSize, int maxReplyDataSize, 
-                         int nbRqstFunc, SERV_ID *pServId );
-
-### csServReplySend
-
-	#include <csLib.h>
-    STATUS csServReplySend ( SERV_ID servId, int rqstId, int replyType, 
-                             int replyBilan, char *replyDataAdrs,
-							 int replyDataSize, FUNCPTR codFunc );
-
-### csServRqstExec
-
-	#include <csLib.h>
-    STATUS csServRqstExec ( SERV_ID servId );
-
-### csServRqstIdFree
-
-	#include <csLib.h>
-    STATUS csServRqstIdFree ( SERV_ID servId, int rqstId );
-
-### csServRqstParamsGet
-
-	#include <csLib.h>
-    STATUS csServRqstParamsGet ( SERV_ID servId, int rqstId, 
-                                 char *rqstDataAdrs, int rqstDataSize,
-								 FUNCPTR decodFunc );
-
-
+This function is used to free the request identifier associated with a
+request. It is automatically be `csClientReplyRcv()` upon receiving
+the final reply associated with the given request and should thus not
+be called directly.
 
 Events
 ------
