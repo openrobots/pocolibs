@@ -616,58 +616,160 @@ Posters
 	#include <posterLib.h>
     STATUS posterCreate (const char *name, int size, POSTER_ID *pPosterId );
 
-### posterMemCreate
+This function creates a new poster, identified by _name_, with a size
+of _size_ bytes. The identifier of the new poster is returned in
+_pPosterId_.
 
-	#include <posterLib.h>
-    STATUS posterMemCreate (const char *name, int busSpace,
-                            void *pPool, int size, POSTER_ID *pPosterId );
+`posterCreate()` returns OK upon successful creation of the poster or
+`ERROR` in case of an error and sets the _errno_ value of the current
+task.
+
+A buffer of _size_ bytes is allocated in shared memory together with
+the associated synchronisation object.
 
 ### posterDelete
 
 	#include <posterLib.h>
     STATUS posterDelete ( POSTER_ID dev );
 
+`posterDelete()` frees the memory and synchronisation object used by
+the given _dev_ poster identifier.
+
+The behaviour of tasks accessing the poster after it has been deleted
+is undefined.
+
 ### posterFind
 
     #include <posterLib.h>
     STATUS posterFind (const char *name, POSTER_ID *pPosterId );
+
+`posterFind()` looks for a poster by its _name_. If such a poster is
+found, its identifer is stored into _pPosterId_ and the function
+returns `OK`. Otherwise it sets the _errno_ value of the current task
+and returns `ERROR`.
+
 
 ### posterWrite
 
 	#include <posterLib.h>
     int posterWrite ( POSTER_ID posterId, int offset, void *buf, int nbytes );
 
+`posterWrite()` permforms a synchronized write on the
+poster. _nbytes_ bytes from the _buf_ memory area are copied into the
+poster, starting at _offset_.
+
+The number of successfully copied bytes (which should be equal to
+_nbytes_) is returned when the copy was successful. Otherwise `ERROR`
+is returned.
+
+Only the task _owning_ a poster (ie the task which created it) can
+write in a poster.
+
 ### posterRead
 
 	#include <posterLib.h>
     int posterRead ( POSTER_ID posterId, int offset, void *buf, int nbytes );
+
+`posterRead()` performs a synchronised read on the poster. _nbytes_
+bytes starting at _offset_ in the poster are copied into _buf_, which
+should have been allocated and have at least _nbytes_.
+
+The number of successfully copied bytes (which should be equal to
+_nbytes_) is returned when the copy was successful. Otherwise `ERROR`
+is returned.
+
+All tasks can perform read operations of a posters. The
+synchronisation object ensures that read and write operations are
+mutually exclusive.
 
 ### posterTake
 
 	#include <posterLib.h>
     STATUS posterTake ( POSTER_ID posterId, POSTER_OP op );
 
+`posterTake()` locks the lock associated with the given
+poster. _posterId_ is the identifier of the poster to lock and _op_ is
+the operation that is going to be performed. It can be
+
+* `POSTER_READ` to indicate that data is going to be read from the
+poster. Any task can use this operation.
+* `POSTER_WRITE` to indicate that data is going to be written to the
+poster. Only the owner of a poster can perform this operation.
+
+Performing data transfers to/from a poster that doesn't respect the
+operation that was declared in _op_ (ie writing data to a poster
+locked with `POSTER_READ` or reading data from a poster locked with
+`POSTER_WRITE` has an undefined behaviour.
+
+`posterTake()`/`posterGive()` is an alernate way to access poster
+data, when `posterRead()` or `posterWrite()` would be too ineficient
+because a large number of sparse data need to be accessed.
+For cases where the data to be transferred is contiguous, posterRead()
+and posterWrite are easier to use and less error prone.
+
 ### posterGive
 
     #include <posterLib.h>
     STATUS posterGive ( POSTER_ID posterId );
+
+`posterGive()` unlocks the lock associated with a poster. _posterId_
+is the identifier of the poster to unlock. The poster should have been
+locked before. 
 
 ### posterAddr
 
 	#include <posterLib.h>
     void * posterAddr ( POSTER_ID posterId );
 
+`posterAddr()` returns the address of the data in the poster
+identified by `posterId`.
+
+This address is only valid after calling `posterTake()` on the
+poster. Dereferencing this address returned whithout holding the lock
+on the poster has an undefined behaviour.
+
 ### posterIoctl
 
 	#include <posterLib.h>
     STATUS posterIoctl(POSTER_ID posterId, int code, void *parg);
+
+`posterIoctl()` performs control operations on the poster. _code_
+defines the operation to be performed and _pargs_ is a pointer to
+arguments that are used depending on the operation.
+The following operations are available:
+
+* `FIO_FRESH` sets an integer pointed to by _pargs_ to 0 if no new
+  data has been written in the poster since the last read operation,
+  or 1 otherwise.
+* `FIO_GETDATE` returns the time of last modification of the poster
+info into an `H2TIMESPEC` structure pointed to by _pargs_.
+* `FIO_NMSEC` set the number of milli-seconds since the last write
+  operation on the poster in an integer pointed to by _pargs_.
+* `FIO_GETSIZE` returns the size of the poster in bytes in a `size_t` value
+  pointed to by _pargs_.
+* `FIO_RESIZE` allows the owner of a poster to change its size. The
+  newsize should be passed in an `size_t` value pointed by _pargs_.
+* `FIO_GETSTATS` returns statistics on the operation on the given
+  poster in a `H2_POSTER_STATS_STR` structure.
 
 ### posterName
 
 	#include <posterLib.h>
     char* posterName(POSTER_ID posterId);
 
+`posterName()` returns the name of the poster identified by _posterId_.
+
 ### posterForget
 
 	#include <posterLib.h>
     STATUS posterForget(POSTER_ID posterId);
+
+`posterForget()` forgets the poster identified by _posterId_. It is
+the opposite of `posterFind()` for tasks who read posters. This is the
+way to free local data associated with a poster will no longer be
+used, or that has been deleted by its owner.
+
+In the case where a poster has been deleted and re-created by its
+owner, it is mandatory to call `posterForget()` followed by
+`posterFind()` to be able to access the new instance of the poster.
+
