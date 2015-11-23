@@ -1,0 +1,300 @@
+<h1 id="comlib">comLib</h1>
+<p>[TOC]</p>
+<p>ComLib is the communication part of Pocolibs. It is mainly composed of two high-level communication paradigms: a message based client/server and shared memory with one exclusive writer and several readers (called posters).</p>
+<p>This library was initially developped for the 'Hilare 2' robot platform at LAAS, hence many parts of its API use the <strong>h2</strong> prefix to identify themselve.</p>
+<p>The comLib API allows several Unix processes on the same machine to communicate. posterLib has an extension that make it possible to semi-transparently access posters on other nodes of the network. See the <a href="remotePosterLib">remotePosterLib</a> documentation for that.</p>
+<h2 id="initialization">Initialization</h2>
+<h3 id="h2initglob">h2initGlob</h3>
+<pre><code>#include &lt;h2initGlob.h&gt;
+STATUS h2initGlob(int ticksPerSec)</code></pre>
+<h3 id="h2-devices">h2 devices</h3>
+<p>All comLib objects are derived from a common <em>h2 device</em> structure which is stored in shared memory. These objects are persistant across processes, but lost on reboot of the system. The h2devLib library is used internally to manage these objects.</p>
+<h3 id="tools">Tools</h3>
+<p>h2devLib also provides a set of command line tools needed to manage the persistant objects outside of existing processes.</p>
+<h4 id="h2">h2</h4>
+<pre><code>h2 init
+h2 end
+h2 info
+h2 clean &lt;id&gt;</code></pre>
+<h2 id="global-semaphores">Global Semaphores</h2>
+<h3 id="h2semalloc">h2semAlloc</h3>
+<pre><code>#include &lt;h2semLib.h&gt;
+H2SEM_ID h2semAlloc(int type)</code></pre>
+<p><code>h2semAlloc()</code> creates a shared counting semaphore. <em>type</em> can be <code>H2SEM_SYNC</code> to specify a semaphore which is to be used for synchronisation purpose, that is a private semaphore, or <code>H2SEM_EXCL</code> to create a semaphore which is used as a mutual exclusion semaphore.</p>
+<p><code>h2semAlloc()</code> returns the semaphore identifier for the newly created semaphore or <code>NULL</code> in case of an error. In that case an error code is left in the task's <em>errno</em> value.</p>
+<h3 id="h2semdelete">h2semDelete</h3>
+<pre><code>#include &lt;h2semLib.h&gt;
+STATUS h2semDelete(H2SEM_ID sem)</code></pre>
+<p><code>h2semDelete()</code> deletes a semaphore from the process and releases any resources used by the semaphore. <em>sem</em> is the identifier of the semaphore to delete.</p>
+<h3 id="h2semgive">h2semGive</h3>
+<pre><code>#include &lt;h2semLib.h&gt;
+STATUS h2semGive(H2SEM_ID sem)</code></pre>
+<p><code>h2semGive()</code> implements the V operation on the given semaphore.</p>
+<h3 id="h2semtake">h2semTake</h3>
+<pre><code>#include &lt;h2semLib.h&gt;
+STATUS h2semTake(H2SEM_ID sem, int timeout)</code></pre>
+<p><code>h2semTake()</code> implements the P operation on the semaphore. <em>timeout</em> specifies a number of ticks in which the operation must succeed. If the semaphore was not taken with this delay, <code>ERROR</code> is returned and the <em>errno</em> value of the task is set to <code>S_objLib_TIMEOUT</code>.</p>
+<p>The behaviour of processes blocked on a semaphore when it is deleted is not defined.</p>
+<h3 id="h2semflush">h2semFlush</h3>
+<pre><code>#include &lt;h2semLib.h&gt;
+BOOL h2semFlush(H2SEM_ID sem)</code></pre>
+<p><code>h2semFlush()</code> resets the value of the specified semaphore to 0, causing the next call to <code>h2semTake()</code> to effectively block the calling task.</p>
+<p><code>h2semDelete()</code>, <code>h2semGive()</code>, <code>h2semTake()</code> and <code>h2semFlush()</code> return <code>OK</code> or <code>ERROR</code> in case an error occured. In that case an error code is left in the task's <em>errno</em> value.</p>
+<h2 id="common-structs">Common Structs</h2>
+<h3 id="commonstructcreate">commonStructCreate</h3>
+<pre><code>#include &lt;commonStructLib.h&gt;
+STATUS commonStructCreate(int len, void **pStructAddr)</code></pre>
+<h3 id="commonstructdelete">commonStructDelete</h3>
+<pre><code>#include &lt;commonStructLib.h&gt;
+STATUS commonStructDelete(const void *pCommonStruct)</code></pre>
+<h3 id="commonstructgive">commonStructGive</h3>
+<pre><code>#include &lt;commonStructLib.h&gt;
+STATUS commonStructGive(const void *pCommonStruct)</code></pre>
+<h3 id="commonstructtake">commonStructTake</h3>
+<pre><code>#include &lt;commonStructLib.h&gt;
+STATUS commonStructTake(const void *pCommonStruct)</code></pre>
+<h2 id="timers">Timers</h2>
+<h3 id="h2timeralloc">h2timerAlloc</h3>
+<pre><code>#include &lt;h2timerLib.h&gt;
+H2TIMER_ID h2timerAlloc(void);</code></pre>
+<p><code>h2timerAlloc()</code> allocates a new inactive timer. <code>h2timerAlloc()</code> returns the identifier of the newly allocated timer or <code>NULL</code> in case of an error.</p>
+<h3 id="h2timerstart">h2timerStart</h3>
+<pre><code>#include &lt;h2timerLib.h&gt;
+STATUS h2timerStart(H2TIMER_ID timerId, int period, int delay);</code></pre>
+<p><code>h2timerStart()</code> arms a timer that will trigger after <em>delay</em> ticks and then every <em>period</em> ticks per second. period must be a multiple or a integer divisor of <em>delay</em> for implementation reasons.</p>
+<h3 id="h2timerpause">h2timerPause</h3>
+<pre><code>#include &lt;h2timerLib.h&gt;
+STATUS h2timerPause(H2TIMER_ID timerId);</code></pre>
+<p><code>h2timerPause()</code> blocks the current task until the next expiration of the timer specified by <em>timerId</em>. This function will not block if it was not called enough times in the past to ensure that all expirations of the timer have been waited on.</p>
+<h1 id="h2timerpausereset">h2timerPauseReset</h1>
+<pre><code>#include &lt;h2timerLib.h&gt;
+STATUS h2timerPauseReset(H2TIMER_ID timerId);</code></pre>
+<p><code>h2timerPauseReset()</code> first flushes the synchronisation semaphore used by the timer and waits for the next expiration of the timer. This ensures that the task will at least yield the processor before returning.</p>
+<h3 id="h2timerstop">h2timerStop</h3>
+<pre><code>#include &lt;h2timerLib.h&gt;
+STATUS h2timerStop(H2TIMER_ID timerId);</code></pre>
+<p><code>h2timerStop()</code> stops the given timer. No more events will be generated by this timer. Calling <code>h2timerPause()</code> on a stopped timer has a undefined behaviour.</p>
+<h3 id="h2timerchangeperiod">h2timerChangePeriod</h3>
+<pre><code>#include &lt;h2timerLib.h&gt;
+STATUS h2timerChangePeriod(H2TIMER_ID timerId, int period);</code></pre>
+<p><code>h2timerChangePeriod()</code> changes the <em>period</em> of a running timer.</p>
+<h3 id="h2timerfree">h2timerFree</h3>
+<pre><code>#include &lt;h2timerLib.h&gt;
+STATUS h2timerFree(H2TIMER_ID timerId);</code></pre>
+<p><code>h2timerFree()</code> frees a timer and returns it to the timer pool of pocoLibs. If it was running, it is first stopped.</p>
+<h3 id="errors">Errors</h3>
+<p><code>S_h2timerLib_TIMER_NOT_INIT</code> : the timer library has not been initialized.</p>
+<p><code>S_h2timerLib_TOO_MUCH_TIMERS</code> : no free timer was available in h2timerAlloc().</p>
+<p><code>S_h2timerLib_NOT_STOPPED_TIMER</code> : The specified timer to h2timerStart() is already running.</p>
+<p><code>S_h2timerLib_BAD_PERIOD</code> : The specified period is not a multiple or a divisor of the delay of the timer.</p>
+<p><code>S_h2timerLib_STOPPED_TIMER</code> : The specified timer is not running for h2timerChangePeriod().</p>
+<h2 id="time-management">Time management</h2>
+<h3 id="h2timeget">h2timeGet</h3>
+<pre><code>#include &lt;h2time.h&gt;
+STATUS h2timeGet(H2TIME *pTimeStr)</code></pre>
+<p><code>h2timeGet()</code> fills the <code>H2TIME_STR</code> structure pointed to by <em>pTimeStr</em> with the current time.</p>
+<h3 id="h2gettimespec">h2GetTimeSpec</h3>
+<pre><code>#include &lt;h2time.h&gt;
+STATUS h2GetTimeSpec(H2TIMESPEC *pTimeSpec)</code></pre>
+<p><code>h2GetTimeSpec()</code> fills the <code>H2TIMESPEC_STR</code> structure pointed to by <em>pTimeSpec</em> with the current time.</p>
+<h3 id="h2timeinterval">h2timeInterval</h3>
+<pre><code>#include &lt;h2time.h&gt;
+STATUS h2timeInterval(H2TIME *pOldTime, unsigned long *pNmsec)</code></pre>
+<p><code>h2timeInterval()</code> computes the elapsed number of mili-seconds between the time structure pointed to by <em>pOldTime</em> and the current time. The value is returned in the long pointed to by <em>pNmsec</em>.</p>
+<h2 id="mailboxes">Mailboxes</h2>
+<h3 id="mboxcreate">mboxCreate</h3>
+<pre><code>#include &lt;moxLib.h&gt;
+STATUS mboxCreate(const char *name, int len, MBOX_ID *pMboxId);</code></pre>
+<h3 id="mboxresize">mboxResize</h3>
+<pre><code>#include &lt;moxLib.h&gt;
+STATUS mboxResize(MBOX_ID mboxId, int size);</code></pre>
+<h3 id="mboxdelete">mboxDelete</h3>
+<pre><code>#include &lt;moxLib.h&gt;
+STATUS mboxDelete(MBOX_ID mboxId);</code></pre>
+<h4 id="mboxend">mboxEnd</h4>
+<pre><code>#include &lt;moxLib.h&gt;
+STATUS mboxEnd(long taskId);</code></pre>
+<h3 id="mboxfind">mboxFind</h3>
+<pre><code>#include &lt;moxLib.h&gt;
+STATUS mboxFind(const char *name, MBOX_ID *pMboxId);</code></pre>
+<h3 id="mbox-init">mbox Init</h3>
+<pre><code>#include &lt;moxLib.h&gt;
+STATUS mboxInit(const char *procName);</code></pre>
+<h3 id="mboxioctl">mboxIoctl</h3>
+<pre><code>#include &lt;moxLib.h&gt;
+STATUS mboxIoctl(MBOX_ID mboxId, int codeFunc, void *pArg);</code></pre>
+<h3 id="mboxpause">mboxPause</h3>
+<pre><code>#include &lt;moxLib.h&gt;
+BOOL mboxPause(MBOX_ID mboxId, int timeout);</code></pre>
+<h3 id="mboxrcv">mboxRcv</h3>
+<pre><code>#include &lt;moxLib.h&gt;
+int mboxRcv(MBOX_ID mboxId, MBOX_ID *pFromId, char *buf,
+            int maxbytes, int timeout);</code></pre>
+<h3 id="mboxsend">mboxSend</h3>
+<pre><code>#include &lt;moxLib.h&gt;
+STATUS mboxSend(MBOX_ID toId, MBOX_ID fromId, char *buf, int nbytes);</code></pre>
+<h3 id="mboxskip">mboxSkip</h3>
+<pre><code>#include &lt;moxLib.h&gt;
+STATUS mboxSkip(MBOX_ID mboxId);</code></pre>
+<h3 id="mboxspy">mboxSpy</h3>
+<pre><code>#include &lt;moxLib.h&gt;
+int mboxSpy(MBOX_ID mboxId, MBOX_ID *pFromId, int *pNbytes,
+             char *buf, int maxbytes);</code></pre>
+<h2 id="client-server-objects">Client-Server Objects</h2>
+<p>These functions will be used both on the client and server sides of a task.</p>
+<h3 id="csmboxinit">csMboxInit</h3>
+<pre><code>#include &lt;csLib.h&gt;
+STATUS csMboxInit ( const char *mboxBaseName, int rcvMboxSize, 
+                    int replyMboxSize );</code></pre>
+<p>Calling this function creates two mailboxes: one will receive requests sent by clients when this task is acting as a server and the other will receive replies from servers to which this task has sent requests.</p>
+<p><em>mboxBaseName</em> is the base name for the created mailboxes. <em>rcvMboxSize</em> is the size of the request mailbox. <em>replyMboxSize</em> is the sie of the reply mailbox. If any of the <em>Size</em> argument is zero, the corresponding mailbox will not be created.</p>
+<p><strong>Note</strong>: this function must be called before any call to <code>csServInit()</code> or <code>csClientInit()</code>.</p>
+<h3 id="csmoxend">csMoxEnd</h3>
+<pre><code>#include &lt;csLib.h&gt;
+STATUS csMboxEnd ( void );</code></pre>
+<p>This function frees the mailboxes created by <code>csMboxInit()</code>.</p>
+<h3 id="csmboxupdate">csMboxUpdate</h3>
+<pre><code>#include &lt;csLib.h&gt;
+STATUS csMboxUpdate( int rcvMboxSize, int replyMboxSize );</code></pre>
+<p>This function makes it possible to change the size of either mailbox of a running task.</p>
+<h3 id="csmboxwait">csMboxWait</h3>
+<pre><code>#include &lt;csLib.h&gt;
+int csMboxWait ( int timeout, int mboxMask );</code></pre>
+<p>This function waits for the arrival of either a request or a reply in one of the task's mailboxes.<br /><em>timeout</em> is expressed in ticks or can be one of the <code>WAIT_FOREVER</code> or <code>NO_WAIT</code> constants. _mboxMask__ is a logical combinaison of <code>RCV_MBOX</code> and <code>REPLY_MBOX</code> specifying which mailboxes are waited upon. <code>csMboxWait</code> returns a combinaision of <code>RCV_MBOX</code> and <code>REPLY_MBOX</code> to indicate which mailboxes were ready. It can also return <code>0</code> if a timeout occured (there will be no message available) or <code>ERROR</code> if an error occured.</p>
+<h3 id="csmboxstatus">csMboxStatus</h3>
+<pre><code>#include &lt;csLib.h&gt;
+int csMboxStatus ( int mask );</code></pre>
+<p>This function checks the state of the mailboxes of a task, like csMboxWait, but without waiting.</p>
+<h2 id="server-side">Server side</h2>
+<h3 id="csservinit">csServInit</h3>
+<pre><code>#include &lt;csLib.h&gt;
+STATUS csServInit ( int maxRqstDataSize, int maxReplyDataSize, 
+                    SERV_ID *pServId );</code></pre>
+<p>Sets up the calling task as a server. <em>maxRqstDataSize</em> is the maximum size, in bytes, of a request that will be received. <em>maxReplyDataSize</em> is the maximum size, in bytes, of a reply that will be sent. <em>pServId</em> is a pointer to store the identifier of the created server.</p>
+<p>This function pre-allocates all memory needed to store the various messages. So further interactions with the server will not cause any memory allocation from the comLib level.</p>
+<h3 id="csservinitn">csServInitN</h3>
+<pre><code>#include &lt;csLib.h&gt;
+STATUS csServInitN ( int maxRqstDataSize, int maxReplyDataSize, 
+                     int nbRqstFunc, SERV_ID *pServId );</code></pre>
+<p>This is the sams as <code>csServInit()</code>, with an extra parameter <em>nbReqstFunc</em>, to specify the maximum number of request types that will be supported (instead of the default <code>NMAX_RQST_TYPE</code>).</p>
+<h3 id="csservend">csServEnd</h3>
+<pre><code>#include &lt;csLib.h&gt;
+STATUS csServEnd ( SERV_ID servId );</code></pre>
+<p>This function frees all the memory associated with a server task.</p>
+<h3 id="csservfuncinstall">csServFuncInstall</h3>
+<pre><code>#include &lt;csLib.h&gt;
+STATUS csServFuncInstall ( SERV_ID servId, int rqstType, 
+                           FUNCPTR rqstFunc );</code></pre>
+<p>This function allow a server to install the callback associated with a given request type. <em>servId</em> is the identifer of the server. <em>rqstType</em> is an integer representing the request type (id). It should be between 0 and <code>NMAX_RQST_TYPE - 1</code>. (or the valur of nbRqstFunc passed to <code>csServInitN()</code> if the latter initialisation function was used). <em>rqstFunc</em> is a pointer to the function associated with this request.</p>
+<h3 id="csservrqstexec">csServRqstExec</h3>
+<pre><code>#include &lt;csLib.h&gt;
+STATUS csServRqstExec ( SERV_ID servId );</code></pre>
+<p>This function reads a request from the input mailbox, checks its type and calls the associated callback (installed via <code>csServFuncInstall</code>).</p>
+<h3 id="csservrqstparamsget">csServRqstParamsGet</h3>
+<pre><code>#include &lt;csLib.h&gt;
+STATUS csServRqstParamsGet ( SERV_ID servId, int rqstId, 
+                             char *rqstDataAdrs, int rqstDataSize,
+                             FUNCPTR decodFunc );</code></pre>
+<p>This function should be called by the callback associated with a request type to read its parameters (if they exist). <em>servId</em> is the server identifier. <em>rqstId</em> is the request identifier <em>rqstDataAdrs</em> is a pointer to storage where the parameters will be stored <em>rqstDataSize</em> is the size of the above storage structure. <em>decodFunc</em> is a pointer to an optional decoding function. (<code>NULL</code> means a simple copy of the bytes).</p>
+<h3 id="csservreplysend">csServReplySend</h3>
+<pre><code>#include &lt;csLib.h&gt;
+STATUS csServReplySend ( SERV_ID servId, int rqstId, int replyType, 
+                         int replyBilan, char *replyDataAdrs,
+                         int replyDataSize, FUNCPTR codFunc );</code></pre>
+<p>This function is used to send a reply to the client. Two kinds of replies are possible: an <em>intermediate</em> reply and a <em>final</em> reply.</p>
+<p><em>servId</em> is the identifier of the server. <em>rqstId</em> is the identifier of the request <em>replyType</em> is the type of the reply (<code>INTERMED_REPLY</code> or <code>FINAL_REPLY</code>) <em>replyBilan</em> is the result of the execution (<code>OK</code> or an error code). <em>replyDataAdrs</em> is the pointer to the reply to be sent. <em>replyDataSize</em> is the length of the reply structure. <em>codFunc</em> is an optional encoding function. (`NULL means a simple copy of the bytes).</p>
+<h3 id="csservrqstidfree">csServRqstIdFree</h3>
+<pre><code>#include &lt;csLib.h&gt;
+STATUS csServRqstIdFree ( SERV_ID servId, int rqstId );</code></pre>
+<p>This function frees the id of a received request. Normally this is done automatically by <code>csServReplySend</code> when the final reply is sent to a client. So this function should not be called directly.</p>
+<h2 id="client-side">Client Side</h2>
+<h3 id="csclientinit">csClientInit</h3>
+<pre><code>#include &lt;csLib.h&gt;
+STATUS csClientInit ( const char *servMboxName, int maxRqstSize, 
+                     int maxIntermedReplySize, int maxFinalReplySize,
+                     CLIENT_ID *pClientId );</code></pre>
+<p>This function initializes the current task as a client of a given server.</p>
+<p><em>servMboxName</em> is the name of the mailbox of the server task. <em>maxRqstSize</em> is the maximum size of a request that will be sent to the server. <em>maxIntermedReplySize</em> is the maximum size of an intermediate reply that will be received <em>maxFinalReplySize</em> is the maximum size of a final reply that will be received. <em>pClientId</em> is a pointer where the identifier of the client will be stored.</p>
+<p>This function will pre-allocate all the memory needed to interact with the given server. No further memory allocation will be made when sending requests or receiving replies to/from the given server.</p>
+<h3 id="csclientend">csClientEnd</h3>
+<pre><code>#include &lt;csLib.h&gt;
+STATUS csClientEnd ( CLIENT_ID clientId );</code></pre>
+<p>Frees all resources associated with this <em>clientId</em>.</p>
+<h3 id="csclientrqstsend">csClientRqstSend</h3>
+<pre><code>#include &lt;csLib.h&gt;
+STATUS csClientRqstSend ( CLIENT_ID clientId, int rqstType, 
+                          char *rqstDataAdrs, int rqstDataSize,
+                          FUNCPTR codFunc, BOOL intermedFlag, 
+                          int intermedReplyTout, int finalReplyTout,
+                          int *pRqstId );</code></pre>
+<p>This function sends a request to a server. Sending requests is always non-blocking.</p>
+<p><em>clientId</em> is the idenfier of the client (which has been associated with a server in <code>csClientInit()</code>). <em>rqstType</em> is the type of the request that will be executed. <em>rqstDataAdrs</em> is a pointer to the request parameters. <em>rqstDataSize</em> is the length of the above structure. <em>codeFunc</em> is an optional encoding function for the parameters. <em>intermedFlag</em> is a flag indicating if an intermediate reply is expected (<code>TRUE</code>) or not (<code>FALSE</code>) <em>intermedReplyTout</em> is the timeout to wait on the intermediate reply in ticks. <em>finalReplyTot</em> is the timeout to wait on the final reply in ticks. <em>pRqstId</em> is a pointer to store the request identifier.</p>
+<h3 id="csclientreplyrcv">csClientReplyRcv</h3>
+<pre><code>#include &lt;csLib.h&gt;
+int csClientReplyRcv ( CLIENT_ID clientId, int rqstId, int block, 
+                       char *intermedReplyDataAdrs,
+                       int intermedReplyDataSize, 
+                       FUNCPTR intermedReplyDecodFunc,
+                       char *finalReplyDataAdrs, 
+                       int finalReplyDataSize,
+                       FUNCPTR finalReplyDecodFunc );</code></pre>
+<p>This function allows to receive (either in a blocking or non-blocking way) replies from a server (which can be the intermediate reply or the final one).</p>
+<p><em>clientId</em> is the client identifier. <em>rqstId</em> is the request identifier (returned by csClientRqstSend). <em>block</em> is a flag indicating the type of blocking behaviour. It can be any of:</p>
+<ul>
+<li><code>NO_BLOCK</code></li>
+<li><code>BLOCK_ON_INTERMED_REPLY</code></li>
+<li><code>BLOCK_ON_FINAL_REPLY</code></li>
+</ul>
+<p><em>intermedReplyDataAdrs</em> is a pointer to storage for the intermediate reply. <em>intermedReplyDataSize</em> is the size of the above structure. <em>intermedReplyDecodFunc</em> is an optional function to decode the intermediate reply. <em>finalReplyDataAdrs</em> is a pointer to storage for the final reply. <em>finalReplyDataSize</em> is the size of the above structure. <em>finalReplyDecodFunc</em> is an optional function to decode the final reply.</p>
+<h3 id="csclientrqstidfree">csClientRqstIdFree</h3>
+<pre><code>#include &lt;csLib.h&gt;
+int csClientRqstIdFree ( CLIENT_ID clientId, int rqstId );</code></pre>
+<p>This function is used to free the request identifier associated with a request. It is automatically be <code>csClientReplyRcv()</code> upon receiving the final reply associated with the given request and should thus not be called directly.</p>
+<h2 id="events">Events</h2>
+<h3 id="h2evnsusp">h2evnSusp</h3>
+<pre><code>#include &lt;h2evnLib.h&gt;
+h2evnSusp(int timeout)</code></pre>
+<h3 id="h2evnsignal">h2evnSignal</h3>
+<pre><code>#include &lt;h2evnLib.h&gt;
+h2evnSignal(long taskId);</code></pre>
+<h3 id="h2evnclear">h2evnClear</h3>
+<pre><code>#include &lt;h2evnLib.h&gt;
+h2evnClear(void)</code></pre>
+<h2 id="posters">Posters</h2>
+<h3 id="postercreate">posterCreate</h3>
+<pre><code>#include &lt;posterLib.h&gt;
+STATUS posterCreate (const char *name, int size, POSTER_ID *pPosterId );</code></pre>
+<h3 id="postermemcreate">posterMemCreate</h3>
+<pre><code>#include &lt;posterLib.h&gt;
+STATUS posterMemCreate (const char *name, int busSpace,
+                        void *pPool, int size, POSTER_ID *pPosterId );</code></pre>
+<h3 id="posterdelete">posterDelete</h3>
+<pre><code>#include &lt;posterLib.h&gt;
+STATUS posterDelete ( POSTER_ID dev );</code></pre>
+<h3 id="posterfind">posterFind</h3>
+<pre><code>#include &lt;posterLib.h&gt;
+STATUS posterFind (const char *name, POSTER_ID *pPosterId );</code></pre>
+<h3 id="posterwrite">posterWrite</h3>
+<pre><code>#include &lt;posterLib.h&gt;
+int posterWrite ( POSTER_ID posterId, int offset, void *buf, int nbytes );</code></pre>
+<h3 id="posterread">posterRead</h3>
+<pre><code>#include &lt;posterLib.h&gt;
+int posterRead ( POSTER_ID posterId, int offset, void *buf, int nbytes );</code></pre>
+<h3 id="postertake">posterTake</h3>
+<pre><code>#include &lt;posterLib.h&gt;
+STATUS posterTake ( POSTER_ID posterId, POSTER_OP op );</code></pre>
+<h3 id="postergive">posterGive</h3>
+<pre><code>#include &lt;posterLib.h&gt;
+STATUS posterGive ( POSTER_ID posterId );</code></pre>
+<h3 id="posteraddr">posterAddr</h3>
+<pre><code>#include &lt;posterLib.h&gt;
+void * posterAddr ( POSTER_ID posterId );</code></pre>
+<h3 id="posterioctl">posterIoctl</h3>
+<pre><code>#include &lt;posterLib.h&gt;
+STATUS posterIoctl(POSTER_ID posterId, int code, void *parg);</code></pre>
+<h3 id="postername">posterName</h3>
+<pre><code>#include &lt;posterLib.h&gt;
+char* posterName(POSTER_ID posterId);</code></pre>
+<h3 id="posterforget">posterForget</h3>
+<pre><code>#include &lt;posterLib.h&gt;
+STATUS posterForget(POSTER_ID posterId);</code></pre>
