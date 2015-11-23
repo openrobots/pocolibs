@@ -582,20 +582,31 @@ be called directly.
 Events
 ------
 
+'h2' events are implemented using the per-task private semaphore also
+associated with the mailboxes owned by the task.
+
 ### h2evnSusp
 
     #include <h2evnLib.h>
 	h2evnSusp(int timeout)
+
+This function suspends the execution of the current task, waiting for
+an external event. (ie executes 'P' on the associated sempaphore).
 
 ### h2evnSignal
 
     #include <h2evnLib.h>
 	h2evnSignal(long taskId);
 
+Send an event to the specified task. (ie executes 'V' on the
+associated semaphore).
+
 ### h2evnClear
 
     #include <h2evnLib.h>
 	h2evnClear(void)
+
+This function flushes pending events for the current task.
 
 Posters
 -------
