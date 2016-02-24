@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2003-2004,2012,2014 CNRS/LAAS
+ * Copyright (c) 1999, 2003-2004,2012,2014,2016 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -251,7 +251,10 @@ smMemMalloc(size_t nBytes)
 	    return NULL;
 	}
     }
+    /* use h2dev global semaphore to protect access to shared data */
+    h2semTake(0, WAIT_FOREVER);
     result = internal_malloc(nBytes);
+    h2semGive(0);
 
     LOGDBG(("comLib:smMemLib: alloc %u -> 0x%lx\n", 
 	    nBytes, (unsigned long)result));
@@ -333,6 +336,10 @@ smMemFree(void *ptr)
        LOGDBG(("comLib:smMemLib: free(something not returned by malloc)\n"));
        return ERROR;
     }
+
+    /* use h2dev global semaphore to protect access to shared data */
+    h2semTake(0, WAIT_FOREVER);
+
     /* insert free chunk in the free list */
     insert_after(&smMemFreeList, oc);
     /* test if can merge with preceding chunk */
@@ -353,6 +360,8 @@ smMemFree(void *ptr)
 	oc->length += REAL_SIZE(c->length);
 	remove_chunk(&smMemFreeList, c);
     }
+
+    h2semGive(0);
     return OK;
 }
 
@@ -378,7 +387,10 @@ smMemShow(BOOL option)
 	logMsg(" num   addr        size\n");
 	logMsg(" --- ---------- ----------\n");
     }
+
     /* Parcours de la liste des blocs libres */
+    /* use h2dev global semaphore to protect access to shared data */
+    h2semTake(0, WAIT_FOREVER);
     for (c = smMemFreeList; c != NULL; c = smObjGlobalToLocal(c->next)) {
         if (c->signature != SIGNATURE) {
             logMsg("corrupted free memory linked list\n");
@@ -394,6 +406,8 @@ smMemShow(BOOL option)
 		   (unsigned long)c->length);
 	}
     }
+    h2semGive(0);
+
     if (option) {
 	logMsg("\nSUMMARY:\n");
     }
