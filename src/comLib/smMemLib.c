@@ -44,7 +44,8 @@
 /**
  ** Global variables
  **/
-/* smMemFreeList is a local address */
+/* smMemBaseAddr & smMemFreeList are local addresses */
+void *smMemBaseAddr = NULL; /* shmat(2) mapped address */
 SM_MALLOC_CHUNK *smMemFreeList = NULL; /* free chunks list */
 #ifdef MALLOC_TRACE
 FILE *malloc_trace_file = NULL;
@@ -228,12 +229,12 @@ internal_malloc(size_t size)
 unsigned long
 smMemBase(void)
 {
-    if (smMemFreeList == NULL) {
+    if (smMemBaseAddr == NULL) {
 	if (smMemAttach() == ERROR) {
 	    return 0;
 	}
     }
-    return (unsigned long)(smMemFreeList - 1);
+    return (unsigned long)smMemBaseAddr;
 }
 
 /*----------------------------------------------------------------------*/
