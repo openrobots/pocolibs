@@ -23,7 +23,6 @@
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
 
 #include <portLib.h>
 #include <errnoLib.h>
@@ -127,8 +126,6 @@ remove_chunk(SM_MALLOC_CHUNK **list, SM_MALLOC_CHUNK *oc)
 {
     SM_MALLOC_CHUNK *tmp;
 
-    assert(oc->signature == SIGNATURE);
-
     if (oc == *list) {
 	*list = smObjGlobalToLocal(oc->next);
 	if (*list != NULL) {
@@ -195,7 +192,10 @@ internal_malloc(size_t size)
 
     if (c != NULL) {
 	/* found a chunk */
-	assert(c->signature == SIGNATURE);
+        if (c->signature != SIGNATURE) {
+            errnoSet(EFAULT);
+            return NULL;
+        }
 	if (c->length > size + REAL_SIZE(MALLOC_MIN_CHUNK)) {
 	    /* split it */
 	    nc = (SM_MALLOC_CHUNK *)((char *)c + c->length - size);
@@ -337,16 +337,18 @@ smMemFree(void *ptr)
     insert_after(&smMemFreeList, oc);
     /* test if can merge with preceding chunk */
     c = smObjGlobalToLocal(oc->prev);
-    if (c != NULL && 
+    if (c != NULL &&
+        c->signature == SIGNATURE &&
 	oc == (SM_MALLOC_CHUNK *)((char *)c + REAL_SIZE(c->length))) {
 	/* merge */
-	c->length += REAL_SIZE(oc->length);
-	remove_chunk(&smMemFreeList, oc);
-	oc = c;
+        c->length += REAL_SIZE(oc->length);
+        remove_chunk(&smMemFreeList, oc);
+        oc = c;
    }
     /* test if can merge with following chunk */
     c = smObjGlobalToLocal(oc->next);
-    if (c == (SM_MALLOC_CHUNK *)((char *)oc + REAL_SIZE(oc->length))) {
+    if (c == (SM_MALLOC_CHUNK *)((char *)oc + REAL_SIZE(oc->length)) &&
+        c->signature == SIGNATURE) {
 	/* merge (=> oc->next != NULL) */
 	oc->length += REAL_SIZE(c->length);
 	remove_chunk(&smMemFreeList, c);
@@ -378,7 +380,10 @@ smMemShow(BOOL option)
     }
     /* Parcours de la liste des blocs libres */
     for (c = smMemFreeList; c != NULL; c = smObjGlobalToLocal(c->next)) {
-	assert(c->signature == SIGNATURE);
+        if (c->signature != SIGNATURE) {
+            logMsg("corrupted free memory linked list\n");
+            break;
+        }
 	blocks++;
 	bytes += c->length;
 	if (c->length > maxb) {
