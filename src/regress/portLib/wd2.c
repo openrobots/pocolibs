@@ -17,6 +17,7 @@
 #include "pocolibs-config.h"
 
 #include <stdio.h>
+#include <stdint.h>
 
 #include <portLib.h>
 #include <semLib.h>
@@ -65,8 +66,8 @@ pocoregress_init()
    logMsg("waiting %d ticks...\n", 10);
 
    t1 = tickGet();
-   wdStart(wd1, 10, wddone, &sem1);
-   wdStart(wd2, 20, wddone, &sem2);
+   wdStart(wd1, 10, wddone, (intptr_t)&sem1);
+   wdStart(wd2, 20, wddone, (intptr_t)&sem2);
    
    semTake(sem1, WAIT_FOREVER);
    t2 = tickGet();

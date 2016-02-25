@@ -19,9 +19,11 @@
 #include <assert.h>
 #include <err.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "portLib.h"
 #include "posterLib.h"
+#include "smMemLib.h"
 
 static void
 pocoregress_test(POSTER_ID p)

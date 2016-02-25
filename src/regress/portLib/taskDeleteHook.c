@@ -21,6 +21,8 @@
 #include <taskLib.h>
 #include <taskHookLib.h>
 
+extern STATUS i(void);
+
 int 
 myDeleteHook(OS_TCB *tcb)
 {
