@@ -1,3 +1,12 @@
+version 2.15, 1 march 2016
+
+154. Don't print version & copyright in h2initGlob() - add an 'h2 version' subcommand
+153. Add a regress test for smMemMalloc() concurrency
+152. Remember base address of smMemLib separately from free blocklist addr
+151. Prevent concurrent access to shared data in smMemMalloc() and smMemFree()
+150. Remove assertions in smMemLib
+149. Rework documentation, convert to markdown
+
 Version 2.14, 23 may 2014
 
 148. h2timeLib: Don't cast H2TIMESPEC to struct timespec
@@ -10,7 +19,7 @@ Version 2.14, 23 may 2014
 141. Add a COPYING file
 140. Make mboxEnd() robust to a call before any successful mboxInit()
 139. Make gcomEnd() robust to a call before any successful gcomInit()
-138. On error, cleanup partially allocated objects in 
+138. On error, cleanup partially allocated objects in
      mboxCreate() and gcomInit()
 137. Replace an unsafe strncpy by a snprintf in h2getErrMsg()
 136. Return 'Unknown error' instead of 'OK' when errno == 0 in h2getErrMsg
@@ -61,12 +70,12 @@ Version 2.10, 3 october 2011
 Version 2.9, 11 february 2011
 
 112. Implement taskSpawn2() a version of taskSpawn() that takes a single
-     void pointer for arguments. This is the only working solution on 
+     void pointer for arguments. This is the only working solution on
      x86_64 architectures, because of the C calling conventions used there.
 111. Implement remotePosterShow().
 110. Add a regression test for parameters passig with taskSpawn.
 109. Fix logMsg() on LP64 architectures.
-108. Produce an error if trying to create a device name longer than 
+108. Produce an error if trying to create a device name longer than
      H2_DEV_MAX_DEVICE_NAME
 107. Make remotePosterLib/posterServ LP64 safe.
 106. Change posterServ to use local poster functions only.
@@ -91,7 +100,7 @@ Version 2.6, 13 April 2010
 
  96. On Linux systems, let taskSuspend() throw a backtrace to stderr.
  95. Use a pipe to wait until h2dev lock is ready before launching posterServ.
- 94. Implement poster time stamps using H2TIMESPEC instead of H2TIME. 
+ 94. Implement poster time stamps using H2TIMESPEC instead of H2TIME.
  93. Don't start posterServ if it cannot find h2 devices.
  92. Add regression tests for h2time conversion functions
  91. Constify posterName arguments in posterLib.
