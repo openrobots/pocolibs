@@ -50,12 +50,13 @@ usage(void)
 	    "Usage: %s init [-p][SM_MEM_SIZE]\n"
 	    "       %s end\n"
 	    "       %s info\n"
+            "       %s version\n"
 	    "       %s posterStats [INTERVAL]\n"
 	    "       %s listModules\n"
 	    "       %s printErrno CODE\n"
 	    "       %s clean PATTERN\n",
 	    progname, progname, progname, progname, progname, 
-	    progname, progname);
+	    progname, progname, progname);
     exit(1);
 }
 
@@ -226,10 +227,14 @@ main(int argc, char *argv[])
     osInit(0);
     
     switch (argc) {
-      case 1: 
-	if (strcmp(argv[0], "init") == 0) {
-	    /* Initialisation des devices h2 */
-		status = h2init(SM_MEM_SIZE, posterServFlag);
+      case 1:
+        if (strcmp(argv[0], "version") == 0) {
+            printf("%s execution environment version %s\n",
+                   PACKAGE_NAME, PACKAGE_VERSION);
+            status = OK;
+        } else if (strcmp(argv[0], "init") == 0) {
+            /* Initialisation des devices h2 */
+            status = h2init(SM_MEM_SIZE, posterServFlag);
 	} else if (strcmp(argv[0], "end") == 0) {
 	    /* Destruction des devices h2 */
 	    status =  h2end();
