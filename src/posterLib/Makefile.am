@@ -8,14 +8,14 @@ AM_CPPFLAGS = -I$(top_srcdir)/include \
 	-DPOSTER_SERV_PATH=\"$(bindir)/posterServ\"
 
 libposterLib_la_SOURCES = \
-	os/$(OSAPI)/hostclient.c \
+	os/@OSAPI@/hostclient.c \
 	posterLib.c \
 	localPosterLib.c \
-	os/$(OSAPI)/remotePosterLib.c \
+	os/@OSAPI@/remotePosterLib.c \
 	posters_clnt.c \
 	posters_xdr.c \
 	posterLibPriv.h \
-	os/$(OSAPI)/remotePosterLibPriv.h \
+	os/@OSAPI@/remotePosterLibPriv.h \
 	posters.x
 
 bin_PROGRAMS = posterServ

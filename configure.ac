@@ -9,7 +9,7 @@ dnl
 dnl
 AC_INIT([pocolibs],[2.14.99],[openrobots@laas.fr])
 AC_PREREQ(2.62)
-AM_INIT_AUTOMAKE([foreign])
+AM_INIT_AUTOMAKE([foreign subdir-objects])
 AM_MAINTAINER_MODE([enable])
 
 AC_CONFIG_MACRO_DIR([m4])
