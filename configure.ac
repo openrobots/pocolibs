@@ -7,7 +7,7 @@ dnl
 dnl GPL, since some parts were copied from other configure.in
 dnl 
 dnl
-AC_INIT([pocolibs],[2.14.99],[openrobots@laas.fr])
+AC_INIT([pocolibs],[2.15],[https://git.openrobots.org/projecrs/pocolibs])
 AC_PREREQ(2.62)
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 AM_MAINTAINER_MODE([enable])
