@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005 CNRS/LAAS
+ * Copyright (c) 1999-2005,2017 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -56,9 +56,11 @@ wdCreate(void)
     wd->magic = WDLIB_MAGIC;
 
     /* Block clock signal */
+    /* XXX: this does not prevent the signal from being delivered to another
+     * thread */
     sigemptyset(&set);
     sigaddset(&set, SIGALRM);
-    sigprocmask(SIG_BLOCK, &set, NULL);
+    pthread_sigmask(SIG_BLOCK, &set, NULL);
 
     pthread_mutex_lock(&wdMutex);
 
@@ -66,7 +68,7 @@ wdCreate(void)
     wd->next = wdList;
     wdList = wd;
     pthread_mutex_unlock(&wdMutex);
-    sigprocmask(SIG_UNBLOCK, &set, NULL);
+    pthread_sigmask(SIG_UNBLOCK, &set, NULL);
     return wd;
 }
 
@@ -81,9 +83,11 @@ wdDelete(WDOG_ID wdId)
 	return ERROR;
     }
     /* Block clock signal */
+    /* XXX: this does not prevent the signal from being delivered to another
+     * thread */
     sigemptyset(&set);
     sigaddset(&set, SIGALRM);
-    sigprocmask(SIG_BLOCK, &set, NULL);
+    pthread_sigmask(SIG_BLOCK, &set, NULL);
 
     /* Remove from wdList */
     pthread_mutex_lock(&wdMutex);
@@ -99,7 +103,7 @@ wdDelete(WDOG_ID wdId)
     }
     free(wdId);
     pthread_mutex_unlock(&wdMutex);
-    sigprocmask(SIG_UNBLOCK, &set, NULL); /* unblock clock sig */
+    pthread_sigmask(SIG_UNBLOCK, &set, NULL); /* unblock clock sig */
     return OK;
 }
 
@@ -112,10 +116,13 @@ wdStart(WDOG_ID wdId, int delay, FUNCPTR pRoutine, long parameter)
 	errnoSet(S_wdLib_ID_ERROR);
 	return ERROR;
     }
+
     /* Block clock signal */
+    /* XXX: this does not prevent the signal from being delivered to another
+     * thread */
     sigemptyset(&set);
     sigaddset(&set, SIGALRM);
-    sigprocmask(SIG_BLOCK, &set, NULL);
+    pthread_sigmask(SIG_BLOCK, &set, NULL);
 
     /* XXX */
     /* mutex_lock n'est pas aync signal safe, or wdStart() doit l'etre */
@@ -126,7 +133,7 @@ wdStart(WDOG_ID wdId, int delay, FUNCPTR pRoutine, long parameter)
     wdId->parameter = parameter;
     pthread_mutex_unlock(&wdMutex);
 
-    sigprocmask(SIG_UNBLOCK, &set, NULL);
+    pthread_sigmask(SIG_UNBLOCK, &set, NULL);
     return OK;
 }
 
@@ -140,19 +147,17 @@ wdCancel(WDOG_ID wdId)
 	return ERROR;
     }
     /* Block clock signal */
+    /* XXX: this does not prevent the signal from being delivered to another
+     * thread */
     sigemptyset(&set);
     sigaddset(&set, SIGALRM);
-    sigprocmask(SIG_BLOCK, &set, NULL);
+    pthread_sigmask(SIG_BLOCK, &set, NULL);
 
     pthread_mutex_lock(&wdMutex);
     wdId->delay = 0;
     wdId->pRoutine = NULL;
     pthread_mutex_unlock(&wdMutex);
 
-    sigprocmask(SIG_UNBLOCK, &set, NULL); /* unblock clock sig */
+    pthread_sigmask(SIG_UNBLOCK, &set, NULL); /* unblock clock sig */
     return OK;
 }
-
-
-
-	
