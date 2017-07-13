@@ -68,6 +68,7 @@ dnl check for rpcgen
 AC_ARG_VAR(RPCGEN, [Remote Procedure Call (RPC) protocol compiler])
 AC_PATH_PROG(RPCGEN, rpcgen, no, [$PATH])
 AC_RPCGEN_C
+AC_RPCGEN_M
 
 dnl check for purify
 opt_purify=no

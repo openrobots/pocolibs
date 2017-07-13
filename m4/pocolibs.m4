@@ -1,7 +1,7 @@
 dnl
 dnl Copyright (c) 2004 
 dnl      Autonomous Systems Lab, Swiss Federal Institute of Technology.
-dnl Copyright (c) 2004,2010 CNRS/LAAS
+dnl Copyright (c) 2004,2010,2017 CNRS/LAAS
 dnl
 dnl Permission to use, copy, modify, and distribute this software for any
 dnl purpose with or without fee is hereby granted, provided that the above
@@ -34,6 +34,22 @@ AC_DEFUN([AC_RPCGEN_C],
   fi
   AC_SUBST(RPCGEN_C)
   test -n "$RPCGEN_C" && AC_DEFINE([HAVE_RPCGEN_C], 1, [define if rpcgen supports the -C option])
+])dnl
+dnl ----------------------------------------------------------------------
+dnl
+dnl tests if rpcgen supports -M
+dnl
+AC_DEFUN([AC_RPCGEN_M],
+  [AC_MSG_CHECKING(for rpcgen -M)
+  AC_CACHE_VAL(poco_cv_prog_RPCGEN_M,
+  [if $RPCGEN -M -c </dev/null >/dev/null 2>/dev/null
+  then
+    poco_cv_prog_RPCGEN_M=yes
+  else
+    poco_cv_prog_RPCGEN_M=no
+  fi])dnl
+  AC_MSG_RESULT($poco_cv_prog_RPCGEN_M)
+  AM_CONDITIONAL(RPCGEN_M, test "$poco_cv_prog_RPCGEN_M" = "yes")
 ])dnl
 dnl ----------------------------------------------------------------------
 dnl

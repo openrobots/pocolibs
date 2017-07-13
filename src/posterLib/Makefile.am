@@ -2,19 +2,24 @@
 lib_LTLIBRARIES = libposterLib.la
 
 libposterLib_la_LDFLAGS = -version-info 7:0:1 -no-undefined
-libposterLib_la_LIBADD = \
-	libposters_xdr.la -L../comLib -L../portLib -lcomLib -lportLib
+libposterLib_la_LIBADD = -L../comLib -L../portLib -lcomLib -lportLib
 
 AM_CPPFLAGS = -I$(top_srcdir)/include \
 	-DPOSTER_SERV_PATH=\"$(bindir)/posterServ\"
 
 libposterLib_la_SOURCES = \
-	os/@OSAPI@/hostclient.c \
 	posterLib.c \
 	localPosterLib.c \
+	posterLibPriv.h
+
+# Multi-thread rpcgen for remotePosterLib and posterServ
+if RPCGEN_M
+
+libposterLib_la_LIBADD += libposters_xdr.la
+libposterLib_la_SOURCES += \
+	os/@OSAPI@/hostclient.c \
 	os/@OSAPI@/remotePosterLib.c \
 	posters_clnt.c \
-	posterLibPriv.h \
 	os/@OSAPI@/remotePosterLibPriv.h \
 	posters.x
 
@@ -60,3 +65,7 @@ posters.h: posters.x Makefile
 
 CLEANFILES = $(BUILT_SOURCES)
 
+else
+
+libposterLib_la_CFLAGS = -DPOSTERLIB_ONLY_LOCAL
+endif
