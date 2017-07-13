@@ -40,7 +40,7 @@ static POSTER_STR *allPosters = NULL;
 
 /*----------------------------------------------------------------------*/
 
-STATUS 
+STATUS
 posterCreate(const char *name, int size, POSTER_ID *pPosterId)
 {
     POSTER_STR *p;
@@ -57,7 +57,7 @@ posterCreate(const char *name, int size, POSTER_ID *pPosterId)
 	errnoSet(S_posterLib_MALLOC_ERROR);
 	return ERROR;
     }
-    
+
 #ifdef POSTERLIB_ONLY_LOCAL
     p->type = POSTER_ACCESS_LOCAL;
     p->funcs = &posterLocalFuncs;
@@ -72,8 +72,8 @@ posterCreate(const char *name, int size, POSTER_ID *pPosterId)
 	p->funcs = &posterLocalFuncs;
     }
 #endif /* POSTERLIB_ONLY_LOCAL */
-    
-    /* Init endianness value to local value 
+
+    /* Init endianness value to local value
        (will be changed in remote create procedure if necessary) */
     p->endianness = H2_LOCAL_ENDIANNESS;
 
@@ -105,7 +105,7 @@ char* posterName(POSTER_ID pPosterId)
 /*----------------------------------------------------------------------*/
 
 STATUS
-posterMemCreate(const char *name, int busSpace, void *pPool, 
+posterMemCreate(const char *name, int busSpace, void *pPool,
 		int size, POSTER_ID *pPosterId)
 {
     logMsg("posterMemCreate: Not supported under Unix\n");
@@ -114,7 +114,7 @@ posterMemCreate(const char *name, int busSpace, void *pPool,
 
 /*----------------------------------------------------------------------*/
 
-STATUS 
+STATUS
 posterDelete(POSTER_ID posterId)
 {
     STATUS res;
@@ -129,7 +129,7 @@ posterDelete(POSTER_ID posterId)
     }
     POSTER_INIT;
     res = p->funcs->delete(p->posterId);
-    /* Don't free the POSTER_STR struct. It should stay around, so that 
+    /* Don't free the POSTER_STR struct. It should stay around, so that
        anything that call posterRead/Write on a closed poster gets
        the error from the actual local or remote function */
     return res;
@@ -154,13 +154,13 @@ posterFind(const char *name, POSTER_ID *pPosterId)
     for (old_p = NULL, p = allPosters; p != NULL; old_p = p, p = p->next) {
 	if (strcmp(p->name, name) == 0) {
 		/* found - check that it wasn't destroyed */
-		if (posterIoctl(p, FIO_GETSIZE, &size) == ERROR || size == 0) 
+		if (posterIoctl(p, FIO_GETSIZE, &size) == ERROR || size == 0)
 		{
 		    /* remove from allPosters. An attentive reader could see that
 		     * allPosters elements are never destroyed
 		     *
-		     * DO NOT free(p): the client may hold a POSTER_ID on it 
-		     * and free-ing the associated POSTER_STR would make the 
+		     * DO NOT free(p): the client may hold a POSTER_ID on it
+		     * and free-ing the associated POSTER_STR would make the
 		     * program crash
 		     */
 		    if (old_p)
@@ -196,18 +196,18 @@ posterFind(const char *name, POSTER_ID *pPosterId)
 	/* Return value */
 	*pPosterId = (POSTER_ID)p;
 	return OK;
-    } 
+    }
 
 #ifndef POSTERLIB_ONLY_LOCAL
     /* Reset errno */
     errnoSet(0);
-    
+
     /* Puis recheche remote */
     if (posterRemoteFuncs.find(name, &id) == OK) {
 	p->type = POSTER_ACCESS_REMOTE;
 	p->funcs = &posterRemoteFuncs;
 	p->posterId = id;
-	/* get endianness from REMOTE_POSTER_STR 
+	/* get endianness from REMOTE_POSTER_STR
 	   (itself filled in by  remotePosterFind) */
 	posterRemoteFuncs.getEndianness(id, &p->endianness);
 	strcpy(p->name, name);
@@ -250,7 +250,7 @@ posterForget(POSTER_ID posterId)
 	return ERROR;
 }
 
-	
+
 /*----------------------------------------------------------------------*/
 
 int
@@ -276,7 +276,7 @@ posterRead(POSTER_ID posterId, int offset, void *buf, int nbytes)
 /*----------------------------------------------------------------------*/
 
 STATUS
-posterTake(POSTER_ID posterId, POSTER_OP op) 
+posterTake(POSTER_ID posterId, POSTER_OP op)
 {
     POSTER_STR *p = (POSTER_STR *)posterId;
 
@@ -286,7 +286,7 @@ posterTake(POSTER_ID posterId, POSTER_OP op)
 
 /*----------------------------------------------------------------------*/
 
-STATUS 
+STATUS
 posterGive(POSTER_ID posterId)
 {
     POSTER_STR *p = (POSTER_STR *)posterId;
@@ -386,12 +386,12 @@ posterInit(void)
 	}
 
 	/* record errors msg */
-	h2recordErrMsgs("posterInit", "posterLib", M_posterLib, 
-			sizeof(posterLibH2errMsgs)/sizeof(H2_ERROR), 
+	h2recordErrMsgs("posterInit", "posterLib", M_posterLib,
+			sizeof(posterLibH2errMsgs)/sizeof(H2_ERROR),
 			posterLibH2errMsgs);
 
-	h2recordErrMsgs("posterInit", "remotePosterLib", M_remotePosterLib, 
-			sizeof(remotePosterLibH2errMsgs)/sizeof(H2_ERROR), 
+	h2recordErrMsgs("posterInit", "remotePosterLib", M_remotePosterLib,
+			sizeof(remotePosterLibH2errMsgs)/sizeof(H2_ERROR),
 			remotePosterLibH2errMsgs);
 
 
