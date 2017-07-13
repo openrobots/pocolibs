@@ -42,19 +42,19 @@ BUILT_SOURCES = \
 	posters_clnt.c \
 	posters_svc.c
 
-posters_clnt.c: posters.x
+posters_clnt.c: posters.x Makefile
 	rm -f $@
 	(cd $(dir $<) ; $(RPCGEN) $(RPCGEN_C) -l posters.x) > $@
 
-posters_svc.c: posters.x
+posters_svc.c: posters.x Makefile
 	rm -f $@
 	(cd $(dir $<) ; $(RPCGEN)  $(RPCGEN_C) -m posters.x) > $@
 
-posters_xdr.c: posters.x
+posters_xdr.c: posters.x Makefile
 	rm -f $@
 	(cd $(dir $<) ; $(RPCGEN) $(RPCGEN_C) -c posters.x) > $@
 
-posters.h: posters.x
+posters.h: posters.x Makefile
 	rm -f $@
 	(cd $(dir $<) ; $(RPCGEN) $(RPCGEN_C) -h posters.x) > $@
 
