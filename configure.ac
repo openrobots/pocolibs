@@ -96,6 +96,7 @@ AC_DEFUN([AC_CHECK_PTHREADS],
 	AC_LANG_C
 	AC_TRY_RUN([
 #include <pthread.h>
+#include <stdlib.h>
 void *pipo(void *a) { exit(0); }
  
 int main() {
