@@ -2,7 +2,8 @@
 lib_LTLIBRARIES = libposterLib.la
 
 libposterLib_la_LDFLAGS = -version-info 7:0:1 -no-undefined
-libposterLib_la_LIBADD = -L../comLib -L../portLib -lcomLib -lportLib
+libposterLib_la_LIBADD = \
+	libposters_xdr.la -L../comLib -L../portLib -lcomLib -lportLib
 
 AM_CPPFLAGS = -I$(top_srcdir)/include \
 	-DPOSTER_SERV_PATH=\"$(bindir)/posterServ\"
@@ -13,7 +14,6 @@ libposterLib_la_SOURCES = \
 	localPosterLib.c \
 	os/@OSAPI@/remotePosterLib.c \
 	posters_clnt.c \
-	posters_xdr.c \
 	posterLibPriv.h \
 	os/@OSAPI@/remotePosterLibPriv.h \
 	posters.x
@@ -21,7 +21,7 @@ libposterLib_la_SOURCES = \
 bin_PROGRAMS = posterServ
 
 posterServ_LDFLAGS =
-posterServ_LDADD =  posters_xdr.lo localPosterLib.lo \
+posterServ_LDADD = libposters_xdr.la localPosterLib.lo \
 	-L../comLib -L../portLib -lcomLib -lportLib
 
 posterServ_SOURCES = \
@@ -30,6 +30,11 @@ posterServ_SOURCES = \
 	posters_svc.c \
 	remPosterId.h \
 	tree.h
+
+noinst_LTLIBRARIES = libposters_xdr.la
+libposters_xdr_la_SOURCES = posters_xdr.c posters.h
+# rpcgen generated code has some unused variables
+libposters_xdr_la_CFLAGS = -Wno-unused-variable
 
 BUILT_SOURCES = \
 	posters.h \
