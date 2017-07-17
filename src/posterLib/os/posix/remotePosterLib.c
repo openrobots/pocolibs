@@ -168,7 +168,7 @@ remotePosterCreate(const char *name,	/* Name of the device to create */
 	
 	/* Allocate a data cache */
 	remPosterId->dataSize = size;
-	remPosterId->dataCache = malloc(size);
+	remPosterId->dataCache = calloc(1, size);
 	if (remPosterId->dataCache == NULL) {
 		errnoSet(S_remotePosterLib_BAD_ALLOC);
 		return(ERROR);
