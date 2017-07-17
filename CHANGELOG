@@ -1,3 +1,15 @@
+version 2.16, 17 july 2017
+
+160. Improve performance of remotePosterTake() with a POSTER_WRITE operation,
+     by avoiding a useless remote read.
+159. Fix undefined errno in case of RPC failure in remotePosterTake/Give()
+158. Add -lm dependency to comLib (for atan(3) in h2MathLib)
+157. Use thread-safe rpcgen (when available) in remotePosterLib . Disable
+     remotePosterLib when rpcgen -M is not available
+156. Fix configure script for gcc with -Werror
+155. Replace sigprocmask(2) in wdLib by pthread_sigmask(3) (fixing some issues
+     with MacOSX)
+
 version 2.15, 1 march 2016
 
 154. Don't print version & copyright in h2initGlob() - add an 'h2 version' subcommand
