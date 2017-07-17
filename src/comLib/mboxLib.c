@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003-2005,2012 CNRS/LAAS
+ * Copyright (c) 1990, 2003-2005,2012,2014 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -109,14 +109,22 @@ mboxInit(const char *procName)		/* unused parameter procName */
 STATUS
 mboxEnd(long taskId)
 {
-    int i; 
+    const char *tName;
+    int i;
     long dev;
 
     if (taskId == 0) {
 	taskId = taskIdSelf();
     }
+
     /* Device for the given task */
-    dev = taskGetUserData(taskId);
+    tName = taskName(taskId);
+    dev = h2devFind((char *)tName, H2_DEV_TYPE_TASK);
+    if (dev == ERROR ||
+        H2DEV_TASK_TID(dev) != taskId || taskGetUserData(taskId) != dev) {
+	errnoSet(S_mboxLib_NOT_OWNER);
+	return ERROR;
+    }
 
     /* Free all mailboxes attached to this task */
     for (i = 0; i < H2_DEV_MAX; i++) {
@@ -162,6 +170,10 @@ mboxCreate(const char *name, int size, MBOX_ID *pMboxId)
     }
     /* Create a global synchronization semaphore */
     if ((mbox->semSigRd = h2semAlloc(H2SEM_SYNC)) == ERROR) {
+	int e = errnoGet();
+	h2semDelete(mbox->semExcl);
+	h2devFree(dev);
+	errnoSet(e);
 	return ERROR;
     }
     LOGDBG(("comLib:mboxCreate: semaphores created\n"));
@@ -169,6 +181,11 @@ mboxCreate(const char *name, int size, MBOX_ID *pMboxId)
     /* Allocate a ring buffer */
     rngId = h2rngCreate(H2RNG_TYPE_BLOCK, size);
     if (rngId == NULL) {
+	int e = errnoGet();
+	h2semDelete(mbox->semSigRd);
+	h2semDelete(mbox->semExcl);
+	h2devFree(dev);
+	errnoSet(e);
 	return ERROR;
     }
     /* Store the global identifier of this ring buffer */

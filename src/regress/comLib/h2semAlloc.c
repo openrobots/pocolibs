@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include <portLib.h>
 #include <h2semLib.h>
 

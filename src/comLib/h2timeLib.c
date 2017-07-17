@@ -23,6 +23,11 @@
 #include <sys/time.h>
 #include <sys/types.h>
 
+#ifdef __MACH__
+#include <mach/clock.h>
+#include <mach/mach.h>
+#endif
+
 #include "portLib.h"
 #include "h2timeLib.h"
 
@@ -45,11 +50,9 @@ static void h2timespec_substract(H2TIMESPEC *,
 STATUS
 h2timeGet(H2TIME *pTimeStr)
 {
-    struct timespec ts;
+    H2TIMESPEC ts;
 
-    if (clock_gettime(CLOCK_REALTIME, &ts) < 0)
-	    return ERROR;
-
+    h2GetTimeSpec(&ts);
     h2timeFromTimespec(pTimeStr, &ts);
 
     return(OK);
@@ -59,8 +62,19 @@ STATUS
 h2GetTimeSpec(H2TIMESPEC *pTs)
 {
 	struct timespec ts;
+#ifdef __MACH__
+	clock_serv_t cclock;
+	mach_timespec_t mts;
+	
+	host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
+	clock_get_time(cclock, &mts);
+	mach_port_deallocate(mach_task_self(), cclock);
+	ts.tv_sec = mts.tv_sec;
+	ts.tv_nsec = mts.tv_nsec;
+#else
 	if (clock_gettime(CLOCK_REALTIME, &ts) < 0)
-		return ERROR;
+	    return ERROR;
+#endif
 	if (pTs != NULL) {
 		pTs->tv_sec = ts.tv_sec;
 		pTs->tv_nsec = ts.tv_nsec;

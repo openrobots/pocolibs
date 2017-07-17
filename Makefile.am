@@ -15,4 +15,4 @@ SUBDIRS = \
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = pocolibs.pc
 
-EXTRA_DIST = README CHANGELOG
+EXTRA_DIST = README CHANGELOG COPYING

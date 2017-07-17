@@ -23,7 +23,7 @@
 
 #include "portLib.h"
 #include "h2timeLib.h"
-
+#include "tickLib.h"
 
 int
 pocoregress_init(void)
@@ -31,7 +31,7 @@ pocoregress_init(void)
 	H2TIMESPEC ts;
 	H2TIME h2time;
 	int i;
-	unsigned long t1, oldtick = tickGet();
+	unsigned long t1;
 
 	h2timeInit();
 

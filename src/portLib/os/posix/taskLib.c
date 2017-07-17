@@ -323,7 +323,7 @@ taskStarter2(void *data)
  * and prepare pthread attributes for the new task
  */
 static OS_TCB *
-newTcb(char *name, int priority, int options, int stackSize,
+newTcb(const char *name, int priority, int options, int stackSize,
        pthread_attr_t *attr)
 {
 #ifdef _POSIX_THREAD_ATTR_STACKSIZE
@@ -524,7 +524,7 @@ taskSpawn(char *name, int priority, int options, int stackSize,
  * single pointer
  */
 long
-taskSpawn2(char *name, int priority, int options, int stackSize,
+taskSpawn2(const char *name, int priority, int options, int stackSize,
 	   void *(*entryPt)(void *), void *arg)
 {
     pthread_attr_t thread_attr;
@@ -552,7 +552,7 @@ taskSpawn2(char *name, int priority, int options, int stackSize,
 /*----------------------------------------------------------------------*/
 
 long
-taskFromThread(char *name)
+taskFromThread(const char *name)
 {
     struct sched_param thread_param;
     OS_TCB *tcb;
@@ -975,7 +975,7 @@ taskOptionsGet(long tid, int *pOptions)
  * Return the Task Id associated with a name
  */
 long
-taskNameToId(char *name)
+taskNameToId(const char *name)
 {
     OS_TCB *t;
 

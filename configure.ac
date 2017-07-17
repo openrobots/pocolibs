@@ -7,9 +7,9 @@ dnl
 dnl GPL, since some parts were copied from other configure.in
 dnl 
 dnl
-AC_INIT([pocolibs],[2.12.99],[openrobots@laas.fr])
+AC_INIT([pocolibs],[2.15.99],[https://git.openrobots.org/projecrs/pocolibs])
 AC_PREREQ(2.62)
-AM_INIT_AUTOMAKE([foreign])
+AM_INIT_AUTOMAKE([foreign subdir-objects])
 AM_MAINTAINER_MODE([enable])
 
 AC_CONFIG_MACRO_DIR([m4])
@@ -68,6 +68,7 @@ dnl check for rpcgen
 AC_ARG_VAR(RPCGEN, [Remote Procedure Call (RPC) protocol compiler])
 AC_PATH_PROG(RPCGEN, rpcgen, no, [$PATH])
 AC_RPCGEN_C
+AC_RPCGEN_M
 
 dnl check for purify
 opt_purify=no
@@ -96,6 +97,7 @@ AC_DEFUN([AC_CHECK_PTHREADS],
 	AC_LANG_C
 	AC_TRY_RUN([
 #include <pthread.h>
+#include <stdlib.h>
 void *pipo(void *a) { exit(0); }
  
 int main() {
@@ -197,7 +199,7 @@ AC_ARG_ENABLE([posix-timers],
 
 AC_SEARCH_LIBS(clock_gettime, [rt posix4])
 AC_CHECK_FUNCS(clock_gettime, [], 
-	       AC_MSG_ERROR([clock_gettime() support is required]))
+	       AC_MSG_WARN([clock_gettime() support is required]))
 
 AC_SEARCH_LIBS(sched_get_priority_min, [rt])
 
@@ -257,12 +259,13 @@ AC_ARG_WITH(debug-output,
            [print debugging information at run-time (comma separated list)]),
            [opt_debug_output=$withval],[opt_debug_output=])
 
-if test "x$opt_debug" = "xall"; then
-   opt_debug="task,sys,h2dev,smmem,h2evn,mbox,gcom,h2timer"
+if test "x$opt_debug_output" = "xall"; then
+   opt_debug_output="task,sys,h2dev,smmem,h2evn,mbox,gcom,h2timer"
 fi
 
 ac_save_ifs=$IFS; IFS=","
 for dopt in $opt_debug_output; do 
+        IFS=$ac_save_ifs
 	test -z "$dopt" && break
 
 	case "$dopt" in

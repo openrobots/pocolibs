@@ -202,7 +202,7 @@ commonStructCreate(int len,		/* Taille de la structure commune
 */
 
 STATUS 
-commonStructTake(void *pCommonStruct)	/* Adresse de base de la structure */
+commonStructTake(const void *pCommonStruct)	/* Adresse de base de la structure */
 {
     COMMON_STRUCT_ID strId;       /* Id de la structure */
     
@@ -233,7 +233,7 @@ commonStructTake(void *pCommonStruct)	/* Adresse de base de la structure */
 */
 
 STATUS 
-commonStructGive(void *pCommonStruct)	/* Adresse de base de la structure */
+commonStructGive(const void *pCommonStruct)	/* Adresse de base de la structure */
 {
     COMMON_STRUCT_ID strId;       /* Id de la structure */
     
@@ -305,7 +305,7 @@ commonStructCopy(void *pCommonStruct, /* Adresse base structure */
 */
 
 STATUS 
-commonStructDelete(void *pCommonStruct) /* Adresse de base de la structure */
+commonStructDelete(const void *pCommonStruct) /* Adresse de base de la structure */
 {
     COMMON_STRUCT_ID strId;       /* Id de la structure */
     

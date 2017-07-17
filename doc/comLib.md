@@ -1,0 +1,775 @@
+comLib
+======
+
+ComLib is the communication part of Pocolibs. It is mainly composed of
+two high-level communication paradigms: a message based client/server
+and shared memory with one exclusive writer and several readers
+(called posters).
+
+This library was initially developped for the 'Hilare 2' robot
+platform at LAAS, hence many parts of its API use the __h2__ prefix to
+identify themselve.
+
+The comLib API allows several Unix processes on the same machine to
+communicate. posterLib has an extension that make it possible to
+semi-transparently access posters on other nodes of the network. See
+the [remotePosterLib](remotePosterLib) documentation for that.
+
+Initialization
+--------------
+
+### h2initGlob
+
+    #include <h2initGlob.h>
+	STATUS h2initGlob(int ticksPerSec)
+
+### h2 devices
+
+All comLib objects are derived from a common _h2 device_ structure
+which is stored in shared memory. These objects are persistant across
+processes, but lost on reboot of the system. The h2devLib library is
+used internally to manage these objects.
+
+### Tools
+
+h2devLib also provides a set of command line tools needed to manage
+the persistant objects outside of existing processes.
+
+#### h2
+
+    h2 init
+	h2 end
+	h2 info
+	h2 clean <id>
+
+
+Global Semaphores
+-----------------
+
+### h2semAlloc
+
+	#include <h2semLib.h>
+    H2SEM_ID h2semAlloc(int type)
+
+`h2semAlloc()` creates a shared counting semaphore. _type_ can be
+`H2SEM_SYNC` to specify a semaphore which is to be used for
+synchronisation purpose, that is a private semaphore, or `H2SEM_EXCL`
+to create a semaphore which is used as a mutual exclusion semaphore.
+
+`h2semAlloc()` returns the semaphore identifier for the newly created
+semaphore or `NULL` in case of an error. In that case an error code
+is left in the task's _errno_ value.
+
+
+### h2semDelete
+
+	#include <h2semLib.h>
+	STATUS h2semDelete(H2SEM_ID sem)
+
+`h2semDelete()` deletes a semaphore from the process and releases any
+resources used by the semaphore.  _sem_ is the identifier of the
+semaphore to delete.
+
+### h2semGive
+
+	#include <h2semLib.h>
+	STATUS h2semGive(H2SEM_ID sem)
+
+`h2semGive()` implements the V operation on the given semaphore.
+
+### h2semTake
+
+	#include <h2semLib.h>
+	STATUS h2semTake(H2SEM_ID sem, int timeout)
+
+`h2semTake()` implements the P operation on the semaphore.  _timeout_
+specifies a number of ticks in which the operation must succeed. If the
+semaphore was not taken with this delay, `ERROR` is returned and the
+_errno_ value of the task is set to `S_objLib_TIMEOUT`.
+
+The behaviour of processes blocked on a semaphore when it is deleted
+is not defined.
+
+### h2semFlush
+
+	#include <h2semLib.h>
+	BOOL h2semFlush(H2SEM_ID sem)
+
+`h2semFlush()` resets the value of the specified semaphore to 0, causing
+the next call to `h2semTake()` to effectively block the calling task.
+
+`h2semDelete()`, `h2semGive()`, `h2semTake()` and `h2semFlush()`
+return `OK` or `ERROR` in case an error occured. In that case an error
+code is left in the task's _errno_ value.
+
+Common Structs
+--------------
+
+### commonStructCreate
+
+	#include <commonStructLib.h>
+    STATUS commonStructCreate(int len, void **pStructAddr)
+
+### commonStructDelete
+
+	#include <commonStructLib.h>
+	STATUS commonStructDelete(const void *pCommonStruct)
+
+### commonStructGive
+
+	#include <commonStructLib.h>
+	STATUS commonStructGive(const void *pCommonStruct)
+
+### commonStructTake
+
+	#include <commonStructLib.h>
+	STATUS commonStructTake(const void *pCommonStruct)
+
+Timers
+------
+
+### h2timerAlloc
+
+	#include <h2timerLib.h>
+    H2TIMER_ID h2timerAlloc(void);
+
+`h2timerAlloc()` allocates a new inactive timer.
+`h2timerAlloc()` returns the identifier of the newly allocated timer or
+`NULL` in case of an error.
+
+
+###h2timerStart
+
+    #include <h2timerLib.h>
+    STATUS h2timerStart(H2TIMER_ID timerId, int period, int delay);
+
+`h2timerStart()` arms a timer that will trigger after _delay_ ticks and
+then every _period_ ticks per second.  period must be a multiple or a
+integer divisor of _delay_ for implementation reasons.
+
+### h2timerPause
+
+    #include <h2timerLib.h>
+    STATUS h2timerPause(H2TIMER_ID timerId);
+
+`h2timerPause()` blocks the current task until the next expiration of the
+timer specified  by _timerId_.  This function will not block if it was not
+called enough times in the past to ensure that all expirations of the
+timer have been waited on.
+
+### h2timerPauseReset
+
+	#include <h2timerLib.h>
+    STATUS h2timerPauseReset(H2TIMER_ID timerId);
+
+`h2timerPauseReset()` first flushes the synchronisation semaphore used
+by the timer and waits for the next expiration of the timer. This
+ensures that the task will at least yield the processor before
+returning.
+
+### h2timerStop
+
+    #include <h2timerLib.h>
+    STATUS h2timerStop(H2TIMER_ID timerId);
+
+`h2timerStop()` stops the given timer. No more events will be
+generated by this timer. Calling `h2timerPause()` on a stopped timer
+has a undefined behaviour.
+
+### h2timerChangePeriod
+
+    #include <h2timerLib.h>
+    STATUS h2timerChangePeriod(H2TIMER_ID timerId, int period);
+
+`h2timerChangePeriod()` changes the _period_ of a running timer.
+
+### h2timerFree
+
+	#include <h2timerLib.h>
+    STATUS h2timerFree(H2TIMER_ID timerId);
+
+`h2timerFree()` frees a timer and returns it to the timer pool of pocoLibs.
+If it was running, it is first stopped.
+
+### Errors
+
+`S_h2timerLib_TIMER_NOT_INIT`
+: the timer library has not been initialized.
+
+`S_h2timerLib_TOO_MUCH_TIMERS`
+: no free timer was available in h2timerAlloc().
+
+`S_h2timerLib_NOT_STOPPED_TIMER`
+: The specified timer to h2timerStart() is already running.
+
+`S_h2timerLib_BAD_PERIOD`
+: The specified period is not a multiple or a divisor of the delay of
+  the timer.
+
+`S_h2timerLib_STOPPED_TIMER`
+: The specified timer is not running for h2timerChangePeriod().
+
+Time management
+---------------
+
+### h2timeGet
+
+	#include <h2time.h>
+	STATUS h2timeGet(H2TIME *pTimeStr)
+
+`h2timeGet()` fills the `H2TIME_STR` structure pointed to by _pTimeStr_ with
+the current time.
+
+### h2GetTimeSpec
+
+	#include <h2time.h>
+	STATUS h2GetTimeSpec(H2TIMESPEC *pTimeSpec)
+
+`h2GetTimeSpec()` fills the `H2TIMESPEC_STR` structure pointed to by
+_pTimeSpec_ with the current time.
+
+### h2timeInterval
+
+    #include <h2time.h>
+	STATUS h2timeInterval(H2TIME *pOldTime, unsigned long *pNmsec)
+
+`h2timeInterval()` computes the elapsed number of mili-seconds between
+the time structure pointed to by _pOldTime_ and the current time. The
+value is returned in the long pointed to by _pNmsec_.
+
+
+Mailboxes
+---------
+
+### mboxCreate
+
+    #include <moxLib.h>
+    STATUS mboxCreate(const char *name, int len, MBOX_ID *pMboxId);
+
+### mboxResize
+	#include <moxLib.h>
+	STATUS mboxResize(MBOX_ID mboxId, int size);
+
+### mboxDelete
+
+    #include <moxLib.h>
+	STATUS mboxDelete(MBOX_ID mboxId);
+
+#### mboxEnd
+
+    #include <moxLib.h>
+    STATUS mboxEnd(long taskId);
+
+### mboxFind
+
+    #include <moxLib.h>
+	STATUS mboxFind(const char *name, MBOX_ID *pMboxId);
+
+### mbox Init
+
+    #include <moxLib.h>
+    STATUS mboxInit(const char *procName);
+
+
+### mboxIoctl
+
+    #include <moxLib.h>
+	STATUS mboxIoctl(MBOX_ID mboxId, int codeFunc, void *pArg);
+
+### mboxPause
+
+    #include <moxLib.h>
+    BOOL mboxPause(MBOX_ID mboxId, int timeout);
+
+### mboxRcv
+
+    #include <moxLib.h>
+	int mboxRcv(MBOX_ID mboxId, MBOX_ID *pFromId, char *buf,
+	            int maxbytes, int timeout);
+
+### mboxSend
+
+	#include <moxLib.h>
+	STATUS mboxSend(MBOX_ID toId, MBOX_ID fromId, char *buf, int nbytes);
+
+### mboxSkip
+
+    #include <moxLib.h>
+	STATUS mboxSkip(MBOX_ID mboxId);
+
+### mboxSpy
+
+    #include <moxLib.h>
+	int mboxSpy(MBOX_ID mboxId, MBOX_ID *pFromId, int *pNbytes,
+	             char *buf, int maxbytes);
+
+Client-Server Objects
+---------------------
+
+These functions will be used both on the client and server sides of a
+task.
+
+### csMboxInit
+
+	#include <csLib.h>
+    STATUS csMboxInit ( const char *mboxBaseName, int rcvMboxSize, 
+                        int replyMboxSize );
+
+Calling this function creates two mailboxes: one will receive requests
+sent by clients when this task is acting as a server and the other
+will receive replies from servers to which this task has sent
+requests.
+
+_mboxBaseName_ is the base name for the created mailboxes.
+_rcvMboxSize_ is the size of the request mailbox. 
+_replyMboxSize_ is the sie of the reply mailbox.
+If any of the _Size_ argument is zero, the corresponding mailbox will
+not be created.
+
+__Note__: this function must be called before any call to
+`csServInit()` or `csClientInit()`.
+
+### csMoxEnd
+
+	#include <csLib.h>
+    STATUS csMboxEnd ( void );
+
+This function frees the mailboxes created by `csMboxInit()`.
+
+### csMboxUpdate
+
+	#include <csLib.h>
+    STATUS csMboxUpdate( int rcvMboxSize, int replyMboxSize );
+
+This function makes it possible to change the size of either mailbox
+of a running task.
+
+### csMboxWait
+
+	#include <csLib.h>
+    int csMboxWait ( int timeout, int mboxMask );
+
+This function waits for the arrival of either a request or a reply in
+one of the task's mailboxes.  
+_timeout_ is expressed in ticks or can be
+one of the `WAIT_FOREVER` or `NO_WAIT` constants.
+_mboxMask__ is a logical combinaison of `RCV_MBOX` and `REPLY_MBOX`
+specifying which mailboxes are waited upon.
+`csMboxWait` returns a combinaision of `RCV_MBOX` and `REPLY_MBOX` to
+indicate which mailboxes were ready. It can also return `0` if a
+timeout occured (there will be no message available) or `ERROR` if an
+error occured.
+
+### csMboxStatus
+
+	#include <csLib.h>
+    int csMboxStatus ( int mask );
+
+This function checks the state of the mailboxes of a task, like
+csMboxWait, but without waiting.
+
+Server side
+-----------
+
+### csServInit
+
+	#include <csLib.h>
+    STATUS csServInit ( int maxRqstDataSize, int maxReplyDataSize, 
+                        SERV_ID *pServId );
+
+Sets up the calling task as a server.
+_maxRqstDataSize_ is the maximum size, in bytes, of a request that
+will be received.
+_maxReplyDataSize_ is the maximum size, in bytes, of a reply that will
+be sent.
+_pServId_ is a pointer to store the identifier of the created server.
+
+This function pre-allocates all memory needed to store the various
+messages. So further interactions with the server will not cause any
+memory allocation from the comLib level.
+
+### csServInitN
+
+	#include <csLib.h>
+    STATUS csServInitN ( int maxRqstDataSize, int maxReplyDataSize, 
+                         int nbRqstFunc, SERV_ID *pServId );
+
+This is the sams as `csServInit()`, with an extra parameter
+_nbReqstFunc_, to specify the maximum number of request types that
+will be supported (instead of the default `NMAX_RQST_TYPE`).
+
+### csServEnd
+
+	#include <csLib.h>
+    STATUS csServEnd ( SERV_ID servId );
+
+This function frees all the memory associated with a server task.
+
+### csServFuncInstall
+
+	#include <csLib.h>
+    STATUS csServFuncInstall ( SERV_ID servId, int rqstType, 
+                               FUNCPTR rqstFunc );
+
+This function allow a server to install the callback associated with a
+given request type.
+_servId_ is the identifer of the server.
+_rqstType_ is an integer representing the request type (id). It should
+be between 0 and `NMAX_RQST_TYPE - 1`. (or the valur of nbRqstFunc
+passed to `csServInitN()` if the latter initialisation function was used).
+_rqstFunc_ is a pointer to the function associated with this request.
+
+### csServRqstExec
+
+	#include <csLib.h>
+    STATUS csServRqstExec ( SERV_ID servId );
+
+This function reads a request from the input mailbox, checks its type
+and calls the associated callback (installed via `csServFuncInstall`).
+
+
+### csServRqstParamsGet
+
+	#include <csLib.h>
+    STATUS csServRqstParamsGet ( SERV_ID servId, int rqstId, 
+                                 char *rqstDataAdrs, int rqstDataSize,
+								 FUNCPTR decodFunc );
+
+This function should be called by the callback associated with a
+request type to read its parameters (if they exist).
+_servId_ is the server identifier.
+_rqstId_ is the request identifier
+_rqstDataAdrs_ is a pointer to storage where the parameters will be
+stored
+_rqstDataSize_ is the size of the above storage structure.
+_decodFunc_ is a pointer to an optional decoding function. (`NULL`
+means a simple copy of the bytes).
+
+### csServReplySend
+
+	#include <csLib.h>
+    STATUS csServReplySend ( SERV_ID servId, int rqstId, int replyType, 
+                             int replyBilan, char *replyDataAdrs,
+							 int replyDataSize, FUNCPTR codFunc );
+
+This function is used to send a reply to the client. Two kinds of
+replies are possible: an _intermediate_ reply and a _final_ reply.
+
+_servId_ is the identifier of the server.
+_rqstId_ is the identifier of the request
+_replyType_ is the type of the reply (`INTERMED_REPLY` or
+`FINAL_REPLY`)
+_replyBilan_ is the result of the execution (`OK` or an error code).
+_replyDataAdrs_ is the pointer to the reply to be sent.
+_replyDataSize_ is the length of the reply structure.
+_codFunc_ is an optional encoding function. (`NULL means a simple copy
+of the bytes).
+
+
+### csServRqstIdFree
+
+	#include <csLib.h>
+    STATUS csServRqstIdFree ( SERV_ID servId, int rqstId );
+
+This function frees the id of a received request. Normally this is
+done automatically by `csServReplySend` when the final reply is sent
+to a client. So this function should not be called directly.
+
+
+Client Side
+-----------
+
+### csClientInit
+
+	#include <csLib.h>
+	STATUS csClientInit ( const char *servMboxName, int maxRqstSize, 
+  	                     int maxIntermedReplySize, int maxFinalReplySize,
+                         CLIENT_ID *pClientId );
+
+This function initializes the current task as a client of a given
+server.
+
+_servMboxName_ is the name of the mailbox of the server task.
+_maxRqstSize_ is the maximum size of a request that will be sent to
+the server.
+_maxIntermedReplySize_ is the maximum size of an intermediate reply
+that will be received
+_maxFinalReplySize_ is the maximum size of a final reply that will be
+received.
+_pClientId_ is a pointer where the identifier of the client will be
+stored.
+
+This function will pre-allocate all the memory needed to interact with
+the given server. No further memory allocation will be made when
+sending requests or receiving replies to/from the given server.
+
+### csClientEnd
+
+	#include <csLib.h>
+    STATUS csClientEnd ( CLIENT_ID clientId );
+
+Frees all resources associated with this _clientId_. 
+
+### csClientRqstSend
+
+	#include <csLib.h>
+    STATUS csClientRqstSend ( CLIENT_ID clientId, int rqstType, 
+                              char *rqstDataAdrs, int rqstDataSize,
+							  FUNCPTR codFunc, BOOL intermedFlag, 
+                              int intermedReplyTout, int finalReplyTout,
+                              int *pRqstId );
+
+This function sends a request to a server. Sending requests is always
+non-blocking.
+
+_clientId_ is the idenfier of the client (which has been associated with a
+server in `csClientInit()`).
+_rqstType_ is the type of the request that will be executed.
+_rqstDataAdrs_ is a pointer to the request parameters.
+_rqstDataSize_ is the length of the above structure.
+_codeFunc_ is an optional encoding function for the parameters.
+_intermedFlag_ is a flag indicating if an intermediate reply is
+expected (`TRUE`) or not (`FALSE`)
+_intermedReplyTout_ is the timeout to wait on the intermediate reply
+in ticks.
+_finalReplyTot_ is the timeout to wait on the final reply in ticks.
+_pRqstId_ is a pointer to store the request identifier.
+
+### csClientReplyRcv
+
+	#include <csLib.h>
+    int csClientReplyRcv ( CLIENT_ID clientId, int rqstId, int block, 
+                           char *intermedReplyDataAdrs,
+						   int intermedReplyDataSize, 
+                           FUNCPTR intermedReplyDecodFunc,
+						   char *finalReplyDataAdrs, 
+                           int finalReplyDataSize,
+						   FUNCPTR finalReplyDecodFunc );
+
+This function allows to receive (either in a blocking or non-blocking
+way) replies from a server (which can be the intermediate reply or the
+final one).
+
+_clientId_ is the client identifier.
+_rqstId_ is the request identifier (returned by csClientRqstSend).
+_block_ is a flag indicating the type of blocking behaviour. It can be
+any of:
+
+* `NO_BLOCK`
+* `BLOCK_ON_INTERMED_REPLY`
+* `BLOCK_ON_FINAL_REPLY`
+
+_intermedReplyDataAdrs_ is a pointer to storage for the intermediate
+reply.
+_intermedReplyDataSize_ is the size of the above structure.
+_intermedReplyDecodFunc_ is an optional function to decode the
+intermediate reply.
+_finalReplyDataAdrs_ is a pointer to storage for the final reply.
+_finalReplyDataSize_ is the size of the above structure.
+_finalReplyDecodFunc_ is an optional function to decode the final
+reply.
+
+### csClientRqstIdFree
+
+	#include <csLib.h>
+    int csClientRqstIdFree ( CLIENT_ID clientId, int rqstId );
+
+This function is used to free the request identifier associated with a
+request. It is automatically be `csClientReplyRcv()` upon receiving
+the final reply associated with the given request and should thus not
+be called directly.
+
+Events
+------
+
+'h2' events are implemented using the per-task private semaphore also
+associated with the mailboxes owned by the task.
+
+### h2evnSusp
+
+    #include <h2evnLib.h>
+	h2evnSusp(int timeout)
+
+This function suspends the execution of the current task, waiting for
+an external event. (ie executes 'P' on the associated sempaphore).
+
+### h2evnSignal
+
+    #include <h2evnLib.h>
+	h2evnSignal(long taskId);
+
+Send an event to the specified task. (ie executes 'V' on the
+associated semaphore).
+
+### h2evnClear
+
+    #include <h2evnLib.h>
+	h2evnClear(void)
+
+This function flushes pending events for the current task.
+
+Posters
+-------
+
+### posterCreate
+
+	#include <posterLib.h>
+    STATUS posterCreate (const char *name, int size, POSTER_ID *pPosterId );
+
+This function creates a new poster, identified by _name_, with a size
+of _size_ bytes. The identifier of the new poster is returned in
+_pPosterId_.
+
+`posterCreate()` returns OK upon successful creation of the poster or
+`ERROR` in case of an error and sets the _errno_ value of the current
+task.
+
+A buffer of _size_ bytes is allocated in shared memory together with
+the associated synchronisation object.
+
+### posterDelete
+
+	#include <posterLib.h>
+    STATUS posterDelete ( POSTER_ID dev );
+
+`posterDelete()` frees the memory and synchronisation object used by
+the given _dev_ poster identifier.
+
+The behaviour of tasks accessing the poster after it has been deleted
+is undefined.
+
+### posterFind
+
+    #include <posterLib.h>
+    STATUS posterFind (const char *name, POSTER_ID *pPosterId );
+
+`posterFind()` looks for a poster by its _name_. If such a poster is
+found, its identifer is stored into _pPosterId_ and the function
+returns `OK`. Otherwise it sets the _errno_ value of the current task
+and returns `ERROR`.
+
+
+### posterWrite
+
+	#include <posterLib.h>
+    int posterWrite ( POSTER_ID posterId, int offset, void *buf, int nbytes );
+
+`posterWrite()` permforms a synchronized write on the
+poster. _nbytes_ bytes from the _buf_ memory area are copied into the
+poster, starting at _offset_.
+
+The number of successfully copied bytes (which should be equal to
+_nbytes_) is returned when the copy was successful. Otherwise `ERROR`
+is returned.
+
+Only the task _owning_ a poster (ie the task which created it) can
+write in a poster.
+
+### posterRead
+
+	#include <posterLib.h>
+    int posterRead ( POSTER_ID posterId, int offset, void *buf, int nbytes );
+
+`posterRead()` performs a synchronised read on the poster. _nbytes_
+bytes starting at _offset_ in the poster are copied into _buf_, which
+should have been allocated and have at least _nbytes_.
+
+The number of successfully copied bytes (which should be equal to
+_nbytes_) is returned when the copy was successful. Otherwise `ERROR`
+is returned.
+
+All tasks can perform read operations of a posters. The
+synchronisation object ensures that read and write operations are
+mutually exclusive.
+
+### posterTake
+
+	#include <posterLib.h>
+    STATUS posterTake ( POSTER_ID posterId, POSTER_OP op );
+
+`posterTake()` locks the lock associated with the given
+poster. _posterId_ is the identifier of the poster to lock and _op_ is
+the operation that is going to be performed. It can be
+
+* `POSTER_READ` to indicate that data is going to be read from the
+poster. Any task can use this operation.
+* `POSTER_WRITE` to indicate that data is going to be written to the
+poster. Only the owner of a poster can perform this operation.
+
+Performing data transfers to/from a poster that doesn't respect the
+operation that was declared in _op_ (ie writing data to a poster
+locked with `POSTER_READ` or reading data from a poster locked with
+`POSTER_WRITE` has an undefined behaviour.
+
+`posterTake()`/`posterGive()` is an alernate way to access poster
+data, when `posterRead()` or `posterWrite()` would be too ineficient
+because a large number of sparse data need to be accessed.
+For cases where the data to be transferred is contiguous, posterRead()
+and posterWrite are easier to use and less error prone.
+
+### posterGive
+
+    #include <posterLib.h>
+    STATUS posterGive ( POSTER_ID posterId );
+
+`posterGive()` unlocks the lock associated with a poster. _posterId_
+is the identifier of the poster to unlock. The poster should have been
+locked before. 
+
+### posterAddr
+
+	#include <posterLib.h>
+    void * posterAddr ( POSTER_ID posterId );
+
+`posterAddr()` returns the address of the data in the poster
+identified by `posterId`.
+
+This address is only valid after calling `posterTake()` on the
+poster. Dereferencing this address returned whithout holding the lock
+on the poster has an undefined behaviour.
+
+### posterIoctl
+
+	#include <posterLib.h>
+    STATUS posterIoctl(POSTER_ID posterId, int code, void *parg);
+
+`posterIoctl()` performs control operations on the poster. _code_
+defines the operation to be performed and _pargs_ is a pointer to
+arguments that are used depending on the operation.
+The following operations are available:
+
+* `FIO_FRESH` sets an integer pointed to by _pargs_ to 0 if no new
+  data has been written in the poster since the last read operation,
+  or 1 otherwise.
+* `FIO_GETDATE` returns the time of last modification of the poster
+info into an `H2TIMESPEC` structure pointed to by _pargs_.
+* `FIO_NMSEC` set the number of milli-seconds since the last write
+  operation on the poster in an integer pointed to by _pargs_.
+* `FIO_GETSIZE` returns the size of the poster in bytes in a `size_t` value
+  pointed to by _pargs_.
+* `FIO_RESIZE` allows the owner of a poster to change its size. The
+  newsize should be passed in an `size_t` value pointed by _pargs_.
+* `FIO_GETSTATS` returns statistics on the operation on the given
+  poster in a `H2_POSTER_STATS_STR` structure.
+
+### posterName
+
+	#include <posterLib.h>
+    char* posterName(POSTER_ID posterId);
+
+`posterName()` returns the name of the poster identified by _posterId_.
+
+### posterForget
+
+	#include <posterLib.h>
+    STATUS posterForget(POSTER_ID posterId);
+
+`posterForget()` forgets the poster identified by _posterId_. It is
+the opposite of `posterFind()` for tasks who read posters. This is the
+way to free local data associated with a poster will no longer be
+used, or that has been deleted by its owner.
+
+In the case where a poster has been deleted and re-created by its
+owner, it is mandatory to call `posterForget()` followed by
+`posterFind()` to be able to access the new instance of the poster.
+

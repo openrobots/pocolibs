@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1992, 2005, 2011 CNRS/LAAS
+ * Copyright (c) 1992, 2005, 2011,2014 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -67,7 +67,6 @@ h2recordErrMsgs(const char *bywho,
 		int nbErrors, const H2_ERROR errors[])
 {
   H2_MOD_ERRORS_LIST *last=modErrorsList;
-  H2_MOD_ERRORS_LIST *prev;
   H2_MOD_ERRORS_LIST *smaller=NULL, *tmp;
   int sameId, sameName;
 
@@ -87,7 +86,6 @@ h2recordErrMsgs(const char *bywho,
   }
 
   /* look for last elt */
-  prev = last;
   do {
     sameId = last->modErrors.id == moduleId;
     sameName = strcmp(last->modErrors.name, moduleName) ? 0 : 1;
@@ -117,7 +115,6 @@ h2recordErrMsgs(const char *bywho,
     if (last->modErrors.id < moduleId) {
       smaller = last;
     }
-    prev = last;
     last = last->next;
   }while (last);
 
@@ -237,9 +234,9 @@ char * h2getErrMsg(int fullError, char *string, int maxLength)
   const H2_MODULE_ERRORS *modStdErrors;
   const H2_ERROR *error;
 
-  /* "OK" */
+  /* unknown error */
   if (fullError == 0) {
-    strncpy(string, "OK", maxLength);
+    snprintf (string, maxLength, "Unknown error");
     return(string);
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003-2004,2012 CNRS/LAAS
+ * Copyright (c) 1990, 2003-2004,2012,2014 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -95,6 +95,8 @@ gcomInit(const char *procName, int rcvMboxSize, int replyMboxSize)
 
     letterTab[myTaskNum] = (LETTER *)calloc(MAX_LETTER, sizeof(LETTER));
     if (letterTab[myTaskNum] == NULL) {
+	free(sendTab[myTaskNum]);
+	sendTab[myTaskNum] = NULL;
 	errnoSet(S_gcomLib_MALLOC_FAILED);
 	return ERROR;
     }
@@ -106,7 +108,13 @@ gcomInit(const char *procName, int rcvMboxSize, int replyMboxSize)
     if (rcvMboxSize != 0) {
 	if (mboxCreate(procName, rcvMboxSize, 
 		       &rcvMboxTab[myTaskNum]) == ERROR) {
-	    return ERROR;
+		int e = errnoGet();
+		free(letterTab[myTaskNum]);
+		free(sendTab[myTaskNum]);
+		letterTab[myTaskNum] = NULL;
+		sendTab[myTaskNum] = NULL;
+		errnoSet(e);
+		return ERROR;
 	}
     }
 
@@ -114,7 +122,14 @@ gcomInit(const char *procName, int rcvMboxSize, int replyMboxSize)
     if (replyMboxSize != 0) {
 	if (mboxCreate(replyMboxName, replyMboxSize, 
 		       &replyMboxTab[myTaskNum]) == ERROR) {
-	    return ERROR;
+		int e = errnoGet();
+		mboxDelete(rcvMboxTab[myTaskNum]);
+		free(letterTab[myTaskNum]);
+		free(sendTab[myTaskNum]);
+		letterTab[myTaskNum] = NULL;
+		sendTab[myTaskNum] = NULL;
+		errnoSet(e);
+		return ERROR;
 	}
     }
     return OK;
@@ -180,6 +195,9 @@ gcomEnd(void)
     
     /* Obtenir le pointeur vers le debut du tableau de lettres */
     letterId = &letterTab[taskIndice][0];
+    if (!letterId) {
+	return bilan;
+    }
 
     /* Liberer les lettres allouees */
     for (cLetter = 0; cLetter < MAX_LETTER; cLetter++) {

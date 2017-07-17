@@ -88,9 +88,5 @@ h2initGlob(int ticksPerSec)
 	}
     }
     h2timeInit();
-    printf("%s execution environment version %s\n"
-	"Copyright (c) 1999-2011 CNRS-LAAS\n",
-	PACKAGE_NAME, PACKAGE_VERSION);
-
     return OK;
 }

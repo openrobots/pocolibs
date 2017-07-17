@@ -468,7 +468,7 @@ h2rngBufGet(H2RNG_ID rngId,		/* Identificateur du ring buffer */
 
 int 
 h2rngBufPut(H2RNG_ID rngId, /* Ring buffer ou mettre les bytes */    
-	    char *buf, 	    /* Buffer a copier */                    
+	    const char *buf, 	    /* Buffer a copier */                    
 	    int nbytes)	    /* Nombre de bytes a essayer de copier */
 {
     int n1, n2;                          
@@ -551,7 +551,7 @@ h2rngBufPut(H2RNG_ID rngId, /* Ring buffer ou mettre les bytes */
 int 
 h2rngBlockPut(H2RNG_ID rngId,       /* Ring buffer ou mettre les bytes */    
 	      int idBlk,            /* Identificateur du block */            
-	      char *buf,            /* Buffer a copier */                    
+	      const char *buf,      /* Buffer a copier */                    
 	      int nbytes)           /* Nombre de bytes a essayer de copier */
 {
     int ntop, nt, n;

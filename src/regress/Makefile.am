@@ -22,11 +22,10 @@ TESTS=\
 	comLib/h2timersem	\
 	comLib/h2timefromts	\
 	comLib/h2rngRealloc	\
+	comLib/smMem		\
 				\
 	posterLib/poster	\
 	posterLib/resize
-
-XFAIL_TESTS=	portLib/taskSuspend	# since this dumps core 
 
 # build test programs
 check_PROGRAMS=${TESTS}

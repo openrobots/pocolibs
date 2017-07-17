@@ -232,11 +232,11 @@ typedef H2RNG_HDR *H2RNG_ID;
 
 
 extern int h2rngBlockGet ( H2RNG_ID rngId, int *pidBlk, char *buf, int maxbytes );
-extern int h2rngBlockPut ( H2RNG_ID rngId, int idBlk, char *buf, int nbytes );
+extern int h2rngBlockPut ( H2RNG_ID rngId, int idBlk, const char *buf, int nbytes );
 extern STATUS h2rngBlockSkip ( H2RNG_ID rngId );
 extern int h2rngBlockSpy ( H2RNG_ID rngId, int *pidBlk, int *pnbytes, char *buf, int maxbytes );
 extern int h2rngBufGet ( H2RNG_ID rngId, char *buf, int maxbytes );
-extern int h2rngBufPut ( H2RNG_ID rngId, char *buf, int nbytes );
+extern int h2rngBufPut ( H2RNG_ID rngId, const char *buf, int nbytes );
 extern H2RNG_ID h2rngCreate ( int type, int nbytes );
 extern H2RNG_ID h2rngRealloc ( H2RNG_ID rngId, int nbytes );
 extern void h2rngDelete ( H2RNG_ID rngId );

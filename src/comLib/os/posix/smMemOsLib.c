@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2003-2004 CNRS/LAAS
+ * Copyright (c) 1999, 2003-2004,2016 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -36,6 +36,7 @@
 #include <smObjLib.h>
 #include <h2devLib.h>
 
+extern void *smMemBaseAddr;
 extern SM_MALLOC_CHUNK *smMemFreeList;
   
 /*----------------------------------------------------------------------*/
@@ -82,7 +83,10 @@ smMemInit(int smMemSize)
             return ERROR;
 	}
     } while (addr == (void *)-1);
-    
+
+    /* remember base address */
+    smMemBaseAddr = addr;
+
     /* Memorise le bloc comme libre */
     header = (SM_MALLOC_CHUNK *)addr + 1;
     header->length = smMemSize;
@@ -106,7 +110,7 @@ smMemAttach(void)
     int dev;
     void *addr;
     
-    if (smMemFreeList != NULL) {
+    if (smMemBaseAddr != NULL) {
 	return OK;
     }
     dev = h2devFind(SM_MEM_NAME, H2_DEV_TYPE_MEM);
@@ -124,6 +128,7 @@ smMemAttach(void)
             return ERROR;
 	}
     } while (addr == (void *)-1);
+    smMemBaseAddr = addr;
     smMemFreeList = (SM_MALLOC_CHUNK *)addr + 1;
 
     return OK;
@@ -142,7 +147,7 @@ smMemEnd(void)
     if (smMemAttach() == ERROR) {
 	return ERROR;
     }
-    if (smMemFreeList == NULL) {
+    if (smMemBaseAddr == NULL) {
 	return ERROR;
     }
     dev = h2devFind(SM_MEM_NAME, H2_DEV_TYPE_MEM);
@@ -150,7 +155,8 @@ smMemEnd(void)
 	return ERROR;
     }
     /* Detach le shared memory segment */
-    shmdt((char *)(smMemFreeList - 1));
+    shmdt((char *)smMemBaseAddr);
+    smMemBaseAddr = NULL;
     smMemFreeList = NULL;
     /* Libere le shared memory segment */
     shmctl(H2DEV_MEM_SHM_ID(dev), IPC_RMID, NULL);

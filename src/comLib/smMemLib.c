@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2003-2004,2012 CNRS/LAAS
+ * Copyright (c) 1999, 2003-2004,2012,2014,2016 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -20,9 +20,9 @@
  ***/
 #include "pocolibs-config.h"
 
+#include <errno.h>
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
 
 #include <portLib.h>
 #include <errnoLib.h>
@@ -44,7 +44,8 @@
 /**
  ** Global variables
  **/
-/* smMemFreeList is a local address */
+/* smMemBaseAddr & smMemFreeList are local addresses */
+void *smMemBaseAddr = NULL; /* shmat(2) mapped address */
 SM_MALLOC_CHUNK *smMemFreeList = NULL; /* free chunks list */
 #ifdef MALLOC_TRACE
 FILE *malloc_trace_file = NULL;
@@ -126,8 +127,6 @@ remove_chunk(SM_MALLOC_CHUNK **list, SM_MALLOC_CHUNK *oc)
 {
     SM_MALLOC_CHUNK *tmp;
 
-    assert(oc->signature == SIGNATURE);
-
     if (oc == *list) {
 	*list = smObjGlobalToLocal(oc->next);
 	if (*list != NULL) {
@@ -194,7 +193,10 @@ internal_malloc(size_t size)
 
     if (c != NULL) {
 	/* found a chunk */
-	assert(c->signature == SIGNATURE);
+        if (c->signature != SIGNATURE) {
+            errnoSet(EFAULT);
+            return NULL;
+        }
 	if (c->length > size + REAL_SIZE(MALLOC_MIN_CHUNK)) {
 	    /* split it */
 	    nc = (SM_MALLOC_CHUNK *)((char *)c + c->length - size);
@@ -212,6 +214,7 @@ internal_malloc(size_t size)
 	    return((void *)(c+1));
 	}
     } else {
+	errnoSet(ENOMEM);
 	return NULL;
     }
 
@@ -226,12 +229,12 @@ internal_malloc(size_t size)
 unsigned long
 smMemBase(void)
 {
-    if (smMemFreeList == NULL) {
+    if (smMemBaseAddr == NULL) {
 	if (smMemAttach() == ERROR) {
 	    return 0;
 	}
     }
-    return (unsigned long)(smMemFreeList - 1);
+    return (unsigned long)smMemBaseAddr;
 }
 
 /*----------------------------------------------------------------------*/
@@ -249,7 +252,10 @@ smMemMalloc(size_t nBytes)
 	    return NULL;
 	}
     }
+    /* use h2dev global semaphore to protect access to shared data */
+    h2semTake(0, WAIT_FOREVER);
     result = internal_malloc(nBytes);
+    h2semGive(0);
 
     LOGDBG(("comLib:smMemLib: alloc %u -> 0x%lx\n", 
 	    nBytes, (unsigned long)result));
@@ -331,24 +337,32 @@ smMemFree(void *ptr)
        LOGDBG(("comLib:smMemLib: free(something not returned by malloc)\n"));
        return ERROR;
     }
+
+    /* use h2dev global semaphore to protect access to shared data */
+    h2semTake(0, WAIT_FOREVER);
+
     /* insert free chunk in the free list */
     insert_after(&smMemFreeList, oc);
     /* test if can merge with preceding chunk */
     c = smObjGlobalToLocal(oc->prev);
-    if (c != NULL && 
+    if (c != NULL &&
+        c->signature == SIGNATURE &&
 	oc == (SM_MALLOC_CHUNK *)((char *)c + REAL_SIZE(c->length))) {
 	/* merge */
-	c->length += REAL_SIZE(oc->length);
-	remove_chunk(&smMemFreeList, oc);
-	oc = c;
+        c->length += REAL_SIZE(oc->length);
+        remove_chunk(&smMemFreeList, oc);
+        oc = c;
    }
     /* test if can merge with following chunk */
     c = smObjGlobalToLocal(oc->next);
-    if (c == (SM_MALLOC_CHUNK *)((char *)oc + REAL_SIZE(oc->length))) {
+    if (c == (SM_MALLOC_CHUNK *)((char *)oc + REAL_SIZE(oc->length)) &&
+        c->signature == SIGNATURE) {
 	/* merge (=> oc->next != NULL) */
 	oc->length += REAL_SIZE(c->length);
 	remove_chunk(&smMemFreeList, c);
     }
+
+    h2semGive(0);
     return OK;
 }
 
@@ -365,7 +379,7 @@ smMemShow(BOOL option)
 
     if (smMemFreeList == NULL) {
 	if (smMemAttach() == ERROR) {
-	    return NULL;
+	    return;
 	}
     }
 
@@ -374,9 +388,15 @@ smMemShow(BOOL option)
 	logMsg(" num   addr        size\n");
 	logMsg(" --- ---------- ----------\n");
     }
+
     /* Parcours de la liste des blocs libres */
+    /* use h2dev global semaphore to protect access to shared data */
+    h2semTake(0, WAIT_FOREVER);
     for (c = smMemFreeList; c != NULL; c = smObjGlobalToLocal(c->next)) {
-	assert(c->signature == SIGNATURE);
+        if (c->signature != SIGNATURE) {
+            logMsg("corrupted free memory linked list\n");
+            break;
+        }
 	blocks++;
 	bytes += c->length;
 	if (c->length > maxb) {
@@ -387,6 +407,8 @@ smMemShow(BOOL option)
 		   (unsigned long)c->length);
 	}
     }
+    h2semGive(0);
+
     if (option) {
 	logMsg("\nSUMMARY:\n");
     }

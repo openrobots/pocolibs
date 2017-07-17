@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 2004, 2010,2012 CNRS/LAAS
+ * Copyright (c) 1996, 2004, 2010,2012,2017 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -561,7 +561,7 @@ remotePosterTake(POSTER_ID posterId, POSTER_OP op)
 	param.length = -1 /* whole poster (in case the size was changed) */;
 	param.offset = 0;
 	
-	res = (POSTER_READ_RESULT *)malloc(sizeof(POSTER_READ_RESULT));
+	res = (POSTER_READ_RESULT *)calloc(1, sizeof(POSTER_READ_RESULT));
 	if (res == NULL) {
 		errnoSet(S_posterLib_MALLOC_ERROR);
 		return ERROR;

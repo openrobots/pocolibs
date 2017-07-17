@@ -61,9 +61,9 @@ typedef struct {
 extern STATUS commonStructCopy ( void *pCommonStruct, int toFromFlag, 
     void *pBuf );
 extern STATUS commonStructCreate ( int len, void **pStructAdrs );
-extern STATUS commonStructDelete ( void *pCommonStruct );
-extern STATUS commonStructGive ( void *pCommonStruct );
-extern STATUS commonStructTake ( void *pCommonStruct );
+extern STATUS commonStructDelete ( const void *pCommonStruct );
+extern STATUS commonStructGive ( const void *pCommonStruct );
+extern STATUS commonStructTake ( const void *pCommonStruct );
 
 #ifdef __cplusplus
 }
