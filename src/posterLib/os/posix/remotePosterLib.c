@@ -569,7 +569,9 @@ remotePosterTake(POSTER_ID posterId, POSTER_OP op)
 	s = poster_read_1(&param, res, client);
 	
 	if (s != RPC_SUCCESS) {
+		clnt_perror(client, "remotePosterTake");
 		free(res);
+		errnoSet(S_remotePosterLib_BAD_RPC);
 		return(ERROR);
 	}
 	
@@ -649,6 +651,7 @@ remotePosterGive(POSTER_ID posterId)
 		
 		if (s != RPC_SUCCESS) {
 			clnt_perror(client, "remotePosterGive");
+			errnoSet(S_remotePosterLib_BAD_RPC);
 			return(ERROR);
 		}
 		if (res != remPosterId->dataSize) {
