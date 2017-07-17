@@ -164,6 +164,7 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
 		#include <pthread.h>
 	],[
 		pthread_rwlock_t lock;
+		pthread_rwlock_init(&lock, NULL);
 	])], [xopen=no], [CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE=500"; xopen=yes])
 AC_MSG_RESULT([$xopen])
 
