@@ -551,7 +551,14 @@ remotePosterTake(POSTER_ID posterId, POSTER_OP op)
 			errnoSet(S_remotePosterLib_NOT_OWNER);
 			return(ERROR);
 		}
-		break;
+		/* there is no need to update the cache, because POSTER_WRITE
+		 * (and posterResize() FWIW) can only be called by one process,
+		 * that is necessarily on this "side" of the network since we
+		 * landed in this function. So the cache is up-to-date by
+		 * construction. The current lock operation must be updated,
+		 * though. */
+		remPosterId->op = op;
+		return OK;
 	default:
 		errnoSet(S_remotePosterLib_BAD_OP);
 		return(ERROR);
