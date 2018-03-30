@@ -47,7 +47,7 @@ void
 usage(void)
 {
     fprintf(stderr, 
-	    "Usage: %s init [-p][SM_MEM_SIZE]\n"
+	    "Usage: %s init [-d H2_DEV_MAX][-p][SM_MEM_SIZE]\n"
 	    "       %s end\n"
 	    "       %s info\n"
             "       %s version\n"
