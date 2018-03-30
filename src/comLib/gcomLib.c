@@ -41,10 +41,10 @@ static const H2_ERROR gcomLibH2errMsgs[] = GCOM_LIB_H2_ERR_MSGS;
 /**
  ** Variables statiques
  **/
-static MBOX_ID rcvMboxTab[H2_DEV_MAX];	 /* Tableau mboxes reception */
-static MBOX_ID replyMboxTab[H2_DEV_MAX]; /* Tableau mboxes replique */
-static SEND *sendTab[H2_DEV_MAX];         /* Tableau de sends */
-static LETTER *letterTab[H2_DEV_MAX];	 /* pointeurs vers les tableaux de 
+static MBOX_ID *rcvMboxTab;	 /* Tableau mboxes reception */
+static MBOX_ID *replyMboxTab; /* Tableau mboxes replique */
+static SEND **sendTab;         /* Tableau de sends */
+static LETTER **letterTab;	 /* pointeurs vers les tableaux de
 					    lettres */
 
 static void gcomDispatch (MBOX_ID replyMbox);
@@ -70,6 +70,7 @@ gcomInit(const char *procName, int rcvMboxSize, int replyMboxSize)
 {
     char replyMboxName[H2_DEV_MAX_NAME];
     int myTaskNum;
+    int h2devMax;
     
     /* record error msgs */
     h2recordErrMsgs("gcomInit", "gcomLib", M_gcomLib, 			
@@ -86,12 +87,24 @@ gcomInit(const char *procName, int rcvMboxSize, int replyMboxSize)
     strcat (replyMboxName, "R");
 
     /* Allouer et Initialiser les tableaux */
+    h2devMax = h2devSize();
+    rcvMboxTab = calloc(h2devMax, sizeof(MBOX_ID));
+    if (rcvMboxTab == NULL)
+	    goto failed;
+    replyMboxTab = calloc(h2devMax, sizeof(MBOX_ID));
+    if (replyMboxTab == NULL)
+	    goto failed;
+    sendTab = calloc(h2devMax, sizeof(MBOX_ID *));
+    if (sendTab == NULL)
+	    goto failed;
+    letterTab = calloc(h2devMax, sizeof(MBOX_ID *));
+    if (letterTab == NULL)
+	    goto failed;
+
     myTaskNum = MY_TASK_DEV;
     sendTab[myTaskNum] = (SEND *)calloc(MAX_SEND, sizeof(SEND));
-    if (sendTab[myTaskNum] == NULL) {
-	errnoSet(S_gcomLib_MALLOC_FAILED);
-	return ERROR;
-    }
+    if (sendTab[myTaskNum] == NULL)
+	    goto failed;
 
     letterTab[myTaskNum] = (LETTER *)calloc(MAX_LETTER, sizeof(LETTER));
     if (letterTab[myTaskNum] == NULL) {
@@ -133,6 +146,13 @@ gcomInit(const char *procName, int rcvMboxSize, int replyMboxSize)
 	}
     }
     return OK;
+failed:
+    free(rcvMboxTab);
+    free(replyMboxTab);
+    free(sendTab);
+    free(letterTab);
+    errnoSet(S_gcomLib_MALLOC_FAILED);
+    return ERROR;
 }
 
 

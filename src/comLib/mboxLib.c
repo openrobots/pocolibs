@@ -127,7 +127,7 @@ mboxEnd(long taskId)
     }
 
     /* Free all mailboxes attached to this task */
-    for (i = 0; i < H2_DEV_MAX; i++) {
+    for (i = 0; i < h2devSize(); i++) {
 	if (H2DEV_TYPE(i) == H2_DEV_TYPE_MBOX
 	    && H2DEV_MBOX_TASK_ID(i) == dev) {
 	    mboxDelete(i);
@@ -305,16 +305,16 @@ mboxFind(const char *name, MBOX_ID *pMboxId)
 void
 mboxShow(void)
 {
-    int i;
+    int i, h2devMax;
     int nMess, bytes, size;
 
-    if (h2devAttach() == ERROR) {
+    if (h2devAttach(&h2devMax) == ERROR) {
 	return;
     }
     logMsg("\n");
     logMsg("Name                              Id     Size NMes    Bytes\n");
     logMsg("-------------------------------- --- -------- ---- --------\n");
-    for (i = 0; i < H2_DEV_MAX; i++) {
+    for (i = 0; i < h2devMax; i++) {
 	if (H2DEV_TYPE(i) == H2_DEV_TYPE_MBOX) {
 	    mboxIoctl(i, FIO_SIZE, &size);
 	    mboxIoctl(i, FIO_NMSGS, &nMess);
@@ -459,7 +459,7 @@ mboxPause(MBOX_ID mboxId, int timeout)
 	/* Wait for a message */
 	while (1) {
 	    /* Check for messages in one of mailboxes attached to this task */
-	    for (nMbox = 0; nMbox < H2_DEV_MAX; nMbox++) {
+	    for (nMbox = 0; nMbox < h2devSize(); nMbox++) {
 		if (H2DEV_TYPE(nMbox) == H2_DEV_TYPE_MBOX
 		    && H2DEV_MBOX_TASK_ID(nMbox) == myTaskId) {
 		    if (mboxIoctl (nMbox, FIO_NMSGS, (char *) &nMes)

@@ -54,6 +54,7 @@
  **/
 
 H2_DEV_STR *h2Devs = NULL;
+static int h2devMaxCur = -1;
 
 static int shmid = -1;
 static char h2devFileName[MAXPATHLEN];
@@ -164,7 +165,7 @@ h2devGetKey(int type, int dev, BOOL create, int *pFd)
  ** Initialization
  **/
 STATUS
-h2devInit(int smMemSize, int posterServFlag)
+h2devInit(int smMemSize, int h2devMax, int posterServFlag)
 {
     key_t key;
     int i;
@@ -178,7 +179,7 @@ h2devInit(int smMemSize, int posterServFlag)
     if (key == ERROR) {
 	return ERROR;
     }
-    shmid = shmget(key, sizeof(H2_DEV_STR)*H2_DEV_MAX,
+    shmid = shmget(key, sizeof(H2_DEV_STR)*h2devMax,
 		   IPC_CREAT | IPC_EXCL | PORTLIB_MODE);
     if (shmid == -1) {
 	errnoSet(S_smObjLib_SHMGET_ERROR);
@@ -193,6 +194,7 @@ h2devInit(int smMemSize, int posterServFlag)
 	close(fd);
 	return(ERROR);
     }
+    h2devMaxCur = h2devMax;
     /* Create semaphores */
     h2Devs[0].type = H2_DEV_TYPE_SEM;
     h2Devs[0].uid = getuid();
@@ -206,7 +208,7 @@ h2devInit(int smMemSize, int posterServFlag)
     h2semCreate0(H2DEV_SEM_SEM_ID(0), SEM_EMPTY);
 
     /* Initialization */
-    for (i = 1; i < H2_DEV_MAX; i++) {
+    for (i = 1; i < h2devMax; i++) {
 	/* mark all devices as free */
 	h2Devs[i].type = H2_DEV_TYPE_NONE;
     }
@@ -281,14 +283,18 @@ h2devInit(int smMemSize, int posterServFlag)
  * Look for the pointer to the shared H2_DEV structure
  */
 STATUS
-h2devAttach(void)
+h2devAttach(int *h2devMaxPtr)
 {
     key_t key;
     int fd, n;
     char buf[16];
+    struct shmid_ds shm_ds;
 
-    if (h2Devs != NULL) 
+    if (h2Devs != NULL) {
+	if (h2devMaxPtr != NULL)
+	    *h2devMaxPtr = h2devMaxCur;
         return OK;
+    }
 
     h2devRecordH2ErrMsgs();
 
@@ -299,13 +305,23 @@ h2devAttach(void)
 	pthread_mutex_unlock(&h2devMutex);
 	return ERROR;
     }
-    shmid = shmget(key, sizeof(H2_DEV_STR)*H2_DEV_MAX, PORTLIB_MODE);
+    shmid = shmget(key, sizeof(H2_DEV_STR), PORTLIB_MODE);
     if (shmid == -1) {
 	errnoSet(errno);
 	pthread_mutex_unlock(&h2devMutex);
 	close(fd);
 	return ERROR;
     }
+    if (shmctl(shmid, IPC_STAT, &shm_ds) < 0) {
+	    errnoSet(errno);
+	    pthread_mutex_unlock(&h2devMutex);
+	    close(fd);
+	    return ERROR;
+    }
+    h2devMaxCur = shm_ds.shm_segsz / sizeof(H2_DEV_STR);
+    if (h2devMaxPtr != NULL)
+	    *h2devMaxPtr = h2devMaxCur;
+
     h2Devs = shmat(shmid, NULL, 0);
     if (h2Devs == NULL) {
 	errnoSet(errno);
@@ -332,12 +348,22 @@ h2devAttach(void)
 
     pthread_mutex_unlock(&h2devMutex);
 
-
 #ifdef VALGRIND_SUPPORT
-    VALGRIND_MAKE_READABLE(h2Devs, sizeof(H2_DEV_STR) * H2_DEV_MAX);
+    VALGRIND_MAKE_READABLE(h2Devs, sizeof(H2_DEV_STR) * *h2devMaxPtr);
 #endif
 
     return OK;
+}
+
+/*----------------------------------------------------------------------*/
+int
+h2devSize(void)
+{
+    int h2devMax;
+
+    if (h2devAttach(&h2devMax) < 0)
+	return ERROR;
+    return h2devMax;
 }
 
 /*----------------------------------------------------------------------*/
@@ -349,8 +375,9 @@ STATUS
 h2devEnd(void)
 {
     int i, rv = OK;
+    int h2devMax;
 
-    if (h2devAttach() == ERROR) {
+    if (h2devAttach(&h2devMax) == ERROR) {
 	/* Unlink the lock file, just in case */
 	/* XXX Not very clean from security point of vue */
 	rv = ERROR;
@@ -363,7 +390,7 @@ h2devEnd(void)
 	goto fail;
     }
     /* Destroy remaining devices */
-    for (i = 0; i < H2_DEV_MAX; i++) {
+    for (i = 0; i < h2devMax; i++) {
 	switch (H2DEV_TYPE(i)) {
 	  case H2_DEV_TYPE_MBOX:
 	    mboxDelete(i);
@@ -438,13 +465,14 @@ STATUS
 h2devShow(void)
 {
     int i;
+    int h2devMax;
 
-    if (h2devAttach() == ERROR) {
+    if (h2devAttach(&h2devMax) == ERROR) {
 	return ERROR;
     }
     printf("Id   Type   UID Name\n"
 	   "------------------------------------------------\n");
-    for (i = 0; i < H2_DEV_MAX; i++) {
+    for (i = 0; i < h2devMax; i++) {
 	pthread_mutex_lock(&h2devMutex);
 	if (H2DEV_TYPE(i) != H2_DEV_TYPE_NONE) {
 	    printf("%2d %6s %5ld %s\n", i,

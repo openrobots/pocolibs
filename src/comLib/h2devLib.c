@@ -45,7 +45,7 @@ static const H2_ERROR h2devLibH2errMsgs[] = H2_DEV_LIB_H2_ERR_MSGS;
 #endif
 
 /* Local fucntions prototypes */
-static int h2devFindAux(const char *name, H2_DEV_TYPE type);
+static int h2devFindAux(const char *name, H2_DEV_TYPE type, int h2devMax);
 
 /*----------------------------------------------------------------------*/
 
@@ -66,21 +66,21 @@ h2devRecordH2ErrMsgs(void)
 int
 h2devAlloc(const char *name, H2_DEV_TYPE type)
 {
-    int i;
+    int i, h2devMax;
 
-    if (h2devAttach() == ERROR) {
+    if (h2devAttach(&h2devMax) == ERROR) {
 	return ERROR;
     }
     h2semTake(0, WAIT_FOREVER);
 
     /* Verifie que le nom n'existe pas */
-    if (type != H2_DEV_TYPE_SEM && h2devFindAux(name, type) != ERROR) {
+    if (type != H2_DEV_TYPE_SEM && h2devFindAux(name, type, h2devMax) != ERROR) {
 	h2semGive(0);
 	errnoSet(S_h2devLib_DUPLICATE_DEVICE_NAME);
 	return ERROR;
     }
     /* Recherche un device libre */
-    for (i = 0; i < H2_DEV_MAX; i++) {
+    for (i = 0; i < h2devMax; i++) {
 	if (h2Devs[i].type == H2_DEV_TYPE_NONE) {
 	    /* Trouve' */
 	    if (snprintf(h2Devs[i].name, H2_DEV_MAX_NAME, "%s", name) 
@@ -115,7 +115,7 @@ h2devFree(int dev)
 {
     uid_t uid = getuid();
 
-    if (h2devAttach() == ERROR) {
+    if (h2devAttach(NULL) == ERROR) {
 	return ERROR;
     }
     if (uid != H2DEV_UID(dev) && uid != H2DEV_UID(0)) {
@@ -138,14 +138,14 @@ h2devFree(int dev)
 STATUS
 h2devClean(const char *name)
 {
-   int i, match = 0;
+   int i, match = 0, h2devMax = 0;
    unsigned char *pool;
 
-   if (h2devAttach() == ERROR) {
+   if (h2devAttach(&h2devMax) == ERROR) {
       return ERROR;
    }
    /* Look for devices */
-   for (i = 0; i < H2_DEV_MAX; i++) {
+   for (i = 0; i < h2devMax; i++) {
       if (H2DEV_TYPE(i) != H2_DEV_TYPE_NONE && 
 	  fnmatch(name, H2DEV_NAME(i), 0) == 0) {
 	 logMsg("Freeing %s\n", H2DEV_NAME(i));
@@ -192,11 +192,11 @@ h2devClean(const char *name)
  **/
 
 static int 
-h2devFindAux(const char *name, H2_DEV_TYPE type)
+h2devFindAux(const char *name, H2_DEV_TYPE type, int h2devMax)
 {
     int i;
 
-    for (i = 0; i < H2_DEV_MAX; i++) {
+    for (i = 0; i < h2devMax; i++) {
 	if ((type == h2Devs[i].type) 
 	    && (strcmp(name, h2Devs[i].name) == 0)) {
 	    return(i);
@@ -208,17 +208,17 @@ h2devFindAux(const char *name, H2_DEV_TYPE type)
 int
 h2devFind(const char *name, H2_DEV_TYPE type)
 {
-    int i;
+    int i, h2devMax;
 
     if (name == NULL) {
 	errnoSet(S_h2devLib_BAD_PARAMETERS);
 	return ERROR;
     }
-    if (h2devAttach() == ERROR) {
+    if (h2devAttach(&h2devMax) == ERROR) {
 	return ERROR;
     }
     h2semTake(0, H2DEV_TIMEOUT);
-    i = h2devFindAux(name, type);
+    i = h2devFindAux(name, type, h2devMax);
     h2semGive(0);
 
     if (i >= 0) {
@@ -237,7 +237,7 @@ h2devFind(const char *name, H2_DEV_TYPE type)
 int
 h2devGetSemId(void)
 {
-    if (h2devAttach() == ERROR) {
+    if (h2devAttach(NULL) == ERROR) {
 	return ERROR;
     }
     if (h2Devs[0].type != H2_DEV_TYPE_SEM) {

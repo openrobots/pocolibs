@@ -296,13 +296,13 @@ bool_t
 SVC(poster_list_1)(void *unused, POSTER_LIST_RESULT *res, struct svc_req *clnt)
 {
     POSTER_LIST *list = NULL, *l;
-    int i;
+    int i, h2devMax;
 
-    if (h2devAttach() == ERROR) {
+    if (h2devAttach(&h2devMax) == ERROR) {
 	    res = NULL;
 	    return 1;
     }
-    for (i = 0; i < H2_DEV_MAX; i++) {
+    for (i = 0; i < h2devMax; i++) {
 	if (H2DEV_TYPE(i) == H2_DEV_TYPE_POSTER) {
 	    l = malloc(sizeof(struct POSTER_LIST));
 	    l->next = list;

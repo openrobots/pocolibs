@@ -102,12 +102,12 @@ getyesno(int def)
  * Creation des devices h2
  */
 static int 
-h2init(int smMemSize, int posterServFlag)
+h2init(int smMemSize, int h2devMax, int posterServFlag)
 {
     printf("Initializing %s devices: ", PACKAGE_NAME);
     fflush(stdout);
     /* Creation du tableau des devices h2 */
-    if (h2devInit(smMemSize, posterServFlag) == ERROR) {
+    if (h2devInit(smMemSize, h2devMax, posterServFlag) == ERROR) {
 	/* Essai recuperation erreur */
 	switch (errnoGet()) {
 	  case EEXIST:
@@ -117,7 +117,7 @@ h2init(int smMemSize, int posterServFlag)
 	    if (getyesno(0)) { 
 		/* Try to remove the devices first */
 		h2devEnd();
-		if (h2devInit(smMemSize, posterServFlag) == ERROR) {
+		if (h2devInit(smMemSize, h2devMax, posterServFlag) == ERROR) {
 		    printf("Sorry, h2devInit failed again.\n"
 			   "Please remove shared memory segments "
 			   "and semaphores manually with ipcrm\n");
@@ -207,14 +207,20 @@ main(int argc, char *argv[])
 {
     int status = ERROR;
     int posterServFlag = 0;
+    int h2devMax = H2_DEV_MAX_DEFAULT;
     int c;
 
     progname = argv[0];
     
-    while ((c = getopt(argc, argv, "p")) != -1) {
+    while ((c = getopt(argc, argv, "d:p")) != -1) {
 	    switch (c) {
 	    case 'p':
 		    posterServFlag++;
+		    break;
+	    case 'd':
+		    h2devMax = atoi(optarg);
+		    if (h2devMax < 0)
+			    usage();
 		    break;
 	    default: 
 		    usage();
@@ -234,7 +240,7 @@ main(int argc, char *argv[])
             status = OK;
         } else if (strcmp(argv[0], "init") == 0) {
             /* Initialisation des devices h2 */
-            status = h2init(SM_MEM_SIZE, posterServFlag);
+	    status = h2init(SM_MEM_SIZE, h2devMax, posterServFlag);
 	} else if (strcmp(argv[0], "end") == 0) {
 	    /* Destruction des devices h2 */
 	    status =  h2end();
@@ -253,7 +259,7 @@ main(int argc, char *argv[])
 	break;
       case 2:
 	if (strcmp(argv[0], "init") == 0) {
-	    status = h2init(atoi(argv[1]), posterServFlag);
+	    status = h2init(atoi(argv[1]), h2devMax, posterServFlag);
 	} else if (strcmp(argv[0], "printErrno") == 0) {
 	    h2printErrno (strtol(argv[1],(char **)NULL, 0));
 	    status = OK;

@@ -70,7 +70,7 @@ h2initGlob(int ticksPerSec)
     setvbuf(stderr, (char *)NULL, _IOLBF, 0);
 
     /* attach to h2 devices */
-    if (h2devAttach() == ERROR) {
+    if (h2devAttach(NULL) == ERROR) {
 	printf("Error: could not find h2 devices\n"
 		"Did you execute `h2 init' ?\n");
 	return ERROR;

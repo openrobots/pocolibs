@@ -120,8 +120,8 @@ typedef struct H2_DEV_STR {
     } data;
 } H2_DEV_STR;
 
-/* Maximum number of h2 devices */
-#define H2_DEV_MAX 120
+/* Default Maximum number of h2 devices */
+#define H2_DEV_MAX_DEFAULT 120
 
 /* Timeout on h2devFind */
 #define H2DEV_TIMEOUT 100
@@ -202,14 +202,15 @@ extern H2_DEV_STR *h2Devs;
  */
 extern int h2devRecordH2ErrMsgs(void);
 extern int h2devAlloc ( const char *name, H2_DEV_TYPE type );
-extern STATUS h2devAttach ( void );
+extern STATUS h2devAttach ( int *h2devMax );
+extern int h2devSize ( void );
 extern STATUS h2devEnd ( void );
 extern int h2devFind ( const char *name, H2_DEV_TYPE type );
 extern STATUS h2devFree ( int dev );
 extern STATUS h2devClean ( const char *name );
 extern long h2devGetKey ( int type, int dev, BOOL create, int *pFd );
 extern int h2devGetSemId ( void );
-extern STATUS h2devInit ( int smMemSize, int posterServFlag );
+extern STATUS h2devInit ( int smMemSize, int h2devMax, int posterServFlag );
 extern STATUS h2devShow ( void );
 
 #ifdef __cplusplus
