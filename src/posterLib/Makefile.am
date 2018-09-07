@@ -25,7 +25,6 @@ libposterLib_la_SOURCES += \
 
 bin_PROGRAMS = posterServ
 
-posterServ_LDFLAGS =
 posterServ_LDADD = libposters_xdr.la localPosterLib.lo \
 	-L../comLib -L../portLib -lcomLib -lportLib
 
