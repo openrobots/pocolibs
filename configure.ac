@@ -171,6 +171,13 @@ AC_MSG_RESULT([$xopen])
 fi 
 dnl --- end of checks for pthread ---------------------------------------
 
+dnl recent glibc have moved rpc out to libtirpc
+AC_CHECK_HEADERS([rpc/rpc.h],[],
+	[PKG_CHECK_MODULES([LIBTIRPC], libtirpc >= 1.0)])
+
+if test "x$LIBTIRPC_LIBS" != "x" ; then
+   LIBS="${LIBS} ${LIBTIRPC_LIBS}"
+fi
 
 AC_SEARCH_LIBS([fabs], [m])
 AC_SEARCH_LIBS([atan], [m])
