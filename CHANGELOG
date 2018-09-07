@@ -1,3 +1,7 @@
+version 2.17, 7 september 2018
+
+161. Add support for separate libtirpc on recent glibc systems.
+
 version 2.16, 17 july 2017
 
 160. Improve performance of remotePosterTake() with a POSTER_WRITE operation,
