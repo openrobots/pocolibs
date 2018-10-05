@@ -40,10 +40,6 @@ extern "C" {
 /* Flag d'initialisation */
 #define   GCOM_FLAG_INIT                  0x12348765
 
-/* Nombre max. de lettres */
-#define   MAX_LETTER                      617 /* 15 modules *
-					       (2*CLIENT_NMAX_RQST_ID + 1) + 2
-					       letters !! */
 /* Nombre max de sends paralelles */
 #define   MAX_SEND                        80
 

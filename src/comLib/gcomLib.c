@@ -37,15 +37,12 @@ static const H2_ERROR gcomLibH2errMsgs[] = GCOM_LIB_H2_ERR_MSGS;
 # define LOGDBG(x)
 #endif
 
-
 /**
  ** Variables statiques
  **/
 static MBOX_ID *rcvMboxTab;	 /* Tableau mboxes reception */
 static MBOX_ID *replyMboxTab; /* Tableau mboxes replique */
 static SEND **sendTab;         /* Tableau de sends */
-static LETTER **letterTab;	 /* pointeurs vers les tableaux de
-					    lettres */
 
 static void gcomDispatch (MBOX_ID replyMbox);
 static int gcomVerifStatus(int sendId);
@@ -97,22 +94,11 @@ gcomInit(const char *procName, int rcvMboxSize, int replyMboxSize)
     sendTab = calloc(h2devMax, sizeof(MBOX_ID *));
     if (sendTab == NULL)
 	    goto failed;
-    letterTab = calloc(h2devMax, sizeof(MBOX_ID *));
-    if (letterTab == NULL)
-	    goto failed;
 
     myTaskNum = MY_TASK_DEV;
     sendTab[myTaskNum] = (SEND *)calloc(MAX_SEND, sizeof(SEND));
     if (sendTab[myTaskNum] == NULL)
 	    goto failed;
-
-    letterTab[myTaskNum] = (LETTER *)calloc(MAX_LETTER, sizeof(LETTER));
-    if (letterTab[myTaskNum] == NULL) {
-	free(sendTab[myTaskNum]);
-	sendTab[myTaskNum] = NULL;
-	errnoSet(S_gcomLib_MALLOC_FAILED);
-	return ERROR;
-    }
 
     LOGDBG(("comLib:gcomInit: arrays allocated for mbox %d (`%s')\n",
 	    myTaskNum, procName));
@@ -122,9 +108,7 @@ gcomInit(const char *procName, int rcvMboxSize, int replyMboxSize)
 	if (mboxCreate(procName, rcvMboxSize, 
 		       &rcvMboxTab[myTaskNum]) == ERROR) {
 		int e = errnoGet();
-		free(letterTab[myTaskNum]);
 		free(sendTab[myTaskNum]);
-		letterTab[myTaskNum] = NULL;
 		sendTab[myTaskNum] = NULL;
 		errnoSet(e);
 		return ERROR;
@@ -137,9 +121,7 @@ gcomInit(const char *procName, int rcvMboxSize, int replyMboxSize)
 		       &replyMboxTab[myTaskNum]) == ERROR) {
 		int e = errnoGet();
 		mboxDelete(rcvMboxTab[myTaskNum]);
-		free(letterTab[myTaskNum]);
 		free(sendTab[myTaskNum]);
-		letterTab[myTaskNum] = NULL;
 		sendTab[myTaskNum] = NULL;
 		errnoSet(e);
 		return ERROR;
@@ -150,7 +132,6 @@ failed:
     free(rcvMboxTab);
     free(replyMboxTab);
     free(sendTab);
-    free(letterTab);
     errnoSet(S_gcomLib_MALLOC_FAILED);
     return ERROR;
 }
@@ -202,8 +183,6 @@ STATUS
 gcomEnd(void)
 {
     int taskIndice;
-    LETTER_ID letterId;           /* Pointeur vers la lettre */
-    int cLetter;                  /* Compteur de lettre */
     int bilan = OK;               /* Bilan de la routine */
 
     taskIndice = MY_TASK_DEV;
@@ -212,34 +191,10 @@ gcomEnd(void)
     if (mboxEnd(0) == ERROR) {
 	bilan = ERROR;
     }
-    
-    /* Obtenir le pointeur vers le debut du tableau de lettres */
-    letterId = &letterTab[taskIndice][0];
-    if (!letterId) {
-	return bilan;
-    }
-
-    /* Liberer les lettres allouees */
-    for (cLetter = 0; cLetter < MAX_LETTER; cLetter++) {
-	/* Verifier si la lettre est initialisee */
-	if (letterId->flagInit == GCOM_FLAG_INIT) {
-	    /* Reseter le flag d'initialisation */
-	    letterId->flagInit = FALSE;
-	    
-	    /* Liberer la memoire */
-	    free ((char *) letterId->pHdr);
-	}
-	
-	/* Incrementer le pointeur vers la lettre */
-	letterId = (LETTER_ID) letterId + 1;
-    } /* for */
 
     /* Liberer les tableaux de send et de lettres */
     free(sendTab[taskIndice]);
     sendTab[taskIndice] = NULL;
-    free(letterTab[taskIndice]);
-    letterTab[taskIndice] = NULL;
-    
     /* Retourner le bilan */
     return (bilan);
 }
@@ -454,29 +409,17 @@ gcomMboxShow (void)
 *  Retourne : OK ou ERROR
 */
 
-STATUS 
+STATUS
 gcomLetterAlloc(int sizeLetter, LETTER_ID *pLetterId)
 {
     LETTER_ID letter;                  /* Lettre allouee */
-    int cLetter;                       /* Compteur de la lettre */
-    int indice;
-    
-    indice = MY_TASK_DEV;
 
-    /* Obtenir le pointeur vers le debut du tableau de lettres */
-    letter = &letterTab[indice][0];
-    
-    /* Chercher une lettre libre */
-    for (cLetter = 0; letter->flagInit != FALSE; cLetter++) {
-	/* Verifier s'il n'y a plus de lettres disponibles */
-	if (cLetter >= MAX_LETTER) {
-	    errnoSet (S_gcomLib_TOO_MANY_LETTERS);
-	    return (ERROR);
-	}
-	
-	/* Incrementer le pointeur */
-	letter = (LETTER_ID) letter + 1;
-    } /* for */
+    letter = malloc(sizeof(LETTER));
+    if (letter == NULL) {
+            errnoSet (S_gcomLib_TOO_MANY_LETTERS);
+            return (ERROR);
+    }
+    memset(letter, 0, sizeof(LETTER));
 
     /* Allouer de la memoire pour la lettre */
     if ((letter->pHdr = (LETTER_HDR_ID) calloc (1, (size_t) sizeLetter + 
@@ -646,12 +589,9 @@ gcomLetterDiscard(LETTER_ID letterId)
 	errnoSet (S_gcomLib_NOT_A_LETTER);
 	return (ERROR);
     }
-    
-    /* Reseter le flag d'initialisation */
-    letterId->flagInit = FALSE;
-    
     /* Liberer la memoire */
-    free ((char *) letterId->pHdr);
+    free (letterId->pHdr);
+    free(letterId);
     return (OK);
 }
 
@@ -670,36 +610,8 @@ gcomLetterDiscard(LETTER_ID letterId)
 int 
 gcomLetterList(LETTER_ID *pList, int maxList)
 {
-    LETTER_ID letterId;           /* Pointeur vers la lettre */
-    int cLet;                     /* Compteur de lettre */
-    int cList;                    /* Compteur de liste */
-    int indice;
-    
-    indice = MY_TASK_DEV;
-
-    /* Obtenir le pointeur vers le debut du tableau de lettres */
-    letterId = &letterTab[indice][0];
-    
-    /* Pour toutes les lettres */
-    for (cLet = 0, cList = 0; cLet < MAX_LETTER && cList < maxList; cLet++) {
-	/* Verifier si la lettre est initialisee */
-	if (letterId->flagInit == GCOM_FLAG_INIT) {
-	    /* Garder l'id de la lettre */
-	    *pList = letterId;
-	    
-	    /* Incrementer le pointeur de la liste */
-	    pList++;
-	    
-	    /* Incrementer le compteur de liste */
-	    cList++;
-	}
-	
-	/* Incrementer le pointeur vers la lettre */
-	letterId = (LETTER_ID) letterId + 1;
-    }
-    
-    /* Retourner le nombre de lettres prises */
-    return (cList);
+    /* Not implemented in this version */
+    return 0;
 }
 
 /******************************************************************************
