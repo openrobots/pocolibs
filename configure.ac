@@ -233,10 +233,9 @@ AC_TRY_LINK([#include <stdio.h>],
 	[AC_MSG_RESULT([no])]
 )
 
-AC_CHECK_FUNCS([fnmatch],[], [
-	COMLIB_COMPATSRC="${COMLIB_COMPATSRC} fnmatch.c"
-])
-AC_SUBST(COMLIB_COMPATSRC)
+AC_CONFIG_LIBOBJ_DIR([compat])
+
+AC_REPLACE_FUNCS([fnmatch])
 
 AC_CHECK_HEADERS([sys/tree.h])
 
