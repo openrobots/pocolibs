@@ -6,7 +6,7 @@ two high-level communication paradigms: a message based client/server
 and shared memory with one exclusive writer and several readers
 (called posters).
 
-This library was initially developped for the 'Hilare 2' robot
+This library was initially developed for the 'Hilare 2' robot
 platform at LAAS, hence many parts of its API use the __h2__ prefix to
 identify themselve.
 
@@ -26,7 +26,7 @@ Initialization
 ### h2 devices
 
 All comLib objects are derived from a common _h2 device_ structure
-which is stored in shared memory. These objects are persistant across
+which is stored in shared memory. These objects are persistent across
 processes, but lost on reboot of the system. The h2devLib library is
 used internally to manage these objects.
 
@@ -53,7 +53,7 @@ Global Semaphores
 
 `h2semAlloc()` creates a shared counting semaphore. _type_ can be
 `H2SEM_SYNC` to specify a semaphore which is to be used for
-synchronisation purpose, that is a private semaphore, or `H2SEM_EXCL`
+synchronization purpose, that is a private semaphore, or `H2SEM_EXCL`
 to create a semaphore which is used as a mutual exclusion semaphore.
 
 `h2semAlloc()` returns the semaphore identifier for the newly created
@@ -312,7 +312,7 @@ task.
 ### csMboxInit
 
 	#include <csLib.h>
-    STATUS csMboxInit ( const char *mboxBaseName, int rcvMboxSize, 
+    STATUS csMboxInit ( const char *mboxBaseName, int rcvMboxSize,
                         int replyMboxSize );
 
 Calling this function creates two mailboxes: one will receive requests
@@ -321,7 +321,7 @@ will receive replies from servers to which this task has sent
 requests.
 
 _mboxBaseName_ is the base name for the created mailboxes.
-_rcvMboxSize_ is the size of the request mailbox. 
+_rcvMboxSize_ is the size of the request mailbox.
 _replyMboxSize_ is the sie of the reply mailbox.
 If any of the _Size_ argument is zero, the corresponding mailbox will
 not be created.
@@ -374,7 +374,7 @@ Server side
 ### csServInit
 
 	#include <csLib.h>
-    STATUS csServInit ( int maxRqstDataSize, int maxReplyDataSize, 
+    STATUS csServInit ( int maxRqstDataSize, int maxReplyDataSize,
                         SERV_ID *pServId );
 
 Sets up the calling task as a server.
@@ -391,7 +391,7 @@ memory allocation from the comLib level.
 ### csServInitN
 
 	#include <csLib.h>
-    STATUS csServInitN ( int maxRqstDataSize, int maxReplyDataSize, 
+    STATUS csServInitN ( int maxRqstDataSize, int maxReplyDataSize,
                          int nbRqstFunc, SERV_ID *pServId );
 
 This is the sams as `csServInit()`, with an extra parameter
@@ -408,7 +408,7 @@ This function frees all the memory associated with a server task.
 ### csServFuncInstall
 
 	#include <csLib.h>
-    STATUS csServFuncInstall ( SERV_ID servId, int rqstType, 
+    STATUS csServFuncInstall ( SERV_ID servId, int rqstType,
                                FUNCPTR rqstFunc );
 
 This function allow a server to install the callback associated with a
@@ -431,7 +431,7 @@ and calls the associated callback (installed via `csServFuncInstall`).
 ### csServRqstParamsGet
 
 	#include <csLib.h>
-    STATUS csServRqstParamsGet ( SERV_ID servId, int rqstId, 
+    STATUS csServRqstParamsGet ( SERV_ID servId, int rqstId,
                                  char *rqstDataAdrs, int rqstDataSize,
 								 FUNCPTR decodFunc );
 
@@ -448,7 +448,7 @@ means a simple copy of the bytes).
 ### csServReplySend
 
 	#include <csLib.h>
-    STATUS csServReplySend ( SERV_ID servId, int rqstId, int replyType, 
+    STATUS csServReplySend ( SERV_ID servId, int rqstId, int replyType,
                              int replyBilan, char *replyDataAdrs,
 							 int replyDataSize, FUNCPTR codFunc );
 
@@ -482,7 +482,7 @@ Client Side
 ### csClientInit
 
 	#include <csLib.h>
-	STATUS csClientInit ( const char *servMboxName, int maxRqstSize, 
+	STATUS csClientInit ( const char *servMboxName, int maxRqstSize,
   	                     int maxIntermedReplySize, int maxFinalReplySize,
                          CLIENT_ID *pClientId );
 
@@ -508,14 +508,14 @@ sending requests or receiving replies to/from the given server.
 	#include <csLib.h>
     STATUS csClientEnd ( CLIENT_ID clientId );
 
-Frees all resources associated with this _clientId_. 
+Frees all resources associated with this _clientId_.
 
 ### csClientRqstSend
 
 	#include <csLib.h>
-    STATUS csClientRqstSend ( CLIENT_ID clientId, int rqstType, 
+    STATUS csClientRqstSend ( CLIENT_ID clientId, int rqstType,
                               char *rqstDataAdrs, int rqstDataSize,
-							  FUNCPTR codFunc, BOOL intermedFlag, 
+							  FUNCPTR codFunc, BOOL intermedFlag,
                               int intermedReplyTout, int finalReplyTout,
                               int *pRqstId );
 
@@ -538,11 +538,11 @@ _pRqstId_ is a pointer to store the request identifier.
 ### csClientReplyRcv
 
 	#include <csLib.h>
-    int csClientReplyRcv ( CLIENT_ID clientId, int rqstId, int block, 
+    int csClientReplyRcv ( CLIENT_ID clientId, int rqstId, int block,
                            char *intermedReplyDataAdrs,
-						   int intermedReplyDataSize, 
+						   int intermedReplyDataSize,
                            FUNCPTR intermedReplyDecodFunc,
-						   char *finalReplyDataAdrs, 
+						   char *finalReplyDataAdrs,
                            int finalReplyDataSize,
 						   FUNCPTR finalReplyDecodFunc );
 
@@ -714,7 +714,7 @@ and posterWrite are easier to use and less error prone.
 
 `posterGive()` unlocks the lock associated with a poster. _posterId_
 is the identifier of the poster to unlock. The poster should have been
-locked before. 
+locked before.
 
 ### posterAddr
 
@@ -772,4 +772,3 @@ used, or that has been deleted by its owner.
 In the case where a poster has been deleted and re-created by its
 owner, it is mandatory to call `posterForget()` followed by
 `posterFind()` to be able to access the new instance of the poster.
-
