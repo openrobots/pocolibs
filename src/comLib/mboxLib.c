@@ -400,9 +400,12 @@ mboxRcv(MBOX_ID mboxId, MBOX_ID *pFromId, char *buf, int maxbytes,
     int takeStat;                 /* status of semTake() */
     H2RNG_ID rid;
 
+    LOGDBG(("comLib:mboxRcv: mboxId: %d\n", mboxId));
+
     /* Compute local address of ring buffer */
     rid = (H2RNG_ID)smObjGlobalToLocal(H2DEV_MBOX_RNG_ID(mboxId));
 
+    LOGDBG(("comLib:mboxRcv: rid: %p\n", rid));
     /* Flush the synchronisation semaphore */
     h2semFlush(H2DEV_MBOX_SEM_ID(mboxId));
 
