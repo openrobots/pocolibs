@@ -43,7 +43,7 @@ extern long taskSpawn(char *, int, int, int, FUNCPTR, int, int, int,
 #else
 /* Awful hack */
 extern long taskSpawn(char *name, int priority, int options,
-    int stackSize, FUNCPTR entryPt, ... );
+    int stackSize, FUNCPTR entryPt, ... ) __attribute__((deprecated("use taskSpawn2() instead")));
 #endif
 extern long taskSpawn2(const char *name, int priority, int options, int stackSize,
     void *(*start_routine)(void *), void *arg);
