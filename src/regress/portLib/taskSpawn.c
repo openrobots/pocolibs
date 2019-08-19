@@ -30,31 +30,44 @@
 #define ARG4 "rumpelstilskin"
 
 SEM_ID sem;
+struct args {
+	int arg1;
+	double arg2;
+	int arg3;
+	char *arg4;
+};
 
-int
-myTask(int arg1, double arg2, int arg3, char *arg4)
+void *
+myTask(void *ptr)
 {
-	printf("arg1 %d arg2 %lf arg3 %d arg4 %s\n", arg1, arg2, arg3, arg4);
-	if (arg1 != ARG1)
-		fprintf(stderr, "arg1 %d != %d\n", arg1, ARG1);
-	if (arg2 != ARG2)
-		fprintf(stderr, "arg2 %lf != %lf\n", arg2, ARG2);
-	if (arg3 != ARG3)
-		fprintf(stderr, "arg1 %d != %d\n", arg3, ARG3);
-	if (strcmp(arg4, ARG4) != 0) 
-		fprintf(stderr, "arg3 \"%s\" != \"%s\"\n", arg4, ARG4);
+	struct args *args = ptr;
+
+	printf("arg1 %d arg2 %lf arg3 %d arg4 %s\n",
+	    args->arg1, args->arg2, args->arg3, args->arg4);
+	if (args->arg1 != ARG1)
+		fprintf(stderr, "arg1 %d != %d\n", args->arg1, ARG1);
+	if (args->arg2 != ARG2)
+		fprintf(stderr, "arg2 %lf != %lf\n", args->arg2, ARG2);
+	if (args->arg3 != ARG3)
+		fprintf(stderr, "arg3 %d != %d\n", args->arg3, ARG3);
+	if (strcmp(args->arg4, ARG4) != 0)
+		fprintf(stderr, "arg4 \"%s\" != \"%s\"\n", args->arg4, ARG4);
 	semGive(sem);
 	return 0;
 }
 
-		
+
 int
 pocoregress_init()
 {
-
+	struct args args = {
+		.arg1 = ARG1,
+		.arg2 = ARG2,
+		.arg3 = ARG3,
+		.arg4 = ARG4};
 	sem = semBCreate(0, SEM_EMPTY);
-	taskSpawn("tArgTest", 100, VX_FP_TASK, 65536, myTask, 
-	    ARG1, ARG2, ARG3, ARG4);
+	taskSpawn2("tArgTest", 100, VX_FP_TASK, 65536, myTask,
+	    &args);
 	semTake(sem, WAIT_FOREVER);
 	return 0;
 }
