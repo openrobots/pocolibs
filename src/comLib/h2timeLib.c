@@ -158,7 +158,7 @@ h2timeShow(void)
     static char *dayStr [] = {
 	    "sunday", "monday", "tuesday", "wednesday", "thursday",
 	    "friday", "saturday"};
-    char buf[50];
+    char buf[60];
 
     /* Demander la lecture de la date */
     if (h2timeGet (&strTime) != OK) {
