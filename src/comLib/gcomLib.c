@@ -17,6 +17,7 @@
 #include "pocolibs-config.h"
 
 #include <sys/types.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -40,9 +41,9 @@ static const H2_ERROR gcomLibH2errMsgs[] = GCOM_LIB_H2_ERR_MSGS;
 /**
  ** Variables statiques
  **/
-static MBOX_ID *rcvMboxTab;	 /* Tableau mboxes reception */
-static MBOX_ID *replyMboxTab; /* Tableau mboxes replique */
-static SEND **sendTab;         /* Tableau de sends */
+static MBOX_ID *rcvMboxTab = NULL;    /* Tableau mboxes reception */
+static MBOX_ID *replyMboxTab = NULL;  /* Tableau mboxes replique */
+static SEND **sendTab = NULL;         /* Tableau de sends */
 
 static void gcomDispatch (MBOX_ID replyMbox);
 static int gcomVerifStatus(int sendId);
@@ -50,6 +51,27 @@ static int gcomVerifTout (int sendId, int *pTimeout);
 
 /* Macro pour retrouver le device h2 d'une tache */
 #define MY_TASK_DEV (taskGetUserData(0))
+
+
+static pthread_once_t gcom_once = PTHREAD_ONCE_INIT;
+
+static void
+gcomAllocTabs(void)
+{
+    int h2devMax = h2devSize();
+
+    rcvMboxTab = calloc(h2devMax, sizeof(MBOX_ID));
+    if (rcvMboxTab == NULL)
+        return;
+
+    replyMboxTab = calloc(h2devMax, sizeof(MBOX_ID));
+    if (replyMboxTab == NULL)
+        return;
+    sendTab = calloc(h2devMax, sizeof(MBOX_ID *));
+    if (sendTab == NULL)
+
+        return;
+}
 
 /******************************************************************************
 *
@@ -67,7 +89,7 @@ gcomInit(const char *procName, int rcvMboxSize, int replyMboxSize)
 {
     char replyMboxName[H2_DEV_MAX_NAME];
     int myTaskNum;
-    int h2devMax;
+    int retval;
     
     /* record error msgs */
     h2recordErrMsgs("gcomInit", "gcomLib", M_gcomLib, 			
@@ -84,17 +106,13 @@ gcomInit(const char *procName, int rcvMboxSize, int replyMboxSize)
     strcat (replyMboxName, "R");
 
     /* Allouer et Initialiser les tableaux */
-    h2devMax = h2devSize();
-    rcvMboxTab = calloc(h2devMax, sizeof(MBOX_ID));
-    if (rcvMboxTab == NULL)
-	    goto failed;
-    replyMboxTab = calloc(h2devMax, sizeof(MBOX_ID));
-    if (replyMboxTab == NULL)
-	    goto failed;
-    sendTab = calloc(h2devMax, sizeof(MBOX_ID *));
-    if (sendTab == NULL)
-	    goto failed;
-
+    /* In the case we have several threads in the same address space,
+       only do the allocation once */
+    retval = pthread_once(&gcom_once, gcomAllocTabs);
+    if (retval != 0) {
+        errnoSet(retval);
+        goto failed;
+    }
     myTaskNum = MY_TASK_DEV;
     sendTab[myTaskNum] = (SEND *)calloc(MAX_SEND, sizeof(SEND));
     if (sendTab[myTaskNum] == NULL)
