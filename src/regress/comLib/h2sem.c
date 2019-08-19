@@ -15,6 +15,7 @@
  *					Anthony Mallet on Tue Jun  9 2009
  */
 
+#include <stdint.h>
 #include <stdio.h>
 #include <time.h>
 
@@ -29,9 +30,11 @@ H2SEM_ID  sem[2];
 
 static int count;
 
-int
-pocoregress_ping(int side)
+void *
+pocoregress_ping(void *arg)
 {
+  int side = (int)(intptr_t)arg;
+
   while (1) {
     h2semTake(sem[side], WAIT_FOREVER);
 
@@ -46,8 +49,8 @@ pocoregress_ping(int side)
   return 0;
 }
 
-int
-pocoregress_unlock()
+void *
+pocoregress_unlock(void *arg)
 {
   struct timespec wreq = { tv_sec: 2, tv_nsec: 0 };
   struct timespec rreq;
@@ -61,18 +64,19 @@ pocoregress_unlock()
   return 0;
 }
 
-int
-pocoregress_incr()
+void *
+pocoregress_incr(void *arg)
 {
   h2semTake(sem[0], WAIT_FOREVER);
   count++;
   h2semGive(sync[0]);
   return 0;
+
 }
 
 
 int
-pocoregress_init()
+pocoregress_init(void)
 {
   sync[0] = h2semAlloc(H2SEM_SYNC);
   sync[1] = h2semAlloc(H2SEM_SYNC);
@@ -93,7 +97,7 @@ pocoregress_init()
   h2semGive(sem[0]); /* 2nd give must be a noop */
 
   h2semTake(sem[0], WAIT_FOREVER);
-  taskSpawn("unlock", 200, VX_FP_TASK, 20000, pocoregress_unlock);
+  taskSpawn2("unlock", 200, VX_FP_TASK, 20000, pocoregress_unlock, NULL);
   /* must block forever, the task will unblock in 2 seconds */
   h2semTake(sem[0], WAIT_FOREVER);
   if (count == 0) {
@@ -109,8 +113,8 @@ pocoregress_init()
   count = 0;
   h2semFlush(sem[0]);
   h2semFlush(sync[0]);
-  taskSpawn("unlock", 200, VX_FP_TASK, 20000, pocoregress_incr);
-  taskSpawn("unlock", 200, VX_FP_TASK, 20000, pocoregress_incr);
+  taskSpawn2("unlock", 200, VX_FP_TASK, 20000, pocoregress_incr, NULL);
+  taskSpawn2("unlock", 200, VX_FP_TASK, 20000, pocoregress_incr, NULL);
 
   if (count != 0) {
     logMsg("h2semTake() did not block: wrong\n");
@@ -138,8 +142,8 @@ pocoregress_init()
   h2semFlush(sem[0]);
   h2semFlush(sem[1]);
   h2semGive(sem[1]);
-  taskSpawn("ping", 200, VX_FP_TASK, 20000, pocoregress_ping, 0);
-  taskSpawn("pong", 200, VX_FP_TASK, 20000, pocoregress_ping, 1);
+  taskSpawn2("ping", 200, VX_FP_TASK, 20000, pocoregress_ping, (void *)(intptr_t)0);
+  taskSpawn2("pong", 200, VX_FP_TASK, 20000, pocoregress_ping, (void *)(intptr_t)1);
 
   h2semTake(sync[0], WAIT_FOREVER);
   h2semTake(sync[1], WAIT_FOREVER);
