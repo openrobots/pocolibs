@@ -2,11 +2,12 @@
 
 #include <sys/select.h>
 
-#include <unistd.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 #include <commonStructLib.h>
 #include <h2initGlob.h>
@@ -15,6 +16,8 @@
 int spawned = 0;
 char common[512] = "";
 void *cs;
+pthread_barrier_t barrier;
+
 
 void *
 t(void *arg)
@@ -32,6 +35,7 @@ t(void *arg)
   }
   spawned++;
   commonStructGive(cs);
+  pthread_barrier_wait(&barrier);
 
   return NULL;
 }
@@ -39,21 +43,15 @@ t(void *arg)
 int
 pocoregress_init()
 {
-  struct timeval tv = { tv_sec: 0, tv_usec: 1000 };
-
   commonStructCreate(1, &cs);
   if (!cs) exit(2);
+
+  pthread_barrier_init(&barrier, NULL, 3);
 
   taskSpawn2("t1", 255, 0, 1024, t, "1");
   taskSpawn2("t2", 255, 0, 1024, t, "2");
 
-  commonStructTake(cs);
-  do {
-    commonStructGive(cs);
-    select(0, NULL, NULL, NULL, &tv);
-    commonStructTake(cs);
-  } while (spawned < 4);
-  commonStructGive(cs);
+  pthread_barrier_wait(&barrier);
 
   if (strstr(common, "11") || strstr(common, "22")) {
     printf("scheduling = %s\n", common);
