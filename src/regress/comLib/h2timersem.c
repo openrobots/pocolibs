@@ -28,9 +28,10 @@
 #include "semLib.h"
 
 
-int
-execTask(SEM_ID done)
+void *
+execTask(void *arg)
 {
+   SEM_ID done = arg;
    unsigned long t1, t2;
    H2TIMER_ID t;
    SEM_ID sem;
@@ -39,7 +40,7 @@ execTask(SEM_ID done)
    t = h2timerAlloc();
    if (!t) {
       logMsg("Error: could not create timer\n");
-      return 1;
+      return NULL;
    }
 
    sem = semBCreate(0, SEM_FULL);
@@ -61,17 +62,17 @@ execTask(SEM_ID done)
    h2timerFree(t);
    
    semGive(done);
-   return 0;
+   return NULL;
 }
 
 int
-pocoregress_init()
+pocoregress_init(void)
 {
 	long tid;
 	SEM_ID sem;
 	
 	sem = semBCreate(0, SEM_EMPTY);
-	if ((tid = taskSpawn("tTest", 100, 0, 4096, execTask, sem)) == ERROR) {
+	if ((tid = taskSpawn2("tTest", 100, 0, 4096, execTask, sem)) == ERROR) {
 		logMsg("error creating test task\n");
 		return 1;
 	}
