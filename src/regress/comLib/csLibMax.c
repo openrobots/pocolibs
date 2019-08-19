@@ -33,7 +33,7 @@
 #include "h2initGlob.h"
 #include "csLib.h"
 
-#define MAX_SERV (H2_DEV_MAX_DEFAULT / 4)
+#define MAX_SERV (4)
 
 struct rq {
 	int a;
@@ -206,7 +206,7 @@ pocoregress_init(void)
 			goto done;
 	}
 	logMsg("servers launched - waiting a bit\n");
-	taskDelay(1000);
+	taskDelay(200);
 	logMsg("done\n");
 	pthread_barrier_init(&barrier, NULL, MAX_SERV + 1);
 	for (i = 0; i < MAX_SERV; i++) {
