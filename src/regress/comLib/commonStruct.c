@@ -26,9 +26,18 @@ struct csTest {
    int v1, v2;
 };
 
-static int
-pocoregress_task1(struct csTest *cs, int v)
+struct args {
+        struct csTest *cs;
+        int v;
+};
+
+static void *
+pocoregress_task1(void *ptr)
 {
+   struct args *args = ptr;
+   struct csTest *cs = args->cs;
+   int v = args->v;
+
    taskDelay(v * 10);
 
    if (commonStructTake(cs) != OK) {
@@ -54,6 +63,7 @@ pocoregress_init()
 {
    int ok;
    struct csTest *cs;
+   struct args args1, args2;
 
    if (commonStructCreate(sizeof(struct csTest), (void **)&cs) != OK) {
       return 1;
@@ -61,8 +71,13 @@ pocoregress_init()
 
    cs->v1 = cs->v2 = 0;
 
-   taskSpawn(NULL, 200, VX_FP_TASK, 20000, pocoregress_task1, cs, 1);
-   taskSpawn(NULL, 200, VX_FP_TASK, 20000, pocoregress_task1, cs, 2);
+   args1.cs = cs;
+   args1.v = 1;
+   args2.cs = cs;
+   args2.v = 2;
+
+   taskSpawn2(NULL, 200, VX_FP_TASK, 20000, pocoregress_task1, &args1);
+   taskSpawn2(NULL, 200, VX_FP_TASK, 20000, pocoregress_task1, &args2);
 
    do {
       ok = 0;
