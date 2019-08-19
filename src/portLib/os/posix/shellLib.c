@@ -136,7 +136,7 @@ executeCmd(char *cmdbuf,		/* client command line */
 				   in strings */
 				printf("%s\n", buf);
 				fflush(stdout);
-				if (executeCmd(buf, clientSock, clientError, 
+				if (executeCmd(buf, clientSock, clientError,
 					recur+1) == ERROR) {
 					statusReturn = ERROR;
 					break;
@@ -184,8 +184,8 @@ executeCmd(char *cmdbuf,		/* client command line */
 					} 
 					argv[2] = symStartAddr;
 				} 
-				if (taskSpawn(NULL, 50, 0, 10000, 
-					(FUNCPTR)fctnStartAddr,
+				if (taskSpawn2(NULL, 50, 0, 10000, 
+					(VOIDPTRFUNCPTR)fctnStartAddr,
 					argv[2]) == ERROR) {
 					fprintf(stderr, 
 					    "Error creating process\n");
