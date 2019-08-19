@@ -17,6 +17,7 @@
 #include "pocolibs-config.h"
 
 #include <sys/types.h>
+#include <stdio.h>
 #include "portLib.h"
 #include "semLib.h"
 #include "taskLib.h"
@@ -31,8 +32,8 @@ struct test {
    double b;
 };
 
-int
-pocoregress_mbox1()
+void *
+pocoregress_mbox1(void *arg)
 {
    struct test data = { 0, 0. };
    int s;
@@ -69,13 +70,15 @@ pocoregress_mbox1()
       logMsg("Error: could not delete mbox\n");
    }
 
-  done:
+   
+
+done:
    semGive(sem1);
-   return 0;
+   return NULL;
 }
 
-int
-pocoregress_mbox2()
+void *
+pocoregress_mbox2(void *arg)
 {
    struct test data = { 3, 3.1415926 };
    MBOX_ID id1, id2;
@@ -109,7 +112,7 @@ pocoregress_mbox2()
 
   done:
    semGive(sem2);
-   return 0;
+   return NULL;
 }
 
 
@@ -119,8 +122,8 @@ pocoregress_init()
    sem1 = semBCreate(0, SEM_EMPTY);
    sem2 = semBCreate(0, SEM_EMPTY);
 
-   taskSpawn("mbox1", 200, VX_FP_TASK, 20000, pocoregress_mbox1);
-   taskSpawn("mbox2", 200, VX_FP_TASK, 20000, pocoregress_mbox2);
+   taskSpawn2("mbox1", 200, VX_FP_TASK, 20000, pocoregress_mbox1, NULL);
+   taskSpawn2("mbox2", 200, VX_FP_TASK, 20000, pocoregress_mbox2, NULL);
 
    semTake(sem1, WAIT_FOREVER);
 
