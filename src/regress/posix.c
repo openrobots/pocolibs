@@ -34,7 +34,7 @@ main(int argc, char *argv[])
 
 	osInit(100);
 	h2devEnd();
-	if (h2devInit(1<<10, H2_DEV_MAX_DEFAULT, FALSE) == ERROR) {
+	if (h2devInit(1024*1024, H2_DEV_MAX_DEFAULT, FALSE) == ERROR) {
 		char buf[1024];
 		h2getErrMsg(errnoGet(), buf, sizeof(buf));
 		printf("cannot create h2 devices: %s\n", buf);

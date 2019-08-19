@@ -12,6 +12,7 @@ TESTS=\
 	portLib/taskSuspend	\
 	portLib/tick		\
 				\
+	comLib/csLibMax		\
 	comLib/commonStruct	\
 	comLib/commonStructScheduler \
 	comLib/gcomAlloc	\
