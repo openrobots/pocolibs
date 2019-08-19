@@ -31,23 +31,23 @@ myDeleteHook(OS_TCB *tcb)
 }
 
 
-int
-suicideTask(void)
+void *
+suicideTask(void *arg)
 {
 	printf("tSuicide: deleting self\n");
 	taskDelete(0);
-	return 0;
+	return NULL;
 }
 
-int 
-returnTask(void)
+void *
+returnTask(void *arg)
 {
 	printf("tReturn: returning at the end of the task\n");
-	return 0;
+	return NULL;
 }
 
-int
-victimTask(void)
+void *
+victimTask(void *arg)
 {
 	SEM_ID sem;
 
@@ -55,7 +55,7 @@ victimTask(void)
 
 	printf("tVictim: blocking task, waiting for external murder\n");
 	semTake(sem, WAIT_FOREVER);
-	return 0;
+	return NULL;
 }
 
 
@@ -65,16 +65,16 @@ pocoregress_init()
 	long tid;
 
 	taskDeleteHookAdd(myDeleteHook);
-	tid = taskSpawn("tVictim", 10, VX_FP_TASK, 10000, victimTask, NULL);
+	tid = taskSpawn2("tVictim", 10, VX_FP_TASK, 10000, victimTask, NULL);
 	taskDelay(100);
 	printf("killing tVictim\n");
 	taskDelete(tid);
 	taskDelay(100);
 	i();
-	taskSpawn("tSuicide", 10, VX_FP_TASK, 10000, suicideTask, NULL);
+	taskSpawn2("tSuicide", 10, VX_FP_TASK, 10000, suicideTask, NULL);
 	taskDelay(100);
 	i();
-	taskSpawn("tReturn", 10, VX_FP_TASK, 10000, returnTask, NULL);
+	taskSpawn2("tReturn", 10, VX_FP_TASK, 10000, returnTask, NULL);
 	taskDelay(100);
 	i();
 	return 0;
