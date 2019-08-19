@@ -224,7 +224,8 @@ char * h2getMsgErrno(int fullError)
  *  Returns: string
  */
 
-char * h2getErrMsg(int fullError, char *string, int maxLength)
+char *
+h2getErrMsg(int fullError, char *string, int maxLength)
 {
   short numErr;     /* err code (if not std) */
   short source;     /* lib or module that has emit the err */
@@ -242,6 +243,11 @@ char * h2getErrMsg(int fullError, char *string, int maxLength)
 
   /* decode error */
   source = h2decodeError(fullError, &numErr, &srcStd, &errStd);
+
+  if (source == 0) {
+	  strerror_r(fullError, string, maxLength);
+	  return string;
+  }
 
   /* find out module source */
   if (!(modErrors = findSourceId(source))) {
@@ -285,6 +291,7 @@ char * h2getErrMsg(int fullError, char *string, int maxLength)
 
 /* -----------------------------------------------------------------
  *
+
  * h2decodeError  -
  *     returns M_lib or M_stdLib, the lib that has emit the error
  *     *err is the error code or the still composed std error
