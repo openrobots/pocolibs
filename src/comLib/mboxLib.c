@@ -170,6 +170,10 @@ mboxCreate(const char *name, int size, MBOX_ID *pMboxId)
     mbox = H2DEV_MBOX_STR(dev);
     /* Create a global mutex sempaphore */
     if ((mbox->semExcl = h2semAlloc(H2SEM_EXCL)) == ERROR) {
+        int e = errnoGet();
+        h2devFree(dev);
+        errnoSet(e);
+        LOGDBG(("mboxCreate:h2semAlloc(H2SEM_EXCL): %d\n", e));
 	return ERROR;
     }
     /* Create a global synchronization semaphore */
