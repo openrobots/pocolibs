@@ -253,6 +253,9 @@ main(int argc, char *argv[])
 	} else if (strcmp(argv[0], "posterStats") == 0) {
 	    h2posterStats(10);
 	    status = OK;
+	} else if (strcmp(argv[0], "h2semList") == 0) {
+            h2semList();
+            status = OK;
 	} else {
 	    usage();
 	}

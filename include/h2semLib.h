@@ -78,7 +78,7 @@ extern STATUS h2semInit ( int num, int *pSemId );
 extern STATUS h2semShow ( H2SEM_ID sem );
 extern BOOL h2semTake ( H2SEM_ID sem, int timeout );
 extern STATUS h2semSet ( H2SEM_ID sem, int value );
-
+extern void h2semList( void);
 
 #ifdef __cplusplus
 }

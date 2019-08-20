@@ -447,6 +447,26 @@ h2semShow(H2SEM_ID sem)
 }
 
 /*----------------------------------------------------------------------*/
+void
+h2semList(void)
+{
+    int i, j, h2devMax;
+    H2SEM_ID semId;
+
+    h2devAttach(&h2devMax);
+    h2semTake(0, WAIT_FOREVER);
+    for (i = 0; i < h2devMax; i++) {
+	if (H2DEV_TYPE(i) == H2_DEV_TYPE_SEM) {
+            for (j = 0; j < MAX_SEM; j++) {
+                semId = i*MAX_SEM + j;
+                printf("%10d:%3d ", H2DEV_SEM_SEM_ID(i), j);
+                h2semShow(semId);
+            }
+        }
+    }
+    h2semGive(0);
+}
+/*----------------------------------------------------------------------*/
 STATUS
 h2semSet(H2SEM_ID sem, int value)
 {
