@@ -162,6 +162,7 @@ client(void *arg)
 		result = 2;
 		goto done;
 	}
+	q.a = i;
 	if (csClientRqstSend(cid, 0, (char *)&q, sizeof(struct rq),
 		NULL, FALSE, 0, 0, &rqstid) == ERROR) {
 		logMsg("client %d sending request fails %s\n", i,
