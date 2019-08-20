@@ -98,6 +98,7 @@ gcomInit(const char *procName, int rcvMboxSize, int replyMboxSize)
 
     /* Appeler la routine d'initialisation des mailboxes */
     if (mboxInit(procName) == ERROR) {
+        LOGDBG(("gcomInit:mboxInit failed %d\n", errnoGet()));
 	return ERROR;
     }
 
@@ -111,6 +112,7 @@ gcomInit(const char *procName, int rcvMboxSize, int replyMboxSize)
     retval = pthread_once(&gcom_once, gcomAllocTabs);
     if (retval != 0) {
         errnoSet(retval);
+        LOGDBG(("gcomInit:pthread_once failed %d\n", errnoGet()));
         goto failed;
     }
     myTaskNum = MY_TASK_DEV;
@@ -128,6 +130,7 @@ gcomInit(const char *procName, int rcvMboxSize, int replyMboxSize)
 		int e = errnoGet();
 		free(sendTab[myTaskNum]);
 		sendTab[myTaskNum] = NULL;
+                LOGDBG(("gcomInit:mboxCreate rcv failed %d\n", e));
 		errnoSet(e);
 		return ERROR;
 	}
@@ -141,6 +144,7 @@ gcomInit(const char *procName, int rcvMboxSize, int replyMboxSize)
 		mboxDelete(rcvMboxTab[myTaskNum]);
 		free(sendTab[myTaskNum]);
 		sendTab[myTaskNum] = NULL;
+                LOGDBG(("gcomInit:mboxCreate reply failed %d\n", e));
 		errnoSet(e);
 		return ERROR;
 	}
