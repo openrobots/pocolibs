@@ -217,14 +217,12 @@ h2semAlloc(int type)
 	return(i*MAX_SEM+j);
     }
     
-    h2semGive(0);
     /* plus de semaphores libre, allocation d'un nouveau tableau */
     /* allocation d'un nouveau device */
-    dev = h2devAlloc("h2semLib", H2_DEV_TYPE_SEM);
+    dev = h2devAllocUnlocked("h2semLib", H2_DEV_TYPE_SEM);
     if (dev == ERROR) {
 	return ERROR;
     }
-    h2semTake(0, WAIT_FOREVER);
     /* Allocation d'un nouveau tableau */
     if (h2semInit(dev, &(H2DEV_SEM_SEM_ID(dev))) == ERROR) {
 	h2semGive(0);

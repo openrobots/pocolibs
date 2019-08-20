@@ -202,6 +202,7 @@ extern H2_DEV_STR *h2Devs;
  */
 extern int h2devRecordH2ErrMsgs(void);
 extern int h2devAlloc ( const char *name, H2_DEV_TYPE type );
+extern int h2devAllocUnlocked ( const char *name, H2_DEV_TYPE type );
 extern STATUS h2devAttach ( int *h2devMax );
 extern int h2devSize ( void );
 extern STATUS h2devEnd ( void );
