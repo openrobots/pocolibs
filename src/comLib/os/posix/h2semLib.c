@@ -414,7 +414,7 @@ h2semGive(H2SEM_ID sem)
 BOOL
 h2semFlush(H2SEM_ID sem)
 {
-    return h2semSet(sem, 0) == OK ? TRUE : FALSE;
+    return h2semSet(sem, SEM_EMPTY) == OK ? TRUE : FALSE;
 }
 
 /*----------------------------------------------------------------------*/
