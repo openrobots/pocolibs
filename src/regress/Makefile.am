@@ -7,7 +7,6 @@ TESTS=\
 	portLib/taskDelete	\
 	portLib/taskDeleteHook	\
 	portLib/taskDelay	\
-	portLib/taskSpawn	\
 	portLib/taskSpawn2	\
 	portLib/taskSuspend	\
 	portLib/tick		\
