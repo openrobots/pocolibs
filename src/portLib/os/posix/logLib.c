@@ -15,12 +15,15 @@
  */
 #include "pocolibs-config.h"
 
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdarg.h>
+#include <stdlib.h>
 
 #define LOGLIB_C
 #include "portLib.h"
 #include "logLib.h"
+#include "taskLib.h"
 
 /*
  * Message logging facilities
@@ -43,10 +46,15 @@ logMsg(const char *fmt, ...)
 {
 	int retval;
 	va_list ap;
+	char *fmt2;
 
 	va_start(ap, fmt);
-	
-	retval = vfprintf(stderr, fmt, ap);
+	if (asprintf(&fmt2, "%s: %s", taskName(0), fmt) == -1)
+		retval = vfprintf(stderr, fmt2, ap);
+	else {
+		retval = vfprintf(stderr, fmt2, ap);
+		free(fmt2);
+	}
 	va_end(ap);
 	return retval;
 }
