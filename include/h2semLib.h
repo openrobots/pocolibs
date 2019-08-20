@@ -69,6 +69,7 @@ extern int h2semRecordH2ErrMsgs(void);
  */
 extern H2SEM_ID h2semAlloc (int type );
 extern STATUS h2semCreate0 ( int semId, int value );
+extern void h2semDelete0 ( void );
 extern STATUS h2semDelete ( H2SEM_ID sem );
 extern void h2semEnd ( void );
 extern BOOL h2semFlush ( H2SEM_ID sem );

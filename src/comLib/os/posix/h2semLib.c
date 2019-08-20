@@ -129,8 +129,9 @@ h2semEnd(void)
 {
     union semun semun;
     int i;
-    
-    for (i = 0; i < h2devSize(); i++) {
+
+    /* skip the first semaphore array */
+    for (i = 1; i < h2devSize(); i++) {
 	if (H2DEV_TYPE(i) == H2_DEV_TYPE_SEM) {
 	    /* Libere le tableau de semaphores */
 	    semun.val = 0;
@@ -159,7 +160,16 @@ h2semCreate0(int semId, int value)
     return OK;
 }
 
-    
+/*----------------------------------------------------------------------*/
+void
+h2semDelete0(void)
+{
+    union semun semun;
+
+    semun.val = 0;
+    semctl(H2DEV_SEM_SEM_ID(0), 0, IPC_RMID, semun);
+}
+
 /*----------------------------------------------------------------------*/
 
 /**
