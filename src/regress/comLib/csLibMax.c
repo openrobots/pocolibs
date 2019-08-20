@@ -54,7 +54,7 @@ struct rp {
 #define  MBOX_REPLY_SIZE   \
 	(BUF_SIZE(sizeof(struct rp)) * CLIENT_NMAX_RQST_ID)
 
-pthread_barrier_t barrier;
+pthread_barrier_t barrierc, barriers;
 int result = 0;
 
 int
@@ -100,6 +100,7 @@ server(void *arg)
 		goto done;
 	}
 	logMsg("server %d ready\n", instance);
+	pthread_barrier_wait(&barriers);
 #if 0
 	if (h2evnSusp(0) != TRUE) {
 		logMsg("h2evnSusp failed\n");
@@ -186,7 +187,7 @@ client(void *arg)
 	}
 done:
 	logMsg("client ending %d %d\n", i, result);
-	pthread_barrier_wait(&barrier);
+	pthread_barrier_wait(&barrierc);
 	return NULL;
 }
 
@@ -199,6 +200,8 @@ pocoregress_init(void)
 
 	logMsg("csLibMax test started\n");
 
+	pthread_barrier_init(&barriers, NULL, MAX_SERV + 1);
+
 	for (i = 0; i < MAX_SERV; i ++) {
 		snprintf(name, sizeof(name), "tServ%04d", i);
 		pid[i] = taskSpawn2(name, 100, 0, 65536,
@@ -206,10 +209,9 @@ pocoregress_init(void)
 		if (pid[i] == ERROR)
 			goto done;
 	}
-	logMsg("servers launched - waiting a bit\n");
-	taskDelay(200);
-	logMsg("done\n");
-	pthread_barrier_init(&barrier, NULL, MAX_SERV + 1);
+	pthread_barrier_wait(&barriers);
+	printf("all servers ready\n");
+	pthread_barrier_init(&barrierc, NULL, MAX_SERV + 1);
 	for (i = 0; i < MAX_SERV; i++) {
 		snprintf(name, sizeof(name), "tClient%04d", i);
 		cpid[i] = taskSpawn2(name, 110, 0, 65536,
@@ -217,7 +219,7 @@ pocoregress_init(void)
 		if (cpid[i] == ERROR)
 			goto done;
 	}
-	pthread_barrier_wait(&barrier);
+	pthread_barrier_wait(&barrierc);
 done:
 	return result;
 }
