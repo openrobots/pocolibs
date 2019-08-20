@@ -64,7 +64,10 @@ mboxInit(const char *procName)		/* unused parameter procName */
 		    sizeof(mboxLibH2errMsgs)/sizeof(H2_ERROR), 
 		    mboxLibH2errMsgs);
 
-    if (tid == 0) return ERROR;
+    if (tid == 0) {
+	    LOGDBG(("mboxInit: tid==0\n"));
+	    return ERROR;
+    }
     tName = taskName(tid);
 
     /* Look for the h2 device associated with current task */
@@ -72,13 +75,13 @@ mboxInit(const char *procName)		/* unused parameter procName */
 
     /* If not found, create one */
     if (dev == ERROR) {
- 
         /* reset error */
         errnoSet(0);
 
 	/* alloc dev */
 	dev = h2devAlloc((char *)tName, H2_DEV_TYPE_TASK);
 	if (dev == ERROR) {
+            LOGDBG(("mboxInit:h2devAlloc failed  %d\n", errnoGet()));
 	    return(ERROR);
 	}
 	H2DEV_TASK_TID(dev) = tid;
@@ -86,6 +89,7 @@ mboxInit(const char *procName)		/* unused parameter procName */
 	/* Create a synchronization semaphore for this task */
 	H2DEV_TASK_SEM_ID(dev) = h2semAlloc(H2SEM_SYNC);
 	if (H2DEV_TASK_SEM_ID(dev) == ERROR) {
+            LOGDBG(("mboxInit:h2semAlloc failed %d\n", errnoGet()));
 	    return ERROR;
 	}
 	/* Store the device index in the user data of this task */
@@ -174,6 +178,7 @@ mboxCreate(const char *name, int size, MBOX_ID *pMboxId)
 	h2semDelete(mbox->semExcl);
 	h2devFree(dev);
 	errnoSet(e);
+        LOGDBG(("mboxCreate:h2semAlloc(H2SEM_SYNC): %d\n", e));
 	return ERROR;
     }
     LOGDBG(("comLib:mboxCreate: semaphores created\n"));
