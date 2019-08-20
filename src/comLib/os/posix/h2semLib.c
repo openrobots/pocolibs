@@ -38,6 +38,13 @@ static const H2_ERROR h2semLibH2errMsgs[] = H2_SEM_LIB_H2_ERR_MSGS;
 #include <valgrind/memcheck.h>
 #endif
 
+#ifdef COMLIB_DEBUG_H2SEMLIB
+#include <assert.h>
+# define LOGDBG(x)     logMsg x
+#else
+# define LOGDBG(x)
+#endif
+
 /***
  *** Semaphores a` la mode VxWorks pour Unix
  ***
@@ -191,6 +198,7 @@ h2semAlloc(int type)
         errnoSet(S_h2semLib_BAD_SEM_TYPE);
         return ERROR;
     }
+    LOGDBG(("h2semAlloc(type %d)\n", type));
     /* Verrouille l'acces aux structures */
     h2semTake(0, WAIT_FOREVER);
 
@@ -200,13 +208,15 @@ h2semAlloc(int type)
 	if (H2DEV_TYPE(i) == H2_DEV_TYPE_SEM) {
 	    /* Allocation d'un semaphore dans le tableau */
 	    semun.array = tabval;
+            LOGDBG(("h2semAlloc: looking in %d semId %d\n",
+                    i, H2DEV_SEM_SEM_ID(i)));
 	    if (semctl(H2DEV_SEM_SEM_ID(i), 0, GETALL, semun) == -1) {
+                LOGDBG(("h2semAlloc:semctl GETALL failed dev %d %d\n",
+                        i, H2DEV_SEM_SEM_ID(i)));
 		errnoSet(errno);
 		h2semGive(0);
 		return ERROR;
 	    }
-
-           
 	    for (j = 0; j < MAX_SEM; j++) {
 		if (tabval[j] == SEM_UNALLOCATED) {
 		    trouve = TRUE;
@@ -223,6 +233,7 @@ h2semAlloc(int type)
 	/* initialise le semaphore */
 	semun.val = type == H2SEM_SYNC ? SEM_EMPTY : SEM_FULL;
 	semctl(H2DEV_SEM_SEM_ID(i), j, SETVAL, semun);
+        LOGDBG(("h2semAlloc: found %d:%d\n", H2DEV_SEM_SEM_ID(i), j));
 	h2semGive(0);
 	return(i*MAX_SEM+j);
     }
@@ -231,15 +242,19 @@ h2semAlloc(int type)
     /* allocation d'un nouveau device */
     dev = h2devAllocUnlocked("h2semLib", H2_DEV_TYPE_SEM);
     if (dev == ERROR) {
+        LOGDBG(("h2semAlloc:h2devAlloc failed\n"));
 	return ERROR;
     }
     /* Allocation d'un nouveau tableau */
     if (h2semInit(dev, &(H2DEV_SEM_SEM_ID(dev))) == ERROR) {
 	h2semGive(0);
+        LOGDBG(("h2semAlloc:h2semInit failed\n"));
 	return ERROR;
     }
+    LOGDBG(("h2semAlloc:new device %d semId %d\n", dev, H2DEV_SEM_SEM_ID(dev)));
     if (h2semCreate0(H2DEV_SEM_SEM_ID(dev), 
 		     type == H2SEM_SYNC ? SEM_EMPTY : SEM_FULL) == ERROR) {
+        LOGDBG(("h2semAlloc:h2semCreate0 failed\n"));
 	h2semGive(0);
 	return ERROR;
     }
@@ -257,7 +272,11 @@ h2semDelete(H2SEM_ID sem)
 {
     union semun semun;
     int dev;
-    
+
+#ifdef COMLIB_DEBUG_H2SEMLIB
+    if (sem == 0)
+        assert("deleting sem 0");
+#endif
     /* Calcul du device */
     dev = sem / MAX_SEM;
     sem = sem % MAX_SEM;
@@ -274,16 +293,27 @@ h2semDelete(H2SEM_ID sem)
  **/
 
 BOOL
-h2semTake(H2SEM_ID sem, int timeout)
+h2semTake(H2SEM_ID semId, int timeout)
 {
     struct  sembuf op;
     WDOG_ID timer;
     unsigned long ticks;
-    int dev;
+    int dev, sem;
 
-    dev = sem / MAX_SEM;
-    sem = sem % MAX_SEM;
+    dev = semId / MAX_SEM;
+    sem = semId % MAX_SEM;
 
+#ifdef COMLIB_DEBUG_H2SEMLIB
+    if (semId == 0) {
+        union semun semun;
+        int id, val;
+        semun.val = 0;
+        id = H2DEV_SEM_SEM_ID(dev);
+        val = semctl(id, sem, GETVAL, semun);
+        assert(val == SEM_EMPTY || val == SEM_FULL);
+        logMsg("h2semTake(0) %s\n", val ? "SEM_FULL" : "SEM_EMPTY");
+    }
+#endif
     op.sem_num = sem;
     op.sem_op = -1;
     /* Dans comLib timeout = 0 signifie bloquant */
@@ -298,6 +328,8 @@ h2semTake(H2SEM_ID sem, int timeout)
 		if (errno == EINTR) {
 		    continue;
 		} else {
+                    if (semId == 0)
+                        LOGDBG(("h2semTake(0): error %d\n", errno));
 		    return FALSE;
 		}
 	    } else {
@@ -316,6 +348,8 @@ h2semTake(H2SEM_ID sem, int timeout)
 	    } else { 
 		errnoSet(errno);
 	    }
+            if (semId == 0)
+                LOGDBG(("h2semTake(0): timeout\n"));
 	    return FALSE;
 	}
 	break;
@@ -341,6 +375,8 @@ h2semTake(H2SEM_ID sem, int timeout)
 		} else {
 		    errnoSet(errno);
 		    wdDelete(timer);
+                    if (semId == 0)
+                        LOGDBG(("h2semTake(0): timeout\n"));
 		    return FALSE;
 		}
 	    } else {
@@ -350,7 +386,8 @@ h2semTake(H2SEM_ID sem, int timeout)
 	wdDelete(timer);
 	break;
     } /* switch */
-    
+    if (semId == 0)
+        LOGDBG(("h2semTake(0): unlocked\n"));
     return TRUE;
 }
 
@@ -362,7 +399,11 @@ h2semTake(H2SEM_ID sem, int timeout)
 STATUS
 h2semGive(H2SEM_ID sem)
 {
-    return h2semSet(sem, 1);
+#ifdef COMLIB_DEBUG_H2SEMLIB
+    if (sem == 0)
+        logMsg("h2semGive(0)\n");
+#endif
+    return h2semSet(sem, SEM_FULL);
 }
 
 /*----------------------------------------------------------------------*/
