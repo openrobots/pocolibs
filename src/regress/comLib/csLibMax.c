@@ -67,8 +67,11 @@ func(SERV_ID si, int rqstId)
 	csServRqstParamsGet(si, rqstId, (char *)&q, sizeof(struct rq), NULL);
 	logMsg("got %d\n", q.a);
 	p.b = q.a;
-	csServReplySend(si, 0, FINAL_REPLY, OK, (char *)&p, sizeof(struct rp), NULL);
+	csServReplySend(si, 0, FINAL_REPLY, OK, (char *)&p,
+
+	    sizeof(struct rp), NULL);
 	return 0;
+
 }
 
 
