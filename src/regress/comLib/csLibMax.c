@@ -33,7 +33,7 @@
 #include "h2initGlob.h"
 #include "csLib.h"
 
-#define MAX_SERV (4)
+#define MAX_SERV (20)
 
 struct rq {
 	int a;
