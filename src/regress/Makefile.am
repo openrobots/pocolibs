@@ -11,7 +11,6 @@ TESTS=\
 	portLib/taskSuspend	\
 	portLib/tick		\
 				\
-	comLib/csLibMax		\
 	comLib/commonStruct	\
 	comLib/commonStructScheduler \
 	comLib/gcomAlloc	\
@@ -24,6 +23,7 @@ TESTS=\
 	comLib/h2timefromts	\
 	comLib/h2rngRealloc	\
 	comLib/smMem		\
+	comLib/csLibMax		\
 				\
 	posterLib/poster	\
 	posterLib/resize
