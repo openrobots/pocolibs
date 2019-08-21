@@ -351,8 +351,6 @@ h2devAttach(int *h2devMaxPtr)
 #ifdef VALGRIND_SUPPORT
     VALGRIND_MAKE_READABLE(h2Devs, sizeof(H2_DEV_STR) * *h2devMaxPtr);
 #endif
-    /* force sem0 to be full */
-    h2semSet(0, SEM_FULL);
     return OK;
 }
 
