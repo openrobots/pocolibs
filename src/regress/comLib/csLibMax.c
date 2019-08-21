@@ -81,14 +81,13 @@ server(void *arg)
 	char errMsg[80];
 	int instance = (int)(long)arg;
 
-	logMsg("server %d %lx\n", instance, taskIdSelf());
+	logMsg("server %d\n", instance);
 	snprintf(name, sizeof(name), "csTest%02d", instance);
 	if (csMboxInit(name, MBOX_RQST_SIZE, 0) != OK) {
-		logMsg("server csMboxInit failed %s\n",
+		logMsg("server %d csMboxInit failed %s\n", instance,
 		    h2getErrMsg(errnoGet(), errMsg, sizeof(errMsg)));
 		return NULL;
 	}
-	logMsg("server dev %d\n", MY_TASK_DEV);
 	if (csServInit(sizeof(struct rq), sizeof(struct rp), &si) != OK) {
 		logMsg("csServInit failed\n");
 		result = 2;
@@ -145,15 +144,14 @@ client(void *arg)
 	int rqstid;
 	int i = (int)(long)arg;
 
-	logMsg("client %d %lx\n", i, taskIdSelf());
+	logMsg("client %d\n", i);
 	snprintf(cname, 20, "client%0d", i);
 	if (csMboxInit(cname, 0, MBOX_REPLY_SIZE) != OK) {
-		logMsg("client csMoxInit failed %d %s\n",
+		logMsg("client %d csMoxInit failed %s\n",
 		    i, h2getErrMsg(errnoGet(), errMsg, sizeof(errMsg)));
 		result = 2;
 		goto done;
 	}
-	logMsg("client dev %d\n", MY_TASK_DEV);
 	snprintf(cname, 20, "csTest%02d", i);
 	if (csClientInit(cname, sizeof(struct rq), 0,
 
