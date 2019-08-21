@@ -89,7 +89,8 @@ server(void *arg)
 	if (csMboxInit(name, MBOX_RQST_SIZE, 0) != OK) {
 		logMsg("server %d csMboxInit failed %s\n", instance,
 		    h2getErrMsg(errnoGet(), errMsg, sizeof(errMsg)));
-		return NULL;
+		result = 2;
+		goto done;
 	}
 	if (csServInit(sizeof(struct rq), sizeof(struct rp), &si) != OK) {
 		logMsg("csServInit failed\n");
