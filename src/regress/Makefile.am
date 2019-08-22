@@ -15,6 +15,7 @@ TESTS=\
 	comLib/commonStructScheduler \
 	comLib/gcomAlloc	\
 	comLib/h2dev		\
+	comLib/h2devMax		\
 	comLib/h2sem		\
 	comLib/h2semAlloc	\
 	comLib/mbox		\
