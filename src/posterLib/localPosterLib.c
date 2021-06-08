@@ -325,10 +325,25 @@ localPosterTake(POSTER_ID posterId, POSTER_OP op)
 	errnoSet(S_posterLib_POSTER_CLOSED);
 	return(ERROR);
     }
-    if (op == POSTER_WRITE && H2DEV_POSTER_TASK_ID(dev) != getpid()) {
-	errnoSet(S_posterLib_NOT_OWNER);
-	return ERROR;
+
+    switch (op) {
+	case POSTER_WRITE:
+	    if (H2DEV_POSTER_TASK_ID(dev) != getpid()) {
+		errnoSet(S_posterLib_NOT_OWNER);
+		return ERROR;
+	    }
+	    break;
+
+	case POSTER_READ:
+	    if (H2DEV_POSTER_FLG_FRESH(dev) != TRUE) {
+		errnoSet(S_posterLib_EMPTY_POSTER);
+		return ERROR;
+	    }
+	    break;
+
+	default: return ERROR;
     }
+
     if (h2semTake(H2DEV_POSTER_SEM_ID(dev), WAIT_FOREVER) == FALSE) {
 	return ERROR;
     }
