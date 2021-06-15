@@ -341,7 +341,8 @@ localPosterTake(POSTER_ID posterId, POSTER_OP op)
 	    }
 	    break;
 
-	default: return ERROR;
+	case POSTER_IOCTL:
+	    break;
     }
 
     if (h2semTake(H2DEV_POSTER_SEM_ID(dev), WAIT_FOREVER) == FALSE) {
