@@ -26,6 +26,7 @@ TESTS=\
 	comLib/smMem		\
 	comLib/csLibMax		\
 				\
+	posterLib/fresh		\
 	posterLib/poster	\
 	posterLib/resize
 

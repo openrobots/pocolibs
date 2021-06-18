@@ -269,25 +269,42 @@ SVC(poster_ioctl_1)(POSTER_IOCTL_PAR *param, POSTER_IOCTL_RESULT *res, struct sv
 {
     POSTER_ID p = (POSTER_ID)remposterIdLookup(param->id);
     H2TIME date;
+    int fresh;
 
-    memset(&date, 0, sizeof(H2TIME));
-    if (posterLocalFuncs.ioctl(p, param->cmd, &date) == ERROR) {
-	res->status = errnoGet();
-	if (verbose) {
-	    fprintf(stderr, "posterServ error: ioctl ");
-	    h2printErrno(res->status);
-	}
-    } else {
-	res->status = POSTER_OK;
-	res->ntick = date.ntick;
-	res->msec = date.msec;
-	res->sec = date.sec;
-	res->minute = date.minute;
-	res->hour = date.hour;
-	res->day = date.day;
-	res->date = date.date;
-	res->month = date.month;
-	res->year = date.year;
+    switch (param->cmd) {
+    case FIO_GETDATE:
+    case FIO_NMSEC:
+	    memset(&date, 0, sizeof(H2TIME));
+	    if (posterLocalFuncs.ioctl(p, param->cmd, &date) == ERROR) {
+		    res->status = errnoGet();
+		    if (verbose) {
+			    fprintf(stderr, "posterServ error: ioctl ");
+			    h2printErrno(res->status);
+		    }
+	    } else {
+		    res->status = POSTER_OK;
+		    res->ntick = date.ntick;
+		    res->msec = date.msec;
+		    res->sec = date.sec;
+		    res->minute = date.minute;
+		    res->hour = date.hour;
+		    res->day = date.day;
+		    res->date = date.date;
+		    res->month = date.month;
+		    res->year = date.year;
+	    }
+	    break;
+    case FIO_FRESH:
+	    if (posterLocalFuncs.ioctl(p, FIO_FRESH, &fresh) == ERROR) {
+		    res->status = errnoGet();
+	    } else {
+		    res->status = POSTER_OK;
+		    res->ntick = fresh;
+	    }
+	    break;
+    default:
+	    res->status = S_posterLib_BAD_IOCTL_CODE;
+	    break;
     }
     return 1;
 }
