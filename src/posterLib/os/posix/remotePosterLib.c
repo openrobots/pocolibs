@@ -798,7 +798,7 @@ remotePosterIoctl(POSTER_ID posterId,	/* poster Id */
 		*(u_long *)parg = res->ntick;
 		break;
 	case FIO_FRESH:
-		*(u_long *)parg = res->ntick;
+		*(int *)parg = res->ntick;
 		break;
 	default:
 		errnoSet(S_posterLib_BAD_IOCTL_CODE);
