@@ -47,16 +47,17 @@ void
 usage(void)
 {
     fprintf(stderr, 
-	    "Usage: %s init [-d H2_DEV_MAX][-p][SM_MEM_SIZE]\n"
+	    "Usage: %s init [-d H2_DEV_MAX (%d)][-p][SM_MEM_SIZE (%u)]\n"
 	    "       %s end\n"
 	    "       %s info\n"
             "       %s version\n"
-	    "       %s posterStats [INTERVAL]\n"
+	    "       %s posterStats [INTERVAL (10)]\n"
 	    "       %s listModules\n"
 	    "       %s printErrno CODE\n"
 	    "       %s clean PATTERN\n",
-	    progname, progname, progname, progname, progname, 
-	    progname, progname, progname);
+	progname, H2_DEV_MAX_DEFAULT, SM_MEM_SIZE,
+	progname, progname, progname, progname,
+	progname, progname, progname);
     exit(1);
 }
 
