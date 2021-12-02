@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 2004, 2010,2012,2017 CNRS/LAAS
+ * Copyright (c) 1996, 2004, 2010,2012,2017,2021 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -829,7 +829,7 @@ remotePosterShowHost(const char *host)
     h = strdup(host);
     client = clientCreate(key, h);
     if (client != NULL) {
-	res = (POSTER_LIST_RESULT *)malloc(sizeof(POSTER_LIST_RESULT));
+	res = (POSTER_LIST_RESULT *)calloc(1, sizeof(POSTER_LIST_RESULT));
 	if (res == NULL) {\
 	    errnoSet(S_posterLib_MALLOC_ERROR);
 	    return ERROR;
