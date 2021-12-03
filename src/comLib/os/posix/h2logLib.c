@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 CNRS/LAAS
+ * Copyright (c) 2011,2021 CNRS/LAAS
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -86,8 +86,11 @@ h2logConnect(const char *path)
 	log_addr.sun_len = sizeof(struct sockaddr_un);
 #endif
 	log_addr.sun_family = AF_UNIX;
-	snprintf(log_addr.sun_path, sizeof(log_addr.sun_path), 
-	    "%s", h2logPath);
+	if (snprintf(log_addr.sun_path, sizeof(log_addr.sun_path),
+                "%s", h2logPath) < 0) {
+		errnoSet(errno);
+		return ERROR;
+        }
 	if (connect(h2logFd, (struct sockaddr *)&log_addr, 
 		sizeof(log_addr)) == -1) {
 		errnoSet(errno);
