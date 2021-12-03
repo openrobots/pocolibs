@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003, 2010,2012 CNRS/LAAS
+ * Copyright (c) 1990, 2003, 2010,2012,2021 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -218,6 +218,7 @@ bool_t
 SVC(poster_read_1)(POSTER_READ_PAR *param, POSTER_READ_RESULT *res, struct svc_req *clnt)
 {
     POSTER_ID p = (POSTER_ID)remposterIdLookup(param->id);
+    int len;
 
     /* tread data_len == -1 as 'read whole poster'. This can only come from a
      * remotePosterTake(), as far as posterLib API is concerned */
@@ -231,16 +232,18 @@ SVC(poster_read_1)(POSTER_READ_PAR *param, POSTER_READ_RESULT *res, struct svc_r
     res->data.data_len = param->length;
     res->data.data_val = malloc(param->length);
 
-    res->data.data_len = posterLocalFuncs.read(p, param->offset,
+    len = posterLocalFuncs.read(p, param->offset,
                                               res->data.data_val, param->length);
-    if (res->data.data_len == ERROR) {
+    if (len == ERROR) {
 	res->status = errnoGet();
+	res->data.data_len = 0;
 	if (verbose) {
 	    fprintf(stderr, "posterServ error: read ");
 	    h2printErrno(res->status);
 	}
     } else {
 	res->status = POSTER_OK;
+	res->data.data_len = len;
     }
     return 1;
 }
