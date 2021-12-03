@@ -577,6 +577,7 @@ remotePosterTake(POSTER_ID posterId, POSTER_OP op)
 	
 	if (s != RPC_SUCCESS) {
 		clnt_perror(client, "remotePosterTake");
+		xdr_free((xdrproc_t)xdr_POSTER_READ_RESULT, (char *)res);
 		free(res);
 		errnoSet(S_remotePosterLib_BAD_RPC);
 		return(ERROR);
@@ -586,6 +587,7 @@ remotePosterTake(POSTER_ID posterId, POSTER_OP op)
 	    && res->status != S_posterLib_POSTER_CLOSED 
 	    && res->status != S_posterLib_EMPTY_POSTER) {
 		errnoSet(res->status);
+		xdr_free((xdrproc_t)xdr_POSTER_READ_RESULT, (char *)res);
 		free(res);
 		return(ERROR);
 	}
@@ -595,6 +597,7 @@ remotePosterTake(POSTER_ID posterId, POSTER_OP op)
             remPosterId->dataSize < res->data.data_len) {
           void *c = realloc(remPosterId->dataCache, res->data.data_len);
           if (!c) {
+            xdr_free((xdrproc_t)xdr_POSTER_READ_RESULT, (char *)res);
             free(res);
             errnoSet(S_posterLib_MALLOC_ERROR);
             return ERROR;
@@ -610,6 +613,8 @@ remotePosterTake(POSTER_ID posterId, POSTER_OP op)
 		case POSTER_READ:
 		case POSTER_IOCTL:
 			errnoSet(res->status);
+			xdr_free((xdrproc_t)xdr_POSTER_READ_RESULT,
+                                (char *)res);
 			free(res);
 			return(ERROR);
 		case POSTER_WRITE:
@@ -621,6 +626,7 @@ remotePosterTake(POSTER_ID posterId, POSTER_OP op)
 		memcpy(remPosterId->dataCache, res->data.data_val, 
 		    remPosterId->dataSize);
 	}
+	xdr_free((xdrproc_t)xdr_POSTER_READ_RESULT, (char *)res);
 	free(res);
 	return(OK);
 }
