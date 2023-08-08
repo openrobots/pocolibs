@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2003-2004,2016 CNRS/LAAS
+ * Copyright (c) 1999, 2003-2004,2016,2023 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -123,8 +123,6 @@ smMemAttach(void)
         addr = shmat(H2DEV_MEM_SHM_ID(dev), NULL, 0);
         if (addr == (void *)-1 && errno != EINTR) {
             errnoSet(S_smObjLib_SHMAT_ERROR);
-            shmctl(H2DEV_MEM_SHM_ID(dev), IPC_RMID, NULL);
-            h2devFree(dev);
             return ERROR;
 	}
     } while (addr == (void *)-1);
