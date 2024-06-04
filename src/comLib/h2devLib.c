@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2004-2005
  *      Autonomous Systems Lab, Swiss Federal Institute of Technology.
- * Copyright (c) 1990, 2003-2005 CNRS/LAAS
+ * Copyright (c) 1990, 2003-2005, 2024 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -45,6 +45,7 @@ static const H2_ERROR h2devLibH2errMsgs[] = H2_DEV_LIB_H2_ERR_MSGS;
 #endif
 
 /* Local fucntions prototypes */
+static int h2devAllocAux(const char *name, H2_DEV_TYPE type, int h2devMax);
 static int h2devFindAux(const char *name, H2_DEV_TYPE type, int h2devMax);
 
 /*----------------------------------------------------------------------*/
@@ -63,6 +64,39 @@ h2devRecordH2ErrMsgs(void)
 /**
  ** Allocation d'un device h2
  **/
+static int
+h2devAllocAux(const char *name, H2_DEV_TYPE type, int h2devMax)
+{
+    int i;
+
+    /* Verifie que le nom n'existe pas */
+    if (type != H2_DEV_TYPE_SEM && h2devFindAux(name, type, h2devMax) != ERROR) {
+        errnoSet(S_h2devLib_DUPLICATE_DEVICE_NAME);
+        return ERROR;
+    }
+    /* Recherche un device libre */
+    for (i = 0; i < h2devMax; i++) {
+        if (h2Devs[i].type == H2_DEV_TYPE_NONE) {
+            /* Trouve' */
+            if (snprintf(h2Devs[i].name, H2_DEV_MAX_NAME, "%s", name)
+                >= H2_DEV_MAX_NAME) {
+                LOGDBG(("comLib:h2devAlloc: device name too long\n"));
+                errnoSet(S_h2devLib_BAD_PARAMETERS);
+                return ERROR;
+            }
+            strncpy(h2Devs[i].name, name, H2_DEV_MAX_NAME);
+            h2Devs[i].type = type;
+            h2Devs[i].uid = getuid();
+            LOGDBG(("comLib:h2devAlloc: created device %d\n", i));
+            return i;
+        }
+    } /* for */
+
+    /* Pas de device libre */
+    errnoSet(S_h2devLib_FULL);
+    return ERROR;
+}
+
 int
 h2devAlloc(const char *name, H2_DEV_TYPE type)
 {
@@ -71,75 +105,24 @@ h2devAlloc(const char *name, H2_DEV_TYPE type)
     if (h2devAttach(&h2devMax) == ERROR) {
         return ERROR;
     }
+
     h2semTake(0, WAIT_FOREVER);
-
-    /* Verifie que le nom n'existe pas */
-    if (type != H2_DEV_TYPE_SEM && h2devFindAux(name, type, h2devMax) != ERROR) {
-        h2semGive(0);
-        errnoSet(S_h2devLib_DUPLICATE_DEVICE_NAME);
-        return ERROR;
-    }
-    /* Recherche un device libre */
-    for (i = 0; i < h2devMax; i++) {
-        if (h2Devs[i].type == H2_DEV_TYPE_NONE) {
-            /* Trouve' */
-            if (snprintf(h2Devs[i].name, H2_DEV_MAX_NAME, "%s", name)
-                >= H2_DEV_MAX_NAME) {
-                h2semGive(0);
-                LOGDBG(("comLib:h2devAlloc: device name too long\n"));
-                errnoSet(S_h2devLib_BAD_PARAMETERS);
-                return ERROR;
-            }
-            strncpy(h2Devs[i].name, name, H2_DEV_MAX_NAME);
-            h2Devs[i].type = type;
-            h2Devs[i].uid = getuid();
-            h2semGive(0);
-            LOGDBG(("comLib:h2devAlloc: created device %d\n", i));
-            return i;
-        }
-    } /* for */
-
-    /* Pas de device libre */
+    i = h2devAllocAux(name, type, h2devMax);
     h2semGive(0);
-    errnoSet(S_h2devLib_FULL);
-    return ERROR;
+
+    return i;
 }
 
 int
 h2devAllocUnlocked(const char *name, H2_DEV_TYPE type)
 {
-    int i, h2devMax;
+    int h2devMax;
 
     if (h2devAttach(&h2devMax) == ERROR) {
         return ERROR;
     }
-    /* Verifie que le nom n'existe pas */
-    if (type != H2_DEV_TYPE_SEM && h2devFindAux(name, type, h2devMax) != ERROR) {
-        LOGDBG(("h2devAllocUnlocked: duplicate name %s\n", name));
-        errnoSet(S_h2devLib_DUPLICATE_DEVICE_NAME);
-        return ERROR;
-    }
-    /* Recherche un device libre */
-    for (i = 0; i < h2devMax; i++) {
-        if (h2Devs[i].type == H2_DEV_TYPE_NONE) {
-            /* Trouve' */
-            if (snprintf(h2Devs[i].name, H2_DEV_MAX_NAME, "%s", name)
-                >= H2_DEV_MAX_NAME) {
-                LOGDBG(("comLib:h2devAlloc: device name too long\n"));
-                errnoSet(S_h2devLib_BAD_PARAMETERS);
-                return ERROR;
-            }
-            strncpy(h2Devs[i].name, name, H2_DEV_MAX_NAME);
-            h2Devs[i].type = type;
-            h2Devs[i].uid = getuid();
-            LOGDBG(("comLib:h2devAlloc: created device %d\n", i));
-            return i;
-        }
-    } /* for */
 
-    /* Pas de device libre */
-    errnoSet(S_h2devLib_FULL);
-    return ERROR;
+    return h2devAllocAux(name, type, h2devMax);
 }
 
 /*----------------------------------------------------------------------*/
