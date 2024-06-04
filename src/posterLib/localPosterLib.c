@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 2003-2004,2009,2012 CNRS/LAAS
+ * Copyright (c) 1996, 2003-2004,2009,2012,2024 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -94,7 +94,7 @@ localPosterCreate(const char *name, int size, POSTER_ID *pPosterId)
 
     /* Allocation d'un h2dev */
     dev = h2devAlloc(name, H2_DEV_TYPE_POSTER);
-    if (dev < 0) {
+    if (dev == ERROR) {
 	return(ERROR);
     }
     /* Allocation memoire partagee */
@@ -197,7 +197,7 @@ localPosterDelete(POSTER_ID posterId)
     unsigned char *pool;
     uid_t uid = getuid();
 
-    if (dev < 0 || dev > h2devSize() ||
+    if (H2DEV_INDEX(dev) > h2devSize() ||
 	H2DEV_TYPE(dev) != H2_DEV_TYPE_POSTER) {
 	errnoSet(S_posterLib_POSTER_CLOSED);
 	return(ERROR);
@@ -320,7 +320,7 @@ localPosterTake(POSTER_ID posterId, POSTER_OP op)
 {
     long dev = (long)posterId;
 
-    if (dev < 0 || dev >= h2devSize()
+    if (H2DEV_INDEX(dev) >= h2devSize()
 	|| H2DEV_TYPE(dev) != H2_DEV_TYPE_POSTER) {
 	errnoSet(S_posterLib_POSTER_CLOSED);
 	return(ERROR);
@@ -361,7 +361,7 @@ localPosterGive(POSTER_ID posterId)
     long dev = (long)posterId;
     H2TIMESPEC date;
 
-    if (dev < 0 || dev >= h2devSize()
+    if (H2DEV_INDEX(dev) >= h2devSize()
 	|| H2DEV_TYPE(dev) != H2_DEV_TYPE_POSTER) {
 	errnoSet(S_posterLib_POSTER_CLOSED);
 	return(ERROR);
@@ -392,7 +392,7 @@ localPosterAddr(POSTER_ID posterId)
 {
     long dev = (long)posterId;
 
-    if (dev < 0 || dev >= h2devSize()
+    if (H2DEV_INDEX(dev) >= h2devSize()
 	|| H2DEV_TYPE(dev) != H2_DEV_TYPE_POSTER) {
 	errnoSet(S_posterLib_POSTER_CLOSED);
 	return(NULL);
@@ -410,7 +410,7 @@ localPosterSetEndianness(POSTER_ID posterId, H2_ENDIANNESS endianness)
 {
     long dev = (long)posterId;
 
-    if (dev < 0 || dev >= h2devSize()
+    if (H2DEV_INDEX(dev) >= h2devSize()
 	|| H2DEV_TYPE(dev) != H2_DEV_TYPE_POSTER) {
 	errnoSet(S_posterLib_POSTER_CLOSED);
 	return ERROR;
@@ -428,7 +428,7 @@ localPosterGetEndianness(POSTER_ID posterId, H2_ENDIANNESS *endianness)
 {
     long dev = (long)posterId;
 
-    if (dev < 0 || dev >= h2devSize()
+    if (H2DEV_INDEX(dev) >= h2devSize()
 	|| H2DEV_TYPE(dev) != H2_DEV_TYPE_POSTER) {
 	errnoSet(S_posterLib_POSTER_CLOSED);
 	return ERROR;
@@ -449,7 +449,7 @@ localPosterIoctl(POSTER_ID posterId, int code, void *parg)
     STATUS retval;
     H2TIME h2time;
 
-    if (dev < 0 || dev >= h2devSize()
+    if (H2DEV_INDEX(dev) >= h2devSize()
 	|| H2DEV_TYPE(dev) != H2_DEV_TYPE_POSTER) {
 	errnoSet(S_posterLib_POSTER_CLOSED);
 	return ERROR;
@@ -522,7 +522,7 @@ localPosterIoctl(POSTER_ID posterId, int code, void *parg)
 static STATUS
 localPosterShow(void)
 {
-    int i, h2devMax;
+    int i, d, h2devMax;
     H2TIMESPEC *date;
     H2TIME h2time;
 
@@ -532,7 +532,8 @@ localPosterShow(void)
     logMsg("\n");
     logMsg("NAME                              Id/host      Size T(last write)\n");
     logMsg("-------------------------------- -------- --------- -------------\n");
-    for (i = 0; i < h2devMax; i++) {
+    for (d = 0; d < h2devMax; i++) {
+	i = H2DEV_BY_INDEX(d);
 	if (H2DEV_TYPE(i) == H2_DEV_TYPE_POSTER) {
 	    logMsg("%-32s %8d %8d", H2DEV_NAME(i), i,
 		   H2DEV_POSTER_SIZE(i));
@@ -554,7 +555,7 @@ localPosterShow(void)
 static STATUS
 localPosterStats(void)
 {
-    int i, h2devMax;
+    int i, d, h2devMax;
 
     if (h2devAttach(&h2devMax) == ERROR) {
 	return ERROR;
@@ -562,7 +563,8 @@ localPosterStats(void)
     logMsg("\n");
     logMsg("NAME                                ReadOps   WriteOps  ReadBytes WriteBytes\n");
     logMsg("-------------------------------- ---------- ---------- ---------- ----------\n");
-    for (i = 0; i < h2devMax; i++) {
+    for (d = 0; d < h2devMax; d++) {
+	i = H2DEV_BY_INDEX(d);
 	if (H2DEV_TYPE(i) == H2_DEV_TYPE_POSTER) {
 	    logMsg("%-32s %10d %10d %10d %10d\n", H2DEV_NAME(i),
 		   H2DEV_POSTER_READ_OPS(i),

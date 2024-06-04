@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003-2005,2012,2014 CNRS/LAAS
+ * Copyright (c) 1990, 2003-2005,2012,2014,2024 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -114,7 +114,7 @@ STATUS
 mboxEnd(long taskId)
 {
     const char *tName;
-    int i;
+    int i, d;
     long dev;
 
     if (taskId == 0) {
@@ -131,7 +131,8 @@ mboxEnd(long taskId)
     }
 
     /* Free all mailboxes attached to this task */
-    for (i = 0; i < h2devSize(); i++) {
+    for (d = 0; d < h2devSize(); d++) {
+        i = H2DEV_BY_INDEX(d);
 	if (H2DEV_TYPE(i) == H2_DEV_TYPE_MBOX
 	    && H2DEV_MBOX_TASK_ID(i) == dev) {
 	    mboxDelete(i);
@@ -314,7 +315,7 @@ mboxFind(const char *name, MBOX_ID *pMboxId)
 void
 mboxShow(void)
 {
-    int i, h2devMax;
+    int i, d, h2devMax;
     int nMess, bytes, size;
 
     if (h2devAttach(&h2devMax) == ERROR) {
@@ -323,7 +324,8 @@ mboxShow(void)
     logMsg("\n");
     logMsg("Name                              Id     Size NMes    Bytes\n");
     logMsg("-------------------------------- --- -------- ---- --------\n");
-    for (i = 0; i < h2devMax; i++) {
+    for (d = 0; d < h2devMax; d++) {
+	i = H2DEV_BY_INDEX(d);
 	if (H2DEV_TYPE(i) == H2_DEV_TYPE_MBOX) {
 	    mboxIoctl(i, FIO_SIZE, &size);
 	    mboxIoctl(i, FIO_NMSGS, &nMess);
@@ -455,6 +457,7 @@ mboxRcv(MBOX_ID mboxId, MBOX_ID *pFromId, char *buf, int maxbytes,
 BOOL
 mboxPause(MBOX_ID mboxId, int timeout)
 {
+    int d;
     int nMbox;                  /* mailbox index */
     int nMes;                   /* number of messages in a mailbox */
     int takeStatus;             /* status of semTake() */
@@ -471,7 +474,8 @@ mboxPause(MBOX_ID mboxId, int timeout)
 	/* Wait for a message */
 	while (1) {
 	    /* Check for messages in one of mailboxes attached to this task */
-	    for (nMbox = 0; nMbox < h2devSize(); nMbox++) {
+	    for (d = 0; d < h2devSize(); d++) {
+		nMbox = H2DEV_BY_INDEX(d);
 		if (H2DEV_TYPE(nMbox) == H2_DEV_TYPE_MBOX
 		    && H2DEV_MBOX_TASK_ID(nMbox) == myTaskId) {
 		    if (mboxIoctl (nMbox, FIO_NMSGS, (char *) &nMes)

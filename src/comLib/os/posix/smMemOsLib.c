@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2003-2004,2016,2023 CNRS/LAAS
+ * Copyright (c) 1999, 2003-2004,2016,2023-2024 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -114,7 +114,7 @@ smMemAttach(void)
 	return OK;
     }
     dev = h2devFind(SM_MEM_NAME, H2_DEV_TYPE_MEM);
-    if (dev < 0) {
+    if (dev == ERROR) {
 	return ERROR;
     }
 
@@ -149,7 +149,7 @@ smMemEnd(void)
 	return ERROR;
     }
     dev = h2devFind(SM_MEM_NAME, H2_DEV_TYPE_MEM);
-    if (dev < 0) {
+    if (dev == ERROR) {
 	return ERROR;
     }
     /* Detach le shared memory segment */

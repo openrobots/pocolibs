@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003,2009 CNRS/LAAS
+ * Copyright (c) 1990, 2003,2009,2024 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -135,10 +135,11 @@ void
 h2semEnd(void)
 {
     union semun semun;
-    int i;
+    int i, d;
 
     /* skip the first semaphore array */
-    for (i = 1; i < h2devSize(); i++) {
+    for (d = 1; d < h2devSize(); d++) {
+	i = H2DEV_BY_INDEX(d);
 	if (H2DEV_TYPE(i) == H2_DEV_TYPE_SEM) {
 	    /* Libere le tableau de semaphores */
 	    semun.val = 0;
@@ -185,7 +186,7 @@ h2semDelete0(void)
 H2SEM_ID
 h2semAlloc(int type)
 {
-    int i, j, dev;
+    int i, d, j, dev;
     union semun semun;    
     unsigned short tabval[MAX_SEM];
 #ifdef VALGRIND_SUPPORT
@@ -204,7 +205,8 @@ h2semAlloc(int type)
 
     /* Recherche d'un semaphore libre dans un tableau */
     j = -1;				/* stupid gcc warning killer */
-    for (i = 0; i < h2devSize(); i++) {
+    for (d = 0; d < h2devSize(); d++) {
+        i = H2DEV_BY_INDEX(d);
 	if (H2DEV_TYPE(i) == H2_DEV_TYPE_SEM) {
 	    /* Allocation d'un semaphore dans le tableau */
 	    semun.array = tabval;
@@ -235,7 +237,9 @@ h2semAlloc(int type)
 	semctl(H2DEV_SEM_SEM_ID(i), j, SETVAL, semun);
         LOGDBG(("h2semAlloc: found %d:%d\n", H2DEV_SEM_SEM_ID(i), j));
 	h2semGive(0);
-	return(i*MAX_SEM+j);
+        /* H2SEM_ID is the h2dev index without generation number, plus the
+         * index within the semaphore array */
+	return d*MAX_SEM + j;
     }
     
     /* plus de semaphores libre, allocation d'un nouveau tableau */
@@ -259,7 +263,9 @@ h2semAlloc(int type)
 	return ERROR;
     }
     h2semGive(0);
-    return dev*MAX_SEM;
+
+    /* return the first H2SEM_ID of the array */
+    return H2DEV_INDEX(dev)*MAX_SEM;
 }
 
 /*----------------------------------------------------------------------*/
@@ -277,8 +283,8 @@ h2semDelete(H2SEM_ID sem)
     if (sem == 0)
         assert("deleting sem 0");
 #endif
-    /* Calcul du device */
-    dev = sem / MAX_SEM;
+    /* decode H2SEM_ID into H2DEV and semaphore number */
+    dev = H2DEV_BY_INDEX(sem / MAX_SEM);
     sem = sem % MAX_SEM;
     /* reset le semaphore */
     semun.val = SEM_UNALLOCATED;
@@ -300,7 +306,8 @@ h2semTake(H2SEM_ID semId, int timeout)
     unsigned long ticks;
     int dev, sem;
 
-    dev = semId / MAX_SEM;
+    /* decode H2SEM_ID into H2DEV and semaphore number */
+    dev = H2DEV_BY_INDEX(semId / MAX_SEM);
     sem = semId % MAX_SEM;
 
 #ifdef COMLIB_DEBUG_H2SEMLIB
@@ -425,7 +432,8 @@ h2semShow(H2SEM_ID sem)
     int val, dev, sem1;
     union semun semun;
 
-    dev = sem / MAX_SEM;
+    /* decode H2SEM_ID into H2DEV and semaphore number */
+    dev = H2DEV_BY_INDEX(sem / MAX_SEM);
     sem1 = sem % MAX_SEM;
 
     semun.val = 0;
@@ -450,15 +458,16 @@ h2semShow(H2SEM_ID sem)
 void
 h2semList(void)
 {
-    int i, j, h2devMax;
+    int i, d, j, h2devMax;
     H2SEM_ID semId;
 
     h2devAttach(&h2devMax);
     h2semTake(0, WAIT_FOREVER);
-    for (i = 0; i < h2devMax; i++) {
+    for (d = 0; d < h2devMax; d++) {
+        i = H2DEV_BY_INDEX(d);
 	if (H2DEV_TYPE(i) == H2_DEV_TYPE_SEM) {
             for (j = 0; j < MAX_SEM; j++) {
-                semId = i*MAX_SEM + j;
+                semId = d*MAX_SEM + j;
                 printf("%10d:%3d ", H2DEV_SEM_SEM_ID(i), j);
                 h2semShow(semId);
             }
@@ -473,7 +482,8 @@ h2semSet(H2SEM_ID sem, int value)
     union semun semun;
     int dev;
 
-    dev = sem / MAX_SEM;
+    /* decode H2SEM_ID into H2DEV and semaphore number */
+    dev = H2DEV_BY_INDEX(sem / MAX_SEM);
     sem = sem % MAX_SEM;
     
     semun.val = value;

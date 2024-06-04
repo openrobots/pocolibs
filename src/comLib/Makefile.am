@@ -1,7 +1,7 @@
 
 lib_LTLIBRARIES = libcomLib.la
 
-libcomLib_la_LDFLAGS = -version-number 11:1:0 -no-undefined
+libcomLib_la_LDFLAGS = -version-number 12:0:0 -no-undefined
 libcomLib_la_LIBADD = $(LTLIBOBJS) -L../portLib -lportLib -lm
 
 AM_CPPFLAGS = -I$(top_srcdir)/include \

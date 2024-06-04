@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003,2008,2009 CNRS/LAAS
+ * Copyright (c) 1990, 2003,2008,2009,2024 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -54,6 +54,7 @@
  **/
 
 H2_DEV_STR *h2Devs = NULL;
+H2_DEV_STR h2DevInvalid = { .type = H2_DEV_TYPE_NONE, .uid = -1 };
 static int h2devMaxCur = -1;
 
 static int shmid = -1;
@@ -149,7 +150,7 @@ h2devGetKey(int type, int dev, BOOL create, int *pFd)
 	}
     }
     /* compute the key id depending on the device type and number */
-    key = ftok(h2devFileName, dev*H2DEV_MAX_TYPES + type);
+    key = ftok(h2devFileName, H2DEV_INDEX(dev)*H2DEV_MAX_TYPES + type);
     if (key == -1) {
 	errnoSet(errno);
 	if (fd != -1)
@@ -175,6 +176,11 @@ h2devInit(int smMemSize, int h2devMax, int posterServFlag)
 
     h2devRecordH2ErrMsgs();
 
+    if (h2devMax > H2DEV_INDEX(-1U)) {
+	errnoSet(S_h2devLib_TOO_MANY_DEVICES);
+	return(ERROR);
+    }
+
     key = h2devGetKey(H2_DEV_TYPE_H2DEV, 0, TRUE, &fd);
     if (key == ERROR) {
 	return ERROR;
@@ -198,6 +204,7 @@ h2devInit(int smMemSize, int h2devMax, int posterServFlag)
     /* Create semaphores */
     h2Devs[0].type = H2_DEV_TYPE_SEM;
     h2Devs[0].uid = getuid();
+    h2Devs[0].devgen = 0; /* this is never deleted, so always gen #0 */
     strcpy(h2Devs[0].name, "h2semLib");
     if (h2semInit(0, &(H2DEV_SEM_SEM_ID(0))) == ERROR) {
 	pthread_mutex_unlock(&h2devMutex);
@@ -209,8 +216,10 @@ h2devInit(int smMemSize, int h2devMax, int posterServFlag)
 
     /* Initialization */
     for (i = 1; i < h2devMax; i++) {
-	/* mark all devices as free */
+	/* mark all devices as free and having max generation number so that
+	   the first creation starts at generation #0 (for convenience) */
 	h2Devs[i].type = H2_DEV_TYPE_NONE;
+	h2Devs[i].devgen = i | (-1U << (8*sizeof(int) - H2_DEV_GEN_BITS));
     }
     h2semGive(0);
     pthread_mutex_unlock(&h2devMutex);
@@ -373,7 +382,7 @@ h2devSize(void)
 STATUS
 h2devEnd(void)
 {
-    int i, rv = OK;
+    int i, d, rv = OK;
     int h2devMax;
 
     if (h2devAttach(&h2devMax) == ERROR) {
@@ -389,7 +398,8 @@ h2devEnd(void)
 	goto fail;
     }
     /* Destroy remaining devices */
-    for (i = 0; i < h2devMax; i++) {
+    for (d = 0; d < h2devMax; d++) {
+	i = H2DEV_BY_INDEX(d);
 	switch (H2DEV_TYPE(i)) {
 	  case H2_DEV_TYPE_MBOX:
 	    mboxDelete(i);
@@ -467,18 +477,19 @@ static char *h2devTypeName[] = {
 STATUS
 h2devShow(void)
 {
-    int i;
+    int i, d;
     int h2devMax;
 
     if (h2devAttach(&h2devMax) == ERROR) {
 	return ERROR;
     }
-    printf("Id   Type   UID Name\n"
+    printf("      Id  Gen   Type   UID Name\n"
 	   "------------------------------------------------\n");
-    for (i = 0; i < h2devMax; i++) {
+    for (d = 0; d < h2devMax; d++) {
+	i = H2DEV_BY_INDEX(d);
 	pthread_mutex_lock(&h2devMutex);
 	if (H2DEV_TYPE(i) != H2_DEV_TYPE_NONE) {
-	    printf("%2d %6s %5ld %s\n", i,
+            printf("%8d %4d %6s %5ld %s\n", H2DEV_INDEX(i), H2DEV_GEN(i),
 		   h2devTypeName[H2DEV_TYPE(i)],  H2DEV_UID(i),
 		   H2DEV_NAME(i));
 	}

@@ -87,8 +87,11 @@ h2devAllocAux(const char *name, H2_DEV_TYPE type, int h2devMax)
             strncpy(h2Devs[i].name, name, H2_DEV_MAX_NAME);
             h2Devs[i].type = type;
             h2Devs[i].uid = getuid();
-            LOGDBG(("comLib:h2devAlloc: created device %d\n", i));
-            return i;
+            /* increment previous generation number */
+            h2Devs[i].devgen += 1 << (8*sizeof(int) - H2_DEV_GEN_BITS);
+            LOGDBG(("comLib:h2devAlloc: created device %d (gen %d)\n", i,
+                     H2DEV_GEN(h2Devs[i].devgen)));
+            return H2DEV_BY_INDEX(i);
         }
     } /* for */
 
@@ -143,7 +146,7 @@ h2devFree(int dev)
         return ERROR;
     }
     h2semTake(0, WAIT_FOREVER);
-    h2Devs[dev].type = H2_DEV_TYPE_NONE;
+    H2DEV_TYPE(dev) = H2_DEV_TYPE_NONE;
     h2semGive(0);
     return OK;
 }
@@ -158,14 +161,15 @@ h2devFree(int dev)
 STATUS
 h2devClean(const char *name)
 {
-   int i, match = 0, h2devMax = 0;
+   int i, d, match = 0, h2devMax = 0;
    unsigned char *pool;
 
    if (h2devAttach(&h2devMax) == ERROR) {
       return ERROR;
    }
    /* Look for devices */
-   for (i = 0; i < h2devMax; i++) {
+   for (d = 0; d < h2devMax; d++) {
+      i = H2DEV_BY_INDEX(d);
       if (H2DEV_TYPE(i) != H2_DEV_TYPE_NONE &&
           fnmatch(name, H2DEV_NAME(i), 0) == 0) {
          logMsg("Freeing %s\n", H2DEV_NAME(i));
@@ -219,7 +223,7 @@ h2devFindAux(const char *name, H2_DEV_TYPE type, int h2devMax)
     for (i = 0; i < h2devMax; i++) {
         if ((type == h2Devs[i].type)
             && (strcmp(name, h2Devs[i].name) == 0)) {
-            return(i);
+          return H2DEV_BY_INDEX(i);
         }
     } /* for */
     return ERROR;
@@ -241,7 +245,7 @@ h2devFind(const char *name, H2_DEV_TYPE type)
     i = h2devFindAux(name, type, h2devMax);
     h2semGive(0);
 
-    if (i >= 0) {
+    if (i != ERROR) {
         return i;
     } else {
         errnoSet(S_h2devLib_NOT_FOUND);

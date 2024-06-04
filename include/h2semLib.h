@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998, 2005 CNRS/LAAS
+ * Copyright (c) 1998, 2005,2024 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -30,6 +30,7 @@ extern "C" {
 #define   H2SEM_SYNC         0          /* Semaphore de synchronisation */
 #define   H2SEM_EXCL         1          /* Semaphore d'exclusion mutuelle */
 
+/* semaphore id, encoded as the (h2dev index)*MAX_SEM + semaphore index */
 typedef int H2SEM_ID;
 
 /* -- ERRORS CODES ----------------------------------------------- */

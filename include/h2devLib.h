@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998, 2003-2010 CNRS/LAAS
+ * Copyright (c) 1998, 2003-2010,2024 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -109,6 +109,7 @@ typedef enum {
 /* devices */
 typedef struct H2_DEV_STR {
     H2_DEV_TYPE type;
+    unsigned int devgen; /* h2dev number: contains generation # and index */
     char name[H2_DEV_MAX_NAME];
     long uid;
     union {
@@ -122,6 +123,9 @@ typedef struct H2_DEV_STR {
 
 /* Default Maximum number of h2 devices */
 #define H2_DEV_MAX_DEFAULT 120
+
+/* Number of bits of an h2dev dedicated to generation number */
+#define H2_DEV_GEN_BITS 12
 
 /* Timeout on h2devFind */
 #define H2DEV_TIMEOUT 100
@@ -161,41 +165,52 @@ typedef struct H2_DEV_STR {
 
 
 extern H2_DEV_STR *h2Devs;
+extern H2_DEV_STR h2DevInvalid;
 
-#define H2DEV_NAME(dev) h2Devs[dev].name
-#define H2DEV_TYPE(dev) h2Devs[dev].type
-#define H2DEV_UID(dev)  h2Devs[dev].uid
+  /* a h2 device is stored on 32 bits, with first bits for generation # */
+#define H2DEV_INDEX(dev) \
+  ((unsigned int)(dev) & (-1U >> H2_DEV_GEN_BITS))
+#define H2DEV_GEN(dev) \
+  ((unsigned int)(dev) >> (8*sizeof(int) - H2_DEV_GEN_BITS))
+#define H2DEV_BY_INDEX(idx) (h2Devs[idx].devgen)
+#define H2DEV_DEV(dev)                                                      \
+  (h2Devs[H2DEV_INDEX(dev)].devgen == (dev) ?                               \
+   &h2Devs[H2DEV_INDEX(dev)] : &h2DevInvalid)
 
-#define H2DEV_SEM_SEM_ID(dev) h2Devs[dev].data.sem.semId
-#define H2DEV_SEM_SEM_NUM(dev) h2Devs[dev].data.sem.semNum
+#define H2DEV_NAME(dev) H2DEV_DEV(dev)->name
+#define H2DEV_TYPE(dev) H2DEV_DEV(dev)->type
+#define H2DEV_UID(dev)  H2DEV_DEV(dev)->uid
 
-#define H2DEV_MBOX_STR(dev) (&(h2Devs[dev].data.mbox))
-#define H2DEV_MBOX_SEM_ID(dev) h2Devs[dev].data.mbox.semSigRd
-#define H2DEV_MBOX_SEM_EXCL_ID(dev) h2Devs[dev].data.mbox.semExcl
-#define H2DEV_MBOX_TASK_ID(dev) h2Devs[dev].data.mbox.taskId
-#define H2DEV_MBOX_RNG_ID(dev) h2Devs[dev].data.mbox.rngId
+#define H2DEV_SEM_SEM_ID(dev) H2DEV_DEV(dev)->data.sem.semId
+#define H2DEV_SEM_SEM_NUM(dev) H2DEV_DEV(dev)->data.sem.semNum
 
-#define H2DEV_POSTER_SEM_ID(dev) h2Devs[dev].data.poster.semId
-#define H2DEV_POSTER_POOL(dev) h2Devs[dev].data.poster.pPool
-#define H2DEV_POSTER_TASK_ID(dev) h2Devs[dev].data.poster.taskId
-#define H2DEV_POSTER_FLG_FRESH(dev) h2Devs[dev].data.poster.flgFresh
-#define H2DEV_POSTER_DATE(dev) (&(h2Devs[dev].data.poster.date))
-#define H2DEV_POSTER_SIZE(dev) h2Devs[dev].data.poster.size
-#define H2DEV_POSTER_OP(dev) h2Devs[dev].data.poster.op
-#define H2DEV_POSTER_ENDIANNESS(dev) h2Devs[dev].data.poster.endianness
+#define H2DEV_MBOX_STR(dev) (&(H2DEV_DEV(dev)->data.mbox))
+#define H2DEV_MBOX_SEM_ID(dev) H2DEV_DEV(dev)->data.mbox.semSigRd
+#define H2DEV_MBOX_SEM_EXCL_ID(dev) H2DEV_DEV(dev)->data.mbox.semExcl
+#define H2DEV_MBOX_TASK_ID(dev) H2DEV_DEV(dev)->data.mbox.taskId
+#define H2DEV_MBOX_RNG_ID(dev) H2DEV_DEV(dev)->data.mbox.rngId
 
-#define H2DEV_POSTER_STATS(dev) h2Devs[dev].data.poster.stats
-#define H2DEV_POSTER_READ_OPS(dev) h2Devs[dev].data.poster.stats.read_ops
-#define H2DEV_POSTER_WRITE_OPS(dev) h2Devs[dev].data.poster.stats.write_ops
-#define H2DEV_POSTER_READ_BYTES(dev) h2Devs[dev].data.poster.stats.read_bytes
-#define H2DEV_POSTER_WRITE_BYTES(dev) h2Devs[dev].data.poster.stats.write_bytes
+#define H2DEV_POSTER_SEM_ID(dev) H2DEV_DEV(dev)->data.poster.semId
+#define H2DEV_POSTER_POOL(dev) H2DEV_DEV(dev)->data.poster.pPool
+#define H2DEV_POSTER_TASK_ID(dev) H2DEV_DEV(dev)->data.poster.taskId
+#define H2DEV_POSTER_FLG_FRESH(dev) H2DEV_DEV(dev)->data.poster.flgFresh
+#define H2DEV_POSTER_DATE(dev) (&(H2DEV_DEV(dev)->data.poster.date))
+#define H2DEV_POSTER_SIZE(dev) H2DEV_DEV(dev)->data.poster.size
+#define H2DEV_POSTER_OP(dev) H2DEV_DEV(dev)->data.poster.op
+#define H2DEV_POSTER_ENDIANNESS(dev) H2DEV_DEV(dev)->data.poster.endianness
 
-#define H2DEV_TASK_TID(dev) h2Devs[dev].data.task.taskId
-#define H2DEV_TASK_PID(dev) h2Devs[dev].data.task.pid
-#define H2DEV_TASK_SEM_ID(dev) h2Devs[dev].data.task.semId
+#define H2DEV_POSTER_STATS(dev) H2DEV_DEV(dev)->data.poster.stats
+#define H2DEV_POSTER_READ_OPS(dev) H2DEV_POSTER_STATS(dev).read_ops
+#define H2DEV_POSTER_WRITE_OPS(dev) H2DEV_POSTER_STATS(dev).write_ops
+#define H2DEV_POSTER_READ_BYTES(dev) H2DEV_POSTER_STATS(dev).read_bytes
+#define H2DEV_POSTER_WRITE_BYTES(dev) H2DEV_POSTER_STATS(dev).write_bytes
 
-#define H2DEV_MEM_SHM_ID(dev) h2Devs[dev].data.mem.shmId
-#define H2DEV_MEM_SIZE(dev) h2Devs[dev].data.mem.size
+#define H2DEV_TASK_TID(dev) H2DEV_DEV(dev)->data.task.taskId
+#define H2DEV_TASK_PID(dev) H2DEV_DEV(dev)->data.task.pid
+#define H2DEV_TASK_SEM_ID(dev) H2DEV_DEV(dev)->data.task.semId
+
+#define H2DEV_MEM_SHM_ID(dev) H2DEV_DEV(dev)->data.mem.shmId
+#define H2DEV_MEM_SIZE(dev) H2DEV_DEV(dev)->data.mem.size
 
 /*
  * Prototypes

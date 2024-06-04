@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003-2004,2012,2014 CNRS/LAAS
+ * Copyright (c) 1990, 2003-2004,2012,2014,2024 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -49,8 +49,8 @@ static void gcomDispatch (MBOX_ID replyMbox);
 static int gcomVerifStatus(int sendId);
 static int gcomVerifTout (int sendId, int *pTimeout);
 
-/* Macro pour retrouver le device h2 d'une tache */
-#define MY_TASK_DEV (taskGetUserData(0))
+/* Retrieve the h2 device index of a task, used as an index in local arrays */
+#define MY_TASK_DEV_IDX (H2DEV_INDEX(taskGetUserData(0)))
 
 
 static pthread_once_t gcom_once = PTHREAD_ONCE_INIT;
@@ -115,7 +115,7 @@ gcomInit(const char *procName, int rcvMboxSize, int replyMboxSize)
         LOGDBG(("gcomInit:pthread_once failed %d\n", errnoGet()));
         goto failed;
     }
-    myTaskNum = MY_TASK_DEV;
+    myTaskNum = MY_TASK_DEV_IDX;
     sendTab[myTaskNum] = (SEND *)calloc(MAX_SEND, sizeof(SEND));
     if (sendTab[myTaskNum] == NULL)
 	    goto failed;
@@ -174,7 +174,7 @@ gcomUpdate(int rcvMboxSize, int replyMboxSize)
 {
     int myIndice;
 
-    myIndice = MY_TASK_DEV;
+    myIndice = MY_TASK_DEV_IDX;
     if (rcvMboxSize > 0) {
         if (mboxResize(rcvMboxTab[myIndice], rcvMboxSize) != OK) {
             return ERROR;
@@ -207,7 +207,7 @@ gcomEnd(void)
     int taskIndice;
     int bilan = OK;               /* Bilan de la routine */
 
-    taskIndice = MY_TASK_DEV;
+    taskIndice = MY_TASK_DEV_IDX;
 
     /* Liberer les mailboxes alloues */
     if (mboxEnd(0) == ERROR) {
@@ -243,7 +243,7 @@ gcomSelect(char *sendIdTable)
 {
     int i;
 
-    gcomDispatch(replyMboxTab[MY_TASK_DEV]);
+    gcomDispatch(replyMboxTab[MY_TASK_DEV_IDX]);
     
     for (i=0; i<MAX_SEND; i++) {
 	if (sendIdTable[i] == 1) {
@@ -290,7 +290,7 @@ gcomMboxPause(int timeout, int mask)
     int pauseStat;               /* Status de la pause */
     int myIndice;
 
-    myIndice = MY_TASK_DEV;
+    myIndice = MY_TASK_DEV_IDX;
     /* En fonction de la masque, trouver le mbox ou` attendre */
     switch (mask) {
       case RCV_MBOX:
@@ -349,7 +349,7 @@ gcomMboxStatus(int mask)
     int n1, n2;                  /* Nombre de bytes dans les mailboxes */
     int myIndice;
     
-    myIndice = MY_TASK_DEV;
+    myIndice = MY_TASK_DEV_IDX;
     /* En fonction de la masque, trouver le mbox a verifier */
     switch (mask) {
       case RCV_MBOX:
@@ -674,7 +674,7 @@ gcomLetterSend(MBOX_ID mboxId, LETTER_ID sendLetter,
     int timeout = NO_WAIT;		/* Temps avant timeout */
     int myIndice;
     
-    myIndice = MY_TASK_DEV;
+    myIndice = MY_TASK_DEV_IDX;
 
     /* Verifier le type de blocage demande */
     if ((block != NO_BLOCK && block != BLOCK_ON_FINAL_REPLY &&
@@ -803,7 +803,7 @@ gcomReplyStatus(int sendId)
     }
     
     /* Distribuer les repliques qui sont deja disponibles */
-    gcomDispatch (replyMboxTab[MY_TASK_DEV]);
+    gcomDispatch (replyMboxTab[MY_TASK_DEV_IDX]);
     
     /* Verifier les timeouts et retourner */
     return (gcomVerifTout (sendId, &timeout));
@@ -829,7 +829,7 @@ gcomReplyWait(int sendId, int replyLetterType)
     int timeout = NO_WAIT;		/* Temps qui reste jusqu'au timeout */
     int indice;
 
-    indice = MY_TASK_DEV;
+    indice = MY_TASK_DEV_IDX;
     
     /* Verifier l'id du send */
     if (sendId < 0 || sendId > MAX_SEND) {
@@ -893,7 +893,7 @@ gcomSendIdFree(int sendId)
 	return (ERROR);
     }
     
-    taskIndice = MY_TASK_DEV;
+    taskIndice = MY_TASK_DEV_IDX;
 
     /* Liberer l'identificateur d'envoi */
     sendTab[taskIndice][sendId].status = FREE;
@@ -922,7 +922,7 @@ gcomSendIdList(int *pList, int maxList)
     int cList;                /* Compteur de la liste */
     
     /* Calculer le pointeur vers le debut du tableau de sends */
-    pTabSend = &sendTab[MY_TASK_DEV][0];
+    pTabSend = &sendTab[MY_TASK_DEV_IDX][0];
     
     /* Remplir la liste avec les sendIds non libres */
     for (sendId = 0, cList = 0; sendId < MAX_SEND && cList < maxList; 
@@ -969,7 +969,7 @@ gcomReplyLetterBySendId (int sendId, LETTER_ID *pIntermedReplyLetter,
     SEND *pTabSend;           /* Pointeur vers tableau de sends de la tache */
     
     /* Calculer le pointeur vers position sendId dans tableau de sends */
-    pTabSend = &sendTab[MY_TASK_DEV][sendId];
+    pTabSend = &sendTab[MY_TASK_DEV_IDX][sendId];
     
     /* Copier l'id de la lettre de replique intermediaire */
     if (pIntermedReplyLetter != (LETTER_ID *) NULL)
@@ -1014,7 +1014,7 @@ gcomLetterRcv (LETTER_ID letter, MBOX_ID *pOrigMboxId, int *pSendId,
     pText = letter->pHdr;
     
     /* Attendre l'arrivee d'un message sur le mailbox */
-    if ((rcvStatus = mboxRcv (rcvMboxTab[MY_TASK_DEV], pOrigMboxId, 
+    if ((rcvStatus = mboxRcv (rcvMboxTab[MY_TASK_DEV_IDX], pOrigMboxId,
 			      (char *) pText, letter->size, timeout)) <= 0)
 	return (rcvStatus);
     
@@ -1067,7 +1067,7 @@ gcomLetterReply(MBOX_ID mboxId, int sendId, int replyLetterType,
     pText->type = replyLetterType;
     
     /* Envoyer la lettre */
-    return (mboxSend (mboxId, rcvMboxTab[MY_TASK_DEV], (char *) pText, 
+    return (mboxSend (mboxId, rcvMboxTab[MY_TASK_DEV_IDX], (char *) pText,
 		      pText->dataSize + sizeof (LETTER_HDR)));
 }
 
@@ -1092,7 +1092,7 @@ gcomDispatch (MBOX_ID replyMbox)
     LETTER_ID letter;          /* Lettre recue */
     SEND *pSend;               /* Pointeur vers structure du send */
     int sendId;                /* Identificateur de send d'une replique */
-    int indice = MY_TASK_DEV;
+    int indice = MY_TASK_DEV_IDX;
     
     /* Boucler tant qu'il y aura des repliques */
     while (mboxIoctl (replyMbox, FIO_NBYTES, (char *) &nbytes) == OK &&
@@ -1171,7 +1171,7 @@ gcomVerifTout (int sendId, int *pTimeout)
     int toutStatus;                /* Status du send si timeout */
     
     /* Calculer le pointeur vers position dans le tableau de sends */
-    pSend = &sendTab[MY_TASK_DEV][sendId];
+    pSend = &sendTab[MY_TASK_DEV_IDX][sendId];
     
     /* Verifier si la tache attend une replique */
     switch (status = pSend->status) {
@@ -1236,7 +1236,7 @@ gcomVerifStatus(int sendId)
     int toutStatus;                /* Status du send si timeout */
     
     /* Calculer le pointeur vers position dans le tableau de sends */
-    pSend = &sendTab[MY_TASK_DEV][sendId];
+    pSend = &sendTab[MY_TASK_DEV_IDX][sendId];
     
     /* Verifier si la tache attend une replique */
     switch (status = pSend->status) {
