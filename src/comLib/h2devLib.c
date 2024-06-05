@@ -84,7 +84,7 @@ h2devAllocAux(const char *name, H2_DEV_TYPE type, int h2devMax)
                 errnoSet(S_h2devLib_BAD_PARAMETERS);
                 return ERROR;
             }
-            strncpy(h2Devs[i].name, name, H2_DEV_MAX_NAME);
+            strncpy(h2Devs[i].name, name, H2_DEV_MAX_NAME-1);
             h2Devs[i].type = type;
             h2Devs[i].uid = getuid();
             /* increment previous generation number */
