@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004,2012 CNRS/LAAS
+ * Copyright (c) 2004,2012,2024 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -33,7 +33,7 @@ pocoregress_init()
 {
    struct test data = { 3, 3.1415926 };
    struct test data2;
-   POSTER_ID p;
+   POSTER_ID p, p2;
    char *e;
    int n;
 
@@ -59,10 +59,28 @@ pocoregress_init()
    } else
       logMsg("ok, posters can be read and written\n");
 
-
-   /* done */
+   /* deletion */
    if (posterDelete(p) != OK) {
       logMsg("Error: could not delete poster\n");
+      return 1;
+   }
+   if (posterTake(p, POSTER_WRITE) == OK) {
+      logMsg("Error: can lock deleted poster\n");
+      return 1;
+   }
+
+   /* recreate with same name */
+   if (posterCreate("pocoster", sizeof(data), &p2) != OK) {
+      logMsg("Error: could not recreate poster\n");
+      return 1;
+   }
+   if (posterTake(p, POSTER_WRITE) == OK) {
+      logMsg("Error: can lock a new poster with a deleted POSTER_ID\n");
+      return 1;
+   }
+   if (posterDelete(p2) != OK) {
+      logMsg("Error: could not delete recreated poster\n");
+      return 1;
    }
 
    return 0;

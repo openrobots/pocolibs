@@ -19,6 +19,7 @@ TESTS=\
 	comLib/h2sem		\
 	comLib/h2semAlloc	\
 	comLib/mbox		\
+	comLib/mboxRecycle	\
 	comLib/h2timer		\
 	comLib/h2timersem	\
 	comLib/h2timefromts	\
