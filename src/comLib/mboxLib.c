@@ -316,7 +316,7 @@ void
 mboxShow(void)
 {
     int i, d, h2devMax;
-    int nMess, bytes, size;
+    int nMess = 0, bytes = 0, size = 0;
 
     if (h2devAttach(&h2devMax) == ERROR) {
 	return;
