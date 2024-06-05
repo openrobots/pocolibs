@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 CNRS/LAAS
+ * Copyright (c) 2010,2024 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -21,6 +21,7 @@
 
 #include <err.h>
 #include <errno.h>
+#include <signal.h>
 #include <stdio.h>
 #include <unistd.h>
 
