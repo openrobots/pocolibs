@@ -113,8 +113,9 @@ h2devGetKey(int type, int dev, BOOL create, int *pFd)
 	return ERROR;
     }
     /* Check the length of the string */
-    if (snprintf(h2devFileName, sizeof(h2devFileName), "%s/%s-%s",
-                 home, H2_DEV_NAME, uts.nodename) >= MAXPATHLEN) {
+    if (snprintf(
+          h2devFileName, sizeof(h2devFileName), "%s/%s-%s.%d",
+          home, H2_DEV_NAME, uts.nodename, libcomLib_MAJOR) >= MAXPATHLEN) {
 	errnoSet(S_h2devLib_BAD_HOME_DIR);
 	return ERROR;
     }

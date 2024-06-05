@@ -1,11 +1,14 @@
 
 lib_LTLIBRARIES = libcomLib.la
 
-libcomLib_la_LDFLAGS = -version-number 12:0:0 -no-undefined
+libcomLib_MAJOR= 12
+
+libcomLib_la_LDFLAGS = -version-number $(libcomLib_MAJOR):0:0 -no-undefined
 libcomLib_la_LIBADD = $(LTLIBOBJS) -L../portLib -lportLib -lm
 
 AM_CPPFLAGS = -I$(top_srcdir)/include \
-	-DPOSTER_SERV_PATH=\"$(bindir)/posterServ\"
+	-DPOSTER_SERV_PATH=\"$(bindir)/posterServ\" \
+	-DlibcomLib_MAJOR='$(libcomLib_MAJOR)'
 
 libcomLib_la_SOURCES = \
         commonStructLib.c       	\

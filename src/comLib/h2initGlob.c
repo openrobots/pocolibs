@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990-2011 CNRS/LAAS
+ * Copyright (c) 1990-2011,2024 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -71,8 +71,9 @@ h2initGlob(int ticksPerSec)
 
     /* attach to h2 devices */
     if (h2devAttach(NULL) == ERROR) {
-	printf("Error: could not find h2 devices\n"
-		"Did you execute `h2 init' ?\n");
+	printf("Error: could not find h2 devices (version %d)\n"
+		"Did you execute `h2 init' ?\n",
+		libcomLib_MAJOR);
 	return ERROR;
     }
     /* attach to shared memory */
