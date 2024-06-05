@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2003-2010 CNRS/LAAS
+ * Copyright (c) 1999, 2003-2010,2024 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -42,7 +42,7 @@ static const H2_ERROR portLibH2errMsgs[]  = PORT_LIB_H2_ERR_MSGS;
 
 static pthread_key_t taskControlBlock;
 static OS_TCB *taskList = NULL;
-static int numTask = 0;
+static unsigned int numTask = 0;
 static int rr_min_priority;
 static int rr_max_priority;
 
@@ -354,7 +354,7 @@ newTcb(const char *name, int priority, int options, int stackSize,
     if (name != NULL) {
 	tcb->name = strdup(name);
     } else {
-	snprintf(bufName, sizeof(bufName), "t%d", ++numTask);
+	snprintf(bufName, sizeof(bufName), "t%u", ++numTask);
 	tcb->name = strdup(bufName);
     }
 #ifdef DEBUG
@@ -573,7 +573,7 @@ taskFromThread(const char *name)
     if (name != NULL) {
 	tcb->name = strdup(name);
     } else {
-	snprintf(bufName, sizeof(bufName), "t%d", ++numTask);
+	snprintf(bufName, sizeof(bufName), "t%u", ++numTask);
 	tcb->name = strdup(bufName);
     }
 #ifdef DEBUG
