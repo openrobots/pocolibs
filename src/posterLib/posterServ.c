@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003, 2010,2012,2021 CNRS/LAAS
+ * Copyright (c) 1990, 2003, 2010,2012,2021,2024 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -54,7 +54,6 @@
 #endif
 
 int verbose = 0;
-int _rpcsvcdirty = 0;
 #ifdef DEBUG
 /* reference created by Solaris rpcgen if DEBUG is defined */
 int _rpcpmstart = 0;
