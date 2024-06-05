@@ -45,3 +45,6 @@ libosapi_la_SOURCES=	posix.c
 
 # export useful variables to the test scripts
 export H2DEV_DIR=.
+
+# because h2devs are global for all tests, there cannot be concurrent testing
+.NOTPARALLEL: $(TEST:=.log)
