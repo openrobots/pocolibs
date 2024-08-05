@@ -26,7 +26,7 @@ libposterLib_la_SOURCES += \
 bin_PROGRAMS = posterServ
 
 posterServ_LDADD = libposters_xdr.la localPosterLib.lo \
-	-L../comLib -L../portLib -lcomLib -lportLib
+	-L../comLib -L../portLib -lcomLib -lportLib 
 
 posterServ_SOURCES = \
 	posterServ.c \
@@ -62,7 +62,7 @@ posters.h: posters.x Makefile
 	rm -f $@
 	(cd $(dir $<) ; $(RPCGEN) $(RPCGEN_C) -M -h posters.x) > $@
 
-CLEANFILES = $(BUILT_SOURCES)
+CLEANFILES = $(BUILT_SOURCES) .deps/localPosterLib.Plo
 
 else
 
