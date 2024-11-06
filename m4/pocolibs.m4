@@ -57,76 +57,9 @@ dnl test for POSIX timers usability
 dnl
 AC_DEFUN([AC_POSIX_TIMERS_WORKS],
 [AC_MSG_CHECKING([for usable posix timers])
-AC_TRY_RUN([
-#include <sys/time.h>
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-
-static volatile int done = 0;
-static void timerInt(int sig) { done++; }
-
-static long
-time_difference(struct timeval *t1, struct timeval *t2)
-{
-	long usec_diff = t1->tv_usec - t2->tv_usec, retenue = 0;
-	
-	if (usec_diff < 0) {
-		usec_diff = 1000000 + usec_diff;
-		retenue = 1;
-	}
-	return (t1->tv_sec - t2->tv_sec - retenue)*1000000 + usec_diff;
-}
-
-int
-main(int argc, char **argv)
-{
-	timer_t t;
-	struct itimerspec tv;
-	sigset_t sigset;
-	struct sigaction act;
-	struct timeval tp1, tp2;
-
-	sigemptyset(&sigset);
-	sigaddset(&sigset, SIGALRM);
-	if (sigprocmask(SIG_UNBLOCK, &sigset, NULL) == -1) {
-		perror("sigprocmask");
-		exit(2);
-	}
-	act.sa_handler = timerInt;
-	sigemptyset(&act.sa_mask);
-	act.sa_flags = 0;
-	if (sigaction(SIGALRM, &act, NULL) == -1) {
-		perror("sigaction");
-		exit(2);
-	}
-	if (timer_create(CLOCK_REALTIME, NULL, &t) == -1) {
-		perror("timer_create");
-		exit(2);
-	}
-	tv.it_interval.tv_nsec = 10000000;
-	tv.it_interval.tv_sec = 0;
-	tv.it_value.tv_nsec = 10000000;
-	tv.it_value.tv_sec = 0;
-	if (timer_settime(t, 0, &tv, NULL) == -1) {
-		perror("timer_settime");
-		exit(2);
-	}
-	gettimeofday(&tp1, NULL);
-	while (done < 100)
-		;
-	gettimeofday(&tp2, NULL);
-	if (time_difference(&tp2, &tp1) < 1200000) 
-		exit(0);
-	else {
-		fprintf(stderr, "no able to generate 100 ticks/s\n");
-		exit(2);
-	}
-}
-],
+AC_TRY_RUN([m4_include(m4/test-posix-timer.c)],
 	[AC_MSG_RESULT([yes])]
- 	[AC_DEFINE(HAVE_POSIX_TIMERS)]
+	[AC_DEFINE(HAVE_POSIX_TIMERS)]
 	[enable_posix_timers=yes]
 ,
 	[AC_MSG_RESULT([no])]
