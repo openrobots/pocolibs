@@ -1,7 +1,7 @@
 dnl
 dnl Copyright (c) 2004 
 dnl      Autonomous Systems Lab, Swiss Federal Institute of Technology.
-dnl Copyright (c) 2004,2010,2017 CNRS/LAAS
+dnl Copyright (c) 2004,2010,2017,2024 CNRS/LAAS
 dnl
 dnl Permission to use, copy, modify, and distribute this software for any
 dnl purpose with or without fee is hereby granted, provided that the above
@@ -80,7 +80,7 @@ time_difference(struct timeval *t1, struct timeval *t2)
 }
 
 int
-main(int argc, char *argv[])
+main(int argc, char **argv)
 {
 	timer_t t;
 	struct itimerspec tv;
