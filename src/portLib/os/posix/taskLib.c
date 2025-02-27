@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2003-2010,2024 CNRS/LAAS
+ * Copyright (c) 1999, 2003-2010,2024-2025 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -148,7 +148,7 @@ taskLibInit(void)
     OS_TCB *tcb;
     struct sched_param param;
     int policy;
-    char name[12];
+    char name[32];
 
     /* Determine the min and max allowable priorities */
 #ifdef PTHREAD_MIN_PRIORITY
