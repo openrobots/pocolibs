@@ -72,18 +72,6 @@ AC_RPCGEN_M
 dnl processor tests 
 AC_C_BIGENDIAN
 
-dnl
-AC_CACHE_CHECK([return type of signal handlers],[ac_cv_type_signal],[AC_COMPILE_IFELSE(
-[AC_LANG_PROGRAM([#include <sys/types.h>
-#include <signal.h>
-],
-		 [return *(signal (0, 0)) (0) == 1;])],
-		   [ac_cv_type_signal=int],
-		   [ac_cv_type_signal=void])])
-AC_DEFINE_UNQUOTED([RETSIGTYPE],[$ac_cv_type_signal],[Define as the return type of signal handlers
-		    (`int' or `void').])
-
-
 AC_CHECK_HEADERS([getopt.h])
 
 dnl --- check for pthread -----------------------------------------------

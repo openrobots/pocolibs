@@ -347,7 +347,7 @@ poster_serv_1_freeresult(SVCXPRT *transp, xdrproc_t xdr_result, caddr_t res)
 }
 /*----------------------------------------------------------------------*/
 
-static RETSIGTYPE
+static void
 sighandler(int sig)
 {
     switch (sig) {
