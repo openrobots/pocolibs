@@ -2,7 +2,7 @@ dnl autoconf script for portLib/comLib (aka pocolibs)
 dnl
 dnl Copyright (c) 2004
 dnl      Autonomous Systems Lab, Swiss Federal Institute of Technology.
-dnl Copyright (c) 2003-2004,2010,2011 CNRS/LAAS
+dnl Copyright (c) 2003-2004,2010,2011,2025 CNRS/LAAS
 dnl
 dnl GPL, since some parts were copied from other configure.in
 dnl

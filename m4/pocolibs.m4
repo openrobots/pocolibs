@@ -1,7 +1,7 @@
 dnl
 dnl Copyright (c) 2004
 dnl      Autonomous Systems Lab, Swiss Federal Institute of Technology.
-dnl Copyright (c) 2004,2010,2017,2024 CNRS/LAAS
+dnl Copyright (c) 2004,2010,2017,2024,2025 CNRS/LAAS
 dnl
 dnl Permission to use, copy, modify, and distribute this software for any
 dnl purpose with or without fee is hereby granted, provided that the above
