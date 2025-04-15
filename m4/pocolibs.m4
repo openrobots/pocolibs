@@ -57,7 +57,7 @@ dnl test for POSIX timers usability
 dnl
 AC_DEFUN([AC_POSIX_TIMERS_WORKS],
 [AC_MSG_CHECKING([for usable posix timers])
-AC_TRY_RUN([m4_include(m4/test-posix-timer.c)],
+AC_RUN_IFELSE([AC_LANG_SOURCE([[m4_include(m4/test-posix-timer.c)]])],
 	[AC_MSG_RESULT([yes])]
 	[AC_DEFINE(HAVE_POSIX_TIMERS)]
 	[enable_posix_timers=yes]
