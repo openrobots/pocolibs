@@ -70,17 +70,6 @@ AC_PATH_PROG(RPCGEN, rpcgen, no, [$PATH])
 AC_RPCGEN_C
 AC_RPCGEN_M
 
-dnl check for purify
-opt_purify=no
-AC_ARG_WITH(purify, [  --with-purify           configure to postprocess with purify], opt_purify=$withval)
-if test "x$opt_purify" = xyes; then
-  AC_MSG_RESULT([enabling purify])
-  PURIFY="purify"
-else
-  PURIFY=
-fi
-AC_SUBST(PURIFY)
-
 dnl processor tests 
 AC_C_BIGENDIAN
 
