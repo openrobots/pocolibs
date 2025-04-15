@@ -8,7 +8,7 @@ dnl GPL, since some parts were copied from other configure.in
 dnl 
 dnl
 AC_INIT([pocolibs],[3.2.99],[https://git.openrobots.org/projecrs/pocolibs])
-AC_PREREQ(2.69)
+AC_PREREQ([2.69])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 AM_MAINTAINER_MODE([enable])
 
@@ -27,7 +27,7 @@ OSAPI=posix
 AC_SUBST(OSAPI)
 
 AC_ARG_WITH(xenomai,
-	AC_HELP_STRING([--with-xenomai=yes|no], [configure to use Xenomai]),
+	AS_HELP_STRING([--with-xenomai=yes|no],[configure to use Xenomai]),
 	[opt_xenomai=$withval],[opt_xenomai=no])
 AC_ARG_VAR([XENO_CONFIG], [Path to the xeno-config command for xenomai])
 
@@ -54,8 +54,7 @@ esac
 
 dnl --- end of OS flavour checks ----------------------------------------
 
-AC_LIBTOOL_DLOPEN
-AC_PROG_LIBTOOL
+LT_INIT([dlopen])
 
 dnl add -ldl if needed 
 if test -n "$lt_cv_dlopen_libs" ; then
@@ -74,7 +73,16 @@ dnl processor tests
 AC_C_BIGENDIAN
 
 dnl
-AC_TYPE_SIGNAL
+AC_CACHE_CHECK([return type of signal handlers],[ac_cv_type_signal],[AC_COMPILE_IFELSE(
+[AC_LANG_PROGRAM([#include <sys/types.h>
+#include <signal.h>
+],
+		 [return *(signal (0, 0)) (0) == 1;])],
+		   [ac_cv_type_signal=int],
+		   [ac_cv_type_signal=void])])
+AC_DEFINE_UNQUOTED([RETSIGTYPE],[$ac_cv_type_signal],[Define as the return type of signal handlers
+		    (`int' or `void').])
+
 
 AC_CHECK_HEADERS([getopt.h])
 
@@ -82,9 +90,8 @@ dnl --- check for pthread -----------------------------------------------
 if test "x$opt_xenomai" != "xyes" ; then
 # AC_CHECK_PTHREADS(action if ok, action if not ok, action if cross-compiling)
 AC_DEFUN([AC_CHECK_PTHREADS],
-	AC_LANG_SAVE
-	AC_LANG_C
-	AC_TRY_RUN([
+	AC_LANG_PUSH([C])
+	AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <pthread.h>
 #include <stdlib.h>
 void *pipo(void *a) { exit(0); }
@@ -95,8 +102,8 @@ int main() {
     pthread_join(t, NULL);
     exit(2);
 }
-	],[$1],[$2],:)
-	AC_LANG_RESTORE
+	]])],[$1],[$2],[:])
+	AC_LANG_POP([C])
 )
 
 AC_CACHE_CHECK(
@@ -183,8 +190,7 @@ esac
 fi
 
 AC_ARG_ENABLE([posix-timers], 
-	AC_HELP_STRING([--disable-posix-timers Force use of setitimer(2)],
-			[instead of timer_create(3p)]),
+	AS_HELP_STRING([--disable-posix-timers Force use of setitimer(2)],[instead of timer_create(3p)]),
 	[ if test "$enable_posix_timers" = "yes"; then
 		AC_MSG_NOTICE([forcing use of POSIX timers])
 		AC_DEFINE([HAVE_POSIX_TIMERS], 1, [timer_*() functions])
@@ -201,13 +207,10 @@ AC_CHECK_FUNCS(clock_gettime, [],
 AC_SEARCH_LIBS(sched_get_priority_min, [rt])
 
 AC_MSG_CHECKING([for pthread_attr_setschedpolicy])
-AC_TRY_LINK([#include <pthread.h>], 
-	[pthread_attr_setschedpolicy(NULL, SCHED_RR);],
-	[AC_MSG_RESULT([yes])]
-	[AC_DEFINE(HAVE_PTHREAD_ATTR_SETSCHEDPOLICY, 1, 
-		[posix threads scheduling policies])],
-	[AC_MSG_RESULT([no])]
-)
+AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <pthread.h>]], [[pthread_attr_setschedpolicy(NULL, SCHED_RR);]])],[AC_MSG_RESULT([yes])
+	AC_DEFINE(HAVE_PTHREAD_ATTR_SETSCHEDPOLICY, 1, 
+		[posix threads scheduling policies])],[AC_MSG_RESULT([no])
+])
 
 AC_CHECK_FUNCS(gethostbyname, [], [
 	  AC_CHECK_LIB(nsl, gethostbyname)
@@ -215,12 +218,9 @@ AC_CHECK_FUNCS(gethostbyname, [], [
 AC_CHECK_LIB(socket, socket)
 
 AC_MSG_CHECKING([for vfscanf])
-AC_TRY_LINK([#include <stdio.h>],
-	[vfscanf(NULL, NULL, NULL);],
-	[AC_MSG_RESULT([yes])]
-	[AC_DEFINE([HAVE_VFSCANF], 1, [vfscanf()])],
-	[AC_MSG_RESULT([no])]
-)
+AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>]], [[vfscanf(NULL, NULL, NULL);]])],[AC_MSG_RESULT([yes])
+	AC_DEFINE([HAVE_VFSCANF], 1, [vfscanf()])],[AC_MSG_RESULT([no])
+])
 
 AC_CONFIG_LIBOBJ_DIR([compat])
 
@@ -231,7 +231,7 @@ AC_CHECK_HEADERS([sys/tree.h])
 dnl --- Debugging options -----------------------------------------------
 
 AC_ARG_ENABLE(valgrind,
-            AC_HELP_STRING([--enable-valgrind], [compile with valgrind support]),
+            AS_HELP_STRING([--enable-valgrind],[compile with valgrind support]),
             [valgrind=$enableval], [valgrind=no])
 if test "x$valgrind" = "xyes"; then
     PKG_CHECK_MODULES(VALGRIND, valgrind >= 1.1, 
@@ -241,7 +241,7 @@ if test "x$valgrind" = "xyes"; then
 fi
 
 AC_ARG_ENABLE(debug,
-           [AC_HELP_STRING([--enable-debug], [compile with DEBUG defined])],
+           [AS_HELP_STRING([--enable-debug],[compile with DEBUG defined])],
                 [debug=$enableval],[debug=no])
 if test "x$debug" = "xyes"; then
     	CFLAGS="${CFLAGS} -DDEBUG"
@@ -251,8 +251,7 @@ elif test "x$opt_debug" = "xno"; then
 fi
 
 AC_ARG_WITH(debug-output,
-           AC_HELP_STRING([--with-debug-output=all task sys h2dev smmem h2evn mbox gcom h2timer],
-           [print debugging information at run-time (comma separated list)]),
+           AS_HELP_STRING([--with-debug-output=all task sys h2dev smmem h2evn mbox gcom h2timer],[print debugging information at run-time (comma separated list)]),
            [opt_debug_output=$withval],[opt_debug_output=])
 
 if test "x$opt_debug_output" = "xall"; then
@@ -325,8 +324,7 @@ fi
 dnl --- Make makefiles --------------------------------------------------
 
 AC_CONFIG_HEADER(src/pocolibs-config.h)
-AC_OUTPUT(
-	Makefile
+AC_CONFIG_FILES([Makefile
 	pocolibs.pc
 	include/Makefile
 	src/portLib/Makefile
@@ -336,4 +334,5 @@ AC_OUTPUT(
 	src/h2logd/Makefile
 	src/shell/Makefile
 	src/regress/Makefile
-)
+])
+AC_OUTPUT
