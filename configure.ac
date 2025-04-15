@@ -1,11 +1,11 @@
 dnl autoconf script for portLib/comLib (aka pocolibs)
 dnl
-dnl Copyright (c) 2004 
+dnl Copyright (c) 2004
 dnl      Autonomous Systems Lab, Swiss Federal Institute of Technology.
 dnl Copyright (c) 2003-2004,2010,2011 CNRS/LAAS
 dnl
 dnl GPL, since some parts were copied from other configure.in
-dnl 
+dnl
 dnl
 AC_INIT([pocolibs],[3.2.99],[https://git.openrobots.org/projecrs/pocolibs])
 AC_PREREQ([2.69])
@@ -56,7 +56,7 @@ dnl --- end of OS flavour checks ----------------------------------------
 
 LT_INIT([dlopen])
 
-dnl add -ldl if needed 
+dnl add -ldl if needed
 if test -n "$lt_cv_dlopen_libs" ; then
 	LIBS=$lt_cv_dlopen_libs
 fi
@@ -69,7 +69,7 @@ AC_PATH_PROG(RPCGEN, rpcgen, no, [$PATH])
 AC_RPCGEN_C
 AC_RPCGEN_M
 
-dnl processor tests 
+dnl processor tests
 AC_C_BIGENDIAN
 
 AC_CHECK_HEADERS([getopt.h])
@@ -83,7 +83,7 @@ AC_DEFUN([AC_CHECK_PTHREADS],
 #include <pthread.h>
 #include <stdlib.h>
 void *pipo(void *a) { exit(0); }
- 
+
 int main() {
     pthread_t t;
     pthread_create(&t, NULL, pipo, NULL);
@@ -100,7 +100,7 @@ AC_CACHE_CHECK(
 	ac_save_CFLAGS=$CFLAGS
 	CFLAGS="$CFLAGS -pthread"
 	AC_CHECK_PTHREADS(
-		poco_cv_gcc_pthread=yes, 
+		poco_cv_gcc_pthread=yes,
 		poco_cv_gcc_pthread=no
 	)
 	CFLAGS=$ac_save_CFLAGS
@@ -126,7 +126,7 @@ else
 		LDFLAGS="$LDFLAGS -mt";
 	else
 		AC_CHECK_LIB(pthread,pthread_create,poco_threads=-lpthread,
-        	     [AC_CHECK_LIB(c_r,pthread_create,poco_threads=-lc_r)])
+		     [AC_CHECK_LIB(c_r,pthread_create,poco_threads=-lc_r)])
 		ac_save_LIBS="$LIBS"
 		if test -n "$poco_threads" ; then
 			LIBS="$poco_threads $LIBS"
@@ -152,7 +152,7 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
 	])], [xopen=no], [CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE=500"; xopen=yes])
 AC_MSG_RESULT([$xopen])
 
-fi 
+fi
 dnl --- end of checks for pthread ---------------------------------------
 
 dnl recent glibc have moved rpc out to libtirpc
@@ -177,7 +177,7 @@ case `uname -r` in
 esac
 fi
 
-AC_ARG_ENABLE([posix-timers], 
+AC_ARG_ENABLE([posix-timers],
 	AS_HELP_STRING([--disable-posix-timers Force use of setitimer(2)],[instead of timer_create(3p)]),
 	[ if test "$enable_posix_timers" = "yes"; then
 		AC_MSG_NOTICE([forcing use of POSIX timers])
@@ -189,14 +189,14 @@ AC_ARG_ENABLE([posix-timers],
 )
 
 AC_SEARCH_LIBS(clock_gettime, [rt posix4])
-AC_CHECK_FUNCS(clock_gettime, [], 
+AC_CHECK_FUNCS(clock_gettime, [],
 	       AC_MSG_WARN([clock_gettime() support is required]))
 
 AC_SEARCH_LIBS(sched_get_priority_min, [rt])
 
 AC_MSG_CHECKING([for pthread_attr_setschedpolicy])
 AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <pthread.h>]], [[pthread_attr_setschedpolicy(NULL, SCHED_RR);]])],[AC_MSG_RESULT([yes])
-	AC_DEFINE(HAVE_PTHREAD_ATTR_SETSCHEDPOLICY, 1, 
+	AC_DEFINE(HAVE_PTHREAD_ATTR_SETSCHEDPOLICY, 1,
 		[posix threads scheduling policies])],[AC_MSG_RESULT([no])
 ])
 
@@ -219,62 +219,62 @@ AC_CHECK_HEADERS([sys/tree.h])
 dnl --- Debugging options -----------------------------------------------
 
 AC_ARG_ENABLE(valgrind,
-            AS_HELP_STRING([--enable-valgrind],[compile with valgrind support]),
-            [valgrind=$enableval], [valgrind=no])
+	    AS_HELP_STRING([--enable-valgrind],[compile with valgrind support]),
+	    [valgrind=$enableval], [valgrind=no])
 if test "x$valgrind" = "xyes"; then
-    PKG_CHECK_MODULES(VALGRIND, valgrind >= 1.1, 
-        [ AC_DEFINE([VALGRIND_SUPPORT], 1, 
-		[Support for running under valgrind])], 
+    PKG_CHECK_MODULES(VALGRIND, valgrind >= 1.1,
+	[ AC_DEFINE([VALGRIND_SUPPORT], 1,
+		[Support for running under valgrind])],
 	[ AC_MSG_ERROR(Valgrind not present and Valgrind support requested) ])
 fi
 
 AC_ARG_ENABLE(debug,
-           [AS_HELP_STRING([--enable-debug],[compile with DEBUG defined])],
-                [debug=$enableval],[debug=no])
+	   [AS_HELP_STRING([--enable-debug],[compile with DEBUG defined])],
+		[debug=$enableval],[debug=no])
 if test "x$debug" = "xyes"; then
-    	CFLAGS="${CFLAGS} -DDEBUG"
-    	AC_MSG_RESULT([enabling -DDEBUG])
+	CFLAGS="${CFLAGS} -DDEBUG"
+	AC_MSG_RESULT([enabling -DDEBUG])
 elif test "x$opt_debug" = "xno"; then
-    	CFLAGS="${CFLAGS} -DNDEBUG"
+	CFLAGS="${CFLAGS} -DNDEBUG"
 fi
 
 AC_ARG_WITH(debug-output,
-           AS_HELP_STRING([--with-debug-output=all task sys h2dev smmem h2evn mbox gcom h2timer],[print debugging information at run-time (comma separated list)]),
-           [opt_debug_output=$withval],[opt_debug_output=])
+	   AS_HELP_STRING([--with-debug-output=all task sys h2dev smmem h2evn mbox gcom h2timer],[print debugging information at run-time (comma separated list)]),
+	   [opt_debug_output=$withval],[opt_debug_output=])
 
 if test "x$opt_debug_output" = "xall"; then
    opt_debug_output="task,sys,h2dev,smmem,h2evn,mbox,gcom,h2timer"
 fi
 
 ac_save_ifs=$IFS; IFS=","
-for dopt in $opt_debug_output; do 
-        IFS=$ac_save_ifs
+for dopt in $opt_debug_output; do
+	IFS=$ac_save_ifs
 	test -z "$dopt" && break
 
 	case "$dopt" in
-	   task)	
+	   task)
 		AC_DEFINE([PORTLIB_DEBUG_TASKLIB], 1,
-			 [Enable debug in taskLib]) 
+			 [Enable debug in taskLib])
 		;;
-	   sys)		
+	   sys)
 		AC_DEFINE([PORTLIB_DEBUG_SYSLIB], 1,
 			[Enable debug in sysLib])
 		;;
 
-	   h2dev)	
+	   h2dev)
 		AC_DEFINE([COMLIB_DEBUG_H2DEVLIB], 1,
 			[Enable debug in h2devLib])
 		;;
-	   smmem)	
+	   smmem)
 		AC_DEFINE([COMLIB_DEBUG_SMMEMLIB], 1,
 			[Enable debug in smMemLib])
 		;;
-	   h2evn)	
+	   h2evn)
 		AC_DEFINE([COMLIB_DEBUG_H2EVNLIB], 1,
 			[Enable debug in h2evnLib])
 		;;
-	   mbox)	
-		AC_DEFINE([COMLIB_DEBUG_MBOXLIB], 1, 
+	   mbox)
+		AC_DEFINE([COMLIB_DEBUG_MBOXLIB], 1,
 			[Enable debug in mboxLib])
 		;;
 	   gcom)
@@ -285,7 +285,7 @@ for dopt in $opt_debug_output; do
 		AC_DEFINE([COMLIB_DEBUG_H2TIMERLIB], 1,
 			[Enable debug in h2timerLib])
 		;;
-	   *)		
+	   *)
 	    IFS=$ac_save_ifs
 	    AC_MSG_ERROR([Invalid debug output mode "$dopt"]) ;;
 	esac

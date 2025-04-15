@@ -1,5 +1,5 @@
 dnl
-dnl Copyright (c) 2004 
+dnl Copyright (c) 2004
 dnl      Autonomous Systems Lab, Swiss Federal Institute of Technology.
 dnl Copyright (c) 2004,2010,2017,2024 CNRS/LAAS
 dnl
@@ -17,7 +17,7 @@ dnl OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 dnl
 dnl ----------------------------------------------------------------------
 dnl
-dnl tests if rpcgen supports -C 
+dnl tests if rpcgen supports -C
 dnl
 AC_DEFUN([AC_RPCGEN_C],
   [AC_MSG_CHECKING(for rpcgen -C)
@@ -70,4 +70,3 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[m4_include(m4/test-posix-timer.c)]])],
 	[enable_posix_timers=yes]
 ,
 )])dnl
-
