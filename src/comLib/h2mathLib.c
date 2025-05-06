@@ -89,9 +89,7 @@ static double tabSinFresnel [] = {
 *   Retourne: le resultat de la limitation
 */
 
-double angleLimit (angle)
-     double angle;               /* Angle a limiter */
-
+double angleLimit (double angle) /* Angle a limiter */
 {
   /* Test angle */
   if (fabs(angle) > 10000) {
@@ -122,9 +120,7 @@ double angleLimit (angle)
 *   Retourne: le resultat de la limitation
 */
 
-double angleDegLimit (angle)
-     double angle;               /* Angle a limiter */
-
+double angleDegLimit (double angle) /* Angle a limiter */
 {
   /* Ajuster l'angle s'il est superieur a 180 */
   while (angle > 180)
@@ -146,12 +142,12 @@ double angleDegLimit (angle)
 *  Description:
 *  Cherche le terme le plus grand dans un tableau de flottants.
 *
+*     int n;                  Nombre d'elements du tableau
+*     double *pTab;           Adresse de debut du tableau
+*
 *  Retourne : le terme le plus grand du tableau de flottants.
 */
-
-double superTab (n, pTab)
-     int n;                  /* Nombre d'elements du tableau */
-     double *pTab;            /* Adresse de debut du tableau */
+double superTab (int n, double *pTab)
 
 {
   int nTerme;                /* Indice d'un terme du tableau */
@@ -178,13 +174,13 @@ double superTab (n, pTab)
 *  Description:
 *  Cherche le terme le plus petit dans un tableau de flottants.
 *
+*     int n;                  Nombre d'elements du tableau
+*     double *pTab;           Adresse de debut du tableau
+*
 *  Retourne : le terme le plus petit du tableau de flottants.
 */
 
-double inferTab (n, pTab)
-     int n;                  /* Nombre d'elements du tableau */
-     double *pTab;            /* Adresse de debut du tableau */
-
+double inferTab (int n, double *pTab)
 {
   int nTerme;                /* Indice d'un terme du tableau */
   double infTerme;            /* Plus petit terme du tableau */
@@ -213,9 +209,7 @@ double inferTab (n, pTab)
 *   Retourne : angle entre -PI et PI
 */
 
-double atan2Par (dty, dtx)
-     double dty, dtx;            /* Differences de coordonnees */
-
+double atan2Par (double dty, double dtx) /* Differences de coordonnees */
 {
   /* Verifier si le dtx est nul */
   if (dty + dtx == dty)
@@ -236,8 +230,7 @@ double atan2Par (dty, dtx)
 *  Retourne: la valeur du cos
 */
 
-double h2cos (theta)
-     double theta;
+double h2cos (double theta)
 
 {
   double cosAngle;
