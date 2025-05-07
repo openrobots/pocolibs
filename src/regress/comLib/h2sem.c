@@ -52,7 +52,7 @@ pocoregress_ping(void *arg)
 void *
 pocoregress_unlock(void *arg)
 {
-  struct timespec wreq = { tv_sec: 2, tv_nsec: 0 };
+  struct timespec wreq = { .tv_sec = 2, .tv_nsec =  0 };
   struct timespec rreq;
 
   while (nanosleep(&wreq, &rreq))
