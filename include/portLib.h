@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998, 2003-2004 CNRS/LAAS
+ * Copyright (c) 1998, 2003-2004, 2025 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -50,14 +50,6 @@ typedef int STATUS;
 #ifndef NO_WAIT
 #define NO_WAIT 0
 #endif
-
-/* Various generic function pointer types */
-typedef int (*FUNCPTR) ();
-typedef int (*INTFUNCPTR)(); 
-typedef void (*VOIDFUNCPTR)();
-typedef float (*FLTFUNCPTR)();
-typedef double (*DBLFUNCPTR)();
-typedef void *(*VOIDPTRFUNCPTR)();
 
 /* Macro used to create endless loops */
 #ifndef FOREVER
