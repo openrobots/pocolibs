@@ -26,11 +26,12 @@
 
 SEM_ID sem1, sem2;
 
-int
-wddone(SEM_ID *sem)
+void
+wddone(long arg)
 {
+   SEM_ID *sem = (SEM_ID *)arg;
+
    semGive(*sem);
-   return 0;
 }
 
 

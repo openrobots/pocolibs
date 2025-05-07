@@ -45,7 +45,7 @@ static WDOG_ID timerWd;			/* timer watchdog */
 static H2TIMER timerTab[NMAX_TIMERS];	/* array of timers */
 static BOOL h2timerInited = FALSE;
 
-static void timerInt(int arg); /* timer handler procedure */
+static void timerInt(long arg); /* timer handler procedure */
 
 /******************************************************************************
 *
@@ -93,7 +93,7 @@ h2timerInit(void)
 	semGive(timerMutex);
 
 	/* Start the watchdog */
-	wdStart (timerWd, 1, (FUNCPTR) timerInt, 0);
+	wdStart (timerWd, 1, timerInt, 0);
 
 	LOGDBG(("comLib:h2timerLib:h2timerInit: ---end\n"));
 
@@ -380,7 +380,7 @@ h2timerFree(H2TIMER_ID timerId)
 *   Return: Nothing
 */
 static void
-timerInt(int arg)
+timerInt(long arg)
 {
 	int nTimer;		  /* timer index */
 	H2TIMER_ID timerId;	  /* Timer array pointer */
@@ -392,7 +392,7 @@ timerInt(int arg)
 		delayCount = 0;
 
 	/* Restart the watchdog */
-	wdStart (timerWd, 1, (FUNCPTR) timerInt, 0);
+	wdStart (timerWd, 1, timerInt, 0);
 
 	/* Loop on all timers */
 	timerId = timerTab;

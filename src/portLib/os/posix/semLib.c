@@ -321,7 +321,7 @@ semGive(SEM_ID semId)
  * Dummy handler for watchdog
  */
 static 
-void semHandler(int sig)
+void semHandler(long sig)
 {
 }
 
@@ -385,7 +385,7 @@ semTake(SEM_ID semId, int timeout)
       default:
 	timer = wdCreate();
 	ticks = tickGet();
-	wdStart(timer, timeout, (FUNCPTR)semHandler, 0);
+	wdStart(timer, timeout, semHandler, 0);
 
 	while (1) {
 	   switch(semId->type) {

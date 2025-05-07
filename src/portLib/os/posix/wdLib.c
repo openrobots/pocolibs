@@ -108,7 +108,7 @@ wdDelete(WDOG_ID wdId)
 }
 
 STATUS
-wdStart(WDOG_ID wdId, int delay, FUNCPTR pRoutine, long parameter)
+wdStart(WDOG_ID wdId, int delay, WDROUTINEFUNC pRoutine, long parameter)
 {
     sigset_t set;
 

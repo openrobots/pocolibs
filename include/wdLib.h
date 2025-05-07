@@ -39,11 +39,13 @@ extern "C" {
 
 #define WDLIB_MAGIC     (M_wdLib << 16)
 
+typedef void (*WDROUTINEFUNC)(long);
+
 typedef struct wdog *WDOG_ID;
 
 struct wdog {
     int magic;
-    FUNCPTR pRoutine;
+    WDROUTINEFUNC pRoutine;
     long parameter;
     int delay;
     WDOG_ID next;
@@ -54,7 +56,7 @@ struct wdog {
 extern STATUS wdLibInit ( void );
 extern WDOG_ID wdCreate ( void );
 extern STATUS wdDelete ( WDOG_ID wdId );
-extern STATUS wdStart ( WDOG_ID wdId, int delay, FUNCPTR pRoutine, 
+extern STATUS wdStart ( WDOG_ID wdId, int delay, WDROUTINEFUNC pRoutine,
 			long parameter );
 extern STATUS wdCancel ( WDOG_ID wdId );
 

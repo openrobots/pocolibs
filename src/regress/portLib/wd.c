@@ -25,11 +25,10 @@
 
 SEM_ID sem;
 
-int
-wddone()
+void
+wddone(long unused)
 {
    semGive(sem);
-   return 0;
 }
 
 int

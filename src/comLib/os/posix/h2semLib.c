@@ -60,7 +60,7 @@ union semun {
 #endif
 
 static 
-void h2semHandler(int sig)
+void h2semHandler(long sig)
 {
 }
 
@@ -364,7 +364,7 @@ h2semTake(H2SEM_ID semId, int timeout)
 	/* Arme un timer pour gerer le timeout */
 	timer=wdCreate();
 	ticks = tickGet();
-	wdStart(timer, timeout, (FUNCPTR)h2semHandler, 0);
+	wdStart(timer, timeout, h2semHandler, 0);
 
 	op.sem_flg = 0;
 	
