@@ -57,7 +57,7 @@ struct rp {
 pthread_barrier_t barrierc, barriers;
 int result = 0;
 
-int
+void
 func(SERV_ID si, int rqstId)
 {
 	struct rq q;
@@ -70,8 +70,6 @@ func(SERV_ID si, int rqstId)
 	csServReplySend(si, 0, FINAL_REPLY, OK, (char *)&p,
 
 	    sizeof(struct rp), NULL);
-	return 0;
-
 }
 
 

@@ -135,7 +135,7 @@ static const H2_ERROR csLibH2errMsgs[] = CS_LIB_H2_ERR_MSGS;
    STATUS csServFuncInstall (servId, rqstType, rqstFunc)
       SERV_ID servId;           * Identificateur du serveur *
       int rqstType;             * Type de la requete *
-      FUNCPTR rqstFunc;         * Fonction de traitement de cette requete *
+      CSSERVFUN rqstFunc;       * Fonction de traitement de cette requete *
 
    Retourne: OK ou ERROR
 */
@@ -471,7 +471,7 @@ csServInitN(int maxRqstDataSize,	/* Taille max des requetes */
     memset((char *) servId, 0, sizeof (CS_SERV));
 
     /* Allouer le tableau initial de fonctions de traitement */
-    servId->rqstFuncTab = (FUNCPTR *)malloc(nbRqstFunc*sizeof(FUNCPTR *));
+    servId->rqstFuncTab = malloc(nbRqstFunc*sizeof(CSSERVFUNC *));
     if (servId->rqstFuncTab == NULL) {
 	free(servId);
 	return ERROR;
@@ -520,7 +520,7 @@ csServInitN(int maxRqstDataSize,	/* Taille max des requetes */
 STATUS 
 csServFuncInstall(SERV_ID servId,  /* Identificateur du serveur */
 		  int rqstType,    /* Type de la requete */
-		  FUNCPTR rqstFunc)/* Fonction de traitement de la requete */
+		  CSSERVFUNC rqstFunc)/* Fonction de traitement de la requete */
 {
     /* Retourner ERROR, si ce serveur n'est pas initialise */
     if (servId->initFlag != CS_SERV_INIT_FLAG) {
@@ -557,7 +557,7 @@ STATUS
 csServRqstExec(SERV_ID servId)  /* Identificateur du serveur */
 {
     int rqstType;                 /* Type de la requete */
-    FUNCPTR servFunc;             /* Fonction de traitement de la requete */
+    CSSERVFUNC servFunc;          /* Fonction de traitement de la requete */
     int rqstId;                   /* Identificateur de la requete */
     SERV_RQST *pRqst;             /* Ptr structure de donnees requete */
     
@@ -597,10 +597,10 @@ csServRqstExec(SERV_ID servId)  /* Identificateur du serveur */
     }
     /* Verifier la validite du type de la requete */
     if ((rqstType < 0 && rqstType >= servId->nbRqstFunc) ||
-	(servFunc = servId->rqstFuncTab[rqstType]) == (FUNCPTR) NULL) {
+	(servFunc = servId->rqstFuncTab[rqstType]) == NULL) {
 	return csServReplySend(servId, rqstId, FINAL_REPLY, 
 			       S_csLib_INVALID_RQST_TYPE, (char *) NULL, 0,
-			       (FUNCPTR) NULL);
+			       NULL);
     }
     /* Signaler la prise de cet identificateur de requete */
     pRqst->rqstIdFlag = TRUE;

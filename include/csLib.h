@@ -90,14 +90,17 @@ typedef struct {
   int clientSendId;                         /* Id d'envoi du client */
 } SERV_RQST;
 
+struct _CS_SERV;
+typedef void (*CSSERVFUNC)(struct _CS_SERV *, int);
+
 /* Def. type de la structure principale d'un serveur */
-typedef struct {
+typedef struct _CS_SERV {
   int initFlag;				/* Flag d'initialisation */
   LETTER_ID rcvLetter;			/* Lettre de reception */
   LETTER_ID replyLetter;		/* Lettre de replique */
   int inExecRqstId;			/* id requete en execution */
   int nbRqstFunc;			/* nombre de fonctions de traitement */
-  FUNCPTR *rqstFuncTab;			/* tab fonctions de traitement */
+  CSSERVFUNC *rqstFuncTab;			/* tab fonctions de traitement */
   SERV_RQST rqstTab[SERV_NMAX_RQST_ID];	/* Tab. parametres requetes */
 } CS_SERV, *SERV_ID;
 
@@ -142,7 +145,7 @@ extern int csMboxStatus ( int mask );
 extern int csMboxWait ( int timeout, int mboxMask );
 extern STATUS csServEnd ( SERV_ID servId );
 extern STATUS csServFuncInstall ( SERV_ID servId, int rqstType, 
-    FUNCPTR rqstFunc );
+    CSSERVFUNC rqstFunc );
 extern STATUS csServInit ( int maxRqstDataSize, int maxReplyDataSize, 
     SERV_ID *pServId );
 extern STATUS csServInitN ( int maxRqstDataSize, int maxReplyDataSize, 
