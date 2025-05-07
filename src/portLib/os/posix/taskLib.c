@@ -53,6 +53,8 @@ static int rr_max_priority;
 
 /*
  * Struture to pass parameters to a VxWorks-like task main routine
+ *
+ * Unused - was for taskSpawn()
  */
 typedef struct taskParams {
     int arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10;
@@ -66,12 +68,10 @@ struct OS_TCB {
     int options;			/* task options bits */
     int policy;				/* scheduling policy */
     int priority;			/*  */
-    FUNCPTR entry;			/* entry point */
     int errorStatus;			/* error code */
     pthread_t tid;			/* thread id */
     pid_t pid;				/* process id */
     unsigned long userData;		/* user data */
-    TASK_PARAMS params;			/* parameters */
     struct OS_TCB *next;		/* next tcb in list */
     unsigned int magic;			/* magic */
     pthread_mutex_t *starter;		/* guard tcb during task startup */
@@ -166,7 +166,7 @@ taskLibInit(void)
     pthread_key_create(&taskControlBlock, NULL);
 
     /* allocate a TCB for main thread */
-    tcb = (OS_TCB *)malloc(sizeof(OS_TCB));
+    tcb = (OS_TCB *)calloc(1, sizeof(OS_TCB));
     if (tcb == NULL) {
 	return ERROR;
     }
@@ -181,7 +181,7 @@ taskLibInit(void)
     tcb->policy = policy;
     tcb->priority = priorityPosixToVx(param.sched_priority);
     tcb->options = 0;
-    tcb->entry = NULL;			/* implicit main() */
+    tcb->entry2 = NULL;			/* implicit main() */
     tcb->errorStatus = errno;
     /* Process and thread ids */
     tcb->pid = getpid();
@@ -239,45 +239,6 @@ taskCleanUp(void *data)
 	    pthread_mutex_destroy(tcb->starter);
     }
     free(tcb);
-}
-
-/*----------------------------------------------------------------------*/
-
-/*
- * A Helper function to convert form VxWorks task function prototype to
- *  pthreads function prototype
- */
-void *
-taskStarter(void *data)
-{
-    OS_TCB *tcb = (OS_TCB *)data;
-    TASK_PARAMS *p = (TASK_PARAMS *)&(tcb->params);
-    static int result;
-
-    pthread_mutex_lock(tcb->starter); 	/* released in taskCleanUp() */
-    tcb->pid = getpid();
-
-    /* Register the TCB pointer in a thread-specific key */
-    if (pthread_setspecific(taskControlBlock, (void *)tcb) != 0) {
-	return NULL;
-    }
-    /* Register a cleanup function */
-    pthread_cleanup_push(taskCleanUp, data);
-
-    /* Execute create hooks */
-    executeHooks(createHooks, tcb);
-
-#ifdef DEBUG
-    printf("taskStart \"%s\" %p\n", tcb->name, tcb);
-#endif
-
-    result = (*(tcb->entry))(p->arg1, p->arg2, p->arg3, p->arg4, p->arg5,
-				p->arg6, p->arg7, p->arg8, p->arg9, p->arg10);
-    /* Execute cleanup functions */
-    pthread_cleanup_pop(1);
-    /* Terminate thread */
-    pthread_exit(&result);
-    return NULL;
 }
 
 /*----------------------------------------------------------------------*/
@@ -481,47 +442,7 @@ registerTcb(OS_TCB *tcb, pthread_t thread_id)
 /*----------------------------------------------------------------------*/
 /*
  * Create a new task
- */
-long
-taskSpawn(char *name, int priority, int options, int stackSize,
-	  FUNCPTR entryPt, int arg1, int arg2, int arg3, int arg4, int arg5,
-	  int arg6, int arg7, int arg8, int arg9, int arg10)
-{
-    pthread_attr_t thread_attr;
-    pthread_t thread_id;
-    int status;
-    OS_TCB *tcb;
-
-    tcb = newTcb(name, priority, options, stackSize, &thread_attr);
-    if (tcb == NULL)
-	return ERROR;
-
-    tcb->entry = entryPt;
-    tcb->params.arg1 = arg1;
-    tcb->params.arg2 = arg2;
-    tcb->params.arg3 = arg3;
-    tcb->params.arg4 = arg4;
-    tcb->params.arg5 = arg5;
-    tcb->params.arg6 = arg6;
-    tcb->params.arg7 = arg7;
-    tcb->params.arg8 = arg8;
-    tcb->params.arg9 = arg9;
-    tcb->params.arg10 = arg10;
-
-    status = pthread_create(&thread_id, &thread_attr, taskStarter, tcb);
-    if (status != 0) {
-	errnoSet(status);
-	pthread_mutex_unlock(tcb->starter);
-	return ERROR;
-    }
-    registerTcb(tcb, thread_id);
-    return (long)tcb;
-}
-
-/*----------------------------------------------------------------------*/
-/*
- * version of taskSpawn() that passes parameters to the new task as a
- * single pointer
+ * passes parameters to the new task as a single pointer
  */
 long
 taskSpawn2(const char *name, int priority, int options, int stackSize,
@@ -564,7 +485,7 @@ taskFromThread(const char *name)
     /*
      * Allocate a TCB
      */
-    tcb = (OS_TCB *)malloc(sizeof(OS_TCB));
+    tcb = (OS_TCB *)calloc(1, sizeof(OS_TCB));
     if (tcb == NULL) {
 	errnoSet(S_portLib_NO_MEMORY);
 	return ERROR;
@@ -579,21 +500,9 @@ taskFromThread(const char *name)
 #ifdef DEBUG
     printf("taskFromThread \"%s\" %p\n", tcb->name, tcb);
 #endif
-    tcb->entry = NULL;
     tcb->errorStatus = 0;
     tcb->pid = getpid();
     tcb->userData = 0; /* XXX */
-
-    tcb->params.arg1 = 0;
-    tcb->params.arg2 = 0;
-    tcb->params.arg3 = 0;
-    tcb->params.arg4 = 0;
-    tcb->params.arg5 = 0;
-    tcb->params.arg6 = 0;
-    tcb->params.arg7 = 0;
-    tcb->params.arg8 = 0;
-    tcb->params.arg9 = 0;
-    tcb->params.arg10 = 0;
 
     tcb->entry2 = NULL;
     tcb->params2 = NULL;

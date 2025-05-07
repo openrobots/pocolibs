@@ -1,7 +1,7 @@
 
 lib_LTLIBRARIES = libportLib.la
 
-libportLib_la_LDFLAGS = -version-info 5:0:1 -no-undefined
+libportLib_la_LDFLAGS = -version-info 5:0:0 -no-undefined
 
 AM_CPPFLAGS = -I$(top_srcdir)/include
 

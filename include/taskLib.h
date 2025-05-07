@@ -37,14 +37,6 @@ typedef struct OS_TCB OS_TCB, WIND_TCB;
  * Function prototypes
  */
 extern STATUS taskLibInit(void);
-#ifdef TASKLIB_C
-extern long taskSpawn(char *, int, int, int, FUNCPTR, int, int, int,
-		       int, int, int, int, int, int, int);
-#else
-/* Awful hack */
-extern long taskSpawn(char *name, int priority, int options,
-    int stackSize, FUNCPTR entryPt, ... ) __attribute__((deprecated("use taskSpawn2() instead")));
-#endif
 extern long taskSpawn2(const char *name, int priority, int options, int stackSize,
     void *(*start_routine)(void *), void *arg);
 extern STATUS taskDelete(long);
