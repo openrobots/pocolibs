@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1991, 2003-2005,2012 CNRS/LAAS
+ * Copyright (c) 1991, 2003-2005, 2012, 2025 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -127,6 +127,8 @@ typedef struct {
 
 /* -- PROTOTYPES ----------------------------------------------- */
 
+typedef int (*GCOM_CODINGFUNC)(char *, int, char *, int);
+
 BOOL gcomLetterRcv (LETTER_ID letter, MBOX_ID *pOrigMboxId, int *pSendId, 
     int timeout);
 STATUS gcomEnd (void);
@@ -137,13 +139,13 @@ STATUS gcomLetterDiscard (LETTER_ID letterId);
 STATUS gcomLetterReply (MBOX_ID mboxId, int sendId, int replyLetterType, 
     LETTER_ID letterReply);
 STATUS gcomLetterWrite (LETTER_ID letterId, int dataType, char *pData, 
-    int dataSize, FUNCPTR codingFunc);
+    int dataSize, GCOM_CODINGFUNC codingFunc);
 STATUS gcomMboxFind (const char *procName, MBOX_ID *pMboxId);
 STATUS gcomMboxName (MBOX_ID mboxId, char *pName);
 STATUS gcomSendIdFree (int sendId);
 int gcomLetterList (LETTER_ID *pList, int maxList);
 int gcomLetterRead (LETTER_ID letterId, char *pData, int maxDataSize, 
-    FUNCPTR decodingFunc);
+    GCOM_CODINGFUNC decodingFunc);
 int gcomLetterSend (MBOX_ID mboxId, LETTER_ID sendLetter, 
     LETTER_ID intermedReplyLetter, LETTER_ID finalReplyLetter, int block, 
     int *pSendId, int finalReplyTout, int intermedReplyTout);

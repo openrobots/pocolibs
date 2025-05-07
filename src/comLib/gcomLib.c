@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003-2004,2012,2014,2024 CNRS/LAAS
+ * Copyright (c) 1990, 2003-2004, 2012, 2014, 2024-2025 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -468,14 +468,14 @@ gcomLetterAlloc(int sizeLetter, LETTER_ID *pLetterId)
 *     int dataType;                 Type des donnees de la lettre
 *     char *pData;                  Adresse initiale donnees a ecrire
 *     int dataSize;                 Taille des donnees
-*     FUNCPTR codingFunc;           Fonction de codage de la lettre
+*     GCOM_CODINGFUNC codingFunc;   Letter encoding function
 *
 *  Retourne : OK ou ERROR
 */
 
 STATUS 
 gcomLetterWrite(LETTER_ID letterId, int dataType, char *pData, 
-		int dataSize, FUNCPTR codingFunc)
+		int dataSize, GCOM_CODINGFUNC codingFunc)
 {
     LETTER_HDR_ID pText;            /* Pointeur vers le texte de la lettre */
     
@@ -549,14 +549,14 @@ gcomLetterType(LETTER_ID letterId)
 *     LETTER_ID letterId;          Lettre a lire 
 *     char *pData;                 Ou` mettre les donnees 
 *     int maxDataSize;             Taille max du message a lire 
-*     FUNCPTR decodingFunc;        Fonction de decodage 
+*     GCOM_CODINGFUNC decodingFunc Decoding function
 *
 *  Retourne : taille du message en bytes ou ERROR
 */
 
 int 
 gcomLetterRead(LETTER_ID letterId, char *pData, int maxDataSize, 
-	       FUNCPTR decodingFunc)
+	       GCOM_CODINGFUNC decodingFunc)
 {
     int dataSize;                   /* Taille des donnees de la lettre */
     LETTER_HDR_ID pText;            /* Pointeur vers le texte de la lettre */

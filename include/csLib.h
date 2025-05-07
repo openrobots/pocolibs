@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1991-2005,2012 CNRS/LAAS
+ * Copyright (c) 1991-2005, 2012, 2025 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -127,12 +127,13 @@ extern STATUS csClientInit ( const char *servMboxName, int maxRqstSize,
     int maxIntermedReplySize, int maxFinalReplySize, CLIENT_ID *pClientId );
 extern int csClientReplyRcv ( CLIENT_ID clientId, int rqstId, int block, 
     char *intermedReplyDataAdrs, int intermedReplyDataSize, 
-    FUNCPTR intermedReplyDecodFunc, char *finalReplyDataAdrs, 
-    int finalReplyDataSize, FUNCPTR finalReplyDecodFunc );
+    GCOM_CODINGFUNC intermedReplyDecodFunc, char *finalReplyDataAdrs,
+    int finalReplyDataSize, GCOM_CODINGFUNC finalReplyDecodFunc );
 extern int csClientRqstIdFree ( CLIENT_ID clientId, int rqstId );
 extern STATUS csClientRqstSend ( CLIENT_ID clientId, int rqstType, 
-    char *rqstDataAdrs, int rqstDataSize, FUNCPTR codFunc, BOOL intermedFlag, 
-    int intermedReplyTout, int finalReplyTout, int *pRqstId );
+    char *rqstDataAdrs, int rqstDataSize, GCOM_CODINGFUNC codFunc,
+    BOOL intermedFlag, int intermedReplyTout, int finalReplyTout,
+    int *pRqstId );
 extern STATUS csMboxEnd ( void );
 extern STATUS csMboxInit ( const char *mboxBaseName, int rcvMboxSize, 
     int replyMboxSize );
@@ -147,11 +148,12 @@ extern STATUS csServInit ( int maxRqstDataSize, int maxReplyDataSize,
 extern STATUS csServInitN ( int maxRqstDataSize, int maxReplyDataSize, 
     int nbRqstFunc, SERV_ID *pServId );
 extern STATUS csServReplySend ( SERV_ID servId, int rqstId, int replyType, 
-    int replyBilan, char *replyDataAdrs, int replyDataSize, FUNCPTR codFunc );
+    int replyBilan, char *replyDataAdrs, int replyDataSize,
+    GCOM_CODINGFUNC codFunc );
 extern STATUS csServRqstExec ( SERV_ID servId );
 extern STATUS csServRqstIdFree ( SERV_ID servId, int rqstId );
 extern STATUS csServRqstParamsGet ( SERV_ID servId, int rqstId, 
-    char *rqstDataAdrs, int rqstDataSize, FUNCPTR decodFunc );
+    char *rqstDataAdrs, int rqstDataSize, GCOM_CODINGFUNC decodFunc );
 
 #ifdef __cplusplus
 }

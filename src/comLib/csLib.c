@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003-2005,2012 CNRS/LAAS
+ * Copyright (c) 1990, 2003-2005, 2012, 2025 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -166,7 +166,7 @@ static const H2_ERROR csLibH2errMsgs[] = CS_LIB_H2_ERR_MSGS;
       int rqstId;               * Id de la requete en execution *
       char *rqstDataAdrs;       * Adrs struct. ou` stocker params requete *
       int rqstDataSize;         * Taille de cette structure *
-      FUNCPTR decodFunc;        * Fonction de decodage *
+      GCOM_CODINGFUNC decodFunc; * Fonction de decodage *
 
    Retourne: OK ou ERROR
 */
@@ -185,7 +185,7 @@ static const H2_ERROR csLibH2errMsgs[] = CS_LIB_H2_ERR_MSGS;
       int replyBilan;           * Bilan: OK ou code d'erreur *
       char *replyDataAdrs;      * Adresse base de la replique a envoyer *
       int replyDataSize;        * Taille de la replique a envoyer *
-      FUNCPTR codFunc;          * Fonction de codage du message *
+      GCOM_CODINGFUNC codFunc;  * Fonction de codage du message *
 
   Retourne : OK ou ERROR
 */
@@ -250,7 +250,7 @@ static const H2_ERROR csLibH2errMsgs[] = CS_LIB_H2_ERR_MSGS;
       int rqstType;              * Type de la requete *
       char *rqstDataAdrs;        * Adrs. struct. donnees de la requete *
       int rqstDataSize;          * Taille de la requete a envoyer *
-      FUNCPTR codeFunc;          * Fonction de codage *
+      GCOM_CODINGFUNC codeFunc;  * Fonction de codage *
       BOOL intermedFlag;         * TRUE (si attend repl interm), FALSE sinon *
       int intermedReplyTout;     * Timeout attente replique intermediaire *
       int finalReplyTout;        * Timeout attente replique finale *
@@ -275,10 +275,12 @@ static const H2_ERROR csLibH2errMsgs[] = CS_LIB_H2_ERR_MSGS;
                                         BLOCK_ON_FINAL_REPLY *
      char *intermedReplyDataAdrs;     * Adresse donees replique intermed. *
      int intermedReplyDataSize;       * Taille de la replique intermediaire *
-     FUNCPTR intermedReplyDecodFunc;  * Fonction decodage replique intermed *
+     GCOM_CODINGFUNC intermedReplyDecodFunc;
+                                      * Fonction decodage replique intermed *
      char *finalReplyDataAdrs;        * Adresse donnees replique finale *
      int finalReplyDataSize;          * Taille de la replique finale *
-     FUNCPTR finalReplyDecodFunc;     * Fonction decodage replique finale *
+     GCOM_CODINGFUNC finalReplyDecodFunc;
+                                      * Fonction decodage replique finale *
 
    Retourne : bilan de la replique ou ERROR
 */
@@ -628,7 +630,7 @@ csServRqstParamsGet(SERV_ID servId, /* Identificateur du serveur */
 		    int rqstId, /* Id de la requete en execution */
 		    char *rqstDataAdrs, /* Adrs ou` stocker params requete */
 		    int rqstDataSize, /* Taille de cette zone */
-		    FUNCPTR decodFunc) /* Fonction de decodage des donnees */
+		    GCOM_CODINGFUNC decodFunc) /* Data decoding function */
 {
     SERV_RQST *pRqst;               /* Ptr vers struct. requete */
     
@@ -675,7 +677,7 @@ csServReplySend(SERV_ID servId,      /* Identificateur du serveur */
 		int replyBilan,      /* Bilan: OK ou code d'erreur */
 		char *replyDataAdrs, /* Adresse  de la replique a envoyer */
 		int replyDataSize,   /* Taille de la replique a envoyer */
-		FUNCPTR codFunc)     /* Fonction de codage des donnees */
+		GCOM_CODINGFUNC codFunc) /* Data encoding function */
 {
     SERV_RQST *pRqst;               /* Ptr vers struct de la requete */
     
@@ -887,7 +889,7 @@ csClientRqstSend(CLIENT_ID clientId,    /* Id du client */
 		 int rqstType, 		/* Type de la requete */ 
 		 char *rqstDataAdrs, 	/* Adrs. donnees de la requete */ 
 		 int rqstDataSize, 	/* Taille de la requete a envoyer */ 
-		 FUNCPTR codFunc, 	/* Fonction de codage des donnees */ 
+		 GCOM_CODINGFUNC codFunc,/* Data encoding function */
 		 BOOL intermedFlag, 	/* TRUE (si attend intermed.), 
 					   FALSE sinon */ 
 		 int intermedReplyTout, /* Timeout attente replique 
@@ -982,13 +984,13 @@ csClientReplyRcv(CLIENT_ID clientId,	/* Identificateur du client */
 						 intermed. */ 
 		 int intermedReplyDataSize, /* Taille de la replique 
 					       intermediaire */
-		 FUNCPTR intermedReplyDecodFunc, /* Fonction decodage replique
-						    intermed */
+		 GCOM_CODINGFUNC intermedReplyDecodFunc, /* Intermediate reply
+                                                            decoding function */
 		 char *finalReplyDataAdrs, /* Adresse donnees replique 
 					      finale */	
 		 int finalReplyDataSize, /* Taille de la replique finale */ 
-		 FUNCPTR finalReplyDecodFunc) /* Fonction decodage replique 
-						 finale */   
+		 GCOM_CODINGFUNC finalReplyDecodFunc) /* Finaly reply decoding
+                                                       * function */
 {
     int status;                         /* Etat de la replique */
     int servErrno;                      /* Errno envoye par le serveur */
