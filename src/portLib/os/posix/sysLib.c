@@ -45,7 +45,7 @@
  **
  ** Based on public VxWorks BSP Sources
  **/
-static FUNCPTR sysClkRoutine = NULL;
+static SYSCLKROUTINEFUNC sysClkRoutine = NULL;
 static int sysClkArg = 0;
 static int sysClkTicksPerSecond = 100;
 static int sysClkConnected = FALSE;
@@ -65,7 +65,7 @@ static sigset_t sysClkSignalSet;
  * Connect a routine to the clock interrupt
  */
 STATUS
-sysClkConnect(FUNCPTR routine, int arg)
+sysClkConnect(SYSCLKROUTINEFUNC routine, int arg)
 {
     sysClkRoutine = routine;
     sysClkArg = arg;

@@ -25,7 +25,7 @@ extern "C" {
 
 extern unsigned long long vxTicks;
 
-extern void tickAnnounce ( void );
+extern void tickAnnounce ( int );
 extern void tickSet ( unsigned long ticks );
 extern unsigned long tickGet ( void );
  

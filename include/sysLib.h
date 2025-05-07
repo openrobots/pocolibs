@@ -21,7 +21,8 @@
 extern "C" {
 #endif
 
-extern STATUS sysClkConnect ( FUNCPTR routine, int arg );
+typedef void (*SYSCLKROUTINEFUNC)(int);
+extern STATUS sysClkConnect ( SYSCLKROUTINEFUNC routine, int arg );
 extern void sysClkEnable ( void );
 extern void sysClkDisable ( void );
 extern STATUS sysClkRateSet ( int ticksPerSecond );

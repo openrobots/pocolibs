@@ -184,7 +184,7 @@ pocoLibs, only clock handling functions are provided by sysLib.
 ### tickAnnounce
 
     #include <tickLib.h>
-	void tickAnnounce(void)
+	void tickAnnounce(int)
 
 `tickAnnounce()` is a function provided to be used as the default
 handler for the system clock. This function handles the expiration of

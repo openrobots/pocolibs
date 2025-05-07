@@ -59,7 +59,7 @@ osInit(int clkRate)
 
     if (clkRate > 0) {
 	/* Start system clock */
-	sysClkConnect((FUNCPTR)tickAnnounce, 0);
+	sysClkConnect(tickAnnounce, 0);
 	sysClkRateSet(clkRate);
 	sysClkEnable();
     }

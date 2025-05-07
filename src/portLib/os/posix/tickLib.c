@@ -26,7 +26,7 @@ unsigned long long vxTicks = 0;
 extern WDOG_ID wdList;
 
 void
-tickAnnounce(void)
+tickAnnounce(int unused)
 {
     WDOG_ID wd;
 
