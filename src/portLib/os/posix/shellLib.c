@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 2003 CNRS/LAAS
+ * Copyright (c) 1997, 2003,2025 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -32,7 +32,7 @@ Written by:         John Monroe         SPARTA, Inc.        (703) 448-0210
 Modified by:        Matthieu Herrb      LAAS/CNRS           matthieu@laas.fr
 -----------------------------------------------------------------------------*/
 
-
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -45,9 +45,14 @@ Modified by:        Matthieu Herrb      LAAS/CNRS           matthieu@laas.fr
 #include "taskLib.h"
 #include "shellLib.h"
 
-static STATUS findSymbol(char *name, char **value);
-static void printValue(long value);
-static void printSymbol(char *name, char *value);
+typedef uintptr_t (*shellFunc)(char *arg1, char *arg2,
+    char *arg3, char *arg4, char *arg5, char *arg6,
+    char *arg7, char *arg8, char *arg9, char *arg10);
+typedef void *(*spFunc)(void *arg);
+
+static STATUS findSymbol(char *name, shellFunc *value);
+static void printValue(uintptr_t value);
+static void printSymbol(char *name, void *value);
 
 #define UNKNOWN                 0       /* arg type unknown */
 #define	FUNCTION		1	/* function in symbol table */
@@ -74,9 +79,9 @@ executeCmd(char *cmdbuf,		/* client command line */
 					 * DEC_VALUE */
 	int argc;			/* number of arguments passed by
 					   * 'rsh' */
-	char *symStartAddr = NULL;	/* start addr Major fctn (sp, ld,
+	shellFunc symStartAddr = NULL;	/* start addr Major fctn (sp, ld,
 					 * etc.) */
-	char *fctnStartAddr = NULL;	/* addr Minor fctn (task being
+	spFunc fctnStartAddr = NULL;	/* addr Minor fctn (task being
 					 * spawned) */
 	STATUS statusReturn = OK;	/* OK/ERROR status returned by
 					 * function */
@@ -162,14 +167,14 @@ executeCmd(char *cmdbuf,		/* client command line */
 				break;
 			case HEX_VALUE:
 			case DEC_VALUE:
-				printValue((long)argv[1]);
+				printValue((uintptr_t)argv[1]);
 				break;
 			default:
 				puts(argv[1]);
 			} /* switch */
 		} else if (strcmp(argv[0], "sp") == 0) {
 			/* task Spawn */
-			if (findSymbol(argv[1], &fctnStartAddr) != OK) {
+			if (findSymbol(argv[1], (shellFunc *)&fctnStartAddr) != OK) {
 				fprintf(stderr, "symbol not found: %s\n", 
 				    argv[1]);
 			} else {
@@ -182,11 +187,11 @@ executeCmd(char *cmdbuf,		/* client command line */
 						    argv[2]);
 						symStartAddr = NULL;
 					} 
-					argv[2] = symStartAddr;
+					argv[2] = (char *)symStartAddr;
 				} 
 				if (taskSpawn2(NULL, 50, 0, 10000, 
-					(VOIDPTRFUNCPTR)fctnStartAddr,
-					argv[2]) == ERROR) {
+					fctnStartAddr,
+					(void *)argv[2]) == ERROR) {
 					fprintf(stderr, 
 					    "Error creating process\n");
 					statusReturn = ERROR;
@@ -221,12 +226,10 @@ executeCmd(char *cmdbuf,		/* client command line */
 #endif
 				
 				parse_args(0, argc, argv, argType);
-				val = (int) (((FUNCPTR) symStartAddr)(argv[1], 
+				val = symStartAddr(argv[1], 
 						 argv[2], argv[3], argv[4],
 						 argv[5], argv[6], argv[7], 
-						 argv[8], argv[9], argv[10])
-				);
-				
+						 argv[8], argv[9], argv[10]);
 				printValue(val);
 				fflush(stdout);
 			}
@@ -246,7 +249,7 @@ executeCmd(char *cmdbuf,		/* client command line */
  **/
 
 static STATUS
-findSymbol(char *name, char **value)
+findSymbol(char *name, shellFunc *value)
 {
 	char *pAdrs;
 	SYM_TYPE  symType;
@@ -262,7 +265,7 @@ findSymbol(char *name, char **value)
 		}
 	}
 	if (value != NULL) {
-		*value = pAdrs;
+		*value = (shellFunc)pAdrs;
 	}
 	return(OK);
 	
@@ -272,10 +275,10 @@ findSymbol(char *name, char **value)
  ** Display a value like the VxWorks shell does
  **/
 static void
-printValue(long value)
+printValue(uintptr_t value)
 {
 	
-	printf("value = %ld = 0x%lx", value, value);
+	printf("value = %lu = 0x%lx", value, value);
 	if (value > ' ' && value < '~' ) {
 		printf(" = '%c'", (int)value);
 	}
@@ -287,10 +290,10 @@ printValue(long value)
  ** Display a symbol and its value like the VxWorks shell does
  **/
 static void
-printSymbol(char *name, char *value)
+printSymbol(char *name, void *value)
 {
 	printf("%s = %p: ", name, value);
-	printValue(*(long *)value);
+	printValue(*(uintptr_t *)value);
 }
 
 
@@ -299,7 +302,7 @@ printSymbol(char *name, char *value)
  ** and return the number arguments found.
  **/
 int
-get_args(int line_length, char *line, char **argv)
+get_args(int line_length, char *line, char *argv[])
 {
 	char quote1 = 0x27, quote2 = 0x22; /* single & double quotes */
 	char *c;

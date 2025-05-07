@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 2003 CNRS/LAAS
+ * Copyright (c) 1990, 2003, 2025 CNRS/LAAS
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -34,12 +34,12 @@ extern void posterShow(void);
 #endif
 
 /* unused varniable, to pull symmbols from libraries */
-VOIDFUNCPTR shellTabFunc[] = {
+void *shellTabFunc[] = {
 #ifdef INCLUDE_MBOX
     mboxEssay,
 #endif
 #ifdef INCLUDE_TIMER
-    (VOIDFUNCPTR)h2timerTest,
+    h2timerTest,
 #endif
 #ifdef INCLUDE_POSTER
     posterShow,
