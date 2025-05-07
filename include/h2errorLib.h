@@ -195,7 +195,7 @@ extern "C" {
 
 typedef struct H2_ERROR {
   const char *name;           /* error name (without source name) */
-  const short num;            /* error number (without source num) */
+  const unsigned short num;            /* error number (without source num) */
 } H2_ERROR;
 
 #include <errnoLib.h>
