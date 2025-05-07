@@ -18,13 +18,9 @@ _portLib_ defines the following types:
 
 #### Function pointers
 
-    typedef int (*FUNCPTR) ();
-    typedef int (*INTFUNCPTR)(); 
-    typedef void (*VOIDFUNCPTR)();
-    typedef float (*FLTFUNCPTR)();
-    typedef double (*DBLFUNCPTR)();
-    typedef void *(*VOIDPTRFUNCPTR)();
-
+	typedef void (*TASKHOOKFUNC)(OS_TCB *);
+	typedef void (*WDROUTINEFUNC)(long);
+	
 Macros
 ------
 

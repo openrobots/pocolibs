@@ -23,11 +23,10 @@
 
 extern STATUS i(void);
 
-int 
+void
 myDeleteHook(OS_TCB *tcb)
 {
 	printf("Calling delete hook for task %s\n", taskName((long)tcb));
-	return 0;
 }
 
 

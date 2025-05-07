@@ -86,7 +86,7 @@ struct OS_TCB {
  * Task hooks globals
  */
 typedef struct TASK_HOOK_LIST {
-    FUNCPTR hook;
+    TASKHOOKFUNC hook;
     struct TASK_HOOK_LIST *next;
 } TASK_HOOK_LIST;
 
@@ -948,7 +948,7 @@ taskHookInit(void)
  * Add a hook to the head of a list
  */
 static STATUS
-addHookHead(TASK_HOOK_LIST **list, FUNCPTR hook)
+addHookHead(TASK_HOOK_LIST **list, TASKHOOKFUNC hook)
 {
     TASK_HOOK_LIST *l;
 
@@ -972,7 +972,7 @@ addHookHead(TASK_HOOK_LIST **list, FUNCPTR hook)
  * Add a hook to the tail of a list
  */
 static STATUS
-addHookTail(TASK_HOOK_LIST **list, FUNCPTR hook)
+addHookTail(TASK_HOOK_LIST **list, TASKHOOKFUNC hook)
 {
     TASK_HOOK_LIST *l, *p;
 
@@ -1004,7 +1004,7 @@ addHookTail(TASK_HOOK_LIST **list, FUNCPTR hook)
  * Remove a hook from a list
  */
 static STATUS
-deleteHook(TASK_HOOK_LIST **list, FUNCPTR hook)
+deleteHook(TASK_HOOK_LIST **list, TASKHOOKFUNC hook)
 {
     TASK_HOOK_LIST *p, *l;
 
@@ -1055,9 +1055,9 @@ executeHooks(TASK_HOOK_LIST *list, OS_TCB *tcb)
  * Add a routine to be called at every task create
  */
 STATUS
-taskCreateHookAdd(FUNCPTR createHook)
+taskCreateHookAdd(TASKHOOKFUNC hook)
 {
-    return addHookTail(&createHooks, createHook);
+    return addHookTail(&createHooks, hook);
 }
 
 /*----------------------------------------------------------------------*/
@@ -1066,9 +1066,9 @@ taskCreateHookAdd(FUNCPTR createHook)
  * Delete a previously added task create routine
  */
 STATUS
-taskCreateHookDelete(FUNCPTR createHook)
+taskCreateHookDelete(TASKHOOKFUNC hook)
 {
-    return deleteHook(&createHooks, createHook);
+    return deleteHook(&createHooks, hook);
 }
 
 /*----------------------------------------------------------------------*/
@@ -1077,7 +1077,7 @@ taskCreateHookDelete(FUNCPTR createHook)
  * Add a routine to be called at every task switch
  */
 STATUS
-taskSwitchHookAdd(FUNCPTR switchHook)
+taskSwitchHookAdd(TASKHOOKFUNC switchHook)
 {
     errnoSet(S_portLib_NOT_IMPLEMENTED);
     return ERROR;
@@ -1089,7 +1089,7 @@ taskSwitchHookAdd(FUNCPTR switchHook)
  * Delete a previously added task switch routine
  */
 STATUS
-taskSwitchHookDelete(FUNCPTR switchHook)
+taskSwitchHookDelete(TASKHOOKFUNC switchHook)
 {
     errnoSet(S_portLib_NOT_IMPLEMENTED);
     return ERROR;
@@ -1100,9 +1100,9 @@ taskSwitchHookDelete(FUNCPTR switchHook)
  * Add a routine to be called at every task delete
  */
 STATUS
-taskDeleteHookAdd(FUNCPTR deleteHook)
+taskDeleteHookAdd(TASKHOOKFUNC hook)
 {
-    addHookHead(&deleteHooks, deleteHook);
+    addHookHead(&deleteHooks, hook);
     return OK;
 }
 
@@ -1112,9 +1112,9 @@ taskDeleteHookAdd(FUNCPTR deleteHook)
  * Delete a previously added task delete routine
  */
 STATUS
-taskDeleteHookDelete(FUNCPTR deleteHook)
+taskDeleteHookDelete(TASKHOOKFUNC hook)
 {
-    deleteHook(&deleteHooks, deleteHook);
+    deleteHook(&deleteHooks, hook);
     return OK;
 }
 

@@ -21,13 +21,15 @@
 extern "C" {
 #endif
 
+typedef void (*TASKHOOKFUNC)(OS_TCB *);
+
 void taskHookInit(void);
-STATUS taskCreateHookAdd(FUNCPTR createHook);
-STATUS taskCreateHookDelete(FUNCPTR createHook);
-STATUS taskSwitchHookAdd(FUNCPTR switchHook);
-STATUS taskSwitchHookDelete(FUNCPTR switchHook);
-STATUS taskDeleteHookAdd(FUNCPTR deleteHook);
-STATUS taskDeleteHookDelete(FUNCPTR deleteHook);
+STATUS taskCreateHookAdd(TASKHOOKFUNC createHook);
+STATUS taskCreateHookDelete(TASKHOOKFUNC createHook);
+STATUS taskSwitchHookAdd(TASKHOOKFUNC switchHook);
+STATUS taskSwitchHookDelete(TASKHOOKFUNC switchHook);
+STATUS taskDeleteHookAdd(TASKHOOKFUNC deleteHook);
+STATUS taskDeleteHookDelete(TASKHOOKFUNC deleteHook);
 
 #ifdef __cplusplus
 }
