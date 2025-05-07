@@ -532,7 +532,7 @@ localPosterShow(void)
     logMsg("\n");
     logMsg("NAME                              Id/host      Size T(last write)\n");
     logMsg("-------------------------------- -------- --------- -------------\n");
-    for (d = 0; d < h2devMax; i++) {
+    for (d = 0; d < h2devMax; d++) {
 	i = H2DEV_BY_INDEX(d);
 	if (H2DEV_TYPE(i) == H2_DEV_TYPE_POSTER) {
 	    logMsg("%-32s %8d %8d", H2DEV_NAME(i), i,
