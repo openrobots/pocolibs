@@ -76,33 +76,6 @@ fonctionalities of VxWorks tasks are not present. Especially, portLib
 uses the default Linux scheduler in the Posix threads implementation,
 which doesn't share VxWorks real-time capabilities.
 
-### taskSpawn
-
-    #include <taskLib.h>
-	
-    long taskSpawn(char *name, int priority, int options, int stackSize,
-          FUNCPTR entryPt, ...)
-
-The `taskSpawn()` function creates a new task in pocoLib.  _name_ is the
-external name given to the new task.  _priority_ is the priority of the new
-task. The value is interpreted  following the VxWorks convention, where 0
-is the highest priority and 255 the lowest one. The mapping of the prior‐
-ity specified here to priorities provided by the underlying system is
-implementation-dependant.  _options_ is an OR-ed mask of possible task
-options. Valid options include:
-
-`VX_FP_TASK`
-: Indicates that the given task is using floating point
-  values in expressions, and thus hints the underlying
-  system that the floating-point context of the task
-  should be saved and restored across task switches.
-
-_stackSize_ specifies the amount of memory to use for the stack of the new
-task. Not all systems use the specified value.  _entryPt_ is the pointer to
-a function returning an int and taking up to ten integer parameters.  The
-rest of the parameters (up to ten integers)  passed to `taskSpawn()` are
-transmitted to the new function.
-
 ### taskSpawn2
 
 	#include <taskLib.h>
